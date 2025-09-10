@@ -3,7 +3,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/drawerLayout"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true">
 
     <!-- Main Screen -->
     <LinearLayout
@@ -15,11 +16,12 @@
         <com.google.android.material.appbar.MaterialToolbar
             android:id="@+id/topAppBar"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:title="@string/nursing_studio"
+            android:layout_height="?attr/actionBarSize"
+            android:background="?attr/colorPrimary"
+            android:title="Nursing Studio"
             android:titleTextColor="@android:color/white"
             app:navigationIcon="@drawable/ic_menu"
-            style="?attr/actionBarTheme" />
+            app:navigationIconTint="@android:color/white" />
 
         <!-- Content Frame (Fragments yahan load honge) -->
         <FrameLayout
