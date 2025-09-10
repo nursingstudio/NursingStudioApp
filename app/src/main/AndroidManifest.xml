@@ -12,6 +12,11 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.NursingStudio">
         <activity
+            android:name=".drawer_header"
+            android:exported="false"
+            android:label="@string/title_activity_drawer_header"
+            android:theme="@style/Theme.NursingStudio" />
+        <activity
             android:name=".MainActivity"
             android:exported="true">
             <intent-filter>
