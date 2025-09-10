@@ -1,6 +1,7 @@
 package com.example.nursingstudio
 
 import android.os.Bundle
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.Fragment
@@ -33,15 +34,26 @@ class MainActivity : AppCompatActivity() {
         // Drawer item clicks
         navigationView.setNavigationItemSelectedListener { menuItem ->
             when (menuItem.itemId) {
-                R.id.nav_subscription -> { /* TODO */ }
-                R.id.nav_notice -> { /* TODO */ }
-                R.id.nav_social -> { /* TODO */ }
-                R.id.nav_share -> { /* TODO */ }
-                R.id.nav_settings -> { /* TODO */ }
+                R.id.nav_subscription -> {
+                    Toast.makeText(this, "Subscription clicked", Toast.LENGTH_SHORT).show()
+                }
+                R.id.nav_notice -> {
+                    Toast.makeText(this, "Notice Board clicked", Toast.LENGTH_SHORT).show()
+                }
+                R.id.nav_social -> {
+                    Toast.makeText(this, "Social Links clicked", Toast.LENGTH_SHORT).show()
+                }
+                R.id.nav_share -> {
+                    Toast.makeText(this, "Share App clicked", Toast.LENGTH_SHORT).show()
+                }
+                R.id.nav_settings -> {
+                    Toast.makeText(this, "Settings clicked", Toast.LENGTH_SHORT).show()
+                }
             }
             drawerLayout.close()
             true
         }
+
 
         // Bottom navigation clicks
         bottomNavigation.setOnItemSelectedListener { item ->
