@@ -9,11 +9,69 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
+        <!-- PERSONAL DETAILS -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Personal Details"
+            android:textStyle="bold"
+            android:textSize="18sp"
+            android:layout_marginBottom="8dp" />
+
         <EditText
             android:id="@+id/etName"
             android:hint="Full Name"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
+
+        <!-- Gender -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Gender"
+            android:layout_marginTop="12dp" />
+
+        <Spinner
+            android:id="@+id/spGender"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <!-- Date of Birth -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Date of Birth (DD-MM-YYYY)"
+            android:layout_marginTop="12dp" />
+
+        <EditText
+            android:id="@+id/etDob"
+            android:hint="DD-MM-YYYY"
+            android:inputType="number"
+            android:maxLength="10"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <!-- Marital Status -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Marital Status"
+            android:layout_marginTop="12dp" />
+
+        <Spinner
+            android:id="@+id/spMarital"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <!-- CONTACT -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Contact"
+            android:textStyle="bold"
+            android:textSize="18sp"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="8dp" />
 
         <EditText
             android:id="@+id/etMobile"
@@ -22,6 +80,196 @@
             android:maxLength="10"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
+
+        <EditText
+            android:id="@+id/etEmail"
+            android:hint="Email ID"
+            android:inputType="textEmailAddress"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <!-- EDUCATION & OCCUPATION -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Education"
+            android:layout_marginTop="16dp" />
+
+        <Spinner
+            android:id="@+id/spEducation"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <!-- Other education textbox -->
+        <EditText
+            android:id="@+id/etEducationOther"
+            android:hint="Enter your education"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            android:layout_marginTop="8dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Occupation"
+            android:layout_marginTop="12dp" />
+
+        <Spinner
+            android:id="@+id/spOccupation"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <EditText
+            android:id="@+id/etOccupationOther"
+            android:hint="Enter your occupation"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            android:layout_marginTop="8dp" />
+
+        <!-- ADDRESS -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Address"
+            android:textStyle="bold"
+            android:textSize="18sp"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="8dp" />
+
+        <!-- Country -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Country" />
+
+        <Spinner
+            android:id="@+id/spCountry"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <EditText
+            android:id="@+id/etCountryOther"
+            android:hint="Enter country name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            android:layout_marginTop="8dp" />
+
+        <!-- State -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="State / UT"
+            android:layout_marginTop="12dp" />
+
+        <!-- India state spinner -->
+        <Spinner
+            android:id="@+id/spStateIndia"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <!-- Other country state textbox -->
+        <EditText
+            android:id="@+id/etStateOther"
+            android:hint="Enter state / region"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            android:layout_marginTop="8dp" />
+
+        <EditText
+            android:id="@+id/etDistrict"
+            android:hint="District"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp" />
+
+        <EditText
+            android:id="@+id/etTehsil"
+            android:hint="Tehsil"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <EditText
+            android:id="@+id/etAddress"
+            android:hint="Local Address"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <EditText
+            android:id="@+id/etPincode"
+            android:hint="Pin Code"
+            android:inputType="number"
+            android:maxLength="6"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <!-- NURSING REGISTRATION -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Nursing Registration"
+            android:textStyle="bold"
+            android:textSize="18sp"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="8dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Do you have Nursing Registration?" />
+
+        <RadioGroup
+            android:id="@+id/rgNursingReg"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <RadioButton
+                android:id="@+id/rbRegYes"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Yes" />
+
+            <RadioButton
+                android:id="@+id/rbRegNo"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="No"
+                android:layout_marginStart="16dp" />
+        </RadioGroup>
+
+        <!-- Ye sirf Yes pe dikhenge -->
+        <LinearLayout
+            android:id="@+id/layoutRegDetails"
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            android:layout_marginTop="8dp">
+
+            <EditText
+                android:id="@+id/etRegState"
+                android:hint="Registration State of higher qualification"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+            <EditText
+                android:id="@+id/etRegNumber"
+                android:hint="Registration Number"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp" />
+        </LinearLayout>
+
+        <!-- PASSWORD (sabse last) -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Password"
+            android:layout_marginTop="16dp" />
 
         <EditText
             android:id="@+id/etPassword"
@@ -35,6 +283,6 @@
             android:text="Register"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="12dp" />
+            android:layout_marginTop="20dp" />
     </LinearLayout>
 </ScrollView>
