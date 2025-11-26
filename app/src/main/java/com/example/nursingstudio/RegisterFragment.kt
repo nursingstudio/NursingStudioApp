@@ -7,8 +7,11 @@ import android.util.Patterns
 import android.view.*
 import android.widget.*
 import androidx.fragment.app.Fragment
+import java.util.Calendar
 
 class RegisterFragment : Fragment() {
+    private var generatedMobileOtp: String? = null
+    private var isMobileVerified: Boolean = false
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -24,17 +27,21 @@ class RegisterFragment : Fragment() {
         // Views
         val etName = view.findViewById<EditText>(R.id.etName)
         val spGender = view.findViewById<Spinner>(R.id.spGender)
-        val etDob = view.findViewById<EditText>(R.id.etDob)
+        val spDay = view.findViewById<Spinner>(R.id.spDay)
+        val spMonth = view.findViewById<Spinner>(R.id.spMonth)
+        val spYear = view.findViewById<Spinner>(R.id.spYear)
+        val spReligion = view.findViewById<Spinner>(R.id.spReligion)
         val spMarital = view.findViewById<Spinner>(R.id.spMarital)
-
         val etMobile = view.findViewById<EditText>(R.id.etMobile)
+        val etMobileOtp = view.findViewById<EditText>(R.id.etMobileOtp)
+        val btnSendMobileOtp = view.findViewById<Button>(R.id.btnSendMobileOtp)
+        val tvMobileOtpStatus = view.findViewById<TextView>(R.id.tvMobileOtpStatus)
+        val btnVerifyMobileOtp = view.findViewById<Button>(R.id.btnVerifyMobileOtp)
         val etEmail = view.findViewById<EditText>(R.id.etEmail)
-
         val spEducation = view.findViewById<Spinner>(R.id.spEducation)
         val etEducationOther = view.findViewById<EditText>(R.id.etEducationOther)
         val spOccupation = view.findViewById<Spinner>(R.id.spOccupation)
         val etOccupationOther = view.findViewById<EditText>(R.id.etOccupationOther)
-
         val spCountry = view.findViewById<Spinner>(R.id.spCountry)
         val etCountryOther = view.findViewById<EditText>(R.id.etCountryOther)
         val spStateIndia = view.findViewById<Spinner>(R.id.spStateIndia)
@@ -43,16 +50,31 @@ class RegisterFragment : Fragment() {
         val etTehsil = view.findViewById<EditText>(R.id.etTehsil)
         val etAddress = view.findViewById<EditText>(R.id.etAddress)
         val etPincode = view.findViewById<EditText>(R.id.etPincode)
-
         val rgNursingReg = view.findViewById<RadioGroup>(R.id.rgNursingReg)
         val rbRegYes = view.findViewById<RadioButton>(R.id.rbRegYes)
         val rbRegNo = view.findViewById<RadioButton>(R.id.rbRegNo)
         val layoutRegDetails = view.findViewById<LinearLayout>(R.id.layoutRegDetails)
         val etRegState = view.findViewById<EditText>(R.id.etRegState)
         val etRegNumber = view.findViewById<EditText>(R.id.etRegNumber)
-
         val etPassword = view.findViewById<EditText>(R.id.etPassword)
         val btnRegister = view.findViewById<Button>(R.id.btnRegister)
+
+        btnSendMobileOtp.setOnClickListener {
+            val mob = etMobile.text.toString().trim()
+            if (mob.length != 10) {
+                showToast("Enter valid 10-digit mobile first")
+                return@setOnClickListener
+            }
+
+            // 4-digit random OTP
+            val otp = (1000..9999).random().toString()
+            generatedMobileOtp = otp
+            isMobileVerified = false
+            tvMobileOtpStatus.text = "OTP sent (test: $otp)"
+
+            // Real app me yahan SMS API call hoti
+            showToast("Test OTP: $otp")
+        }
 
         // ----- Spinners data -----
 
@@ -80,14 +102,22 @@ class RegisterFragment : Fragment() {
         val occupationList = listOf(
             "Select occupation",
             "Student",
-            "Teacher",
-            "Tutor",
+            "Preparation (Competitive Exam)",
+            "Private Job (Hospital/Clinic)",
+            "Contractual Job (Govt. Hospital)",
+            "Private Job + Preparation",
             "Nursing Officer",
             "CHO",
-            "Private Job",
-            "Preparation",
+            "Nursing Tutor",
+            "SNO",
+            "Ward Incharge",
+            "Metron",
+            "ANS",
+            "DNS",
+            "Nursing Superintendent",
             "Other"
         )
+
 
         val countryList = listOf(
             "Select country",
@@ -107,6 +137,33 @@ class RegisterFragment : Fragment() {
             "Jammu & Kashmir","Ladakh","Lakshadweep","Puducherry"
         )
 
+        val dayList = mutableListOf("DD").apply {
+            for (d in 1..31) add(String.format("%02d", d))
+        }
+
+        val monthList = mutableListOf("MM").apply {
+            for (m in 1..12) add(String.format("%02d", m))
+        }
+
+        val currentYear = Calendar.getInstance().get(Calendar.YEAR)
+        val yearList = mutableListOf("YYYY").apply {
+            for (y in currentYear downTo 1900) add(y.toString())
+        }
+
+
+        val religionList = listOf(
+            "Select religion",
+            "Hindu",
+            "Muslim",
+            "Christian",
+            "Sikh",
+            "Buddhist",
+            "Jain",
+            "Other"
+        )
+
+
+
         // ----- Adapters set -----
 
         spGender.adapter =
@@ -114,6 +171,18 @@ class RegisterFragment : Fragment() {
 
         spMarital.adapter =
             ArrayAdapter(requireContext(), android.R.layout.simple_spinner_dropdown_item, maritalList)
+
+        spDay.adapter =
+            ArrayAdapter(requireContext(), android.R.layout.simple_spinner_dropdown_item, dayList)
+
+        spMonth.adapter =
+            ArrayAdapter(requireContext(), android.R.layout.simple_spinner_dropdown_item, monthList)
+
+        spYear.adapter =
+            ArrayAdapter(requireContext(), android.R.layout.simple_spinner_dropdown_item, yearList)
+
+        spReligion.adapter =
+            ArrayAdapter(requireContext(), android.R.layout.simple_spinner_dropdown_item, religionList)
 
         spEducation.adapter =
             ArrayAdapter(requireContext(), android.R.layout.simple_spinner_dropdown_item, educationList)
@@ -185,72 +254,80 @@ class RegisterFragment : Fragment() {
             }
         }
 
-        // ----- DOB auto separator (DD-MM-YYYY) -----
-
-        etDob.addTextChangedListener(object : TextWatcher {
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
-            override fun afterTextChanged(s: Editable?) {
-                if (s == null) return
-                val digits = s.toString().filter { it.isDigit() }
-                val sb = StringBuilder()
-                for (i in digits.indices) {
-                    sb.append(digits[i])
-                    if (i == 1 || i == 3) sb.append('-')
-                }
-                etDob.removeTextChangedListener(this)
-                etDob.setText(sb.toString())
-                etDob.setSelection(etDob.text.length)
-                etDob.addTextChangedListener(this)
-            }
-        })
 
         // ----- Register button -----
 
         btnRegister.setOnClickListener {
             val name = etName.text.toString().trim()
             val gender = spGender.selectedItem.toString()
-            val dob = etDob.text.toString().trim()
             val marital = spMarital.selectedItem.toString()
-
             val mob = etMobile.text.toString().trim()
             val email = etEmail.text.toString().trim()
-
             var edu = spEducation.selectedItem.toString()
             val eduOther = etEducationOther.text.toString().trim()
-
             var occ = spOccupation.selectedItem.toString()
             val occOther = etOccupationOther.text.toString().trim()
-
             val countrySelected = spCountry.selectedItem.toString()
             val countryOther = etCountryOther.text.toString().trim()
             val stateIndiaSelected = spStateIndia.selectedItem.toString()
             val stateOther = etStateOther.text.toString().trim()
-
             val district = etDistrict.text.toString().trim()
             val tehsil = etTehsil.text.toString().trim()
             val address = etAddress.text.toString().trim()
             val pincode = etPincode.text.toString().trim()
-
             val hasRegYes = rbRegYes.isChecked
             val hasRegNo = rbRegNo.isChecked
             val regState = etRegState.text.toString().trim()
             val regNumber = etRegNumber.text.toString().trim()
 
+            // --- Mobile OTP validation ---
+            btnVerifyMobileOtp.setOnClickListener {
+                val enteredOtp = etMobileOtp.text.toString().trim()
+
+                if (generatedMobileOtp == null) {
+                    showToast("Please send OTP first")
+                    return@setOnClickListener
+                }
+
+                if (enteredOtp != generatedMobileOtp) {
+                    showToast("Invalid OTP")
+                    return@setOnClickListener
+                }
+
+                isMobileVerified = true
+                tvMobileOtpStatus.text = "Mobile verified"
+                showToast("OTP Verified")
+            }
+
+
             val pass = etPassword.text.toString()
+
 
             // ---- VALIDATIONS ----
 
             if (name.isEmpty()) { showToast("Enter name"); return@setOnClickListener }
             if (gender == "Select gender") { showToast("Select gender"); return@setOnClickListener }
 
-            if (!dob.matches(Regex("\\d{2}-\\d{2}-\\d{4}"))) {
-                showToast("Enter DOB in DD-MM-YYYY")
+            val day = spDay.selectedItem.toString()
+            val month = spMonth.selectedItem.toString()
+            val year = spYear.selectedItem.toString()
+
+            if (day == "DD" || month == "MM" || year == "YYYY") {
+                showToast("Select valid DOB")
                 return@setOnClickListener
             }
 
+            val dob = "$day-$month-$year"
+
+
             if (marital == "Select marital status") {
                 showToast("Select marital status")
+                return@setOnClickListener
+            }
+
+            val religion = spReligion.selectedItem.toString()
+            if (religion == "Select religion") {
+                showToast("Select religion")
                 return@setOnClickListener
             }
 
@@ -359,6 +436,7 @@ class RegisterFragment : Fragment() {
                 .putString("reg_name", name)
                 .putString("reg_gender", gender)
                 .putString("reg_dob", dob)
+                .putString("reg_religion", religion)
                 .putString("reg_marital", marital)
                 .putString("reg_mobile", mob)
                 .putString("reg_email", email)
@@ -374,6 +452,8 @@ class RegisterFragment : Fragment() {
                 .putString("reg_has_nursing_reg", regStatus)
                 .putString("reg_nursing_reg_state", finalRegState)
                 .putString("reg_nursing_reg_number", finalRegNumber)
+
+                .putBoolean("reg_mobile_verified", isMobileVerified)
                 .apply()
 
             showToast("Registered! Now login.")

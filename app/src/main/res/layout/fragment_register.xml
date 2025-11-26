@@ -40,16 +40,35 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Date of Birth (DD-MM-YYYY)"
+            android:text="Date of Birth"
             android:layout_marginTop="12dp" />
 
-        <EditText
-            android:id="@+id/etDob"
-            android:hint="DD-MM-YYYY"
-            android:inputType="number"
-            android:maxLength="10"
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="4dp">
+
+            <Spinner
+                android:id="@+id/spDay"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1" />
+
+            <Spinner
+                android:id="@+id/spMonth"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="8dp" />
+
+            <Spinner
+                android:id="@+id/spYear"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="8dp" />
+        </LinearLayout>
 
         <!-- Marital Status -->
         <TextView
@@ -63,6 +82,18 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 
+        <!-- Religion -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Religion"
+            android:layout_marginTop="12dp" />
+
+        <Spinner
+            android:id="@+id/spReligion"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
         <!-- CONTACT -->
         <TextView
             android:layout_width="wrap_content"
@@ -73,20 +104,70 @@
             android:layout_marginTop="16dp"
             android:layout_marginBottom="8dp" />
 
-        <EditText
-            android:id="@+id/etMobile"
-            android:hint="Mobile (10 digits)"
-            android:inputType="phone"
-            android:maxLength="10"
+        <!-- MOBILE NUMBER + SEND OTP IN SAME LINE -->
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <EditText
+                android:id="@+id/etMobile"
+                android:hint="Mobile (10 digits)"
+                android:inputType="phone"
+                android:maxLength="10"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1" />
+
+            <Button
+                android:id="@+id/btnSendMobileOtp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Send OTP"
+                android:layout_marginStart="8dp" />
+        </LinearLayout>
+
+        <!-- OTP + VERIFY OTP IN SAME LINE -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="8dp"
+            android:gravity="center_vertical">
+
+            <EditText
+                android:id="@+id/etMobileOtp"
+                android:hint="Enter OTP"
+                android:inputType="number"
+                android:maxLength="6"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1" />
+
+            <Button
+                android:id="@+id/btnVerifyMobileOtp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Verify OTP"
+                android:layout_marginStart="8dp" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/tvMobileOtpStatus"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Mobile not verified"
+            android:textSize="12sp"
+            android:layout_marginTop="4dp" />
 
         <EditText
             android:id="@+id/etEmail"
             android:hint="Email ID"
             android:inputType="textEmailAddress"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp" />
 
         <!-- EDUCATION & OCCUPATION -->
         <TextView

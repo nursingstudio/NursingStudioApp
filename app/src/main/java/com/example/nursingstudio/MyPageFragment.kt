@@ -1,18 +1,59 @@
 package com.example.nursingstudio
 
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.os.Bundle
+import android.util.Base64
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
+import java.io.ByteArrayOutputStream
+import java.io.InputStream
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
 
 class MyPageFragment : Fragment() {
+
+    private lateinit var imgProfile: ImageView
+    private lateinit var btnChangePhoto: Button
+
+    // Gallery se image choose karne ke liye launcher
+    private val pickImageLauncher =
+        registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
+            if (uri != null) {
+                try {
+                    val inputStream: InputStream? =
+                        requireContext().contentResolver.openInputStream(uri)
+                    val bitmap = BitmapFactory.decodeStream(inputStream)
+                    inputStream?.close()
+
+                    if (bitmap != null) {
+                        // ImageView me dikhana
+                        imgProfile.setImageBitmap(bitmap)
+
+                        // Bitmap ko Base64 string me convert karna
+                        val baos = ByteArrayOutputStream()
+                        bitmap.compress(Bitmap.CompressFormat.JPEG, 80, baos)
+                        val bytes = baos.toByteArray()
+                        val encoded = Base64.encodeToString(bytes, Base64.DEFAULT)
+
+                        // SharedPreferences me save
+                        val sp = requireContext().getSharedPreferences("session", 0)
+                        sp.edit()
+                            .putString("reg_profile_image_base64", encoded)
+                            .apply()
+                    }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+            }
+        }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -25,13 +66,15 @@ class MyPageFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val imgProfile = view.findViewById<ImageView>(R.id.imgProfile)
+        imgProfile = view.findViewById(R.id.imgProfile)
+        btnChangePhoto = view.findViewById(R.id.btnChangePhoto)
 
         val tvWelcome = view.findViewById<TextView>(R.id.tvWelcome)
         val tvName = view.findViewById<TextView>(R.id.tvName)
         val tvGender = view.findViewById<TextView>(R.id.tvGender)
         val tvDobWithAge = view.findViewById<TextView>(R.id.tvDobWithAge)
         val tvMarital = view.findViewById<TextView>(R.id.tvMarital)
+        val tvReligion = view.findViewById<TextView>(R.id.tvReligion)
         val tvEmail = view.findViewById<TextView>(R.id.tvEmail)
         val tvMobile = view.findViewById<TextView>(R.id.tvMobile)
         val tvEducation = view.findViewById<TextView>(R.id.tvEducation)
@@ -47,6 +90,7 @@ class MyPageFragment : Fragment() {
         val gender = sp.getString("reg_gender", "-")
         val dob = sp.getString("reg_dob", "-")
         val marital = sp.getString("reg_marital", "-")
+        val religion = sp.getString("reg_religion", "-")
         val email = sp.getString("reg_email", "-")
         val mobile = sp.getString("reg_mobile", "-")
         val education = sp.getString("reg_education", "-")
@@ -61,10 +105,23 @@ class MyPageFragment : Fragment() {
         val regState = sp.getString("reg_nursing_reg_state", "")
         val regNumber = sp.getString("reg_nursing_reg_number", "")
 
+        // Profile image Base64 load karna
+        val imageBase64 = sp.getString("reg_profile_image_base64", null)
+        if (!imageBase64.isNullOrEmpty()) {
+            try {
+                val bytes = Base64.decode(imageBase64, Base64.DEFAULT)
+                val bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+                imgProfile.setImageBitmap(bitmap)
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+
         tvWelcome.text = "Welcome,"
         tvName.text = name
         tvGender.text = gender
         tvMarital.text = marital
+        tvReligion.text = religion
         tvEmail.text = email
         tvMobile.text = mobile
         tvEducation.text = education
@@ -86,10 +143,20 @@ class MyPageFragment : Fragment() {
         btnLogout.setOnClickListener {
             sp.edit().putBoolean("logged_in", false).apply()
             val intent = android.content.Intent(requireContext(), AuthActivity::class.java)
-            intent.addFlags(android.content.Intent.FLAG_ACTIVITY_CLEAR_TOP or android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
+            intent.addFlags(
+                android.content.Intent.FLAG_ACTIVITY_CLEAR_TOP or
+                        android.content.Intent.FLAG_ACTIVITY_NEW_TASK
+            )
             startActivity(intent)
             requireActivity().finish()
         }
+
+        // Change photo – button & image pe click se gallery khule
+        val pickAction: (View) -> Unit = {
+            pickImageLauncher.launch("image/*")
+        }
+        btnChangePhoto.setOnClickListener(pickAction)
+        imgProfile.setOnClickListener(pickAction)
     }
 
     private fun calculateAgeText(dobString: String): String {

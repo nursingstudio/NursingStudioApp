@@ -18,7 +18,16 @@
             android:src="@mipmap/ic_launcher_round"
             android:layout_marginBottom="12dp"
             android:background="@android:color/darker_gray"
-            android:padding="4dp" />
+            android:padding="0dp"
+            android:scaleType="centerCrop" />
+
+        <Button
+            android:id="@+id/btnChangePhoto"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Add/Change Photo"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginBottom="16dp" />
 
         <TextView
             android:id="@+id/tvWelcome"
@@ -34,7 +43,8 @@
             android:layout_height="wrap_content"
             android:text="User Name"
             android:textSize="20sp"
-            android:layout_marginTop="4dp" />
+            android:layout_marginTop="4dp"
+            android:textStyle="bold" />
 
         <View
             android:layout_width="match_parent"
@@ -54,7 +64,8 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Gender:" />
+            android:text="Gender:"
+            android:textStyle="bold" />
 
         <TextView
             android:id="@+id/tvGender"
@@ -65,7 +76,8 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Date of Birth:" />
+            android:text="Date of Birth:"
+            android:textStyle="bold" />
 
         <TextView
             android:id="@+id/tvDobWithAge"
@@ -76,7 +88,8 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Marital Status:" />
+            android:text="Marital Status:"
+            android:textStyle="bold" />
 
         <TextView
             android:id="@+id/tvMarital"
@@ -87,7 +100,21 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Email:" />
+            android:text="Religion:"
+            android:textStyle="bold"
+            android:layout_marginTop="8dp" />
+
+        <TextView
+            android:id="@+id/tvReligion"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="-" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Email:"
+            android:textStyle="bold" />
 
         <TextView
             android:id="@+id/tvEmail"
@@ -98,7 +125,8 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Mobile:" />
+            android:text="Mobile:"
+            android:textStyle="bold" />
 
         <TextView
             android:id="@+id/tvMobile"
@@ -171,9 +199,14 @@
         <!-- Logout button -->
         <Button
             android:id="@+id/btnLogout"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Logout"
+            android:textAllCaps="false"
+            android:textSize="16sp"
+            android:background="@drawable/bg_logout_button"
+            android:textColor="@android:color/white"
+            android:layout_gravity="center_horizontal"
             android:layout_marginTop="24dp" />
 
     </LinearLayout>
