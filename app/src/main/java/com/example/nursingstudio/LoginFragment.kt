@@ -10,6 +10,7 @@ import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import android.view.inputmethod.EditorInfo
 
 class LoginFragment : Fragment() {
 
@@ -31,6 +32,16 @@ class LoginFragment : Fragment() {
         val tvGoRegister = view.findViewById<TextView>(R.id.tvGoRegister)
 
         val sp = requireContext().getSharedPreferences("session", 0)
+
+
+        etPassword.setOnEditorActionListener { _, actionId, _ ->
+            if (actionId == EditorInfo.IME_ACTION_DONE) {
+                btnLogin.performClick()
+                true
+            } else {
+                false
+            }
+        }
 
         // LOGIN BUTTON
         btnLogin.setOnClickListener {

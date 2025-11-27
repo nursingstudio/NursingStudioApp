@@ -21,7 +21,7 @@ import java.util.Locale
 class MyPageFragment : Fragment() {
 
     private lateinit var imgProfile: ImageView
-    private lateinit var btnChangePhoto: Button
+    private lateinit var imgEditPhoto: ImageView
 
     // Gallery se image choose karne ke liye launcher
     private val pickImageLauncher =
@@ -67,7 +67,8 @@ class MyPageFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         imgProfile = view.findViewById(R.id.imgProfile)
-        btnChangePhoto = view.findViewById(R.id.btnChangePhoto)
+        imgEditPhoto = view.findViewById(R.id.imgEditPhoto)
+
 
         val tvWelcome = view.findViewById<TextView>(R.id.tvWelcome)
         val tvName = view.findViewById<TextView>(R.id.tvName)
@@ -155,8 +156,10 @@ class MyPageFragment : Fragment() {
         val pickAction: (View) -> Unit = {
             pickImageLauncher.launch("image/*")
         }
-        btnChangePhoto.setOnClickListener(pickAction)
+
+        imgEditPhoto.setOnClickListener(pickAction)
         imgProfile.setOnClickListener(pickAction)
+
     }
 
     private fun calculateAgeText(dobString: String): String {

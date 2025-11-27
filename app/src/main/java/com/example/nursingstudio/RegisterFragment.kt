@@ -10,8 +10,8 @@ import androidx.fragment.app.Fragment
 import java.util.Calendar
 
 class RegisterFragment : Fragment() {
-    private var generatedMobileOtp: String? = null
-    private var isMobileVerified: Boolean = false
+    private var generatedOtp: String? = null
+    private var isMobileOtpVerified = false
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -33,10 +33,9 @@ class RegisterFragment : Fragment() {
         val spReligion = view.findViewById<Spinner>(R.id.spReligion)
         val spMarital = view.findViewById<Spinner>(R.id.spMarital)
         val etMobile = view.findViewById<EditText>(R.id.etMobile)
-        val etMobileOtp = view.findViewById<EditText>(R.id.etMobileOtp)
-        val btnSendMobileOtp = view.findViewById<Button>(R.id.btnSendMobileOtp)
-        val tvMobileOtpStatus = view.findViewById<TextView>(R.id.tvMobileOtpStatus)
-        val btnVerifyMobileOtp = view.findViewById<Button>(R.id.btnVerifyMobileOtp)
+        val etOtp = view.findViewById<EditText>(R.id.etOtp)
+        val btnSendOtp = view.findViewById<Button>(R.id.btnSendOtp)
+        val btnVerifyOtp = view.findViewById<Button>(R.id.btnVerifyOtp)
         val etEmail = view.findViewById<EditText>(R.id.etEmail)
         val spEducation = view.findViewById<Spinner>(R.id.spEducation)
         val etEducationOther = view.findViewById<EditText>(R.id.etEducationOther)
@@ -59,22 +58,48 @@ class RegisterFragment : Fragment() {
         val etPassword = view.findViewById<EditText>(R.id.etPassword)
         val btnRegister = view.findViewById<Button>(R.id.btnRegister)
 
-        btnSendMobileOtp.setOnClickListener {
-            val mob = etMobile.text.toString().trim()
-            if (mob.length != 10) {
+
+         // OTP send button ka code //
+
+        btnSendOtp.setOnClickListener {
+            val mobile = etMobile.text.toString().trim()
+
+            if (mobile.length != 10) {
                 showToast("Enter valid 10-digit mobile first")
                 return@setOnClickListener
             }
 
-            // 4-digit random OTP
-            val otp = (1000..9999).random().toString()
-            generatedMobileOtp = otp
-            isMobileVerified = false
-            tvMobileOtpStatus.text = "OTP sent (test: $otp)"
+            // 4-digit OTP generate (demo)
+            generatedOtp = (1000..9999).random().toString()
+            isMobileOtpVerified = false
 
-            // Real app me yahan SMS API call hoti
-            showToast("Test OTP: $otp")
+            showToast("Demo OTP: $generatedOtp") // Filhaal toast me dikha raha hai
         }
+
+        // OTP verify button ka code //
+
+        btnVerifyOtp.setOnClickListener {
+            val enteredOtp = etOtp.text.toString().trim()
+
+            if (generatedOtp == null) {
+                showToast("Send OTP first")
+                return@setOnClickListener
+            }
+
+            if (enteredOtp.isEmpty()) {
+                showToast("Enter OTP")
+                return@setOnClickListener
+            }
+
+            if (enteredOtp == generatedOtp) {
+                isMobileOtpVerified = true
+                showToast("Mobile OTP verified ✅")
+            } else {
+                isMobileOtpVerified = false
+                showToast("Wrong OTP ❌")
+            }
+        }
+
 
         // ----- Spinners data -----
 
@@ -281,22 +306,9 @@ class RegisterFragment : Fragment() {
             val regNumber = etRegNumber.text.toString().trim()
 
             // --- Mobile OTP validation ---
-            btnVerifyMobileOtp.setOnClickListener {
-                val enteredOtp = etMobileOtp.text.toString().trim()
-
-                if (generatedMobileOtp == null) {
-                    showToast("Please send OTP first")
-                    return@setOnClickListener
-                }
-
-                if (enteredOtp != generatedMobileOtp) {
-                    showToast("Invalid OTP")
-                    return@setOnClickListener
-                }
-
-                isMobileVerified = true
-                tvMobileOtpStatus.text = "Mobile verified"
-                showToast("OTP Verified")
+            if (!isMobileOtpVerified) {
+                showToast("Please verify mobile OTP")
+                return@setOnClickListener
             }
 
 
@@ -453,7 +465,7 @@ class RegisterFragment : Fragment() {
                 .putString("reg_nursing_reg_state", finalRegState)
                 .putString("reg_nursing_reg_number", finalRegNumber)
 
-                .putBoolean("reg_mobile_verified", isMobileVerified)
+                .putBoolean("reg_mobile_verified", isMobileOtpVerified)
                 .apply()
 
             showToast("Registered! Now login.")
