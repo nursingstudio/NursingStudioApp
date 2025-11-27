@@ -294,7 +294,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Kya aapke paas nursing registration hai?" />
+                    android:text="Do you have a Nursing Registration?" />
 
                 <RadioGroup
                     android:id="@+id/rgNursingReg"

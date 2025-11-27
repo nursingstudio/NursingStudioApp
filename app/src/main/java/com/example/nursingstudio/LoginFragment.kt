@@ -45,6 +45,15 @@ class LoginFragment : Fragment() {
 
         // LOGIN BUTTON
         btnLogin.setOnClickListener {
+            btnLogin.animate()
+                .scaleX(0.97f)
+                .scaleY(0.97f)
+                .setDuration(80)
+                .withEndAction {
+                    btnLogin.animate().scaleX(1f).scaleY(1f).setDuration(80).start()
+                }
+                .start()
+
             val mob = etMobile.text.toString().trim()
             val pass = etPassword.text.toString()
 
