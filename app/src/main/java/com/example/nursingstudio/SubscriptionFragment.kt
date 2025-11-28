@@ -31,6 +31,11 @@ class SubscriptionFragment : Fragment() {
 
         tvCurrentPlan.text = "Current plan: $currentType"
 
+        //new line added for header update
+        (activity as? MainActivity)?.updateDrawerHeader()
+        //---------------------------------
+
+
         btnSelectFree.setOnClickListener {
             sp.edit().putString("subscription_type", "Free").apply()
             tvCurrentPlan.text = "Current plan: Free"

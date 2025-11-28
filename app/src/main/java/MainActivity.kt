@@ -11,6 +11,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.Fragment
+import androidx.core.view.GravityCompat
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.navigation.NavigationView
@@ -21,6 +22,12 @@ class MainActivity : AppCompatActivity() {
     private lateinit var navigationView: NavigationView
     private lateinit var bottomNavigation: BottomNavigationView
     private lateinit var topAppBar: MaterialToolbar
+
+    // Drawer header views ko class level pe rakh lete hain
+    private lateinit var imgHeaderProfile: ImageView
+    private lateinit var tvHeaderName: TextView
+    private lateinit var tvHeaderMobile: TextView
+    private lateinit var tvDrawerSubscription: TextView
 
     companion object {
         private const val PROFILE_PREF = "profile_prefs"
@@ -37,50 +44,25 @@ class MainActivity : AppCompatActivity() {
         bottomNavigation = findViewById(R.id.bottomNavigation)
         topAppBar = findViewById(R.id.topAppBar)
 
-        // Top app bar hamburger click
+        // 🔹 Top app bar hamburger click -> Drawer open
         topAppBar.setNavigationOnClickListener {
-            drawerLayout.open()
+            drawerLayout.openDrawer(GravityCompat.START)
         }
 
         // ---------- Drawer HEADER setup ----------
         val headerView = navigationView.getHeaderView(0)
-        val imgHeaderProfile = headerView.findViewById<ImageView>(R.id.imgHeaderProfile)
-        val tvHeaderName = headerView.findViewById<TextView>(R.id.tvHeaderName)
-        val tvHeaderMobile = headerView.findViewById<TextView>(R.id.tvHeaderMobile)
-        val tvDrawerSubscription =
-            headerView.findViewById<TextView>(R.id.tvDrawerSubscription)
+        imgHeaderProfile = headerView.findViewById(R.id.imgHeaderProfile)
+        tvHeaderName = headerView.findViewById(R.id.tvHeaderName)
+        tvHeaderMobile = headerView.findViewById(R.id.tvHeaderMobile)
+        tvDrawerSubscription = headerView.findViewById(R.id.tvDrawerSubscription)
 
-        // Session prefs: name, mobile, subscription type
-        val session = getSharedPreferences("session", MODE_PRIVATE)
-        val name = session.getString("reg_name", "Your Name")
-        val mobile = session.getString("reg_mobile", "9999999999")
-        val subType = session.getString("subscription_type", "Free")
-
-        tvHeaderName.text = name
-        tvHeaderMobile.text = mobile
-        tvDrawerSubscription.text =
-            if (subType == "Premium") "Premium Version" else "Free Version"
-
-        // Profile image from profile_prefs (MyPage se)
-        val profileSp = getSharedPreferences(PROFILE_PREF, MODE_PRIVATE)
-        val encoded = profileSp.getString(KEY_PROFILE_IMAGE, null)
-        if (encoded != null) {
-            try {
-                val bytes = Base64.decode(encoded, Base64.DEFAULT)
-                val bmp = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
-                imgHeaderProfile.setImageBitmap(bmp)
-            } catch (e: Exception) {
-                e.printStackTrace()
-                imgHeaderProfile.setImageResource(R.drawable.ic_person)
-            }
-        } else {
-            imgHeaderProfile.setImageResource(R.drawable.ic_person)
-        }
+        // Pehli baar header set karo
+        updateDrawerHeader()
 
         // Header click -> My Page
         headerView.setOnClickListener {
             loadFragment(MyPageFragment())
-            drawerLayout.close()
+            drawerLayout.closeDrawer(GravityCompat.START)
         }
         // ----------------------------------------
 
@@ -94,8 +76,7 @@ class MainActivity : AppCompatActivity() {
                     loadFragment(NoticeFragment())
                 }
                 R.id.nav_social -> {
-                    // TODO: yahan social links daalna hai
-                    val url = "https://youtube.com" // apna actual link
+                    val url = "https://youtube.com" // apna actual link daalna
                     startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
                 }
                 R.id.nav_share -> {
@@ -112,7 +93,7 @@ class MainActivity : AppCompatActivity() {
                     Toast.makeText(this, "Settings coming soon", Toast.LENGTH_SHORT).show()
                 }
             }
-            drawerLayout.close()
+            drawerLayout.closeDrawer(GravityCompat.START)
             true
         }
 
@@ -143,6 +124,36 @@ class MainActivity : AppCompatActivity() {
         if (savedInstanceState == null) {
             loadFragment(QuizFragment())
             bottomNavigation.selectedItemId = R.id.nav_quiz
+        }
+    }
+
+    // 🔹 Ye function header ke saare data ko refresh karega
+    fun updateDrawerHeader() {
+        // Session prefs: name, mobile, subscription type
+        val session = getSharedPreferences("session", MODE_PRIVATE)
+        val name = session.getString("reg_name", "Your Name")
+        val mobile = session.getString("reg_mobile", "9999999999")
+        val subType = session.getString("subscription_type", "Free")
+
+        tvHeaderName.text = name
+        tvHeaderMobile.text = mobile
+        tvDrawerSubscription.text =
+            if (subType == "Premium") "Premium Version" else "Free Version"
+
+        // Profile image from profile_prefs (MyPage se)
+        val profileSp = getSharedPreferences(PROFILE_PREF, MODE_PRIVATE)
+        val encoded = profileSp.getString(KEY_PROFILE_IMAGE, null)
+        if (encoded != null) {
+            try {
+                val bytes = Base64.decode(encoded, Base64.DEFAULT)
+                val bmp = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+                imgHeaderProfile.setImageBitmap(bmp)
+            } catch (e: Exception) {
+                e.printStackTrace()
+                imgHeaderProfile.setImageResource(R.drawable.ic_person)
+            }
+        } else {
+            imgHeaderProfile.setImageResource(R.drawable.ic_person)
         }
     }
 
