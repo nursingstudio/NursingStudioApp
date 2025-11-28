@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="My Subscription"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="12dp" />
+
+        <!-- Current status -->
+        <TextView
+            android:id="@+id/tvCurrentPlan"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Current plan: Free"
+            android:textSize="14sp"
+            android:layout_marginBottom="16dp" />
+
+        <!-- Free card -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardFree"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="4dp"
+            app:strokeWidth="1dp">
+
+            <LinearLayout
+                android:padding="16dp"
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Free Plan"
+                    android:textStyle="bold"
+                    android:textSize="16sp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="• Access basic quizzes\n• Limited PDFs &amp; videos"
+                    android:layout_marginTop="4dp" />
+
+                <Button
+                    android:id="@+id/btnSelectFree"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Use Free Plan"
+                    android:layout_marginTop="8dp" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Premium card -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardPremium"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="4dp"
+            app:strokeWidth="1dp">
+
+            <LinearLayout
+                android:padding="16dp"
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Premium Plan"
+                    android:textStyle="bold"
+                    android:textSize="16sp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="&#8226; All quizzes unlocked&#10;&#8226; All PDFs &amp; videos&#10;&#8226; No ads (future)"
+                    android:layout_marginTop="4dp" />
+
+                <Button
+                    android:id="@+id/btnSelectPremium"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Upgrade to Premium"
+                    android:layout_marginTop="8dp" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+    </LinearLayout>
+</ScrollView>

@@ -23,6 +23,10 @@ class MyPageFragment : Fragment() {
     private lateinit var imgProfile: ImageView
     private lateinit var imgEditPhoto: ImageView
 
+    // SharedPreferences ka naam & key:
+    private val PREF_NAME = "profile_prefs"
+    private val KEY_PROFILE_IMAGE = "profile_image_base64"
+
     // Gallery se image choose karne ke liye launcher
     private val pickImageLauncher =
         registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
@@ -54,6 +58,17 @@ class MyPageFragment : Fragment() {
                 }
             }
         }
+
+    private fun saveProfileImage(bitmap: Bitmap) {
+        val baos = ByteArrayOutputStream()
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 80, baos)
+        val bytes = baos.toByteArray()
+        val encoded = Base64.encodeToString(bytes, Base64.DEFAULT)
+
+        val sp = requireContext().getSharedPreferences(PREF_NAME, 0)
+        sp.edit().putString(KEY_PROFILE_IMAGE, encoded).apply()
+    }
+
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -118,6 +133,17 @@ class MyPageFragment : Fragment() {
             }
         }
 
+        fun loadProfileImageIfAny() {
+            val sp = requireContext().getSharedPreferences(PREF_NAME, 0)
+            val encoded = sp.getString(KEY_PROFILE_IMAGE, null) ?: return
+
+            val bytes = Base64.decode(encoded, Base64.DEFAULT)
+            val bmp = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+            imgProfile.setImageBitmap(bmp)
+        }
+
+
+
         tvWelcome.text = "Welcome,"
         tvName.text = name
         tvGender.text = gender
@@ -161,6 +187,7 @@ class MyPageFragment : Fragment() {
         imgProfile.setOnClickListener(pickAction)
 
     }
+
 
     private fun calculateAgeText(dobString: String): String {
         return try {

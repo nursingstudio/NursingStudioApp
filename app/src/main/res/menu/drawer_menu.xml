@@ -1,12 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <group android:checkableBehavior="single">
-        <item android:id="@+id/nav_subscription" android:title="Subscription"/>
-        <item android:id="@+id/nav_notice" android:title="Notice Board"/>
-        <item android:id="@+id/nav_social" android:title="Social Links"/>
-        <item android:id="@+id/nav_share" android:title="Share App"/>
-        <item android:id="@+id/nav_settings" android:title="Settings"/>
-    </group>
+    <item
+        android:id="@+id/nav_subscription"
+        android:title="My Subscription" />
+
+    <item
+        android:id="@+id/nav_notice"
+        android:title="Notice Board" />
+
+    <item
+        android:id="@+id/nav_social"
+        android:title="Follow us on Social Media" />
+
+    <item
+        android:id="@+id/nav_share"
+        android:title="Share this App" />
+
+    <item
+        android:id="@+id/nav_settings"
+        android:title="Settings" />
 
 </menu>

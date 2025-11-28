@@ -1,26 +1,56 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
-    android:padding="16dp"
-    android:gravity="center_vertical"
     android:layout_width="match_parent"
-    android:layout_height="160dp"
-    android:background="@color/purple_500">
+    android:layout_height="220dp"
+    android:orientation="vertical"
+    android:gravity="center_horizontal"
+    android:background="@color/purple_500"
+    android:paddingTop="56dp"
+    android:paddingBottom="16dp">
 
+    <!-- Profile Image -->
     <ImageView
-        android:id="@+id/profileImage"
-        android:layout_width="64dp"
-        android:layout_height="64dp"
+        android:id="@+id/imgHeaderProfile"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
         android:src="@drawable/ic_person"
-        android:contentDescription="Profile Picture"
-        android:layout_marginBottom="8dp" />
+        android:scaleType="centerCrop"
+        android:background="@drawable/circle_bg_white"
+        android:padding="8dp" />
 
+    <!-- Name -->
     <TextView
-        android:id="@+id/profileName"
+        android:id="@+id/tvHeaderName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="User Name"
-        android:textColor="@android:color/white"
+        android:text="Your Name"
         android:textStyle="bold"
-        android:textSize="16sp" />
+        android:textSize="16sp"
+        android:textColor="@android:color/white"
+        android:layout_marginTop="8dp" />
+
+    <!-- Mobile -->
+    <TextView
+        android:id="@+id/tvHeaderMobile"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="9999999999"
+        android:textSize="14sp"
+        android:textColor="@android:color/white" />
+
+    <!-- Subscription Tag -->
+    <TextView
+        android:id="@+id/tvDrawerSubscription"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Free Version"
+        android:textSize="12sp"
+        android:textColor="@android:color/white"
+        android:background="@android:color/holo_green_dark"
+        android:paddingLeft="8dp"
+        android:paddingRight="8dp"
+        android:paddingTop="2dp"
+        android:paddingBottom="2dp"
+        android:layout_marginTop="6dp" />
+
 </LinearLayout>

@@ -464,6 +464,7 @@ class RegisterFragment : Fragment() {
                 .putString("reg_has_nursing_reg", regStatus)
                 .putString("reg_nursing_reg_state", finalRegState)
                 .putString("reg_nursing_reg_number", finalRegNumber)
+                .putString("subscription_type", "Free")
 
                 .putBoolean("reg_mobile_verified", isMobileOtpVerified)
                 .apply()
