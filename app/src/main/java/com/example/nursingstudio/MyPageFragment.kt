@@ -1,5 +1,6 @@
 package com.example.nursingstudio
 
+import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.os.Bundle
@@ -10,8 +11,11 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
+import com.canhub.cropper.CropImageContract
+import com.canhub.cropper.CropImageContractOptions
+import com.canhub.cropper.CropImageOptions
+import com.canhub.cropper.CropImageView
 import java.io.ByteArrayOutputStream
 import java.io.InputStream
 import java.text.SimpleDateFormat
@@ -22,16 +26,17 @@ class MyPageFragment : Fragment() {
 
     // SharedPreferences ka naam & key:
     companion object {
-        private val PROFILE_PREF = "profile_prefs"
-        private val KEY_PROFILE_IMAGE = "profile_image_base64"
+        private const val PROFILE_PREF = "profile_prefs"
+        private const val KEY_PROFILE_IMAGE = "profile_image_base64"
     }
 
     private lateinit var imgProfile: ImageView
     private lateinit var imgEditPhoto: ImageView
 
-    // Gallery se image choose karne ke liye launcher
-    private val pickImageLauncher =
-        registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
+    // Cropper launcher: gallery se image lega, crop & rotate screen dikhayega
+    private val cropImage = registerForActivityResult(CropImageContract()) { result ->
+        if (result.isSuccessful) {
+            val uri = result.uriContent
             if (uri != null) {
                 try {
                     val inputStream: InputStream? =
@@ -40,32 +45,34 @@ class MyPageFragment : Fragment() {
                     inputStream?.close()
 
                     if (bitmap != null) {
-                        // ImageView me dikhana
+                        // UI me dikhana
                         imgProfile.setImageBitmap(bitmap)
 
-                        // Bitmap ko Base64 string me convert karna
+                        // Session me Base64 save (tumhara purana structure)
+                        val sessionSp = requireContext().getSharedPreferences("session", 0)
                         val baos = ByteArrayOutputStream()
                         bitmap.compress(Bitmap.CompressFormat.JPEG, 80, baos)
                         val bytes = baos.toByteArray()
                         val encoded = Base64.encodeToString(bytes, Base64.DEFAULT)
-
-                        // 🔹 PURANA: session me save (jaise pehle tha, isko nahi hataya)
-                        val sp = requireContext().getSharedPreferences("session", 0)
-                        sp.edit()
+                        sessionSp.edit()
                             .putString("reg_profile_image_base64", encoded)
                             .apply()
 
-                        // 🔹 NAYA: header ke liye PROFILE_PREF me bhi save
+                        // Header ke liye PROFILE_PREF me bhi save
                         saveProfileImage(bitmap)
 
-                        // 🔹 NAYA: Drawer header turant refresh
+                        // Drawer header turant refresh
                         (activity as? MainActivity)?.updateDrawerHeader()
                     }
                 } catch (e: Exception) {
                     e.printStackTrace()
                 }
             }
+        } else {
+            // Error aaya to yahan aayega
+            result.error?.printStackTrace()
         }
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -154,19 +161,30 @@ class MyPageFragment : Fragment() {
         // Logout
         btnLogout.setOnClickListener {
             sp.edit().putBoolean("logged_in", false).apply()
-            val intent = android.content.Intent(requireContext(), AuthActivity::class.java)
+            val intent = Intent(requireContext(), AuthActivity::class.java)
             intent.addFlags(
-                android.content.Intent.FLAG_ACTIVITY_CLEAR_TOP or
-                        android.content.Intent.FLAG_ACTIVITY_NEW_TASK
+                Intent.FLAG_ACTIVITY_CLEAR_TOP or
+                        Intent.FLAG_ACTIVITY_NEW_TASK
             )
             startActivity(intent)
             requireActivity().finish()
         }
 
-        // Change photo – button & image pe click se gallery khule
+        // Change photo – button & image pe click se CROP screen open
         val pickAction: (View) -> Unit = {
-            pickImageLauncher.launch("image/*")
+            cropImage.launch(
+                CropImageContractOptions(
+                    uri = null,   // library khud gallery/camera se image legi
+                    cropImageOptions = CropImageOptions(
+                        guidelines = CropImageView.Guidelines.ON,
+                        fixAspectRatio = true,   // square crop
+                        aspectRatioX = 1,
+                        aspectRatioY = 1
+                    )
+                )
+            )
         }
+
 
         imgEditPhoto.setOnClickListener(pickAction)
         imgProfile.setOnClickListener(pickAction)
