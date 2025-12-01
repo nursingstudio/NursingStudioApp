@@ -31,15 +31,16 @@ class SubscriptionFragment : Fragment() {
 
         tvCurrentPlan.text = "Current plan: $currentType"
 
-        //new line added for header update
+        // Optional: yahan ek baar sync kara diya header ko
         (activity as? MainActivity)?.updateDrawerHeader()
-        //---------------------------------
-
 
         btnSelectFree.setOnClickListener {
             sp.edit().putString("subscription_type", "Free").apply()
             tvCurrentPlan.text = "Current plan: Free"
             Toast.makeText(requireContext(), "Free plan selected", Toast.LENGTH_SHORT).show()
+
+            // 🔹 NAYA: Drawer header turant refresh
+            (activity as? MainActivity)?.updateDrawerHeader()
         }
 
         btnSelectPremium.setOnClickListener {
@@ -47,6 +48,9 @@ class SubscriptionFragment : Fragment() {
             sp.edit().putString("subscription_type", "Premium").apply()
             tvCurrentPlan.text = "Current plan: Premium"
             Toast.makeText(requireContext(), "Premium plan selected (demo)", Toast.LENGTH_SHORT).show()
+
+            // 🔹 NAYA: Drawer header turant refresh
+            (activity as? MainActivity)?.updateDrawerHeader()
         }
     }
 }

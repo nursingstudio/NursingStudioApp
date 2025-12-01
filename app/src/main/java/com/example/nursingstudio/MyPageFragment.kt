@@ -29,7 +29,6 @@ class MyPageFragment : Fragment() {
     private lateinit var imgProfile: ImageView
     private lateinit var imgEditPhoto: ImageView
 
-
     // Gallery se image choose karne ke liye launcher
     private val pickImageLauncher =
         registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
@@ -50,18 +49,23 @@ class MyPageFragment : Fragment() {
                         val bytes = baos.toByteArray()
                         val encoded = Base64.encodeToString(bytes, Base64.DEFAULT)
 
-                        // SharedPreferences me save
+                        // 🔹 PURANA: session me save (jaise pehle tha, isko nahi hataya)
                         val sp = requireContext().getSharedPreferences("session", 0)
                         sp.edit()
                             .putString("reg_profile_image_base64", encoded)
                             .apply()
+
+                        // 🔹 NAYA: header ke liye PROFILE_PREF me bhi save
+                        saveProfileImage(bitmap)
+
+                        // 🔹 NAYA: Drawer header turant refresh
+                        (activity as? MainActivity)?.updateDrawerHeader()
                     }
                 } catch (e: Exception) {
                     e.printStackTrace()
                 }
             }
         }
-
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -76,7 +80,6 @@ class MyPageFragment : Fragment() {
 
         imgProfile = view.findViewById(R.id.imgProfile)
         imgEditPhoto = view.findViewById(R.id.imgEditPhoto)
-
 
         val tvWelcome = view.findViewById<TextView>(R.id.tvWelcome)
         val tvName = view.findViewById<TextView>(R.id.tvName)
@@ -114,7 +117,7 @@ class MyPageFragment : Fragment() {
         val regState = sp.getString("reg_nursing_reg_state", "")
         val regNumber = sp.getString("reg_nursing_reg_number", "")
 
-        // Profile image Base64 load karna
+        // Profile image Base64 load karna (session se)
         val imageBase64 = sp.getString("reg_profile_image_base64", null)
         if (!imageBase64.isNullOrEmpty()) {
             try {
@@ -125,9 +128,6 @@ class MyPageFragment : Fragment() {
                 e.printStackTrace()
             }
         }
-
-
-
 
         tvWelcome.text = "Welcome,"
         tvName.text = name
@@ -171,11 +171,9 @@ class MyPageFragment : Fragment() {
         imgEditPhoto.setOnClickListener(pickAction)
         imgProfile.setOnClickListener(pickAction)
 
-
-    loadProfileImageIfAny()
+        // PROFILE_PREF se bhi image load (agar waha saved ho)
+        loadProfileImageIfAny()
     }
-
-
 
     private fun saveProfileImage(bitmap: Bitmap) {
         val baos = ByteArrayOutputStream()

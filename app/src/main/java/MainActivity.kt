@@ -9,9 +9,9 @@ import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.Fragment
-import androidx.core.view.GravityCompat
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.navigation.NavigationView
@@ -23,7 +23,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var bottomNavigation: BottomNavigationView
     private lateinit var topAppBar: MaterialToolbar
 
-    // Drawer header views ko class level pe rakh lete hain
+    // Drawer header views
     private lateinit var imgHeaderProfile: ImageView
     private lateinit var tvHeaderName: TextView
     private lateinit var tvHeaderMobile: TextView
@@ -44,19 +44,19 @@ class MainActivity : AppCompatActivity() {
         bottomNavigation = findViewById(R.id.bottomNavigation)
         topAppBar = findViewById(R.id.topAppBar)
 
-        // 🔹 Top app bar hamburger click -> Drawer open
+        // Hamburger click -> open drawer
         topAppBar.setNavigationOnClickListener {
             drawerLayout.openDrawer(GravityCompat.START)
         }
 
-        // ---------- Drawer HEADER setup ----------
+        // Drawer HEADER
         val headerView = navigationView.getHeaderView(0)
         imgHeaderProfile = headerView.findViewById(R.id.imgHeaderProfile)
         tvHeaderName = headerView.findViewById(R.id.tvHeaderName)
         tvHeaderMobile = headerView.findViewById(R.id.tvHeaderMobile)
         tvDrawerSubscription = headerView.findViewById(R.id.tvDrawerSubscription)
 
-        // Pehli baar header set karo
+        // Pehli baar data set karo
         updateDrawerHeader()
 
         // Header click -> My Page
@@ -64,9 +64,8 @@ class MainActivity : AppCompatActivity() {
             loadFragment(MyPageFragment())
             drawerLayout.closeDrawer(GravityCompat.START)
         }
-        // ----------------------------------------
 
-        // Drawer item clicks
+        // Drawer menu clicks
         navigationView.setNavigationItemSelectedListener { menuItem ->
             when (menuItem.itemId) {
                 R.id.nav_subscription -> {
@@ -76,7 +75,7 @@ class MainActivity : AppCompatActivity() {
                     loadFragment(NoticeFragment())
                 }
                 R.id.nav_social -> {
-                    val url = "https://youtube.com" // apna actual link daalna
+                    val url = "https://youtube.com" // apna actual link
                     startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
                 }
                 R.id.nav_share -> {
@@ -127,9 +126,9 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    // 🔹 Ye function header ke saare data ko refresh karega
+    // 🔹 Ye function name, mobile, subscription & photo sab refresh karega
     fun updateDrawerHeader() {
-        // Session prefs: name, mobile, subscription type
+        // Name, mobile, subscription session se
         val session = getSharedPreferences("session", MODE_PRIVATE)
         val name = session.getString("reg_name", "Your Name")
         val mobile = session.getString("reg_mobile", "9999999999")
@@ -140,7 +139,7 @@ class MainActivity : AppCompatActivity() {
         tvDrawerSubscription.text =
             if (subType == "Premium") "Premium Version" else "Free Version"
 
-        // Profile image from profile_prefs (MyPage se)
+        // Profile image profile_prefs se
         val profileSp = getSharedPreferences(PROFILE_PREF, MODE_PRIVATE)
         val encoded = profileSp.getString(KEY_PROFILE_IMAGE, null)
         if (encoded != null) {
