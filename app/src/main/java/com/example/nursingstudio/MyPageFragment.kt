@@ -3,6 +3,8 @@ package com.example.nursingstudio
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.Matrix
+import android.net.Uri
 import android.os.Bundle
 import android.util.Base64
 import android.view.LayoutInflater
@@ -11,11 +13,8 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
-import com.canhub.cropper.CropImageContract
-import com.canhub.cropper.CropImageContractOptions
-import com.canhub.cropper.CropImageOptions
-import com.canhub.cropper.CropImageView
 import java.io.ByteArrayOutputStream
 import java.io.InputStream
 import java.text.SimpleDateFormat
@@ -24,7 +23,6 @@ import java.util.Locale
 
 class MyPageFragment : Fragment() {
 
-    // SharedPreferences ka naam & key:
     companion object {
         private const val PROFILE_PREF = "profile_prefs"
         private const val KEY_PROFILE_IMAGE = "profile_image_base64"
@@ -33,46 +31,15 @@ class MyPageFragment : Fragment() {
     private lateinit var imgProfile: ImageView
     private lateinit var imgEditPhoto: ImageView
 
-    // Cropper launcher: gallery se image lega, crop & rotate screen dikhayega
-    private val cropImage = registerForActivityResult(CropImageContract()) { result ->
-        if (result.isSuccessful) {
-            val uri = result.uriContent
+    private var currentBitmap: Bitmap? = null
+
+    // Gallery se image lene ke liye launcher
+    private val pickImageLauncher =
+        registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
             if (uri != null) {
-                try {
-                    val inputStream: InputStream? =
-                        requireContext().contentResolver.openInputStream(uri)
-                    val bitmap = BitmapFactory.decodeStream(inputStream)
-                    inputStream?.close()
-
-                    if (bitmap != null) {
-                        // UI me dikhana
-                        imgProfile.setImageBitmap(bitmap)
-
-                        // Session me Base64 save (tumhara purana structure)
-                        val sessionSp = requireContext().getSharedPreferences("session", 0)
-                        val baos = ByteArrayOutputStream()
-                        bitmap.compress(Bitmap.CompressFormat.JPEG, 80, baos)
-                        val bytes = baos.toByteArray()
-                        val encoded = Base64.encodeToString(bytes, Base64.DEFAULT)
-                        sessionSp.edit()
-                            .putString("reg_profile_image_base64", encoded)
-                            .apply()
-
-                        // Header ke liye PROFILE_PREF me bhi save
-                        saveProfileImage(bitmap)
-
-                        // Drawer header turant refresh
-                        (activity as? MainActivity)?.updateDrawerHeader()
-                    }
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                }
+                handlePickedImage(uri)
             }
-        } else {
-            // Error aaya to yahan aayega
-            result.error?.printStackTrace()
         }
-    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -124,12 +91,13 @@ class MyPageFragment : Fragment() {
         val regState = sp.getString("reg_nursing_reg_state", "")
         val regNumber = sp.getString("reg_nursing_reg_number", "")
 
-        // Profile image Base64 load karna (session se)
+        // Session me saved profile image load karo
         val imageBase64 = sp.getString("reg_profile_image_base64", null)
         if (!imageBase64.isNullOrEmpty()) {
             try {
                 val bytes = Base64.decode(imageBase64, Base64.DEFAULT)
                 val bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+                currentBitmap = bitmap
                 imgProfile.setImageBitmap(bitmap)
             } catch (e: Exception) {
                 e.printStackTrace()
@@ -149,16 +117,13 @@ class MyPageFragment : Fragment() {
         val fullAddress = "$address, $tehsil, $district, $state, $country - $pincode"
         tvAddressFull.text = fullAddress
 
-        // DOB + Age
         val ageText = calculateAgeText(dob ?: "")
         tvDobWithAge.text = if (ageText.isNotEmpty()) "$dob ($ageText)" else dob
 
-        // Nursing registration
         tvNursingRegStatus.text = hasReg
         tvNursingRegDetails.text =
             if (hasReg == "Yes") "State: $regState | Reg. No: $regNumber" else ""
 
-        // Logout
         btnLogout.setOnClickListener {
             sp.edit().putBoolean("logged_in", false).apply()
             val intent = Intent(requireContext(), AuthActivity::class.java)
@@ -170,27 +135,111 @@ class MyPageFragment : Fragment() {
             requireActivity().finish()
         }
 
-        // Change photo – button & image pe click se CROP screen open
+        // 👉 Photo change – click se gallery open
         val pickAction: (View) -> Unit = {
-            cropImage.launch(
-                CropImageContractOptions(
-                    uri = null,   // library khud gallery/camera se image legi
-                    cropImageOptions = CropImageOptions(
-                        guidelines = CropImageView.Guidelines.ON,
-                        fixAspectRatio = true,   // square crop
-                        aspectRatioX = 1,
-                        aspectRatioY = 1
-                    )
-                )
-            )
+            pickImageLauncher.launch("image/*")
         }
-
-
         imgEditPhoto.setOnClickListener(pickAction)
         imgProfile.setOnClickListener(pickAction)
 
-        // PROFILE_PREF se bhi image load (agar waha saved ho)
+        // 👉 Long press to rotate (90°)
+        imgProfile.setOnLongClickListener {
+            rotateCurrentImage()
+            true
+        }
+
+        // PROFILE_PREF se bhi image load (header ke liye)
         loadProfileImageIfAny()
+    }
+
+    private fun handlePickedImage(uri: Uri) {
+        try {
+            val inputStream: InputStream? =
+                requireContext().contentResolver.openInputStream(uri)
+            val bitmap = BitmapFactory.decodeStream(inputStream)
+            inputStream?.close()
+
+            if (bitmap != null) {
+                // Optionally thoda resize kar lo (memory ke liye)
+                val scaled = scaleDownBitmap(bitmap, 800)
+                currentBitmap = scaled
+
+                imgProfile.setImageBitmap(scaled)
+
+                // Session me Base64 save
+                val sessionSp = requireContext().getSharedPreferences("session", 0)
+                val baos = ByteArrayOutputStream()
+                scaled.compress(Bitmap.CompressFormat.JPEG, 80, baos)
+                val bytes = baos.toByteArray()
+                val encoded = Base64.encodeToString(bytes, Base64.DEFAULT)
+                sessionSp.edit()
+                    .putString("reg_profile_image_base64", encoded)
+                    .apply()
+
+                // Header ke liye PROFILE_PREF me bhi save
+                saveProfileImage(scaled)
+
+                // Drawer header turant refresh
+                (activity as? MainActivity)?.updateDrawerHeader()
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    private fun rotateCurrentImage() {
+        val bitmap = currentBitmap ?: return
+
+        val matrix = Matrix().apply {
+            postRotate(90f)
+        }
+        val rotated = Bitmap.createBitmap(
+            bitmap,
+            0,
+            0,
+            bitmap.width,
+            bitmap.height,
+            matrix,
+            true
+        )
+
+        currentBitmap = rotated
+        imgProfile.setImageBitmap(rotated)
+
+        // Session + header me rotated image save
+        val baos = ByteArrayOutputStream()
+        rotated.compress(Bitmap.CompressFormat.JPEG, 80, baos)
+        val bytes = baos.toByteArray()
+        val encoded = Base64.encodeToString(bytes, Base64.DEFAULT)
+
+        val sessionSp = requireContext().getSharedPreferences("session", 0)
+        sessionSp.edit()
+            .putString("reg_profile_image_base64", encoded)
+            .apply()
+
+        saveProfileImage(rotated)
+        (activity as? MainActivity)?.updateDrawerHeader()
+    }
+
+    private fun scaleDownBitmap(bitmap: Bitmap, maxSize: Int): Bitmap {
+        val width = bitmap.width
+        val height = bitmap.height
+
+        if (width <= maxSize && height <= maxSize) return bitmap
+
+        val ratio = width.toFloat() / height.toFloat()
+        val newWidth: Int
+        val newHeight: Int
+
+        if (ratio > 1f) {
+            newWidth = maxSize
+            newHeight = (maxSize / ratio).toInt()
+        } else {
+            newHeight = maxSize
+            newWidth = (maxSize * ratio).toInt()
+        }
+
+        return Bitmap.createScaledBitmap(bitmap, newWidth, newHeight, true)
     }
 
     private fun saveProfileImage(bitmap: Bitmap) {
@@ -209,6 +258,7 @@ class MyPageFragment : Fragment() {
 
         val bytes = Base64.decode(encoded, Base64.DEFAULT)
         val bmp = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+        currentBitmap = bmp
         imgProfile.setImageBitmap(bmp)
     }
 
