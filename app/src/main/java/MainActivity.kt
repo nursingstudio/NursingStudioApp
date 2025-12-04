@@ -32,6 +32,15 @@ class MainActivity : AppCompatActivity() {
     companion object {
         private const val PROFILE_PREF = "profile_prefs"
         private const val KEY_PROFILE_IMAGE = "profile_image_base64"
+        // 👉 Social links (yahan apne actual links daal dena)
+        private const val URL_YOUTUBE  = "https://youtube.com/@risingbharat2025"        // CHANGE
+        private const val URL_WHATSAPP = "https://whatsapp.com/channel/0029Vb6Sjdq6BIEapKtNUE2L"               // CHANGE (mobile / community link)
+        private const val URL_TELEGRAM = "https://telegram.me/NursingStudio"                // CHANGE
+        private const val URL_ARATTAI  = "https://aratt.ai/@nursingstudio"        // CHANGE
+        private const val URL_INSTA    = "https://instagram.com/risingbharat2025"       // CHANGE
+        private const val URL_TWITTER  = "https://twitter.com/"        // CHANGE
+        private const val URL_FACEBOOK  = "https://facebook.com/"        // CHANGE
+
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -75,9 +84,9 @@ class MainActivity : AppCompatActivity() {
                     loadFragment(NoticeFragment())
                 }
                 R.id.nav_social -> {
-                    val url = "https://youtube.com" // apna actual link
-                    startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
+                    showSocialDialog()
                 }
+
                 R.id.nav_share -> {
                     val shareIntent = Intent(Intent.ACTION_SEND).apply {
                         type = "text/plain"
@@ -125,6 +134,72 @@ class MainActivity : AppCompatActivity() {
             bottomNavigation.selectedItemId = R.id.nav_quiz
         }
     }
+
+    // Simple browser / app open helper
+    private fun openUrl(url: String, packageName: String? = null) {
+        try {
+            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+            if (packageName != null) {
+                intent.setPackage(packageName)
+            }
+            startActivity(intent)
+        } catch (e: Exception) {
+            // Fallback: normal browser
+            try {
+                startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
+            } catch (e2: Exception) {
+                Toast.makeText(this, "Unable to open link", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+    // Drawer ke Social item ke liye dialog
+    private fun showSocialDialog() {
+        val items = arrayOf(
+            "YouTube Channel",
+            "WhatsApp Channel",
+            "Telegram Channel",
+            "Arattai Channel",
+            "Instagram",
+            "Twitter",
+            "Facebook",
+
+        )
+
+        com.google.android.material.dialog.MaterialAlertDialogBuilder(this)
+            .setTitle("Follow Nursing Studio")
+            .setItems(items) { _, which ->
+                when (which) {
+                    0 -> { // YouTube
+                        openUrl(URL_YOUTUBE, "com.google.android.youtube")
+                    }
+                    1 -> { // WhatsApp
+                        openUrl(URL_WHATSAPP, "com.whatsapp")
+                    }
+                    2 -> { // Telegram
+                        openUrl(URL_TELEGRAM, "org.telegram.messenger")
+                    }
+                    3 -> { // Arattai
+                        openUrl(URL_ARATTAI, "com.aratt.aratt")
+                    }
+                    4 -> { // Instagram
+                        openUrl(URL_INSTA, "com.instagram.android")
+                    }
+                    5 -> { //Twitter
+                        openUrl(URL_TWITTER, "com.twitter.android")
+                    }
+                    6 -> { // Telegram
+                        openUrl(URL_FACEBOOK, "null")
+                    }
+
+                }
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
+    }
+
+
+
 
     // 🔹 Ye function name, mobile, subscription & photo sab refresh karega
     fun updateDrawerHeader() {
