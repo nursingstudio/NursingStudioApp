@@ -19,6 +19,7 @@ class SocialAdapter(
 
         val item = items[position]
 
+        // 👉 Yahi line hai:
         val icon = view.findViewById<ImageView>(R.id.icon)
         val title = view.findViewById<TextView>(R.id.title)
 

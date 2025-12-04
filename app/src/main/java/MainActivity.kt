@@ -106,7 +106,11 @@ class MainActivity : AppCompatActivity() {
         // Bottom navigation clicks
         bottomNavigation.setOnItemSelectedListener { item ->
             when (item.itemId) {
-                R.id.nav_quiz -> {
+                R.id.nav_home -> {
+                    loadFragment(HomeFragment())
+                    true
+                }
+                R.id.nav_quiz -> {          // ab "Test Series" likha hoga
                     loadFragment(QuizFragment())
                     true
                 }
@@ -128,9 +132,10 @@ class MainActivity : AppCompatActivity() {
 
         // Default screen
         if (savedInstanceState == null) {
-            loadFragment(QuizFragment())
-            bottomNavigation.selectedItemId = R.id.nav_quiz
+            loadFragment(HomeFragment())
+            bottomNavigation.selectedItemId = R.id.nav_home
         }
+
     }
 
     // 🔹 Name, mobile, subscription & photo sab refresh karega

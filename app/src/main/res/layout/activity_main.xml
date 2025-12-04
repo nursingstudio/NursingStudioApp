@@ -17,10 +17,10 @@
             android:id="@+id/topAppBar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            android:background="?attr/colorPrimary"
+            android:background="@color/saffron"
             android:title="@string/app_name"
             android:titleTextColor="@android:color/white"
-            app:navigationIcon="@drawable/ic_menu"
+            app:navigationIcon="@drawable/ic_menu_24"
             app:navigationIconTint="@android:color/white" />
 
         <!-- Content Frame (Fragments yahan load honge) -->

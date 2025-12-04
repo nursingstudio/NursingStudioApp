@@ -3,4 +3,10 @@
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
     <color name="purple_500">#6200EE</color>
+
+    <color name="saffron">#FF9933</color>
+    <color name="saffron_dark">#CC7A00</color>
+    <color name="app_background">#FFF4E3</color> <!-- halka saffron-ish background -->
+
+
 </resources>

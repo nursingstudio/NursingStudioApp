@@ -1,7 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:id="@+id/nav_quiz" android:title="Quiz" android:icon="@drawable/ic_quiz"/>
-    <item android:id="@+id/nav_pdf" android:title="PDF" android:icon="@drawable/ic_pdf"/>
-    <item android:id="@+id/nav_video" android:title="Video" android:icon="@drawable/ic_video"/>
-    <item android:id="@+id/nav_mypage" android:title="My Page" android:icon="@drawable/ic_profile"/>
+
+    <item
+        android:id="@+id/nav_home"
+        android:icon="@drawable/ic_home_24"
+        android:title="Home" />
+
+    <item
+        android:id="@+id/nav_quiz"
+        android:icon="@drawable/ic_test_series_24"
+        android:title="Test Series" />
+
+    <item
+        android:id="@+id/nav_pdf"
+        android:icon="@drawable/ic_pdf_24"
+        android:title="PDFs" />
+
+    <item
+        android:id="@+id/nav_video"
+        android:icon="@drawable/ic_video_24"
+        android:title="Videos" />
+
+    <item
+        android:id="@+id/nav_mypage"
+        android:icon="@drawable/ic_person_24"
+        android:title="My Page" />
+
 </menu>

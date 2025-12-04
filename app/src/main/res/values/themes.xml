@@ -1,9 +1,28 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Base application theme. -->
+
+    <!-- Base application theme (Light / default) -->
     <style name="Base.Theme.NursingStudio" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your light theme here. -->
+        <!-- Primary saffron -->
+        <item name="colorPrimary">@color/saffron</item>
+        <item name="colorPrimaryContainer">@color/saffron</item>
+        <item name="colorOnPrimary">@android:color/white</item>
+
+        <!-- Status & nav bar -->
+        <item name="android:statusBarColor">@color/saffron_dark</item>
+        <item name="android:navigationBarColor">@color/saffron_dark</item>
+
+        <!-- App background -->
+        <item name="android:colorBackground">@color/app_background</item>
     </style>
 
     <style name="Theme.NursingStudio" parent="Base.Theme.NursingStudio" />
+
+    <!-- Agar kabhi UCrop wapas use karna ho to ye rehne do -->
+    <style name="UCropActivityTheme" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="colorPrimary">@color/saffron</item>
+        <item name="colorPrimaryDark">@color/saffron_dark</item>
+        <item name="colorAccent">@android:color/white</item>
+        <item name="android:navigationBarColor">@color/saffron</item>
+    </style>
 
 </resources>

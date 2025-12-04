@@ -1,7 +1,24 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Base application theme. -->
+
+    <!-- Night theme -->
     <style name="Base.Theme.NursingStudio" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your dark theme here. -->
+        <item name="colorPrimary">@color/saffron_dark</item>
+        <item name="colorPrimaryContainer">@color/saffron_dark</item>
+        <item name="colorOnPrimary">@android:color/white</item>
+
+        <item name="android:statusBarColor">@color/saffron_dark</item>
+        <item name="android:navigationBarColor">@color/saffron_dark</item>
+
+        <item name="android:colorBackground">@color/app_background</item>
+    </style>
+
+    <style name="Theme.NursingStudio" parent="Base.Theme.NursingStudio" />
+
+    <style name="UCropActivityTheme" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="colorPrimary">@color/saffron</item>
+        <item name="colorPrimaryDark">@color/saffron_dark</item>
+        <item name="colorAccent">@android:color/white</item>
+        <item name="android:navigationBarColor">@color/saffron</item>
     </style>
 
 </resources>
