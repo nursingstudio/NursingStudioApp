@@ -53,6 +53,12 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        setSupportActionBar(findViewById(R.id.topAppBar))
+
+        val toolbar=findViewById<MaterialToolbar>(R.id.topAppBar)
+        setSupportActionBar(toolbar)
+
+
         // Find views
         drawerLayout = findViewById(R.id.drawerLayout)
         navigationView = findViewById(R.id.navigationView)
