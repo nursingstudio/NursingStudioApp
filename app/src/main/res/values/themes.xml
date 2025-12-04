@@ -6,14 +6,4 @@
 
     <style name="Theme.NursingStudio" parent="Base.Theme.NursingStudio" />
 
-    <!-- UCrop ke liye AppCompat theme -->
-
-    <style name="UCropActivityTheme" parent="Theme.AppCompat.Light.NoActionBar">
-        <item name="android:windowIsTranslucent">false</item>
-        <item name="android:windowFullscreen">false</item>
-        <item name="android:statusBarColor">@android:color/holo_orange_dark</item>
-        <item name="android:navigationBarColor">@android:color/holo_orange_light</item>
-    </style>
-
-
 </resources>

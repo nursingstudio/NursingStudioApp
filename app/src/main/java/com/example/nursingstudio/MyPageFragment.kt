@@ -14,6 +14,7 @@ import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import java.io.ByteArrayOutputStream
 import java.io.InputStream
@@ -30,14 +31,31 @@ class MyPageFragment : Fragment() {
 
     private lateinit var imgProfile: ImageView
     private lateinit var imgEditPhoto: ImageView
-
     private var currentBitmap: Bitmap? = null
 
-    // Gallery se image lene ke liye launcher
-    private val pickImageLauncher =
+    // 👉 CAMERA launcher (returns small Bitmap preview)
+    private val cameraLauncher =
+        registerForActivityResult(ActivityResultContracts.TakePicturePreview()) { bitmap ->
+            if (bitmap != null) {
+                handleNewBitmap(bitmap)
+            }
+        }
+
+    // 👉 GALLERY launcher
+    private val galleryLauncher =
         registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
             if (uri != null) {
-                handlePickedImage(uri)
+                try {
+                    val input: InputStream? =
+                        requireContext().contentResolver.openInputStream(uri)
+                    val bmp = BitmapFactory.decodeStream(input)
+                    input?.close()
+                    if (bmp != null) {
+                        handleNewBitmap(bmp)
+                    }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
             }
         }
 
@@ -135,14 +153,14 @@ class MyPageFragment : Fragment() {
             requireActivity().finish()
         }
 
-        // 👉 Photo change – click se gallery open
+        // 👉 Photo change – dialog: Camera ya Gallery
         val pickAction: (View) -> Unit = {
-            pickImageLauncher.launch("image/*")
+            showImageSourceDialog()
         }
         imgEditPhoto.setOnClickListener(pickAction)
         imgProfile.setOnClickListener(pickAction)
 
-        // 👉 Long press to rotate (90°)
+        // 👉 Long press to rotate 90°
         imgProfile.setOnLongClickListener {
             rotateCurrentImage()
             true
@@ -152,39 +170,39 @@ class MyPageFragment : Fragment() {
         loadProfileImageIfAny()
     }
 
-    private fun handlePickedImage(uri: Uri) {
-        try {
-            val inputStream: InputStream? =
-                requireContext().contentResolver.openInputStream(uri)
-            val bitmap = BitmapFactory.decodeStream(inputStream)
-            inputStream?.close()
-
-            if (bitmap != null) {
-                // Optionally thoda resize kar lo (memory ke liye)
-                val scaled = scaleDownBitmap(bitmap, 800)
-                currentBitmap = scaled
-
-                imgProfile.setImageBitmap(scaled)
-
-                // Session me Base64 save
-                val sessionSp = requireContext().getSharedPreferences("session", 0)
-                val baos = ByteArrayOutputStream()
-                scaled.compress(Bitmap.CompressFormat.JPEG, 80, baos)
-                val bytes = baos.toByteArray()
-                val encoded = Base64.encodeToString(bytes, Base64.DEFAULT)
-                sessionSp.edit()
-                    .putString("reg_profile_image_base64", encoded)
-                    .apply()
-
-                // Header ke liye PROFILE_PREF me bhi save
-                saveProfileImage(scaled)
-
-                // Drawer header turant refresh
-                (activity as? MainActivity)?.updateDrawerHeader()
+    private fun showImageSourceDialog() {
+        AlertDialog.Builder(requireContext())
+            .setTitle("Select photo")
+            .setItems(arrayOf("Camera", "Gallery")) { _, which ->
+                when (which) {
+                    0 -> cameraLauncher.launch(null)
+                    1 -> galleryLauncher.launch("image/*")
+                }
             }
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
+            .setNegativeButton("Cancel", null)
+            .show()
+    }
+
+    private fun handleNewBitmap(bitmap: Bitmap) {
+        val scaled = scaleDownBitmap(bitmap, 800)
+        currentBitmap = scaled
+        imgProfile.setImageBitmap(scaled)
+
+        // Session me Base64 save
+        val sessionSp = requireContext().getSharedPreferences("session", 0)
+        val baos = ByteArrayOutputStream()
+        scaled.compress(Bitmap.CompressFormat.JPEG, 80, baos)
+        val bytes = baos.toByteArray()
+        val encoded = Base64.encodeToString(bytes, Base64.DEFAULT)
+        sessionSp.edit()
+            .putString("reg_profile_image_base64", encoded)
+            .apply()
+
+        // Header ke liye PROFILE_PREF me bhi save
+        saveProfileImage(scaled)
+
+        // Drawer header turant refresh
+        (activity as? MainActivity)?.updateDrawerHeader()
     }
 
     private fun rotateCurrentImage() {
@@ -206,7 +224,6 @@ class MyPageFragment : Fragment() {
         currentBitmap = rotated
         imgProfile.setImageBitmap(rotated)
 
-        // Session + header me rotated image save
         val baos = ByteArrayOutputStream()
         rotated.compress(Bitmap.CompressFormat.JPEG, 80, baos)
         val bytes = baos.toByteArray()
