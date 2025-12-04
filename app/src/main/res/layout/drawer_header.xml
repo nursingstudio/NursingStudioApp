@@ -5,7 +5,7 @@ xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_height="240dp"
     android:orientation="vertical"
     android:gravity="center_horizontal"
-    android:background="@color/purple_500"
+    android:background="@color/app_background"
     android:paddingTop="56dp"
     android:paddingBottom="16dp">
 
@@ -24,7 +24,7 @@ xmlns:app="http://schemas.android.com/apk/res-auto"
         android:text="Your Name"
         android:textStyle="bold"
         android:textSize="16sp"
-        android:textColor="@android:color/white"
+        android:textColor="#000000"
         android:layout_marginTop="8dp" />
 
     <TextView
@@ -33,7 +33,7 @@ xmlns:app="http://schemas.android.com/apk/res-auto"
         android:layout_height="wrap_content"
         android:text="9999999999"
         android:textSize="14sp"
-        android:textColor="@android:color/white" />
+        android:textColor="#333333" />
 
     <TextView
         android:id="@+id/tvDrawerSubscription"
