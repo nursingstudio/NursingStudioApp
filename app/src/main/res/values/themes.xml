@@ -1,9 +1,7 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
 
-    <style name="Theme.NursingStudio" parent="Base.Theme.NursingStudio" />
-
-    <!-- Base application theme (Light / default) -->
-    <style name="Base.Theme.NursingStudio" parent="Theme.Material3.DayNight.NoActionBar">
+    <!-- Base application theme: LIGHT ONLY -->
+    <style name="Base.Theme.NursingStudio" parent="Theme.Material3.Light.NoActionBar">
         <!-- Primary saffron -->
         <item name="colorPrimary">@color/saffron</item>
         <item name="colorPrimaryContainer">@color/saffron</item>
@@ -16,21 +14,17 @@
         <!-- App background -->
         <item name="android:colorBackground">@color/app_background</item>
 
-        <!-- Dark mode force off -->
-        <item name="android:forceDarkAllowed">false</item>
-
+        <!-- Global text colors (MyPage / Drawer / etc.) -->
+        <item name="android:textColorPrimary">@color/text_primary</item>
+        <item name="android:textColorSecondary">@color/text_secondary</item>
+        <item name="android:textColorHint">@color/text_muted</item>
     </style>
 
+    <style name="Theme.NursingStudio" parent="Base.Theme.NursingStudio" />
 
-    <!-- Agar kabhi UCrop wapas use karna ho to ye rehne do -->
-    <style name="UCropActivityTheme" parent="Theme.AppCompat.Light.NoActionBar">
-        <item name="colorPrimary">@color/saffron</item>
-        <item name="colorPrimaryDark">@color/saffron_dark</item>
-        <item name="colorAccent">@android:color/white</item>
-        <item name="android:navigationBarColor">@color/saffron</item>
-    </style>
-
-    <style name="ToolbarTitleBold" parent="@style/TextAppearance.Widget.AppCompat.Toolbar.Title">
+    <!-- Toolbar title bold style -->
+    <style name="ToolbarTitleBold"
+        parent="@style/TextAppearance.Widget.AppCompat.Toolbar.Title">
         <item name="android:textStyle">bold</item>
         <item name="android:textSize">20sp</item>
     </style>

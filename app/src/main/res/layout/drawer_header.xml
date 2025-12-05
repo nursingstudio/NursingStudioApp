@@ -24,7 +24,7 @@ xmlns:app="http://schemas.android.com/apk/res-auto"
         android:text="Your Name"
         android:textStyle="bold"
         android:textSize="16sp"
-        android:textColor="#000000"
+        android:textColor="@color/text_primary"
         android:layout_marginTop="8dp" />
 
     <TextView
@@ -33,7 +33,7 @@ xmlns:app="http://schemas.android.com/apk/res-auto"
         android:layout_height="wrap_content"
         android:text="9999999999"
         android:textSize="14sp"
-        android:textColor="#333333" />
+        android:textColor="@color/text_secondary" />
 
     <TextView
         android:id="@+id/tvDrawerSubscription"

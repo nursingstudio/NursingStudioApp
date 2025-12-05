@@ -18,9 +18,10 @@
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             android:background="@color/saffron"
-            android:title="@string/app_name"
+            android:elevation="4dp"
+            android:title="Nursing Studio"
             android:titleTextColor="@android:color/white"
-            app:titleCentered="true"
+            app:titleCentered="false"
             app:titleTextAppearance="@style/ToolbarTitleBold"
             app:navigationIcon="@drawable/ic_menu_24"
             app:navigationIconTint="@android:color/white" />

@@ -1,12 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
+
 <resources>
+<!-- Saffron theme -->
+<color name="saffron">#FF9933</color>
+<color name="saffron_dark">#CC7A00</color>
+<color name="app_background">#FFF4E3</color> <!-- halka saffron-ish background -->
+
+<!-- Text colors -->
+<color name="text_primary">#222222</color>
+<color name="text_secondary">#555555</color>
+<color name="text_muted">#888888</color>
+
+<!-- jo bhi tumhare existing colors (purple_500, white, etc.) hain, unko yahin rehne do -->
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
     <color name="purple_500">#6200EE</color>
-
-    <color name="saffron">#FF9933</color>
-    <color name="saffron_dark">#CC7A00</color>
-    <color name="app_background">#FFF4E3</color> <!-- halka saffron-ish background -->
-
 
 </resources>
