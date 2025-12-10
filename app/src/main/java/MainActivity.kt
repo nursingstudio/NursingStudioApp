@@ -5,6 +5,7 @@ import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Bundle
 import android.util.Base64
+import android.util.Log
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
@@ -16,7 +17,6 @@ import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.navigation.NavigationView
-import android.util.Log
 
 class MainActivity : AppCompatActivity() {
 
@@ -53,17 +53,15 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        setSupportActionBar(findViewById(R.id.topAppBar))
-
-        val toolbar=findViewById<MaterialToolbar>(R.id.topAppBar)
-        setSupportActionBar(toolbar)
-
-
-        // Find views
+        // Views
         drawerLayout = findViewById(R.id.drawerLayout)
         navigationView = findViewById(R.id.navigationView)
         bottomNavigation = findViewById(R.id.bottomNavigation)
         topAppBar = findViewById(R.id.topAppBar)
+
+        // Toolbar ko app bar bana + title set karo
+        setSupportActionBar(topAppBar)
+        supportActionBar?.title = "Nursing Studio"
 
         // Hamburger click -> open drawer
         topAppBar.setNavigationOnClickListener {
@@ -96,7 +94,7 @@ class MainActivity : AppCompatActivity() {
                     loadFragment(NoticeFragment())
                 }
                 R.id.nav_social -> {
-                    showSocialDialog()
+                    loadFragment(SocialHandlesFragment())
                 }
                 R.id.nav_share -> {
                     shareApp()
@@ -116,7 +114,7 @@ class MainActivity : AppCompatActivity() {
                     loadFragment(HomeFragment())
                     true
                 }
-                R.id.nav_quiz -> {          // ab "Test Series" likha hoga
+                R.id.nav_quiz -> {          // text ko menu XML me "Test Series" likha hai
                     loadFragment(QuizFragment())
                     true
                 }
@@ -141,7 +139,6 @@ class MainActivity : AppCompatActivity() {
             loadFragment(HomeFragment())
             bottomNavigation.selectedItemId = R.id.nav_home
         }
-
     }
 
     // 🔹 Name, mobile, subscription & photo sab refresh karega
@@ -215,31 +212,26 @@ class MainActivity : AppCompatActivity() {
             .setAdapter(adapter) { _, which ->
                 when (which) {
                     0 -> { trackSocialClick("YouTube");  openUrl(URL_YOUTUBE, "com.google.android.youtube") }
-                    1 -> { trackSocialClick("WhatsApp"); openUrl(URL_WHATSAPP) }          // 👈 yahan change
+                    1 -> { trackSocialClick("WhatsApp"); openUrl(URL_WHATSAPP) }
                     2 -> { trackSocialClick("Telegram"); openUrl(URL_TELEGRAM, "org.telegram.messenger") }
                     3 -> { trackSocialClick("Arattai");  openUrl(URL_ARATTAI, "com.aratt.aratt") }
                     4 -> { trackSocialClick("Instagram");openUrl(URL_INSTA, "com.instagram.android") }
                     5 -> { trackSocialClick("Twitter");  openUrl(URL_TWITTER, "com.twitter.android") }
                     6 -> { trackSocialClick("Facebook"); openUrl(URL_FACEBOOK, "com.facebook.katana") }
                 }
-
             }
             .setNegativeButton("Cancel", null)
             .show()
     }
 
     private fun trackSocialClick(channel: String) {
-        // Simple shared prefs counter
         val sp = getSharedPreferences("analytics", MODE_PRIVATE)
         val key = "social_click_${channel.lowercase()}"
         val newCount = sp.getInt(key, 0) + 1
         sp.edit().putInt(key, newCount).apply()
 
-        // Logcat me bhi print kar dega
         Log.d("SocialAnalytics", "Clicked $channel, total = $newCount")
     }
-
-
 
     // 👉 Share App – tumhara custom text
     private fun shareApp() {
