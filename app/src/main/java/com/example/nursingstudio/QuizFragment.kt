@@ -6,7 +6,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
-import com.google.android.material.card.MaterialCardView
 
 class QuizFragment : Fragment() {
 
@@ -21,32 +20,47 @@ class QuizFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // Cards find karo
-        val cardSubjectTests =
-            view.findViewById<MaterialCardView>(R.id.cardSubjectTests)
-        val cardMockTests =
-            view.findViewById<MaterialCardView>(R.id.cardMockTests)
-        val cardPreviousPapers =
-            view.findViewById<MaterialCardView>(R.id.cardPreviousPapers)
-
-        // Abhi ke liye sirf Coming soon – baad me yahi se actual quiz screens open karenge
-        cardSubjectTests.setOnClickListener {
-            Toast.makeText(requireContext(),
-                "Subject-wise tests coming soon 🔄",
+        // Full syllabus
+        view.findViewById<View?>(R.id.cardFullSyllabus)?.setOnClickListener {
+            Toast.makeText(
+                requireContext(),
+                "Full Syllabus Test Series – coming soon 🚧",
                 Toast.LENGTH_SHORT
             ).show()
         }
 
-        cardMockTests.setOnClickListener {
-            Toast.makeText(requireContext(),
-                "Full mock tests coming soon 🔄",
+        // Subject-wise
+        view.findViewById<View?>(R.id.cardSubjectWise)?.setOnClickListener {
+            Toast.makeText(
+                requireContext(),
+                "Subject-wise tests – coming soon",
                 Toast.LENGTH_SHORT
             ).show()
         }
 
-        cardPreviousPapers.setOnClickListener {
-            Toast.makeText(requireContext(),
-                "Previous year papers coming soon 🔄",
+        // Topic-wise
+        view.findViewById<View?>(R.id.cardTopicWise)?.setOnClickListener {
+            Toast.makeText(
+                requireContext(),
+                "Topic-wise practice – coming soon",
+                Toast.LENGTH_SHORT
+            ).show()
+        }
+
+        // Previous year
+        view.findViewById<View?>(R.id.cardPreviousYear)?.setOnClickListener {
+            Toast.makeText(
+                requireContext(),
+                "Previous year papers – coming soon",
+                Toast.LENGTH_SHORT
+            ).show()
+        }
+
+        // Quick practice
+        view.findViewById<View?>(R.id.cardQuickPractice)?.setOnClickListener {
+            Toast.makeText(
+                requireContext(),
+                "Quick practice tests – coming soon",
                 Toast.LENGTH_SHORT
             ).show()
         }
