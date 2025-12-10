@@ -100,7 +100,7 @@ class MainActivity : AppCompatActivity() {
                     shareApp()
                 }
                 R.id.nav_settings -> {
-                    Toast.makeText(this, "Settings coming soon", Toast.LENGTH_SHORT).show()
+                    loadFragment(SettingsFragment())
                 }
             }
             drawerLayout.closeDrawer(GravityCompat.START)
