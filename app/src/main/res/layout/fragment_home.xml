@@ -10,23 +10,58 @@
         android:orientation="vertical"
         android:padding="16dp">
 
+        <!-- Greeting -->
         <TextView
-            android:id="@+id/tvHomeTitle"
+            android:id="@+id/tvGreeting"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Nursing Studio"
+            android:text="Welcome, Nursing Student"
             android:textSize="22sp"
-            android:textStyle="bold" />
+            android:textStyle="bold"
+            android:textColor="@color/text_primary"
+            android:layout_marginBottom="4dp" />
 
         <TextView
-            android:id="@+id/tvHomeSubtitle"
+            android:id="@+id/tvSubtitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Start smart preparation for all nursing competitive exams."
-            android:layout_marginTop="4dp"
-            android:textSize="14sp" />
+            android:text="Start smart preparation for your nursing exams."
+            android:textSize="14sp"
+            android:textColor="@color/text_secondary"
+            android:layout_marginBottom="16dp" />
 
-        <!-- Baad me yahan featured quizzes, notices, etc. add kar sakte hain -->
+        <!-- Motivation Card (toggle se hide/show) -->
+        <LinearLayout
+            android:id="@+id/layoutMotivationCard"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="12dp"
+            android:background="@drawable/bg_motivation_card"
+            android:layout_marginBottom="16dp">
+
+            <TextView
+                android:id="@+id/tvMotivationTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Daily Motivation"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:textColor="@color/text_primary"
+                android:layout_marginBottom="4dp" />
+
+            <TextView
+                android:id="@+id/tvMotivationText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="You are not just clearing an exam, you are building a nursing career."
+                android:textSize="14sp"
+                android:textColor="@color/text_secondary" />
+        </LinearLayout>
+
+        <!-- Baad me yahan par sections / cards aa sakte hain:
+             - Quick links to Test Series / PDFs / Videos
+             - Today's target etc. -->
 
     </LinearLayout>
 </ScrollView>

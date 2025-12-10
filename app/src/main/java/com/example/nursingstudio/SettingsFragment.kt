@@ -18,15 +18,11 @@ class SettingsFragment : Fragment() {
         private const val PREF_SETTINGS = "settings_prefs"
         private const val KEY_NOTIFICATIONS = "enable_notifications"
         private const val KEY_QUIZ_SOUND = "enable_quiz_sound"
-        private const val KEY_QUIZ_VIBRATE = "enable_quiz_vibrate"
         private const val KEY_MOTIVATION = "enable_motivation"
 
-        // Ye links tumhare MainActivity ke jaisa rakhe:
         private const val URL_PLAYSTORE =
             "https://play.google.com/store/apps/details?id=com.example.nursingstudio"
 
-        // Support ke liye WhatsApp – abhi channel link use kar rahe hain,
-        // baad me chaho to direct chat link laga sakte ho.
         private const val URL_WHATSAPP_SUPPORT =
             "https://whatsapp.com/channel/0029Vb6Sjdq6BIEapKtNUE2L"
     }
@@ -46,28 +42,28 @@ class SettingsFragment : Fragment() {
             view.findViewById<SwitchCompat>(R.id.switch_notifications)
         val switchQuizSound =
             view.findViewById<SwitchCompat>(R.id.switch_quiz_sound)
-        val switchQuizVibrate =
-            view.findViewById<SwitchCompat>(R.id.switch_quiz_vibrate)
         val switchMotivation =
             view.findViewById<SwitchCompat>(R.id.switch_motivation)
 
         val btnRateApp = view.findViewById<Button>(R.id.btnRateApp)
         val btnWhatsappSupport = view.findViewById<Button>(R.id.btnWhatsappSupport)
+        val btnPrivacyPolicy = view.findViewById<Button>(R.id.btnPrivacyPolicy)
+        val btnTerms = view.findViewById<Button>(R.id.btnTerms)
+        val btnDisclaimer = view.findViewById<Button>(R.id.btnDisclaimer)
+        val btnAbout = view.findViewById<Button>(R.id.btnAbout)
 
         val sp = requireContext().getSharedPreferences(PREF_SETTINGS, Context.MODE_PRIVATE)
 
-        // ▸ SharedPreferences se values load karo
+        // Load saved values
         val notificationsOn = sp.getBoolean(KEY_NOTIFICATIONS, true)
         val quizSoundOn = sp.getBoolean(KEY_QUIZ_SOUND, true)
-        val quizVibrateOn = sp.getBoolean(KEY_QUIZ_VIBRATE, false)
         val motivationOn = sp.getBoolean(KEY_MOTIVATION, true)
 
         switchNotifications.isChecked = notificationsOn
         switchQuizSound.isChecked = quizSoundOn
-        switchQuizVibrate.isChecked = quizVibrateOn
         switchMotivation.isChecked = motivationOn
 
-        // ▸ Listeners – abhi sirf prefs save, actual use hum baad me karenge
+        // Listeners
         switchNotifications.setOnCheckedChangeListener { _, isChecked ->
             sp.edit().putBoolean(KEY_NOTIFICATIONS, isChecked).apply()
             Toast.makeText(
@@ -81,23 +77,36 @@ class SettingsFragment : Fragment() {
             sp.edit().putBoolean(KEY_QUIZ_SOUND, isChecked).apply()
         }
 
-        switchQuizVibrate.setOnCheckedChangeListener { _, isChecked ->
-            sp.edit().putBoolean(KEY_QUIZ_VIBRATE, isChecked).apply()
-        }
-
         switchMotivation.setOnCheckedChangeListener { _, isChecked ->
             sp.edit().putBoolean(KEY_MOTIVATION, isChecked).apply()
         }
 
-        // ▸ Rate app button
+        // Rate app
         btnRateApp.setOnClickListener {
             openUrl(URL_PLAYSTORE, null)
         }
 
-        // ▸ WhatsApp support button
+        // WhatsApp support
         btnWhatsappSupport.setOnClickListener {
-            // Direct WhatsApp try karo, warna normal browser
             openUrl(URL_WHATSAPP_SUPPORT, "com.whatsapp")
+        }
+
+        // Legal screens
+        btnPrivacyPolicy.setOnClickListener {
+            openFragment(PrivacyPolicyFragment())
+        }
+
+        btnTerms.setOnClickListener {
+            Toast.makeText(requireContext(), "Terms of Use coming soon", Toast.LENGTH_SHORT).show()
+            // Future: openFragment(TermsFragment())
+        }
+
+        btnDisclaimer.setOnClickListener {
+            Toast.makeText(requireContext(), "Disclaimer coming soon", Toast.LENGTH_SHORT).show()
+        }
+
+        btnAbout.setOnClickListener {
+            Toast.makeText(requireContext(), "About Nursing Studio coming soon", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -116,5 +125,13 @@ class SettingsFragment : Fragment() {
                 Toast.makeText(ctx, "Unable to open link", Toast.LENGTH_SHORT).show()
             }
         }
+    }
+
+    private fun openFragment(fragment: Fragment) {
+        // MainActivity ke container me hi replace karenge
+        requireActivity().supportFragmentManager.beginTransaction()
+            .replace(R.id.fragment_container, fragment)
+            .addToBackStack(null)
+            .commit()
     }
 }

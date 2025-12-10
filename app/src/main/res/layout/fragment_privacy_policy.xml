@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/app_background"
+    android:padding="16dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/tvPrivacyTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Privacy Policy"
+            android:textSize="22sp"
+            android:textStyle="bold"
+            android:textColor="@color/text_primary"
+            android:layout_marginBottom="8dp" />
+
+        <TextView
+            android:id="@+id/tvPrivacyUpdated"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Last updated: December 2025"
+            android:textSize="12sp"
+            android:textColor="@color/text_muted"
+            android:layout_marginBottom="16dp" />
+
+        <TextView
+            android:id="@+id/tvPrivacyBody"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="14sp"
+            android:textColor="@color/text_primary"
+            android:lineSpacingExtra="4dp"
+            android:text="
+Nursing Studio respects your privacy.
+
+1. Information we collect
+• Basic registration details: name, email, mobile number, gender, education, occupation and address (as shared by you).
+• Exam-related preferences: nursing exams and categories you are interested in.
+• App usage information: which screens or features are used (for improving the app in future).
+• Device information: basic device details (Android version, app version, crash reports).
+
+We do NOT intentionally collect:
+• Sensitive financial data (card / UPI details)
+• Any clinical patient data
+
+2. How we use your information
+We use your information to:
+• Create and manage your Nursing Studio account
+• Show you relevant content (tests, PDFs, videos)
+• Improve app features and fix bugs
+• Send important updates (for example: new test series, feature changes), only if notifications are enabled
+
+3. Data storage and security
+• Your data is stored securely using Android’s local storage and/or our online services (if used in future).
+• We try to protect your information with reasonable technical safeguards, but no system is 100% secure.
+
+4. Third-party services
+If we use any third-party services in future (for example: analytics, ads, payment gateway), they may receive some limited information as per their own privacy policies. Details will be updated here whenever such services are added.
+
+5. Your choices
+• You can update most of your basic details in the profile section.
+• You can control notification preferences from the Settings screen.
+• If you want your account/data to be removed in future versions, you will be able to request deletion through in-app options or by contacting support.
+
+6. Children’s privacy
+Nursing Studio is designed for adult students preparing for nursing competitive exams. It is not targeted at children under 13 years.
+
+7. Contact &amp; support
+If you have any questions about this Privacy Policy, you can contact us through:
+• WhatsApp support link given in the Settings page
+(or official support email once it is available).
+
+By using the Nursing Studio app, you agree to this Privacy Policy. This policy may be updated in future and the latest version will always be shown inside the app.
+" />
+
+    </LinearLayout>
+</ScrollView>

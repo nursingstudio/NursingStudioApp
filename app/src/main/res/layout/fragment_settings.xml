@@ -64,12 +64,12 @@
                 android:layout_height="wrap_content" />
         </LinearLayout>
 
-        <!-- SECTION: Quiz preferences -->
+        <!-- SECTION: Test preferences -->
         <TextView
             android:id="@+id/tvQuizHeader"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Quiz preferences"
+            android:text="Test preferences"
             android:textStyle="bold"
             android:textSize="16sp"
             android:textColor="@color/text_primary"
@@ -88,34 +88,12 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="Sound in quizzes"
+                android:text="Sound in online tests"
                 android:textSize="14sp"
                 android:textColor="@color/text_primary" />
 
             <androidx.appcompat.widget.SwitchCompat
                 android:id="@+id/switch_quiz_sound"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical"
-            android:paddingTop="4dp"
-            android:paddingBottom="4dp">
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="Vibrate on wrong answer"
-                android:textSize="14sp"
-                android:textColor="@color/text_primary" />
-
-            <androidx.appcompat.widget.SwitchCompat
-                android:id="@+id/switch_quiz_vibrate"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content" />
         </LinearLayout>
@@ -154,7 +132,7 @@
                 android:layout_height="wrap_content" />
         </LinearLayout>
 
-        <!-- SECTION: Support / Info -->
+        <!-- SECTION: Support & Info -->
         <TextView
             android:id="@+id/tvSupportHeader"
             android:layout_width="wrap_content"
@@ -166,24 +144,102 @@
             android:layout_marginTop="20dp"
             android:layout_marginBottom="8dp" />
 
-        <Button
-            android:id="@+id/btnRateApp"
+        <!-- Primary support buttons (compact, center, rounded) -->
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Rate app on Play Store"
-            android:textAllCaps="false"
-            android:backgroundTint="@color/saffron"
-            android:textColor="@android:color/white" />
+            android:orientation="vertical"
+            android:gravity="center_horizontal">
 
-        <Button
-            android:id="@+id/btnWhatsappSupport"
+            <Button
+                android:id="@+id/btnRateApp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_button_primary_rounded"
+                android:text="Rate on Play Store"
+                android:textAllCaps="false"
+                android:textSize="14sp"
+                android:textColor="@android:color/white"
+                android:layout_marginTop="4dp"
+                android:layout_marginBottom="8dp" />
+
+            <Button
+                android:id="@+id/btnWhatsappSupport"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_button_primary_rounded"
+                android:text="Need help? Contact support"
+                android:textAllCaps="false"
+                android:textSize="14sp"
+                android:textColor="@android:color/white"
+                android:layout_marginBottom="8dp" />
+        </LinearLayout>
+
+        <!-- Sub-heading for legal section -->
+        <TextView
+            android:id="@+id/tvLegalHeader"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Legal &amp; App Information"
+            android:textStyle="bold"
+            android:textSize="14sp"
+            android:textColor="@color/text_secondary"
+            android:layout_marginTop="12dp"
+            android:layout_marginBottom="4dp" />
+
+        <!-- Legal / Info buttons – outline style, smaller text -->
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:text="Contact support on WhatsApp"
-            android:textAllCaps="false"
-            android:backgroundTint="@color/saffron_dark"
-            android:textColor="@android:color/white" />
+            android:orientation="vertical"
+            android:gravity="center_horizontal"
+            android:layout_marginTop="4dp">
+
+            <Button
+                android:id="@+id/btnPrivacyPolicy"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:background="@drawable/bg_button_outline_rounded"
+                android:text="Privacy Policy"
+                android:textAllCaps="false"
+                android:textSize="13sp"
+                android:textColor="@color/text_primary" />
+
+            <Button
+                android:id="@+id/btnTerms"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:background="@drawable/bg_button_outline_rounded"
+                android:text="Terms of Use"
+                android:textAllCaps="false"
+                android:textSize="13sp"
+                android:textColor="@color/text_primary" />
+
+            <Button
+                android:id="@+id/btnDisclaimer"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:background="@drawable/bg_button_outline_rounded"
+                android:text="Disclaimer"
+                android:textAllCaps="false"
+                android:textSize="13sp"
+                android:textColor="@color/text_primary" />
+
+            <Button
+                android:id="@+id/btnAbout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:layout_marginBottom="8dp"
+                android:background="@drawable/bg_button_outline_rounded"
+                android:text="About Nursing Studio"
+                android:textAllCaps="false"
+                android:textSize="13sp"
+                android:textColor="@color/text_primary" />
+        </LinearLayout>
 
     </LinearLayout>
 </ScrollView>
