@@ -117,7 +117,7 @@
                 android:id="@+id/tvForgotPassword"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Forgot Password"
+                android:text="Forgot Password?"
                 android:textStyle="bold"
                 android:textSize="14sp"
                 android:layout_marginTop="16dp" />
@@ -127,7 +127,7 @@
                 android:id="@+id/tvGoRegister"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="New user? Register first"
+                android:text="New User? Register First"
                 android:textSize="14sp"
                 android:layout_marginTop="6dp" />
 

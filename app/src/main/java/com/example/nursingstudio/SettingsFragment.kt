@@ -8,9 +8,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
-import android.widget.Toast
-import androidx.appcompat.widget.SwitchCompat
 import androidx.fragment.app.Fragment
+import androidx.appcompat.widget.SwitchCompat
+import android.widget.Toast
 
 class SettingsFragment : Fragment() {
 
@@ -20,12 +20,23 @@ class SettingsFragment : Fragment() {
         private const val KEY_QUIZ_SOUND = "enable_quiz_sound"
         private const val KEY_MOTIVATION = "enable_motivation"
 
+        // Yahi wale tum MainActivity me bhi use kar rahe ho (duplicate allowed)
         private const val URL_PLAYSTORE =
             "https://play.google.com/store/apps/details?id=com.example.nursingstudio"
-
         private const val URL_WHATSAPP_SUPPORT =
-            "https://whatsapp.com/channel/0029Vb6Sjdq6BIEapKtNUE2L"
+            "https://wa.me/919999999999?text=Hello%20Nursing%20Studio%20Support" // yahan apna number
     }
+
+    private lateinit var switchNotifications: SwitchCompat
+    private lateinit var switchQuizSound: SwitchCompat
+    private lateinit var switchMotivation: SwitchCompat
+
+    private lateinit var btnRateApp: Button
+    private lateinit var btnWhatsappSupport: Button
+    private lateinit var btnPrivacyPolicy: Button
+    private lateinit var btnTerms: Button
+    private lateinit var btnDisclaimer: Button
+    private lateinit var btnAbout: Button
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -38,97 +49,86 @@ class SettingsFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val switchNotifications =
-            view.findViewById<SwitchCompat>(R.id.switch_notifications)
-        val switchQuizSound =
-            view.findViewById<SwitchCompat>(R.id.switch_quiz_sound)
-        val switchMotivation =
-            view.findViewById<SwitchCompat>(R.id.switch_motivation)
-
-        val btnRateApp = view.findViewById<Button>(R.id.btnRateApp)
-        val btnWhatsappSupport = view.findViewById<Button>(R.id.btnWhatsappSupport)
-        val btnPrivacyPolicy = view.findViewById<Button>(R.id.btnPrivacyPolicy)
-        val btnTerms = view.findViewById<Button>(R.id.btnTerms)
-        val btnDisclaimer = view.findViewById<Button>(R.id.btnDisclaimer)
-        val btnAbout = view.findViewById<Button>(R.id.btnAbout)
-
         val sp = requireContext().getSharedPreferences(PREF_SETTINGS, Context.MODE_PRIVATE)
 
-        // Load saved values
-        val notificationsOn = sp.getBoolean(KEY_NOTIFICATIONS, true)
-        val quizSoundOn = sp.getBoolean(KEY_QUIZ_SOUND, true)
-        val motivationOn = sp.getBoolean(KEY_MOTIVATION, true)
+        switchNotifications = view.findViewById(R.id.switch_notifications)
+        switchQuizSound = view.findViewById(R.id.switch_quiz_sound)
+        switchMotivation = view.findViewById(R.id.switch_motivation)
 
-        switchNotifications.isChecked = notificationsOn
-        switchQuizSound.isChecked = quizSoundOn
-        switchMotivation.isChecked = motivationOn
+        btnRateApp = view.findViewById(R.id.btnRateApp)
+        btnWhatsappSupport = view.findViewById(R.id.btnWhatsappSupport)
+        btnPrivacyPolicy = view.findViewById(R.id.btnPrivacyPolicy)
+        btnTerms = view.findViewById(R.id.btnTerms)
+        btnDisclaimer = view.findViewById(R.id.btnDisclaimer)
+        btnAbout = view.findViewById(R.id.btnAbout)
 
-        // Listeners
+        // 🔹 Load saved states
+        switchNotifications.isChecked = sp.getBoolean(KEY_NOTIFICATIONS, true)
+        switchQuizSound.isChecked = sp.getBoolean(KEY_QUIZ_SOUND, true)
+        switchMotivation.isChecked = sp.getBoolean(KEY_MOTIVATION, true)
+
+        // 🔹 Save on change: Notifications
         switchNotifications.setOnCheckedChangeListener { _, isChecked ->
             sp.edit().putBoolean(KEY_NOTIFICATIONS, isChecked).apply()
-            Toast.makeText(
-                requireContext(),
-                if (isChecked) "Notifications enabled" else "Notifications disabled",
-                Toast.LENGTH_SHORT
-            ).show()
         }
 
+        // 🔹 Save on change: Test sound
         switchQuizSound.setOnCheckedChangeListener { _, isChecked ->
             sp.edit().putBoolean(KEY_QUIZ_SOUND, isChecked).apply()
         }
 
+        // 🔹 Save on change: Motivation on Home
         switchMotivation.setOnCheckedChangeListener { _, isChecked ->
             sp.edit().putBoolean(KEY_MOTIVATION, isChecked).apply()
         }
 
-        // Rate app
+        // 🔹 Rate App – Play Store
         btnRateApp.setOnClickListener {
-            openUrl(URL_PLAYSTORE, null)
+            openUrl(URL_PLAYSTORE)
         }
 
-        // WhatsApp support
+        // 🔹 WhatsApp support
         btnWhatsappSupport.setOnClickListener {
-            openUrl(URL_WHATSAPP_SUPPORT, "com.whatsapp")
+            openWhatsappSupport()
         }
 
-        // Legal screens
+        // 🔹 Legal & info pages
         btnPrivacyPolicy.setOnClickListener {
-            openFragment(PrivacyPolicyFragment())
+            openStaticPage("privacy")
         }
 
         btnTerms.setOnClickListener {
-            Toast.makeText(requireContext(), "Terms of Use coming soon", Toast.LENGTH_SHORT).show()
-            // Future: openFragment(TermsFragment())
+            openStaticPage("terms")
         }
 
         btnDisclaimer.setOnClickListener {
-            Toast.makeText(requireContext(), "Disclaimer coming soon", Toast.LENGTH_SHORT).show()
+            openStaticPage("disclaimer")
         }
 
         btnAbout.setOnClickListener {
-            Toast.makeText(requireContext(), "About Nursing Studio coming soon", Toast.LENGTH_SHORT).show()
+            openStaticPage("about")
         }
     }
 
-    private fun openUrl(url: String, packageName: String?) {
-        val ctx = requireContext()
+    private fun openUrl(url: String) {
         try {
-            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
-            if (packageName != null) {
-                intent.setPackage(packageName)
-            }
+            startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
+        } catch (e: Exception) {
+            Toast.makeText(requireContext(), "Unable to open link", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun openWhatsappSupport() {
+        try {
+            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(URL_WHATSAPP_SUPPORT))
             startActivity(intent)
         } catch (e: Exception) {
-            try {
-                startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
-            } catch (e2: Exception) {
-                Toast.makeText(ctx, "Unable to open link", Toast.LENGTH_SHORT).show()
-            }
+            Toast.makeText(requireContext(), "WhatsApp not available", Toast.LENGTH_SHORT).show()
         }
     }
 
-    private fun openFragment(fragment: Fragment) {
-        // MainActivity ke container me hi replace karenge
+    private fun openStaticPage(type: String) {
+        val fragment = StaticPageFragment.newInstance(type)
         requireActivity().supportFragmentManager.beginTransaction()
             .replace(R.id.fragment_container, fragment)
             .addToBackStack(null)

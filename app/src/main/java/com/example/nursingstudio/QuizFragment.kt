@@ -50,6 +50,16 @@ class QuizFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        // 👉 Test sound button
+        val btnTestSound = view.findViewById<android.widget.Button>(R.id.btnTestSound)
+        btnTestSound?.setOnClickListener {
+            // Settings ka toggle respect karega
+            playLocalTestSound()
+            // YA agar tum helper use karna chaho:
+            // QuizFragment.playTestSoundIfEnabled(requireContext())
+        } //test sound button ended
+
+
         // Yaha tum apne existing buttons / views ka code rakh sakte ho.
         // Example (sirf idea, tumhaare IDs par depend karega):
         //
@@ -95,4 +105,5 @@ class QuizFragment : Fragment() {
         mediaPlayer?.release()
         mediaPlayer = null
     }
+
 }

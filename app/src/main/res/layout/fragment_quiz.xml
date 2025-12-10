@@ -193,5 +193,17 @@
             android:textSize="12sp"
             android:textColor="@color/text_muted" />
 
+        //test sound button//
+        <Button
+            android:id="@+id/btnTestSound"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Test sound"
+            android:textAllCaps="false"
+            android:textSize="14sp"
+            android:background="@drawable/bg_button_primary_rounded"
+            android:textColor="@android:color/white"
+            android:layout_marginTop="16dp" />
+
     </LinearLayout>
 </ScrollView>

@@ -132,7 +132,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Mobile verification (OTP)"
+                    android:text="Mobile Verification (OTP)"
                     android:layout_marginTop="8dp" />
 
                 <Button
@@ -180,7 +180,7 @@
 
                 <EditText
                     android:id="@+id/etEducationOther"
-                    android:hint="Enter your education"
+                    android:hint="Enter Your Education"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:visibility="gone"
@@ -199,7 +199,7 @@
 
                 <EditText
                     android:id="@+id/etOccupationOther"
-                    android:hint="Enter your occupation"
+                    android:hint="Enter Your Occupation"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:visibility="gone"
@@ -228,7 +228,7 @@
 
                 <EditText
                     android:id="@+id/etCountryOther"
-                    android:hint="Enter country name"
+                    android:hint="Enter Country Name"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:visibility="gone"
@@ -248,7 +248,7 @@
 
                 <EditText
                     android:id="@+id/etStateOther"
-                    android:hint="Enter state / region"
+                    android:hint="Enter State / Region"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:visibility="gone"
@@ -326,7 +326,7 @@
 
                     <EditText
                         android:id="@+id/etRegState"
-                        android:hint="Registration State of higher qualification"
+                        android:hint="Registration State of Higher Qualification"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content" />
 
