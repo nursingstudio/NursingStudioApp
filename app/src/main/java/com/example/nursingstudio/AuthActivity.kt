@@ -8,6 +8,8 @@ import android.os.Handler
 import android.os.Looper
 import android.view.animation.AnimationUtils
 import android.widget.ImageView
+import android.view.View
+
 
 
 class AuthActivity : AppCompatActivity() {
@@ -15,6 +17,12 @@ class AuthActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_auth)
+
+        val rootView = findViewById<View>(android.R.id.content)
+        rootView.startAnimation(
+            AnimationUtils.loadAnimation(this, R.anim.fade_in)
+        )
+
 
         val logo = findViewById<ImageView>(R.id.imgSplash)
         logo.startAnimation(
@@ -51,3 +59,4 @@ class AuthActivity : AppCompatActivity() {
         ) // 1200 ms = 1.2 seconds
     }
 }
+
