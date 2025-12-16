@@ -9,20 +9,18 @@ class AuthActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        val sp = getSharedPreferences("session", MODE_PRIVATE)
-        if (sp.getBoolean("logged_in", false)) {
-            startActivity(Intent(this, MainActivity::class.java))
-            finish()
-            return
-        }
-
         setContentView(R.layout.activity_auth)
 
-        if (savedInstanceState == null) {
-            supportFragmentManager.beginTransaction()
-                .replace(R.id.auth_container, LoginFragment())
-                .commit()
-        }
+        val sp = getSharedPreferences("session", MODE_PRIVATE)
+
+        window.decorView.postDelayed({
+            if (sp.getBoolean("logged_in", false)) {
+                startActivity(Intent(this, MainActivity::class.java))
+            } else {
+                supportFragmentManager.beginTransaction()
+                    .replace(R.id.auth_container, LoginFragment())
+                    .commit()
+            }
+        }, 300)
     }
 }

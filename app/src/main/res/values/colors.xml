@@ -16,4 +16,6 @@
     <color name="white">#FFFFFFFF</color>
     <color name="purple_500">#6200EE</color>
 
+<!--- Splash background color -->
+    <color name="splash_bg">#FF9933</color> <!-- saffron -->
 </resources>
