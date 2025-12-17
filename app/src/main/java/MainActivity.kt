@@ -61,7 +61,6 @@ class MainActivity : AppCompatActivity() {
 
         // Toolbar ko app bar bana + title set karo
         setSupportActionBar(topAppBar)
-        supportActionBar?.title = "Nursing Studio"
 
         // Hamburger click -> open drawer
         topAppBar.setNavigationOnClickListener {
@@ -236,7 +235,7 @@ class MainActivity : AppCompatActivity() {
     // 👉 Share App – tumhara custom text
     private fun shareApp() {
         val shareText = """
-            Start smart preparation for all nursing competitive exams. 👩‍⚕️👨‍⚕️
+ Start smart preparation for all nursing competitive exams. 👩‍⚕️👨‍⚕️
 "Nursing Studio" app brings together Online Test Series, PDFs and videos.
 
 Download link:
