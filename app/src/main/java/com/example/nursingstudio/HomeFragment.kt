@@ -1,9 +1,11 @@
 package com.example.nursingstudio
 
+import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.TextView
 import androidx.fragment.app.Fragment
 import com.google.android.material.card.MaterialCardView
 
@@ -47,4 +49,18 @@ class HomeFragment : Fragment() {
             .addToBackStack(null)
             .commit()
     }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        val tvWelcome = view.findViewById<TextView>(R.id.tvWelcome)
+
+        val session = requireActivity()
+            .getSharedPreferences("session", Context.MODE_PRIVATE)
+
+        val name = session.getString("reg_name", "User")
+
+        tvWelcome.text = getString(R.string.welcome_user, name)
+    }
+
 }

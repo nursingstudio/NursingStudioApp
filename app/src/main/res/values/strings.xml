@@ -2,4 +2,22 @@
     <string name="app_name">Nursing Studio</string>
     <string name="title_activity_drawer_header">drawer_header</string>
     <string name="nursing_studio">Nursing Studio</string>
+
+
+    <string name="welcome_user">Welcome, %1$s</string>
+    <string name="welcome_subtitle">Start smart preparation for your nursing exams</string>
+
+    <string name="daily_motivation_title">Daily Motivation</string>
+    <string name="daily_motivation_text">Small consistent study today brings big results.</string>
+
+    <string name="quick_actions">Quick Actions</string>
+
+    <string name="test_series">Test Series</string>
+    <string name="pdfs">PDFs</string>
+    <string name="videos">Videos</string>
+    <string name="progress">Progress</string>
+
+    <string name="latest_update">Latest Update</string>
+    <string name="latest_update_text">New nursing vacancy notification released.</string>
+
 </resources>
