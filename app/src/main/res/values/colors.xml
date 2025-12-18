@@ -18,4 +18,8 @@
 
 <!--- Splash background color -->
     <color name="splash_bg">#FF9933</color> <!-- saffron -->
+
+<!-- new color -->
+    <color name="saffron_light">#33FF9933</color>
+
 </resources>

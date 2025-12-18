@@ -203,6 +203,36 @@
             android:text=""
             android:layout_marginTop="4dp" />
 
+        <!-- Study Progress -->
+        <TextView
+            android:id="@+id/tvProgressTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Your Study Progress"
+            android:textStyle="bold"
+            android:textSize="16sp"
+            android:layout_marginTop="16dp"/>
+
+        <TextView
+            android:id="@+id/tvProgressTests"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Tests Attempted: 0"/>
+
+        <TextView
+            android:id="@+id/tvProgressPdfs"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="PDFs Opened: 0"/>
+
+        <TextView
+            android:id="@+id/tvProgressVideos"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Videos Watched: 0"/>
+
+
+
         <!-- Logout button -->
         <Button
             android:id="@+id/btnLogout"

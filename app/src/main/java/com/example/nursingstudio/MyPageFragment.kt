@@ -33,26 +33,22 @@ class MyPageFragment : Fragment() {
     private lateinit var imgEditPhoto: ImageView
     private var currentBitmap: Bitmap? = null
 
-    // 👉 CAMERA launcher (returns small Bitmap preview)
+    // CAMERA
     private val cameraLauncher =
         registerForActivityResult(ActivityResultContracts.TakePicturePreview()) { bitmap ->
-            if (bitmap != null) {
-                handleNewBitmap(bitmap)
-            }
+            bitmap?.let { handleNewBitmap(it) }
         }
 
-    // 👉 GALLERY launcher
+    // GALLERY
     private val galleryLauncher =
         registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
-            if (uri != null) {
+            uri?.let {
                 try {
                     val input: InputStream? =
-                        requireContext().contentResolver.openInputStream(uri)
+                        requireContext().contentResolver.openInputStream(it)
                     val bmp = BitmapFactory.decodeStream(input)
                     input?.close()
-                    if (bmp != null) {
-                        handleNewBitmap(bmp)
-                    }
+                    bmp?.let { handleNewBitmap(it) }
                 } catch (e: Exception) {
                     e.printStackTrace()
                 }
@@ -63,13 +59,14 @@ class MyPageFragment : Fragment() {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         return inflater.inflate(R.layout.fragment_mypage, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        // -------- Views --------
         imgProfile = view.findViewById(R.id.imgProfile)
         imgEditPhoto = view.findViewById(R.id.imgEditPhoto)
 
@@ -88,6 +85,7 @@ class MyPageFragment : Fragment() {
         val tvNursingRegDetails = view.findViewById<TextView>(R.id.tvNursingRegDetails)
         val btnLogout = view.findViewById<Button>(R.id.btnLogout)
 
+        // -------- Session --------
         val sp = requireContext().getSharedPreferences("session", 0)
 
         val name = sp.getString("reg_name", "User")
@@ -109,11 +107,10 @@ class MyPageFragment : Fragment() {
         val regState = sp.getString("reg_nursing_reg_state", "")
         val regNumber = sp.getString("reg_nursing_reg_number", "")
 
-        // Session me saved profile image load karo
-        val imageBase64 = sp.getString("reg_profile_image_base64", null)
-        if (!imageBase64.isNullOrEmpty()) {
+        // -------- Profile Image --------
+        sp.getString("reg_profile_image_base64", null)?.let {
             try {
-                val bytes = Base64.decode(imageBase64, Base64.DEFAULT)
+                val bytes = Base64.decode(it, Base64.DEFAULT)
                 val bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
                 currentBitmap = bitmap
                 imgProfile.setImageBitmap(bitmap)
@@ -122,6 +119,7 @@ class MyPageFragment : Fragment() {
             }
         }
 
+        // -------- Set Data --------
         tvWelcome.text = "Welcome,"
         tvName.text = name
         tvGender.text = gender
@@ -132,52 +130,62 @@ class MyPageFragment : Fragment() {
         tvEducation.text = education
         tvOccupation.text = occupation
 
-        val fullAddress = "$address, $tehsil, $district, $state, $country - $pincode"
-        tvAddressFull.text = fullAddress
+        tvAddressFull.text =
+            "$address, $tehsil, $district, $state, $country - $pincode"
 
         val ageText = calculateAgeText(dob ?: "")
-        tvDobWithAge.text = if (ageText.isNotEmpty()) "$dob ($ageText)" else dob
+        tvDobWithAge.text =
+            if (ageText.isNotEmpty()) "$dob ($ageText)" else dob
 
         tvNursingRegStatus.text = hasReg
         tvNursingRegDetails.text =
             if (hasReg == "Yes") "State: $regState | Reg. No: $regNumber" else ""
 
+        // -------- Logout --------
         btnLogout.setOnClickListener {
             sp.edit().putBoolean("logged_in", false).apply()
             val intent = Intent(requireContext(), AuthActivity::class.java)
-            intent.addFlags(
-                Intent.FLAG_ACTIVITY_CLEAR_TOP or
-                        Intent.FLAG_ACTIVITY_NEW_TASK
-            )
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
             startActivity(intent)
             requireActivity().finish()
         }
 
-        // 👉 Photo change – dialog: Camera ya Gallery
-        val pickAction: (View) -> Unit = {
-            showImageSourceDialog()
-        }
+        // -------- Photo Actions --------
+        val pickAction: (View) -> Unit = { showImageSourceDialog() }
         imgEditPhoto.setOnClickListener(pickAction)
         imgProfile.setOnClickListener(pickAction)
 
-        // 👉 Long press to rotate 90°
         imgProfile.setOnLongClickListener {
             rotateCurrentImage()
             true
         }
 
-        // PROFILE_PREF se bhi image load (header ke liye)
         loadProfileImageIfAny()
+
+        // ===============================
+        // 🔥 STUDY PROGRESS (FINAL FIX)
+        // ===============================
+        val tvProgressTests = view.findViewById<TextView>(R.id.tvProgressTests)
+        val tvProgressPdfs = view.findViewById<TextView>(R.id.tvProgressPdfs)
+        val tvProgressVideos = view.findViewById<TextView>(R.id.tvProgressVideos)
+
+        val tests = ProgressManager.get(requireContext(), "test_attempted")
+        val pdfs = ProgressManager.get(requireContext(), "pdf_opened")
+        val videos = ProgressManager.get(requireContext(), "video_watched")
+
+        tvProgressTests.text = "Tests Attempted: $tests"
+        tvProgressPdfs.text = "PDFs Opened: $pdfs"
+        tvProgressVideos.text = "Videos Watched: $videos"
     }
+
+    // ---------------- Helpers ----------------
 
     private fun showImageSourceDialog() {
         AlertDialog.Builder(requireContext())
             .setTitle("Select photo")
             .setItems(arrayOf("Camera", "Gallery")) { _, which ->
-                when (which) {
-                    0 -> cameraLauncher.launch(null)
-                    1 -> galleryLauncher.launch("image/*")
-                }
+                if (which == 0) cameraLauncher.launch(null)
+                else galleryLauncher.launch("image/*")
             }
             .setNegativeButton("Cancel", null)
             .show()
@@ -188,91 +196,45 @@ class MyPageFragment : Fragment() {
         currentBitmap = scaled
         imgProfile.setImageBitmap(scaled)
 
-        // Session me Base64 save
-        val sessionSp = requireContext().getSharedPreferences("session", 0)
         val baos = ByteArrayOutputStream()
         scaled.compress(Bitmap.CompressFormat.JPEG, 80, baos)
-        val bytes = baos.toByteArray()
-        val encoded = Base64.encodeToString(bytes, Base64.DEFAULT)
-        sessionSp.edit()
-            .putString("reg_profile_image_base64", encoded)
-            .apply()
+        val encoded = Base64.encodeToString(baos.toByteArray(), Base64.DEFAULT)
 
-        // Header ke liye PROFILE_PREF me bhi save
+        requireContext().getSharedPreferences("session", 0)
+            .edit().putString("reg_profile_image_base64", encoded).apply()
+
         saveProfileImage(scaled)
-
-        // Drawer header turant refresh
         (activity as? MainActivity)?.updateDrawerHeader()
     }
 
     private fun rotateCurrentImage() {
         val bitmap = currentBitmap ?: return
-
-        val matrix = Matrix().apply {
-            postRotate(90f)
-        }
-        val rotated = Bitmap.createBitmap(
-            bitmap,
-            0,
-            0,
-            bitmap.width,
-            bitmap.height,
-            matrix,
-            true
+        val matrix = Matrix().apply { postRotate(90f) }
+        handleNewBitmap(
+            Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true)
         )
-
-        currentBitmap = rotated
-        imgProfile.setImageBitmap(rotated)
-
-        val baos = ByteArrayOutputStream()
-        rotated.compress(Bitmap.CompressFormat.JPEG, 80, baos)
-        val bytes = baos.toByteArray()
-        val encoded = Base64.encodeToString(bytes, Base64.DEFAULT)
-
-        val sessionSp = requireContext().getSharedPreferences("session", 0)
-        sessionSp.edit()
-            .putString("reg_profile_image_base64", encoded)
-            .apply()
-
-        saveProfileImage(rotated)
-        (activity as? MainActivity)?.updateDrawerHeader()
     }
 
     private fun scaleDownBitmap(bitmap: Bitmap, maxSize: Int): Bitmap {
-        val width = bitmap.width
-        val height = bitmap.height
-
-        if (width <= maxSize && height <= maxSize) return bitmap
-
-        val ratio = width.toFloat() / height.toFloat()
-        val newWidth: Int
-        val newHeight: Int
-
-        if (ratio > 1f) {
-            newWidth = maxSize
-            newHeight = (maxSize / ratio).toInt()
-        } else {
-            newHeight = maxSize
-            newWidth = (maxSize * ratio).toInt()
-        }
-
-        return Bitmap.createScaledBitmap(bitmap, newWidth, newHeight, true)
+        val ratio = bitmap.width.toFloat() / bitmap.height.toFloat()
+        val (w, h) =
+            if (ratio > 1) maxSize to (maxSize / ratio).toInt()
+            else (maxSize * ratio).toInt() to maxSize
+        return Bitmap.createScaledBitmap(bitmap, w, h, true)
     }
 
     private fun saveProfileImage(bitmap: Bitmap) {
         val baos = ByteArrayOutputStream()
         bitmap.compress(Bitmap.CompressFormat.JPEG, 80, baos)
-        val bytes = baos.toByteArray()
-        val encoded = Base64.encodeToString(bytes, Base64.DEFAULT)
-
-        val sp = requireContext().getSharedPreferences(PROFILE_PREF, 0)
-        sp.edit().putString(KEY_PROFILE_IMAGE, encoded).apply()
+        val encoded = Base64.encodeToString(baos.toByteArray(), Base64.DEFAULT)
+        requireContext().getSharedPreferences(PROFILE_PREF, 0)
+            .edit().putString(KEY_PROFILE_IMAGE, encoded).apply()
     }
 
     private fun loadProfileImageIfAny() {
-        val sp = requireContext().getSharedPreferences(PROFILE_PREF, 0)
-        val encoded = sp.getString(KEY_PROFILE_IMAGE, null) ?: return
-
+        val encoded =
+            requireContext().getSharedPreferences(PROFILE_PREF, 0)
+                .getString(KEY_PROFILE_IMAGE, null) ?: return
         val bytes = Base64.decode(encoded, Base64.DEFAULT)
         val bmp = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
         currentBitmap = bmp
@@ -285,20 +247,10 @@ class MyPageFragment : Fragment() {
             val birthDate = sdf.parse(dobString) ?: return ""
             val dobCal = Calendar.getInstance().apply { time = birthDate }
             val today = Calendar.getInstance()
-
             var years = today.get(Calendar.YEAR) - dobCal.get(Calendar.YEAR)
             var months = today.get(Calendar.MONTH) - dobCal.get(Calendar.MONTH)
-
-            if (months < 0) {
-                years--
-                months += 12
-            }
-
-            if (years < 0) return ""
-
+            if (months < 0) { years--; months += 12 }
             "$years years, $months months"
-        } catch (e: Exception) {
-            ""
-        }
+        } catch (e: Exception) { "" }
     }
 }
