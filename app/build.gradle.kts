@@ -2,7 +2,11 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
-}
+
+        // Add the Google services Gradle plugin
+        id("com.google.gms.google-services")
+
+    }
 
 android {
     namespace = "com.example.nursingstudio"
@@ -55,6 +59,19 @@ dependencies {
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
     implementation("androidx.core:core-splashscreen:1.0.1")
+
+    // Import the Firebase BoM
+    implementation(platform("com.google.firebase:firebase-bom:34.7.0"))
+    implementation ("com.google.firebase:firebase-auth")
+
+
+    // TODO: Add the dependencies for Firebase products you want to use
+    // When using the BoM, don't specify versions in Firebase dependencies
+    implementation("com.google.firebase:firebase-analytics")
+
+
+    // Add the dependencies for any other desired Firebase products
+    // https://firebase.google.com/docs/android/setup#available-libraries
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

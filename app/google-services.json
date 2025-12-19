@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1009948838228",
+    "project_id": "nursing-studio",
+    "storage_bucket": "nursing-studio.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1009948838228:android:d5c8ce25e28d13377ce0c1",
+        "android_client_info": {
+          "package_name": "com.example.nursingstudio"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCBownBrK1L7M8vdojyFfCxKuYUiW84ykw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
