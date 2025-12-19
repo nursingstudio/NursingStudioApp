@@ -135,12 +135,14 @@
                     android:text="Mobile Verification (OTP)"
                     android:layout_marginTop="8dp" />
 
-                <Button
+                <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnSendOtp"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="Send OTP"
-                    android:layout_marginTop="4dp" />
+                    android:layout_marginTop="4dp"
+                    android:textColor="@android:color/white"
+                    app:backgroundTint="@color/saffron" />
 
                 <EditText
                     android:id="@+id/etOtp"
@@ -151,12 +153,14 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp" />
 
-                <Button
+                <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnVerifyOtp"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="Verify OTP"
-                    android:layout_marginTop="4dp" />
+                    android:layout_marginTop="4dp"
+                    android:textColor="@android:color/white"
+                    app:backgroundTint="@color/saffron" />
 
                 <EditText
                     android:id="@+id/etEmail"
@@ -352,12 +356,15 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content" />
 
-                <Button
+                <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnRegister"
-                    android:text="Register"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="20dp" />
+                    android:text="Register"
+                    android:layout_marginTop="20dp"
+                    android:textColor="@android:color/white"
+                    app:cornerRadius="28dp"
+                    app:backgroundTint="@color/saffron" />
 
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
