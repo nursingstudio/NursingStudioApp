@@ -5,6 +5,7 @@ import android.view.*
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.fragment.app.Fragment
+import androidx.appcompat.app.AppCompatActivity
 
 class PrivacyFragment : Fragment() {
 
@@ -12,37 +13,34 @@ class PrivacyFragment : Fragment() {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View = inflater.inflate(R.layout.fragment_terms, container, false)
+    ): View {
+        val view = inflater.inflate(R.layout.fragment_privacy, container, false)
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
+        val webView = view.findViewById<WebView>(R.id.webView)
 
-        val web = view.findViewById<WebView>(R.id.webTerms)
-        web.settings.javaScriptEnabled = false
+        webView.settings.javaScriptEnabled = true
+        webView.webViewClient = WebViewClient()
 
-        val html = """
-            <html>
-            <body style="padding:16px; font-family:sans-serif;">
-                
-                <h2>Privacy Policy</h2>
-                <p>
-                We respect your privacy.
-                Your personal data such as name, mobile number, email and profile details
-                are stored securely and are never sold to third parties.
-                OTP verification is used only for authentication.
-                </p>
+        // 🔐 Offline fallback
+        webView.loadUrl("file:///android_asset/privacy.html")
 
-                <p>
-                By continuing, you acknowledge that you have read and understood
-                our Terms & Conditions and Privacy Policy.
-                </p>
-            </body>
-            </html>
-        """.trimIndent()
+        return view
+    }
 
-        // 🔥 OPTION 2 (BEST): Online hosted legal page
-        web.loadUrl("https://yourdomain.com/terms")
+    override fun onResume() {
+        super.onResume()
+        (activity as? AppCompatActivity)?.supportActionBar?.apply {
+            title = "Privacy Policy"
+            setDisplayHomeAsUpEnabled(true)
+        }
+        setHasOptionsMenu(true)
+    }
 
-        web.loadDataWithBaseURL(null, html, "text/html", "utf-8", null)
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        if (item.itemId == android.R.id.home) {
+            requireActivity().onBackPressedDispatcher.onBackPressed()
+            return true
+        }
+        return super.onOptionsItemSelected(item)
     }
 }
