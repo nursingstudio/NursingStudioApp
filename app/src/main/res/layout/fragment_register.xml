@@ -20,32 +20,32 @@
             app:cardUseCompatPadding="true">
 
             <LinearLayout
-                android:orientation="vertical"
-                android:padding="16dp"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
 
                 <!-- PERSONAL DETAILS -->
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_marginBottom="8dp"
                     android:text="Personal Details"
-                    android:textStyle="bold"
                     android:textSize="18sp"
-                    android:layout_marginBottom="8dp" />
+                    android:textStyle="bold" />
 
                 <EditText
                     android:id="@+id/etName"
-                    android:hint="Full Name"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content" />
+                    android:layout_height="wrap_content"
+                    android:hint="Full Name" />
 
                 <!-- Gender -->
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Gender"
-                    android:layout_marginTop="12dp" />
+                    android:layout_marginTop="12dp"
+                    android:text="Gender" />
 
                 <Spinner
                     android:id="@+id/spGender"
@@ -56,14 +56,14 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Date of Birth"
-                    android:layout_marginTop="12dp" />
+                    android:layout_marginTop="12dp"
+                    android:text="Date of Birth" />
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:layout_marginTop="4dp">
+                    android:layout_marginTop="4dp"
+                    android:orientation="horizontal">
 
                     <Spinner
                         android:id="@+id/spDay"
@@ -75,23 +75,23 @@
                         android:id="@+id/spMonth"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:layout_marginStart="8dp" />
+                        android:layout_marginStart="8dp"
+                        android:layout_weight="1" />
 
                     <Spinner
                         android:id="@+id/spYear"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:layout_marginStart="8dp" />
+                        android:layout_marginStart="8dp"
+                        android:layout_weight="1" />
                 </LinearLayout>
 
                 <!-- Marital Status -->
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Marital Status"
-                    android:layout_marginTop="12dp" />
+                    android:layout_marginTop="12dp"
+                    android:text="Marital Status" />
 
                 <Spinner
                     android:id="@+id/spMarital"
@@ -102,8 +102,8 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Religion"
-                    android:layout_marginTop="12dp" />
+                    android:layout_marginTop="12dp"
+                    android:text="Religion" />
 
                 <Spinner
                     android:id="@+id/spReligion"
@@ -114,68 +114,68 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Contact"
-                    android:textStyle="bold"
-                    android:textSize="18sp"
                     android:layout_marginTop="16dp"
-                    android:layout_marginBottom="8dp" />
+                    android:layout_marginBottom="8dp"
+                    android:text="Contact"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
 
                 <EditText
                     android:id="@+id/etMobile"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
                     android:hint="Mobile (10 digits)"
                     android:inputType="phone"
-                    android:maxLength="10"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content" />
+                    android:maxLength="10" />
 
                 <!-- OTP Section -->
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Mobile Verification (OTP)"
-                    android:layout_marginTop="8dp" />
+                    android:layout_marginTop="8dp"
+                    android:text="Mobile Verification (OTP)" />
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnSendOtp"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Send OTP"
                     android:layout_marginTop="4dp"
+                    android:text="Send OTP"
                     android:textColor="@android:color/white"
                     app:backgroundTint="@color/saffron" />
 
                 <EditText
                     android:id="@+id/etOtp"
-                    android:hint="Enter OTP"
-                    android:inputType="number"
-                    android:maxLength="6"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp" />
+                    android:layout_marginTop="8dp"
+                    android:hint="Enter OTP"
+                    android:inputType="number"
+                    android:maxLength="6" />
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnVerifyOtp"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Verify OTP"
                     android:layout_marginTop="4dp"
+                    android:text="Verify OTP"
                     android:textColor="@android:color/white"
                     app:backgroundTint="@color/saffron" />
 
                 <EditText
                     android:id="@+id/etEmail"
-                    android:hint="Email ID"
-                    android:inputType="textEmailAddress"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="12dp" />
+                    android:layout_marginTop="12dp"
+                    android:hint="Email ID"
+                    android:inputType="textEmailAddress" />
 
                 <!-- EDUCATION & OCCUPATION -->
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Education"
-                    android:layout_marginTop="16dp" />
+                    android:layout_marginTop="16dp"
+                    android:text="Education" />
 
                 <Spinner
                     android:id="@+id/spEducation"
@@ -184,17 +184,17 @@
 
                 <EditText
                     android:id="@+id/etEducationOther"
-                    android:hint="Enter Your Education"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:visibility="gone"
-                    android:layout_marginTop="8dp" />
+                    android:layout_marginTop="8dp"
+                    android:hint="Enter Your Education"
+                    android:visibility="gone" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Occupation"
-                    android:layout_marginTop="12dp" />
+                    android:layout_marginTop="12dp"
+                    android:text="Occupation" />
 
                 <Spinner
                     android:id="@+id/spOccupation"
@@ -203,21 +203,21 @@
 
                 <EditText
                     android:id="@+id/etOccupationOther"
-                    android:hint="Enter Your Occupation"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:visibility="gone"
-                    android:layout_marginTop="8dp" />
+                    android:layout_marginTop="8dp"
+                    android:hint="Enter Your Occupation"
+                    android:visibility="gone" />
 
                 <!-- ADDRESS -->
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Address"
-                    android:textStyle="bold"
-                    android:textSize="18sp"
                     android:layout_marginTop="16dp"
-                    android:layout_marginBottom="8dp" />
+                    android:layout_marginBottom="8dp"
+                    android:text="Address"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
 
                 <!-- Country -->
                 <TextView
@@ -232,18 +232,18 @@
 
                 <EditText
                     android:id="@+id/etCountryOther"
-                    android:hint="Enter Country Name"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:visibility="gone"
-                    android:layout_marginTop="8dp" />
+                    android:layout_marginTop="8dp"
+                    android:hint="Enter Country Name"
+                    android:visibility="gone" />
 
                 <!-- State -->
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="State / UT"
-                    android:layout_marginTop="12dp" />
+                    android:layout_marginTop="12dp"
+                    android:text="State / UT" />
 
                 <Spinner
                     android:id="@+id/spStateIndia"
@@ -252,48 +252,48 @@
 
                 <EditText
                     android:id="@+id/etStateOther"
-                    android:hint="Enter State / Region"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:visibility="gone"
-                    android:layout_marginTop="8dp" />
+                    android:layout_marginTop="8dp"
+                    android:hint="Enter State / Region"
+                    android:visibility="gone" />
 
                 <EditText
                     android:id="@+id/etDistrict"
-                    android:hint="District"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp" />
+                    android:layout_marginTop="8dp"
+                    android:hint="District" />
 
                 <EditText
                     android:id="@+id/etTehsil"
-                    android:hint="Tehsil"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content" />
+                    android:layout_height="wrap_content"
+                    android:hint="Tehsil" />
 
                 <EditText
                     android:id="@+id/etAddress"
-                    android:hint="Local Address"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content" />
+                    android:layout_height="wrap_content"
+                    android:hint="Local Address" />
 
                 <EditText
                     android:id="@+id/etPincode"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
                     android:hint="Pin Code"
                     android:inputType="number"
-                    android:maxLength="6"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content" />
+                    android:maxLength="6" />
 
                 <!-- NURSING REGISTRATION -->
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Nursing Registration"
-                    android:textStyle="bold"
-                    android:textSize="18sp"
                     android:layout_marginTop="16dp"
-                    android:layout_marginBottom="8dp" />
+                    android:layout_marginBottom="8dp"
+                    android:text="Nursing Registration"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -316,55 +316,55 @@
                         android:id="@+id/rbRegNo"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="No"
-                        android:layout_marginStart="16dp" />
+                        android:layout_marginStart="16dp"
+                        android:text="No" />
                 </RadioGroup>
 
                 <LinearLayout
                     android:id="@+id/layoutRegDetails"
-                    android:orientation="vertical"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:visibility="gone"
-                    android:layout_marginTop="8dp">
+                    android:layout_marginTop="8dp"
+                    android:orientation="vertical"
+                    android:visibility="gone">
 
                     <EditText
                         android:id="@+id/etRegState"
-                        android:hint="Registration State of Higher Qualification"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content" />
+                        android:layout_height="wrap_content"
+                        android:hint="Registration State of Higher Qualification" />
 
                     <EditText
                         android:id="@+id/etRegNumber"
-                        android:hint="Registration Number"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp" />
+                        android:layout_marginTop="8dp"
+                        android:hint="Registration Number" />
                 </LinearLayout>
 
                 <!-- PASSWORD (last field) -->
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Password"
-                    android:layout_marginTop="16dp" />
+                    android:layout_marginTop="16dp"
+                    android:text="Password" />
 
                 <EditText
                     android:id="@+id/etPassword"
-                    android:hint="Create Password"
-                    android:inputType="textPassword"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content" />
+                    android:layout_height="wrap_content"
+                    android:hint="Create Password"
+                    android:inputType="textPassword" />
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnRegister"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Register"
                     android:layout_marginTop="20dp"
+                    android:text="Register"
                     android:textColor="@android:color/white"
-                    app:cornerRadius="28dp"
-                    app:backgroundTint="@color/saffron" />
+                    app:backgroundTint="@color/saffron"
+                    app:cornerRadius="28dp" />
 
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
