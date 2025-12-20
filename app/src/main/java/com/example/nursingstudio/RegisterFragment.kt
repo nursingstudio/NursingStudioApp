@@ -96,6 +96,9 @@ class RegisterFragment : Fragment() {
             }
         }, termsStart, termsEnd, android.text.Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
 
+
+
+
 // Privacy click
         val privacyStart = fullText.indexOf("Privacy")
         val privacyEnd = privacyStart + "Privacy Policy".length
@@ -187,12 +190,6 @@ class RegisterFragment : Fragment() {
                 .addOnFailureListener { toast(it.message ?: "OTP failed") }
         }
 
-        tvTermsText.setOnClickListener {
-            requireActivity().supportFragmentManager.beginTransaction()
-                .replace(R.id.auth_container, TermsFragment())
-                .addToBackStack(null)
-                .commit()
-        }
 
         // --------- HARD VALIDATION ---------
 
@@ -254,7 +251,12 @@ class RegisterFragment : Fragment() {
 
             // ✅ Yahan se registration save / firebase / navigation chalegi
             // ---------- SAVE / NEXT STEP ----------
-            // yahan Firebase profile save / Firestore / navigation aayega
+            Toast.makeText(requireContext(), "Registration successful", Toast.LENGTH_SHORT).show()
+
+            requireActivity().supportFragmentManager.beginTransaction()
+                .replace(R.id.auth_container, LoginFragment())
+                .commit()
+
         }
     }
 

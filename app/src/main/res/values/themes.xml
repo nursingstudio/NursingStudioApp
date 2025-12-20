@@ -16,7 +16,21 @@
         <item name="android:textColorHint">@color/text_muted</item>
     </style>
 
-    <style name="Theme.NursingStudio" parent="Base.Theme.NursingStudio"/>
+    <style name="Theme.NursingStudio" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/saffron</item>
+        <item name="colorPrimaryVariant">@color/saffron_dark</item>
+        <item name="colorSecondary">@color/saffron</item>
+
+        <!-- Controls -->
+        <item name="colorControlActivated">@color/saffron</item>
+        <item name="colorControlHighlight">@color/saffron</item>
+
+        <!-- Links -->
+        <item name="android:textColorLink">@color/saffron</item>
+    </style>
+
+
+    <style name="TODO" parent="Base.Theme.NursingStudio"/>
 
     <!-- Toolbar Title -->
     <style name="ToolbarTitleBold" parent="TextAppearance.Material3.TitleLarge">
