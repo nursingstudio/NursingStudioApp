@@ -370,7 +370,8 @@
                         android:id="@+id/cbTerms"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:buttonTint="@color/saffron" />
+                        android:background="@android:color/transparent"
+                        android:buttonTint="@color/checkbox_selector" />
 
                     <TextView
                         android:id="@+id/tvTermsText"

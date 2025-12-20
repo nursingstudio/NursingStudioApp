@@ -10,8 +10,12 @@ import com.google.firebase.auth.*
 import java.util.Calendar
 import java.util.concurrent.TimeUnit
 import android.text.Editable
+import android.text.Spannable
 import android.text.TextWatcher
 import android.widget.AdapterView
+import android.text.TextPaint
+import android.text.style.ClickableSpan
+import androidx.core.content.ContextCompat
 
 
 class RegisterFragment : Fragment() {
@@ -83,18 +87,34 @@ class RegisterFragment : Fragment() {
 
         val spannable = android.text.SpannableString(fullText)
 
+        fun makeLink(start: Int, end: Int, open: () -> Unit) =
+            object : ClickableSpan() {
+                override fun onClick(widget: View) {
+                    open()
+                }
+
+                override fun updateDrawState(ds: TextPaint) {
+                    ds.color = ContextCompat.getColor(requireContext(), R.color.saffron)
+                    ds.isUnderlineText = false
+                }
+            }
+
+
 // Terms click
         val termsStart = fullText.indexOf("Terms")
         val termsEnd = termsStart + "Terms & Conditions".length
 
-        spannable.setSpan(object : android.text.style.ClickableSpan() {
-            override fun onClick(widget: View) {
+        spannable.setSpan(
+            makeLink(termsStart, termsEnd) {
                 requireActivity().supportFragmentManager.beginTransaction()
                     .replace(R.id.auth_container, TermsFragment())
                     .addToBackStack(null)
                     .commit()
-            }
-        }, termsStart, termsEnd, android.text.Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+            },
+            termsStart,
+            termsEnd,
+            Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+        )
 
 
 
@@ -103,18 +123,23 @@ class RegisterFragment : Fragment() {
         val privacyStart = fullText.indexOf("Privacy")
         val privacyEnd = privacyStart + "Privacy Policy".length
 
-        spannable.setSpan(object : android.text.style.ClickableSpan() {
-            override fun onClick(widget: View) {
+        spannable.setSpan(
+            makeLink(privacyStart, privacyEnd) {
                 requireActivity().supportFragmentManager.beginTransaction()
                     .replace(R.id.auth_container, PrivacyFragment())
                     .addToBackStack(null)
                     .commit()
-            }
-        }, privacyStart, privacyEnd, android.text.Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+            },
+            privacyStart,
+            privacyEnd,
+            Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+        )
 
         tvTermsText.text = spannable
         tvTermsText.movementMethod = android.text.method.LinkMovementMethod.getInstance()
         tvTermsText.highlightColor = android.graphics.Color.TRANSPARENT
+
+
 
 
         // -------- Spinners (WORKING) --------
@@ -283,6 +308,7 @@ class RegisterFragment : Fragment() {
             override fun onItemSelected(p: AdapterView<*>?, v: View?, pos: Int, id: Long) = block(pos)
             override fun onNothingSelected(p: AdapterView<*>?) {}
         }
+
 
     private fun toast(msg: String) =
         Toast.makeText(requireContext(), msg, Toast.LENGTH_SHORT).show()
