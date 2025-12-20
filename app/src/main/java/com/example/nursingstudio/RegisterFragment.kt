@@ -21,6 +21,15 @@ class RegisterFragment : Fragment() {
     private var resendToken: PhoneAuthProvider.ForceResendingToken? = null
     private var isOtpVerified = false
 
+    private fun validateOrStop(cond: Boolean, msg: String): Boolean {
+        if (!cond) {
+            Toast.makeText(requireContext(), msg, Toast.LENGTH_SHORT).show()
+            return false
+        }
+        return true
+    }
+
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -31,6 +40,7 @@ class RegisterFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         auth = FirebaseAuth.getInstance()
+
 
         // Views
         val etName = view.findViewById<EditText>(R.id.etName)
@@ -65,6 +75,44 @@ class RegisterFragment : Fragment() {
         val etRegNumber = view.findViewById<EditText>(R.id.etRegNumber)
         val etPassword = view.findViewById<EditText>(R.id.etPassword)
         val btnRegister = view.findViewById<Button>(R.id.btnRegister)
+        val cbTerms = view.findViewById<CheckBox>(R.id.cbTerms)
+        val tvTermsText = view.findViewById<TextView>(R.id.tvTermsText)
+
+        val fullText =
+            "I have read and agree to the Terms & Conditions and Privacy Policy."
+
+        val spannable = android.text.SpannableString(fullText)
+
+// Terms click
+        val termsStart = fullText.indexOf("Terms")
+        val termsEnd = termsStart + "Terms & Conditions".length
+
+        spannable.setSpan(object : android.text.style.ClickableSpan() {
+            override fun onClick(widget: View) {
+                requireActivity().supportFragmentManager.beginTransaction()
+                    .replace(R.id.auth_container, TermsFragment())
+                    .addToBackStack(null)
+                    .commit()
+            }
+        }, termsStart, termsEnd, android.text.Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+
+// Privacy click
+        val privacyStart = fullText.indexOf("Privacy")
+        val privacyEnd = privacyStart + "Privacy Policy".length
+
+        spannable.setSpan(object : android.text.style.ClickableSpan() {
+            override fun onClick(widget: View) {
+                requireActivity().supportFragmentManager.beginTransaction()
+                    .replace(R.id.auth_container, PrivacyFragment())
+                    .addToBackStack(null)
+                    .commit()
+            }
+        }, privacyStart, privacyEnd, android.text.Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+
+        tvTermsText.text = spannable
+        tvTermsText.movementMethod = android.text.method.LinkMovementMethod.getInstance()
+        tvTermsText.highlightColor = android.graphics.Color.TRANSPARENT
+
 
         // -------- Spinners (WORKING) --------
         val genderList = listOf("Select gender","Male","Female","Transgender")
@@ -111,6 +159,7 @@ class RegisterFragment : Fragment() {
             layoutRegDetails.visibility = if (id == R.id.rbRegYes) View.VISIBLE else View.GONE
         }
 
+
         // -------- Firebase OTP --------
         btnSendOtp.setOnClickListener {
             val mob = etMobile.text.toString().trim()
@@ -138,28 +187,74 @@ class RegisterFragment : Fragment() {
                 .addOnFailureListener { toast(it.message ?: "OTP failed") }
         }
 
-        // -------- Register Save --------
-        btnRegister.setOnClickListener {
-            if (!isOtpVerified) { toast("Verify mobile OTP first"); return@setOnClickListener }
-            if (etName.text.isNullOrBlank()) { toast("Enter name"); return@setOnClickListener }
-            if (etEmail.text.isNullOrBlank() || !Patterns.EMAIL_ADDRESS.matcher(etEmail.text).matches()) {
-                toast("Enter valid email"); return@setOnClickListener
-            }
-            if (etPassword.text.length < 4) { toast("Password too short"); return@setOnClickListener }
-
-            // Local save (profile)
-            val sp = requireContext().getSharedPreferences("session", 0)
-            sp.edit()
-                .putString("reg_name", etName.text.toString())
-                .putString("reg_mobile", etMobile.text.toString())
-                .putString("reg_email", etEmail.text.toString())
-                .putString("reg_password", etPassword.text.toString())
-                .putBoolean("logged_in", true)
-                .apply()
-
+        tvTermsText.setOnClickListener {
             requireActivity().supportFragmentManager.beginTransaction()
-                .replace(R.id.auth_container, LoginFragment())
+                .replace(R.id.auth_container, TermsFragment())
+                .addToBackStack(null)
                 .commit()
+        }
+
+        // --------- HARD VALIDATION ---------
+
+        btnRegister.setOnClickListener {
+
+            if (!validateOrStop(etName.text.isNotBlank(), "Enter full name")) return@setOnClickListener
+            if (!validateOrStop(spGender.selectedItemPosition != 0, "Select gender")) return@setOnClickListener
+
+            if (!validateOrStop(
+                    spDay.selectedItemPosition != 0 &&
+                            spMonth.selectedItemPosition != 0 &&
+                            spYear.selectedItemPosition != 0,
+                    "Select complete DOB"
+                )) return@setOnClickListener
+
+            if (!validateOrStop(spMarital.selectedItemPosition != 0, "Select marital status")) return@setOnClickListener
+            if (!validateOrStop(spReligion.selectedItemPosition != 0, "Select religion")) return@setOnClickListener
+
+            if (!validateOrStop(etMobile.text.length == 10, "Enter valid mobile")) return@setOnClickListener
+            if (!validateOrStop(isOtpVerified, "Verify mobile OTP first")) return@setOnClickListener
+
+            if (!validateOrStop(
+                    Patterns.EMAIL_ADDRESS.matcher(etEmail.text).matches(),
+                    "Enter valid email"
+                )) return@setOnClickListener
+
+            if (!validateOrStop(etPassword.text.length >= 4, "Password too short")) return@setOnClickListener
+
+            if (!validateOrStop(spEducation.selectedItemPosition != 0, "Select education")) return@setOnClickListener
+            if (spEducation.selectedItem == "Other") {
+                if (!validateOrStop(etEducationOther.text.isNotBlank(), "Enter education")) return@setOnClickListener
+            }
+
+            if (!validateOrStop(spOccupation.selectedItemPosition != 0, "Select occupation")) return@setOnClickListener
+            if (spOccupation.selectedItem == "Other") {
+                if (!validateOrStop(etOccupationOther.text.isNotBlank(), "Enter occupation")) return@setOnClickListener
+            }
+
+            if (!validateOrStop(spCountry.selectedItemPosition != 0, "Select country")) return@setOnClickListener
+            if (spCountry.selectedItem == "Bharat (India)") {
+                if (!validateOrStop(spStateIndia.selectedItemPosition != 0, "Select state")) return@setOnClickListener
+            } else {
+                if (!validateOrStop(etCountryOther.text.isNotBlank(), "Enter country")) return@setOnClickListener
+                if (!validateOrStop(etStateOther.text.isNotBlank(), "Enter state")) return@setOnClickListener
+            }
+
+            if (!validateOrStop(etDistrict.text.isNotBlank(), "Enter district")) return@setOnClickListener
+            if (!validateOrStop(etTehsil.text.isNotBlank(), "Enter tehsil")) return@setOnClickListener
+            if (!validateOrStop(etAddress.text.isNotBlank(), "Enter address")) return@setOnClickListener
+            if (!validateOrStop(etPincode.text.length == 6, "Enter valid pincode")) return@setOnClickListener
+
+            if (!validateOrStop(rgNursingReg.checkedRadioButtonId != -1, "Select nursing registration")) return@setOnClickListener
+            if (rbRegYes.isChecked) {
+                if (!validateOrStop(etRegState.text.isNotBlank(), "Enter registration state")) return@setOnClickListener
+                if (!validateOrStop(etRegNumber.text.isNotBlank(), "Enter registration number")) return@setOnClickListener
+            }
+
+            if (!validateOrStop(cbTerms.isChecked, "Accept Terms & Conditions")) return@setOnClickListener
+
+            // ✅ Yahan se registration save / firebase / navigation chalegi
+            // ---------- SAVE / NEXT STEP ----------
+            // yahan Firebase profile save / Firestore / navigation aayega
         }
     }
 
