@@ -181,33 +181,110 @@ class RegisterFragment : Fragment() {
 
         // --- Final Pro Registration ---
         btnRegister.setOnClickListener {
-            // Validation Logic
-            if (etName.text.isBlank()) { toast("Enter Name"); return@setOnClickListener }
-            if (spGender.selectedItemPosition == 0) { toast("Select Gender"); return@setOnClickListener }
-            if (!Patterns.EMAIL_ADDRESS.matcher(etEmail.text).matches()) { toast("Invalid Email"); return@setOnClickListener }
-            if (etPassword.text.length < 6) { toast("Password min 6 chars"); return@setOnClickListener }
-            if (!cbTerms.isChecked) { toast("Accept Terms"); return@setOnClickListener }
-            if (!isOtpVerified) { toast("Verify Mobile OTP"); return@setOnClickListener }
+            // --- 1. Basic Data Nikalna ---
+            val name = etName.text.toString().trim()
+            val email = etEmail.text.toString().trim()
+            val mobile = etMobile.text.toString().trim()
+            val pass = etPassword.text.toString().trim()
+            val district = etDistrict.text.toString().trim()
+            val tehsil = etTehsil.text.toString().trim()
+            val pincode = etPincode.text.toString().trim()
+            val address = etAddress.text.toString().trim()
+            val dob = "${spDay.selectedItem}-${spMonth.selectedItem}-${spYear.selectedItem}"
 
-            auth.createUserWithEmailAndPassword(etEmail.text.toString().trim(), etPassword.text.toString().trim())
+            val marital = if(spMarital.selectedItemPosition != 0) spMarital.selectedItem.toString() else ""
+            val religion = if(spReligion.selectedItemPosition != 0) spReligion.selectedItem.toString() else ""
+            val gender = if(spGender.selectedItemPosition != 0) spGender.selectedItem.toString() else ""
+            val education = if(spEducation.selectedItemPosition != 0) spEducation.selectedItem.toString() else ""
+            val occupation = if(spOccupation.selectedItemPosition != 0) spOccupation.selectedItem.toString() else ""
+            val country = if(spCountry.selectedItemPosition != 0) spCountry.selectedItem.toString() else ""
+            val state = if(spCountry.selectedItemPosition == 1) spStateIndia.selectedItem.toString() else ""
+            val regState = if(rbRegYes.isChecked) etRegState.text.toString().trim() else ""
+            val regNumber = if(rbRegYes.isChecked) etRegNumber.text.toString().trim() else ""
+
+            // --- 2. Mandatory Fields Validation ---
+            if (name.isEmpty() || email.isEmpty() || mobile.isEmpty() || pass.isEmpty() ||
+                district.isEmpty() || tehsil.isEmpty() || regState.isEmpty() || regNumber.isEmpty() ||
+                pincode.isEmpty() || address.isEmpty() || gender.isEmpty() ||
+                marital.isEmpty() || religion.isEmpty() || dob.isEmpty() || education.isEmpty() || occupation.isEmpty() || country.isEmpty() || state.isEmpty()) {
+                toast("Please fill in all the required fields to proceed.")
+                return@setOnClickListener
+            }
+
+            // --- 3. Special "Other" Validation (Jo tumne manga tha) ---
+            if (education == "Other" && etEducationOther.text.toString().trim().isEmpty()) {
+                toast("Please specify your details in the 'Other' field.")
+                return@setOnClickListener
+            }
+            if (occupation == "Other" && etOccupationOther.text.toString().trim().isEmpty()) {
+                toast("Please specify your details in the 'Other' field.")
+                return@setOnClickListener
+            }
+            if (country == "Other" && etCountryOther.text.toString().trim().isEmpty()) {
+                toast("Please specify your details in the 'Other' field.")
+                return@setOnClickListener
+            }
+
+            // --- 4. OTP & Terms Check ---
+            if (!isOtpVerified) {
+                toast("Please verify your mobile number via OTP.")
+                return@setOnClickListener
+            }
+            if (!cbTerms.isChecked) {
+                toast("Please accept the Terms & Conditions and Privacy Policy.")
+                return@setOnClickListener
+            }
+
+            // --- 5. Firebase Auth (Sirf Email se Account Banega - Ek hi UID ke liye) ---
+            auth.createUserWithEmailAndPassword(email, pass)
                 .addOnSuccessListener { result ->
+                    val uid = result.user!!.uid
+
+                    // Pura data jo Firestore mein jayega
                     val userMap = hashMapOf(
-                        "uid" to result.user?.uid,
-                        "name" to etName.text.toString(),
-                        "email" to etEmail.text.toString(),
-                        "occupation" to spOccupation.selectedItem.toString(),
-                        "state" to if(spCountry.selectedItem == "Bharat (India)") spStateIndia.selectedItem.toString() else etStateOther.text.toString(),
-                        "regStatus" to if(rbRegYes.isChecked) "Registered" else "Not Registered",
+                        "uid" to uid,
+                        "name" to name,
+                        "email" to email,
+                        "mobile" to mobile,
+                        "gender" to gender,
+                        "dob" to dob,
+                        "religion" to spReligion.selectedItem.toString(),
+                        "maritalStatus" to spMarital.selectedItem.toString(),
+                        "education" to if(education == "Other") etEducationOther.text.toString() else education,
+                        "occupation" to if(occupation == "Other") etOccupationOther.text.toString() else occupation,
+                        "country" to if(country == "Other") etCountryOther.text.toString() else country,
+                        "state" to if(country == "Other") etStateOther.text.toString() else state,
+                        "tehsil" to tehsil,
+                        "address" to address,
+                        "district" to district,
+                        "pincode" to pincode,
+                        "nursingRegStatus" to if(rbRegYes.isChecked) "Yes" else "No",
+                        "regState" to etRegState.text.toString(),
+                        "regNumber" to etRegNumber.text.toString(),
+                        "password" to pass,
                         "createdAt" to FieldValue.serverTimestamp()
                     )
-                    db.collection("Users").document(result.user!!.uid).set(userMap)
-                        .addOnSuccessListener {
-                            toast("Nursing Studio Registration Success! ❤️")
-                            // Navigate to Login Fragment here
-                        }
-                }.addOnFailureListener { toast(it.message ?: "Failed") }
 
+                    // Firestore mein save karna
+                    db.collection("Users").document(uid).set(userMap)
+                        .addOnSuccessListener {
+                            // Professional Success Toast
+                            toast("Registration successful! Welcome to Nursing Studio.")
+
+                            // Navigate to Login Fragment (Professional way)
+                            requireActivity().supportFragmentManager.beginTransaction()
+                                .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
+                                .replace(R.id.auth_container, LoginFragment())
+                                .commit()
+                        }
+                        .addOnFailureListener { e ->
+                            toast("Registration failed: ${e.localizedMessage}")
+                        }
+                }
+                .addOnFailureListener { e -> toast("Error: ${e.message}") }
         }
+
+
     }
 
     private fun setupTermsSaffron(tv: TextView) {
