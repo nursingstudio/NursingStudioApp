@@ -8,10 +8,8 @@ import android.widget.ArrayAdapter
 import android.widget.ImageView
 import android.widget.TextView
 
-class SocialAdapter(
-    context: Context,
-    private val items: List<SocialItem>
-) : ArrayAdapter<SocialItem>(context, 0, items) {
+class SocialAdapter(context: Context, private val items: List<SocialItem>) :
+    ArrayAdapter<SocialItem>(context, 0, items) {
 
     override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
         val view = convertView ?: LayoutInflater.from(context)
@@ -19,9 +17,8 @@ class SocialAdapter(
 
         val item = items[position]
 
-        // 👉 Yahi line hai:
-        val icon = view.findViewById<ImageView>(R.id.icon)
-        val title = view.findViewById<TextView>(R.id.title)
+        val icon = view.findViewById<ImageView>(R.id.icon) // XML me id "icon" hai
+        val title = view.findViewById<TextView>(R.id.title) // XML me id "title" hai
 
         icon.setImageResource(item.iconRes)
         title.text = item.title

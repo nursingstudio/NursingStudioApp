@@ -10,8 +10,12 @@
         android:title="Notice Board" />
 
     <item
-        android:id="@+id/nav_social"
-        android:title="Social Media Handles" />
+        android:id="@+id/nav_social_dialog"
+        android:title="Quick Follow" />
+
+    <item
+        android:id="@+id/nav_social_fragment"
+        android:title="Our Social Media" />
 
     <item
         android:id="@+id/nav_share"
