@@ -1,16 +1,15 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
+    // Compose plugin ko tabhi rakhna agar tum Compose use kar rahe ho,
+    // par tumhara RegisterFragment XML based hai, toh ye thik hai rehne do.
     alias(libs.plugins.kotlin.compose)
-
-        // Add the Google services Gradle plugin
-        id("com.google.gms.google-services")
-
-    }
+    id("com.google.gms.google-services")
+}
 
 android {
     namespace = "com.example.nursingstudio"
-    compileSdk = 36
+    compileSdk = 36 // Tip: 36 abhi preview mein ho sakta hai, 35 zyada stable hai.
 
     defaultConfig {
         applicationId = "com.example.nursingstudio"
@@ -44,13 +43,25 @@ android {
 }
 
 dependencies {
+    // Standard Android Libraries
     implementation(libs.androidx.core.ktx)
-    implementation("com.google.android.material:material:1.12.0")
     implementation(libs.androidx.appcompat)
-    implementation("de.hdodenhof:circleimageview:3.1.0")
-    implementation(libs.material)
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
+    implementation(libs.material) // Material library for Spinners/Buttons
+
+    // UI Enhancements
+    implementation("de.hdodenhof:circleimageview:3.1.0")
+    implementation("androidx.core:core-splashscreen:1.0.1")
+
+    // 🔥 FIREBASE (Clean & Fixed) 🔥
+    // Sirf ek BoM rakho, latest wala best hai.
+    implementation(platform("com.google.firebase:firebase-bom:33.7.0"))
+    implementation("com.google.firebase:firebase-auth")
+    implementation("com.google.firebase:firebase-firestore")
+    implementation("com.google.firebase:firebase-storage")
+
+    // Compose (Jo tumne pehle se add kiye the)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
     implementation(platform(libs.androidx.compose.bom))
@@ -58,21 +69,8 @@ dependencies {
     implementation(libs.androidx.compose.ui.graphics)
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
-    implementation("androidx.core:core-splashscreen:1.0.1")
 
-    // Import the Firebase BoM
-    implementation(platform("com.google.firebase:firebase-bom:34.7.0"))
-    implementation ("com.google.firebase:firebase-auth")
-
-
-    // TODO: Add the dependencies for Firebase products you want to use
-    // When using the BoM, don't specify versions in Firebase dependencies
-    implementation("com.google.firebase:firebase-analytics")
-
-
-    // Add the dependencies for any other desired Firebase products
-    // https://firebase.google.com/docs/android/setup#available-libraries
-
+    // Testing
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

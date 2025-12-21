@@ -24,8 +24,9 @@
         <!-- Controls -->
         <item name="colorControlActivated">@color/saffron</item>
         <item name="colorControlHighlight">@color/saffron</item>
-        <item name="colorControlActivated">@color/saffron</item>
+        <item name="colorControlNormal">@color/saffron</item>
         <item name="colorOnSurface">@color/text_primary</item>
+        <item name="colorAccent">@color/saffron</item>
 
         <!-- Links -->
         <item name="android:textColorLink">@color/saffron</item>
