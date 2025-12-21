@@ -6,10 +6,7 @@ import android.util.Patterns
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
-import android.widget.EditText
-import android.widget.TextView
-import android.widget.Toast
+import android.widget.*
 import androidx.fragment.app.Fragment
 import android.view.inputmethod.EditorInfo
 import com.google.firebase.auth.FirebaseAuth
@@ -32,7 +29,13 @@ class LoginFragment : Fragment() {
 
         auth = FirebaseAuth.getInstance()
 
-        val etEmail = view.findViewById<EditText>(R.id.etMobile) // XML mein etMobile hai, par hum email use karenge login ke liye
+        // --- SESSION MANAGEMENT (AUTO-LOGIN) ---
+        if (auth.currentUser != null) {
+            navigateToDashboard()
+            return
+        }
+
+        val etEmail = view.findViewById<EditText>(R.id.etEmail) // Make sure ID is etEmail in XML
         val etPassword = view.findViewById<EditText>(R.id.etPassword)
         val btnLogin = view.findViewById<Button>(R.id.btnLogin)
         val tvForgotPassword = view.findViewById<TextView>(R.id.tvForgotPassword)
@@ -46,9 +49,9 @@ class LoginFragment : Fragment() {
             } else false
         }
 
-        // LOGIN BUTTON
+        // LOGIN BUTTON LOGIC
         btnLogin.setOnClickListener {
-            // Tumhara animation logic
+            // Button Animation
             btnLogin.animate().scaleX(0.97f).scaleY(0.97f).setDuration(80).withEndAction {
                 btnLogin.animate().scaleX(1f).scaleY(1f).setDuration(80).start()
             }.start()
@@ -56,26 +59,36 @@ class LoginFragment : Fragment() {
             val email = etEmail.text.toString().trim()
             val pass = etPassword.text.toString().trim()
 
-            // Validations
+            // Professional Validations
             if (email.isEmpty() || !Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-                toast("Please enter a valid email")
+                toast("Please enter a valid email address.")
                 return@setOnClickListener
             }
             if (pass.isEmpty()) {
-                toast("Please enter password")
+                toast("Please enter your password.")
                 return@setOnClickListener
             }
 
-            // 🔥 FIREBASE LOGIN 🔥
+            // --- FIREBASE LOGIN WITH DATA CHECK ---
             auth.signInWithEmailAndPassword(email, pass)
-                .addOnSuccessListener {
-                    toast("Welcome back to Nursing Studio! ❤️")
-                    val intent = Intent(requireContext(), MainActivity::class.java)
-                    startActivity(intent)
-                    requireActivity().finish()
+                .addOnSuccessListener { authResult ->
+                    val userId = authResult.user?.uid
+                    if (userId != null) {
+                        // Check if user exists in Firestore
+                        FirebaseFirestore.getInstance().collection("Users").document(userId).get()
+                            .addOnSuccessListener { document ->
+                                if (document.exists()) {
+                                    toast("Login successful! Welcome back.")
+                                    navigateToDashboard()
+                                } else {
+                                    toast("User profile not found. Please register again.")
+                                    auth.signOut()
+                                }
+                            }
+                    }
                 }
                 .addOnFailureListener { e ->
-                    toast("Login Failed: ${e.message}")
+                    toast("Authentication failed. Please check your credentials.")
                 }
         }
 
@@ -83,21 +96,30 @@ class LoginFragment : Fragment() {
         tvForgotPassword.setOnClickListener {
             val email = etEmail.text.toString().trim()
             if (email.isEmpty()) {
-                toast("Enter your email above to reset password")
+                toast("Please enter your registered email to reset password.")
             } else {
                 auth.sendPasswordResetEmail(email).addOnSuccessListener {
-                    toast("Reset link sent to your email! 📧")
+                    toast("Password reset link has been sent to your email.")
+                }.addOnFailureListener {
+                    toast("Error: Could not send reset email.")
                 }
             }
         }
 
-        // NEW USER? REGISTER FIRST
+        // NAVIGATION TO REGISTER
         tvGoRegister.setOnClickListener {
             requireActivity().supportFragmentManager.beginTransaction()
+                .setCustomAnimations(android.R.anim.slide_in_left, android.R.anim.slide_out_right)
                 .replace(R.id.auth_container, RegisterFragment())
                 .addToBackStack(null)
                 .commit()
         }
+    }
+
+    private fun navigateToDashboard() {
+        val intent = Intent(requireContext(), MainActivity::class.java)
+        startActivity(intent)
+        requireActivity().finish()
     }
 
     private fun toast(msg: String) = Toast.makeText(requireContext(), msg, Toast.LENGTH_SHORT).show()
