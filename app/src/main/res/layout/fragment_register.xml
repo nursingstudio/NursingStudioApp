@@ -304,24 +304,23 @@
                     android:id="@+id/rgNursingReg"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal">
+                    android:orientation="horizontal"
+                    app:theme="@style/Theme.AppCompat.Light">
 
                     <RadioButton
                         android:id="@+id/rbRegYes"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:buttonTint="@color/saffron"
                         android:text="Yes"
-                        app:useMaterialThemeColors="false"/>
+                        android:buttonTint="@color/radio_selector" />
 
                     <RadioButton
                         android:id="@+id/rbRegNo"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="16dp"
-                        android:buttonTint="@color/saffron"
                         android:text="No"
-                        app:useMaterialThemeColors="false"/>
+                        android:buttonTint="@color/radio_selector" />
                 </RadioGroup>
 
                 <LinearLayout
