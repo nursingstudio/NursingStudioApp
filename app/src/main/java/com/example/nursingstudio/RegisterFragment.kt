@@ -11,6 +11,8 @@ import com.google.firebase.firestore.FieldValue
 import java.util.Calendar
 import java.util.concurrent.TimeUnit
 import android.text.Spannable
+import android.text.SpannableString
+import android.text.Spanned
 import android.text.style.ClickableSpan
 import android.text.TextPaint
 import androidx.core.content.ContextCompat
@@ -107,8 +109,53 @@ class RegisterFragment : Fragment() {
         }
         rgNursingReg.setOnCheckedChangeListener { _, id -> layoutRegDetails.visibility = if (id == R.id.rbRegYes) View.VISIBLE else View.GONE }
 
-        // --- Terms with Saffron ---
-        setupTermsSaffron(tvTermsText)
+        // --- TN&C AND PRIVACY POLICY LOGIC (PERFECTED) ---
+        val fullText = "I have read and agree to the Terms & Conditions and Privacy Policy."
+        val spannable = SpannableString(fullText)
+
+        // Helper function for Saffron Clickable Links
+        fun makeLink(start: Int, end: Int, action: () -> Unit): ClickableSpan {
+            return object : ClickableSpan() {
+                override fun onClick(widget: View) {
+                    action()
+                }
+                override fun updateDrawState(ds: TextPaint) {
+                    // ContextCompat se color uthana sabse safe hai
+                    ds.color = ContextCompat.getColor(requireContext(), R.color.saffron)
+                    ds.isUnderlineText = true // Isse professional link look aayega
+                }
+            }
+        }
+
+        // Terms & Conditions Link
+        val termsStart = fullText.indexOf("Terms & Conditions")
+        val termsEnd = termsStart + "Terms & Conditions".length
+        if (termsStart != -1) {
+            spannable.setSpan(makeLink(termsStart, termsEnd) {
+                requireActivity().supportFragmentManager.beginTransaction()
+                    .replace(R.id.auth_container, TermsFragment())
+                    .addToBackStack(null)
+                    .commit()
+            }, termsStart, termsEnd, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+        }
+
+        // Privacy Policy Link
+        val privacyStart = fullText.indexOf("Privacy Policy")
+        val privacyEnd = privacyStart + "Privacy Policy".length
+        if (privacyStart != -1) {
+            spannable.setSpan(makeLink(privacyStart, privacyEnd) {
+                requireActivity().supportFragmentManager.beginTransaction()
+                    .replace(R.id.auth_container, PrivacyFragment())
+                    .addToBackStack(null)
+                    .commit()
+            }, privacyStart, privacyEnd, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+        }
+
+        tvTermsText.text = spannable
+        tvTermsText.movementMethod = android.text.method.LinkMovementMethod.getInstance()
+        tvTermsText.highlightColor = android.graphics.Color.TRANSPARENT
+        // --- LOGIC END ---
+
 
         // --- OTP ---
         btnSendOtp.setOnClickListener {
@@ -159,6 +206,7 @@ class RegisterFragment : Fragment() {
                             // Navigate to Login Fragment here
                         }
                 }.addOnFailureListener { toast(it.message ?: "Failed") }
+
         }
     }
 

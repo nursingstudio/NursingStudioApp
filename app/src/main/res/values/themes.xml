@@ -1,54 +1,32 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
 
-    <!-- Main App Theme -->
     <style name="Base.Theme.NursingStudio" parent="Theme.Material3.Light.NoActionBar">
         <item name="colorPrimary">@color/saffron</item>
-        <item name="colorPrimaryContainer">@color/saffron</item>
         <item name="colorOnPrimary">@android:color/white</item>
+        <item name="colorPrimaryContainer">@color/saffron_light</item>
+
+        <item name="colorSecondary">@color/saffron</item>
+        <item name="colorTertiary">@color/saffron_dark</item>
+        <item name="colorAccent">@color/saffron</item>
+        <item name="colorOnSurface">@color/text_primary</item>
+
+        <item name="colorControlActivated">@color/saffron</item>
+        <item name="colorControlNormal">@color/text_secondary</item>
 
         <item name="android:statusBarColor">@color/saffron_dark</item>
         <item name="android:navigationBarColor">@color/saffron_dark</item>
-
         <item name="android:colorBackground">@color/app_background</item>
 
         <item name="android:textColorPrimary">@color/text_primary</item>
         <item name="android:textColorSecondary">@color/text_secondary</item>
-        <item name="android:textColorHint">@color/text_muted</item>
-    </style>
-
-    <style name="Theme.NursingStudio" parent="Theme.MaterialComponents.DayNight.NoActionBar">
-        <item name="colorPrimary">@color/saffron</item>
-        <item name="colorPrimaryVariant">@color/saffron_dark</item>
-        <item name="colorSecondary">@color/saffron</item>
-
-        <!-- Controls -->
-        <item name="colorControlActivated">@color/saffron</item>
-        <item name="colorControlHighlight">@color/saffron</item>
-        <item name="colorControlNormal">@color/saffron</item>
-        <item name="colorOnSurface">@color/text_primary</item>
-        <item name="colorAccent">@color/saffron</item>
-
-        <!-- Links -->
         <item name="android:textColorLink">@color/saffron</item>
     </style>
 
+    <style name="Theme.NursingStudio" parent="Base.Theme.NursingStudio" />
 
-    <style name="TODO" parent="Base.Theme.NursingStudio"/>
-
-    <!-- Toolbar Title -->
-    <style name="ToolbarTitleBold" parent="TextAppearance.Material3.TitleLarge">
-        <item name="android:textSize">20sp</item>
-        <item name="android:textStyle">bold</item>
-        <item name="android:fontFamily">sans-serif-medium</item>
-        <item name="android:textColor">@android:color/white</item>
-    </style>
-
-    <!-- Splash Theme -->
     <style name="Theme.NursingStudio.Splash" parent="Theme.Material3.DayNight.NoActionBar">
         <item name="android:windowBackground">@color/splash_bg</item>
         <item name="android:statusBarColor">@color/splash_bg</item>
-        <item name="android:navigationBarColor">@color/splash_bg</item>
     </style>
-
 
 </resources>
