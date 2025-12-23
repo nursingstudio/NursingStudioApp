@@ -38,7 +38,7 @@ android {
         jvmTarget = "11"
     }
     buildFeatures {
-        compose = true
+        buildConfig = true
     }
 }
 
@@ -49,6 +49,17 @@ dependencies {
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
     implementation(libs.material) // Material library for Spinners/Buttons
+    implementation("com.hbb20:ccp:2.6.0") //CCP yani Country Code Picker
+        // App Check Play Integrity aur Debug ke liye
+        implementation("com.google.firebase:firebase-appcheck-playintegrity")
+        implementation("com.google.firebase:firebase-appcheck-debug")
+        // App Check core
+        implementation ("com.google.firebase:firebase-appcheck-ktx:18.0.0")
+        // Debug Provider (Sirf testing ke liye)
+        implementation ("com.google.firebase:firebase-appcheck-debug:18.0.0")
+        // Play Integrity (Release ke liye)
+        implementation ("com.google.firebase:firebase-appcheck-playintegrity:18.0.0")
+
 
     // UI Enhancements
     implementation("de.hdodenhof:circleimageview:3.1.0")

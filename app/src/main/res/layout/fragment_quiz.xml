@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/app_background">
@@ -10,200 +11,128 @@
         android:orientation="vertical"
         android:padding="16dp">
 
-        <!-- Heading -->
         <TextView
-            android:id="@+id/tvTestSeriesTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Test Series"
-            android:textSize="22sp"
+            android:text="Online Test Series"
+            android:textSize="24sp"
             android:textStyle="bold"
             android:textColor="@color/text_primary" />
 
         <TextView
-            android:id="@+id/tvTestSeriesSub"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:text="Plan your nursing exam preparation with smart test categories."
+            android:text="Boost your preparation with real-time analysis."
             android:textSize="14sp"
-            android:textColor="@color/text_secondary" />
+            android:textColor="@color/text_secondary"
+            android:layout_marginBottom="20dp" />
 
-        <!-- Full Syllabus main card -->
-        <LinearLayout
+        <com.google.android.material.card.MaterialCardView
             android:id="@+id/cardFullSyllabus"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:background="@drawable/bg_home_card"
-            android:orientation="vertical"
-            android:padding="16dp">
+            android:layout_marginBottom="16dp"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="6dp"
+            app:strokeWidth="0dp">
 
-            <TextView
-                android:layout_width="wrap_content"
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Full Syllabus Test Series"
-                android:textSize="18sp"
-                android:textStyle="bold"
-                android:textColor="@android:color/white" />
+                android:background="@drawable/bg_home_card"
+                android:orientation="vertical"
+                android:padding="20dp">
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:text="Complete exam pattern based tests with ranking &amp; analysis."
-                android:textSize="13sp"
-                android:textColor="@android:color/white" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Full Syllabus Mock Test"
+                    android:textSize="20sp"
+                    android:textStyle="bold"
+                    android:textColor="@android:color/white" />
 
-            <TextView
-                android:id="@+id/tvFullSyllabusStatus"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:text="Coming soon"
-                android:textSize="12sp"
-                android:textColor="@android:color/white" />
-        </LinearLayout>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="100 Questions | 90 Minutes"
+                    android:textColor="#E0E0E0"
+                    android:textSize="12sp" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
 
-        <!-- Subject-wise & Topic-wise row -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:orientation="horizontal">
+            android:orientation="horizontal"
+            android:baselineAligned="false">
 
-            <LinearLayout
+            <com.google.android.material.card.MaterialCardView
                 android:id="@+id/cardSubjectWise"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:background="@drawable/bg_small_card"
-                android:orientation="vertical"
-                android:padding="12dp">
+                android:layout_marginEnd="8dp"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="3dp">
 
-                <TextView
-                    android:layout_width="wrap_content"
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Subject-wise Tests"
-                    android:textSize="16sp"
-                    android:textStyle="bold"
-                    android:textColor="@color/text_primary" />
+                    android:orientation="vertical"
+                    android:padding="16dp">
+                    <TextView
+                        android:text="Subject-wise"
+                        android:textStyle="bold"
+                        android:textColor="@color/text_primary"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"/>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
-                    android:text="Focus on one subject at a time."
-                    android:textSize="12sp"
-                    android:textColor="@color/text_secondary" />
-            </LinearLayout>
-
-            <Space
-                android:layout_width="8dp"
-                android:layout_height="match_parent" />
-
-            <LinearLayout
+            <com.google.android.material.card.MaterialCardView
                 android:id="@+id/cardTopicWise"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:background="@drawable/bg_small_card"
-                android:orientation="vertical"
-                android:padding="12dp">
+                android:layout_marginStart="8dp"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="3dp">
 
-                <TextView
-                    android:layout_width="wrap_content"
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Topic-wise Practice"
-                    android:textSize="16sp"
-                    android:textStyle="bold"
-                    android:textColor="@color/text_primary" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
-                    android:text="Revise small topics with MCQs."
-                    android:textSize="12sp"
-                    android:textColor="@color/text_secondary" />
-            </LinearLayout>
+                    android:orientation="vertical"
+                    android:padding="16dp">
+                    <TextView
+                        android:text="Topic-wise"
+                        android:textStyle="bold"
+                        android:textColor="@color/text_primary"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"/>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
         </LinearLayout>
 
-        <!-- Previous Year Papers -->
-        <LinearLayout
+        <com.google.android.material.card.MaterialCardView
             android:id="@+id/cardPreviousYear"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:background="@drawable/bg_small_card"
-            android:orientation="vertical"
-            android:padding="12dp">
+            app:cardCornerRadius="12dp"
+            app:cardElevation="3dp">
 
-            <TextView
-                android:layout_width="wrap_content"
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Previous Year Papers"
-                android:textSize="16sp"
-                android:textStyle="bold"
-                android:textColor="@color/text_primary" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:text="Solve actual exam questions from previous years."
-                android:textSize="12sp"
-                android:textColor="@color/text_secondary" />
-        </LinearLayout>
-
-        <!-- Quick Practice -->
-        <LinearLayout
-            android:id="@+id/cardQuickPractice"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:background="@drawable/bg_small_card"
-            android:orientation="vertical"
-            android:padding="12dp">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Quick Practice (10/20 MCQs)"
-                android:textSize="16sp"
-                android:textStyle="bold"
-                android:textColor="@color/text_primary" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:text="For small breaks and quick revision."
-                android:textSize="12sp"
-                android:textColor="@color/text_secondary" />
-        </LinearLayout>
-
-        <!-- Note -->
-        <TextView
-            android:id="@+id/tvComingNote"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
-            android:text="Detailed Test Series structure is under development."
-            android:textSize="12sp"
-            android:textColor="@color/text_muted" />
-
-        //test sound button//
-        <Button
-            android:id="@+id/btnTestSound"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Test sound"
-            android:textAllCaps="false"
-            android:textSize="14sp"
-            android:background="@drawable/bg_button_primary_rounded"
-            android:textColor="@android:color/white"
-            android:layout_marginTop="16dp" />
+                android:padding="16dp">
+                <TextView
+                    android:text="Previous Year Question Papers"
+                    android:textStyle="bold"
+                    android:textColor="@color/text_primary"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
 
     </LinearLayout>
 </ScrollView>

@@ -15,8 +15,10 @@ import android.text.SpannableString
 import android.text.Spanned
 import android.text.style.ClickableSpan
 import android.text.TextPaint
+import android.util.Log
 import androidx.core.content.ContextCompat
 import com.google.firebase.FirebaseException
+import com.hbb20.CountryCodePicker
 
 class RegisterFragment : Fragment() {
 
@@ -24,6 +26,11 @@ class RegisterFragment : Fragment() {
     private lateinit var db: FirebaseFirestore
     private var verificationId: String? = null
     private var isOtpVerified = false
+
+    private lateinit var ccp: CountryCodePicker
+    private lateinit var tvTimer: TextView
+    private lateinit var btnResendOtp: TextView
+    private var resendToken: PhoneAuthProvider.ForceResendingToken? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -86,6 +93,11 @@ class RegisterFragment : Fragment() {
         val yearList = mutableListOf("YYYY").apply {
             val y = Calendar.getInstance().get(Calendar.YEAR)
             for (i in y downTo 1900) add(i.toString())
+
+            ccp = view.findViewById(R.id.ccp)
+            ccp.registerCarrierNumberEditText(etMobile) // Ye CCP ko mobile field se jod dega
+            tvTimer = view.findViewById(R.id.tvTimer)
+            btnResendOtp = view.findViewById(R.id.btnResendOtp)
         }
 
         // --- Adapters ---
@@ -159,24 +171,125 @@ class RegisterFragment : Fragment() {
 
         // --- OTP ---
         btnSendOtp.setOnClickListener {
-            val mob = etMobile.text.toString().trim()
-            if (mob.length == 10) {
-                PhoneAuthProvider.verifyPhoneNumber(PhoneAuthOptions.newBuilder(auth)
-                    .setPhoneNumber("+91$mob").setTimeout(60L, TimeUnit.SECONDS)
-                    .setActivity(requireActivity()).setCallbacks(object : PhoneAuthProvider.OnVerificationStateChangedCallbacks() {
-                        override fun onVerificationCompleted(cred: PhoneAuthCredential) { isOtpVerified = true }
-                        override fun onVerificationFailed(e: FirebaseException) { toast(e.message ?: "Error") }
-                        override fun onCodeSent(id: String, token: PhoneAuthProvider.ForceResendingToken) { verificationId = id; toast("OTP Sent!") }
-                    }).build())
-            } else toast("Enter 10-digit mobile")
+            // CCP khud hi +91 aur mobile number ko merge kar deta hai
+            val fullPhoneNumber = ccp.fullNumberWithPlus.trim()
+            val mobileOnly = etMobile.text.toString().trim()
+
+            if (mobileOnly.length == 10) {
+                startResendTimer() // Timer shuru kar do baby
+
+                val options = PhoneAuthOptions.newBuilder(auth)
+                    .setPhoneNumber(fullPhoneNumber) // Ab ye "+911234567890" format mein jayega
+                    .setTimeout(60L, TimeUnit.SECONDS)
+                    .setActivity(requireActivity())
+                    .setCallbacks(object : PhoneAuthProvider.OnVerificationStateChangedCallbacks() {
+                        override fun onVerificationCompleted(credential: PhoneAuthCredential) {
+                            // Auto-verification logic (agar phone khud read kar le)
+                            isOtpVerified = true
+                            etOtp.setText(credential.smsCode)
+                            toast("Auto-Verified! ✅")
+                        }
+
+                        override fun onVerificationFailed(e: FirebaseException) {
+                            toast("Failed: ${e.message}")
+                            // Agar fail ho jaye toh timer rok sakte ho ya error dikhao
+                        }
+
+                        override fun onCodeSent(id: String, token: PhoneAuthProvider.ForceResendingToken) {
+                            verificationId = id
+                            resendToken = token // Token ko save kar lo resend ke liye
+                            toast("OTP Sent to $fullPhoneNumber")
+                        }
+                    })
+                    .build()
+                PhoneAuthProvider.verifyPhoneNumber(options)
+            } else {
+                toast("Please enter a valid 10-digit mobile number")
+            }
         }
 
+        //resend otp button
+        btnResendOtp.setOnClickListener {
+            val fullPhoneNumber = ccp.fullNumberWithPlus.trim()
+            startResendTimer() // Timer dobara shuru
+
+            val options = PhoneAuthOptions.newBuilder(auth)
+                .setPhoneNumber(fullPhoneNumber)
+                .setTimeout(60L, TimeUnit.SECONDS)
+                .setActivity(requireActivity())
+                .setCallbacks(object : PhoneAuthProvider.OnVerificationStateChangedCallbacks() {
+                    override fun onVerificationCompleted(credential: PhoneAuthCredential) { isOtpVerified = true }
+                    override fun onVerificationFailed(e: FirebaseException) { toast(e.message ?: "Error") }
+                    override fun onCodeSent(id: String, token: PhoneAuthProvider.ForceResendingToken) {
+                        verificationId = id
+                        resendToken = token
+                        toast("OTP Resent!")
+                    }
+                })
+                .setForceResendingToken(resendToken!!) // Purana token use karke force resend
+                .build()
+            PhoneAuthProvider.verifyPhoneNumber(options)
+        }
+
+
+        // Verify OTP Button
         btnVerifyOtp.setOnClickListener {
             val code = etOtp.text.toString().trim()
-            if (verificationId != null && code.isNotEmpty()) {
-                auth.signInWithCredential(PhoneAuthProvider.getCredential(verificationId!!, code))
-                    .addOnSuccessListener { isOtpVerified = true; toast("Verified! ✅") }
+
+            if (verificationId == null) {
+                // World-class warning: User ko direction do
+                toast("Action Required: Please initiate mobile verification first.")
+                return@setOnClickListener
             }
+
+            if (code.length < 6) {
+                etOtp.error = "Full 6-digit code required"
+                return@setOnClickListener
+            }
+
+            // Progress dikhane ke liye yahan progress bar start kar sakte ho (if any)
+            val credential = PhoneAuthProvider.getCredential(verificationId!!, code)
+
+            auth.signInWithCredential(credential)
+                .addOnCompleteListener { task ->
+                    if (task.isSuccessful) {
+                        // --- SUCCESS STATE: Professional & Clean ---
+                        isOtpVerified = true
+                        etOtp.isEnabled = false
+
+                        // Sabhi verification related UI elements ko ek smooth transition ke saath hide karo
+                        btnVerifyOtp.visibility = View.GONE
+                        btnSendOtp.visibility = View.GONE
+                        tvTimer.visibility = View.GONE
+                        btnResendOtp.visibility = View.GONE
+
+                        // Professional Success Message
+                        toast("Verification Successful! Your identity is confirmed. ✅")
+
+                        // Register button ko highlight karo
+                        btnRegister.isEnabled = true
+                        btnRegister.alpha = 1.0f // Agar alpha kam kiya tha toh full kar do
+                    } else {
+                        // --- ERROR STATE: Pro-Level Feedback ---
+                        val e = task.exception
+
+                        // 1. Shake Effect: Visual feedback
+                        try {
+                            val shake = android.view.animation.AnimationUtils.loadAnimation(requireContext(), R.anim.shake)
+                            etOtp.startAnimation(shake)
+                        } catch (ex: Exception) { Log.e("Animation", "Shake animation missing") }
+
+                        // 2. Inline Error: Direct guidance
+                        etOtp.error = "Incorrect Verification Code"
+
+                        // 3. Smart Toast: World-Class tone
+                        if (e is FirebaseAuthInvalidCredentialsException) {
+                            toast("Invalid OTP. Please ensure you entered the correct code sent to your device.")
+                        } else {
+                            toast("System Alert: Verification could not be completed. [${e?.localizedMessage}]")
+                        }
+                    }
+                }
         }
 
         // --- Final Pro Registration ---
@@ -307,5 +420,22 @@ class RegisterFragment : Fragment() {
         override fun onNothingSelected(p: AdapterView<*>?) {}
     }
 
+    private fun startResendTimer() {
+        btnResendOtp.visibility = View.GONE
+        tvTimer.visibility = View.VISIBLE
+
+        object : android.os.CountDownTimer(120000, 1000) { // 2 minute ka timer
+            override fun onTick(millisUntilFinished: Long) {
+                val minutes = (millisUntilFinished / 1000) / 60
+                val seconds = (millisUntilFinished / 1000) % 60
+                tvTimer.text = "Resend OTP in ${String.format("%02d:%02d", minutes, seconds)}"
+            }
+
+            override fun onFinish() {
+                tvTimer.visibility = View.GONE
+                btnResendOtp.visibility = View.VISIBLE // 2 min baad Resend button dikhega
+            }
+        }.start()
+    }
     private fun toast(msg: String) = Toast.makeText(requireContext(), msg, Toast.LENGTH_SHORT).show()
 }

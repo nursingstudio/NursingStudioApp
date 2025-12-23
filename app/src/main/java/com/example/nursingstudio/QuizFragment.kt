@@ -7,103 +7,52 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import com.google.android.material.card.MaterialCardView
 import android.widget.Toast
 
 class QuizFragment : Fragment() {
 
-    companion object {
-        private const val PREF_SETTINGS = "settings_prefs"
-        private const val KEY_QUIZ_SOUND = "enable_quiz_sound"
-
-        /**
-         * Agar future me kahin aur se (adapter / dialog) se sound chalana ho,
-         * to ye helper function use kar sakte ho:
-         *
-         * QuizFragment.playTestSoundIfEnabled(context)
-         */
-        fun playTestSoundIfEnabled(context: Context) {
-            val sp = context.getSharedPreferences(PREF_SETTINGS, Context.MODE_PRIVATE)
-            val soundOn = sp.getBoolean(KEY_QUIZ_SOUND, true)
-            if (!soundOn) {
-                // Agar off hai to sirf chup-chaap return
-                return
-            }
-
-            // Raw se chhota ping sound play karega
-            val mp = MediaPlayer.create(context, R.raw.test_ping)
-            mp.setOnCompletionListener { it.release() }
-            mp.start()
-        }
-    }
-
     private var mediaPlayer: MediaPlayer? = null
 
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        // Yahi tumhara khud ka beautiful fragment_quiz.xml inflate karega
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return inflater.inflate(R.layout.fragment_quiz, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // 👉 Test sound button
-        val btnTestSound = view.findViewById<android.widget.Button>(R.id.btnTestSound)
-        btnTestSound?.setOnClickListener {
-            // Settings ka toggle respect karega
-            playLocalTestSound()
-            // YA agar tum helper use karna chaho:
-            // QuizFragment.playTestSoundIfEnabled(requireContext())
-        } //test sound button ended
+        // Binding Material Cards
+        val cardFull = view.findViewById<MaterialCardView>(R.id.cardFullSyllabus)
+        val cardSubject = view.findViewById<MaterialCardView>(R.id.cardSubjectWise)
+        val cardTopic = view.findViewById<MaterialCardView>(R.id.cardTopicWise)
+        val cardPrev = view.findViewById<MaterialCardView>(R.id.cardPreviousYear)
 
-
-        // Yaha tum apne existing buttons / views ka code rakh sakte ho.
-        // Example (sirf idea, tumhaare IDs par depend karega):
-        //
-        // val btnStartTest = view.findViewById<Button>(R.id.btnStartTest)
-        // btnStartTest.setOnClickListener {
-        //     // Apna purana logic + sound:
-        //     playTestSoundIfEnabled(requireContext())
-        // }
-
-        // Abhi ke liye kuch force nahi kar rahi,
-        // sirf helper function available hai.
+        // Set Click Listeners (In par click hote hi sound aayega)
+        cardFull.setOnClickListener { handleCategoryClick("Full Syllabus Mock Test") }
+        cardSubject.setOnClickListener { handleCategoryClick("Subject-wise Test") }
+        cardTopic.setOnClickListener { handleCategoryClick("Topic-wise Practice") }
+        cardPrev.setOnClickListener { handleCategoryClick("Previous Year Papers") }
     }
 
-    /**
-     * Agar tum QuizFragment ke andar se hi sound chalana chaho,
-     * bina companion wale helper ke, to ye method use kar sakte ho:
-     */
-    private fun playLocalTestSound() {
-        val sp = requireContext().getSharedPreferences(PREF_SETTINGS, Context.MODE_PRIVATE)
-        val soundOn = sp.getBoolean(KEY_QUIZ_SOUND, true)
-        if (!soundOn) {
-            Toast.makeText(
-                requireContext(),
-                "Turn ON 'Sound in online tests' from Settings.",
-                Toast.LENGTH_SHORT
-            ).show()
-            return
-        }
+    private fun handleCategoryClick(title: String) {
+        playFeedbackSound() // User click karega toh app "Sound" karegi (ping sound)
+        Toast.makeText(requireContext(), "Opening $title...", Toast.LENGTH_SHORT).show()
 
-        mediaPlayer?.release()
-        mediaPlayer = null
+        // Future: Yahan se TestActivity khulega
+    }
 
-        mediaPlayer = MediaPlayer.create(requireContext(), R.raw.test_ping)
-        mediaPlayer?.setOnCompletionListener { mp ->
-            mp.release()
-            if (mediaPlayer === mp) mediaPlayer = null
+    private fun playFeedbackSound() {
+        val sp = requireContext().getSharedPreferences("settings_prefs", Context.MODE_PRIVATE)
+        if (sp.getBoolean("enable_quiz_sound", true)) {
+            mediaPlayer?.release()
+            mediaPlayer = MediaPlayer.create(requireContext(), R.raw.test_ping)
+            mediaPlayer?.setOnCompletionListener { it.release() }
+            mediaPlayer?.start()
         }
-        mediaPlayer?.start()
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
         mediaPlayer?.release()
-        mediaPlayer = null
     }
-
 }

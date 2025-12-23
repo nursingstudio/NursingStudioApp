@@ -17,8 +17,14 @@ import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.navigation.NavigationView
+import com.google.firebase.FirebaseApp
+import com.google.firebase.appcheck.FirebaseAppCheck
+import com.google.firebase.appcheck.debug.DebugAppCheckProviderFactory
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.example.nursingstudio.BuildConfig
+import com.google.firebase.appcheck.playintegrity.PlayIntegrityAppCheckProviderFactory
+
 
 class MainActivity : AppCompatActivity() {
 
@@ -50,9 +56,28 @@ class MainActivity : AppCompatActivity() {
         private const val URL_PLAYSTORE = "https://play.google.com/store/apps/details?id=com.example.nursingstudio"
     }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+override fun onCreate(savedInstanceState: Bundle?) {
+    // 1. Firebase Initialize sabse pehle
+    FirebaseApp.initializeApp(this)
+
+    // 2. App Check Setup (Ekdum Start mein)
+    val firebaseAppCheck = FirebaseAppCheck.getInstance()
+
+    if (BuildConfig.DEBUG) {
+        // Debug mode mein ye provider install karna zaroori hai
+        firebaseAppCheck.installAppCheckProviderFactory(
+            DebugAppCheckProviderFactory.getInstance()
+        )
+        Log.d("AppCheckDebug", "Debug Provider Installed Successfully")
+    } else {
+        firebaseAppCheck.installAppCheckProviderFactory(
+            PlayIntegrityAppCheckProviderFactory.getInstance()
+        )
+    }
+
+    super.onCreate(savedInstanceState) // Iske BAAD baki logic
+    setContentView(R.layout.activity_main)
+
 
         // Session Check: Agar user logged out hai toh AuthActivity pe bhej do
         if (auth.currentUser == null) {
