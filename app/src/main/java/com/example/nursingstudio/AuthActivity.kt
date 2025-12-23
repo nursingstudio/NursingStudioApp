@@ -14,8 +14,26 @@ import android.view.View
 class AuthActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
+        // 🔥 1. Sabse pehle Firebase aur App Check (Yahan hona chahiye!)
+        com.google.firebase.FirebaseApp.initializeApp(this)
+        val firebaseAppCheck = com.google.firebase.appcheck.FirebaseAppCheck.getInstance()
+
+        if (BuildConfig.DEBUG) {
+            firebaseAppCheck.installAppCheckProviderFactory(
+                com.google.firebase.appcheck.debug.DebugAppCheckProviderFactory.getInstance()
+            )
+            // Ye line token ko logcat mein print karegi
+            android.util.Log.d("AppCheckDebug", "AuthActivity: Debug Provider Installed")
+        } else {
+            firebaseAppCheck.installAppCheckProviderFactory(
+                com.google.firebase.appcheck.playintegrity.PlayIntegrityAppCheckProviderFactory.getInstance()
+            )
+        }
+
+        super.onCreate(savedInstanceState) // Iske baad super call
         setContentView(R.layout.activity_auth)
+
+        // ... tumhara baki ka logo animation aur handler wala code
 
         val logo = findViewById<ImageView>(R.id.imgSplash)
         logo.startAnimation(

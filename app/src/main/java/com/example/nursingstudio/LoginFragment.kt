@@ -8,19 +8,22 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import androidx.fragment.app.Fragment
-import android.view.inputmethod.EditorInfo
-import com.google.firebase.auth.FirebaseAuth
+import com.google.android.material.tabs.TabLayout
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.firebase.FirebaseException
+import com.google.firebase.auth.*
 import com.google.firebase.firestore.FirebaseFirestore
+import com.hbb20.CountryCodePicker
+import java.util.concurrent.TimeUnit
 
 class LoginFragment : Fragment() {
 
     private lateinit var auth: FirebaseAuth
+    private lateinit var db: FirebaseFirestore
+    private var isEmailMode = true
+    private var verificationId: String? = null
 
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return inflater.inflate(R.layout.fragment_login, container, false)
     }
 
@@ -28,99 +31,123 @@ class LoginFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         auth = FirebaseAuth.getInstance()
+        db = FirebaseFirestore.getInstance()
 
-        // --- SESSION MANAGEMENT (AUTO-LOGIN) ---
-        if (auth.currentUser != null) {
-            navigateToDashboard()
-            return
-        }
-
-        val etEmail = view.findViewById<EditText>(R.id.etEmail) // Make sure ID is etEmail in XML
+        // View Mappings
+        val tabLayout = view.findViewById<TabLayout>(R.id.loginTabLayout)
+        val layoutEmail = view.findViewById<LinearLayout>(R.id.layoutEmailLogin)
+        val layoutMobile = view.findViewById<LinearLayout>(R.id.layoutMobileLogin)
+        val btnLoginAction = view.findViewById<Button>(R.id.btnLoginAction)
+        val etEmail = view.findViewById<EditText>(R.id.etEmail)
         val etPassword = view.findViewById<EditText>(R.id.etPassword)
-        val btnLogin = view.findViewById<Button>(R.id.btnLogin)
-        val tvForgotPassword = view.findViewById<TextView>(R.id.tvForgotPassword)
-        val tvGoRegister = view.findViewById<TextView>(R.id.tvGoRegister)
 
-        // Keyboard "Done" button logic
-        etPassword.setOnEditorActionListener { _, actionId, _ ->
-            if (actionId == EditorInfo.IME_ACTION_DONE) {
-                btnLogin.performClick()
-                true
-            } else false
-        }
+        // Mobile Fields
+        val etMobile = view.findViewById<EditText>(R.id.etMobileLogin)
+        val etOtp = view.findViewById<EditText>(R.id.etOtpLogin)
+        val layoutOtp = view.findViewById<View>(R.id.layoutOtpLogin)
+        val ccp = view.findViewById<CountryCodePicker>(R.id.ccpLogin)
 
-        // LOGIN BUTTON LOGIC
-        btnLogin.setOnClickListener {
-            // Button Animation
-            btnLogin.animate().scaleX(0.97f).scaleY(0.97f).setDuration(80).withEndAction {
-                btnLogin.animate().scaleX(1f).scaleY(1f).setDuration(80).start()
-            }.start()
+        // 🔥 VITAL STEP: CCP ko mobile field se connect karo
+        ccp.registerCarrierNumberEditText(etMobile)
 
-            val email = etEmail.text.toString().trim()
-            val pass = etPassword.text.toString().trim()
 
-            // Professional Validations
-            if (email.isEmpty() || !Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-                toast("Please enter a valid email address.")
-                return@setOnClickListener
-            }
-            if (pass.isEmpty()) {
-                toast("Please enter your password.")
-                return@setOnClickListener
-            }
-
-            // --- FIREBASE LOGIN WITH DATA CHECK ---
-            auth.signInWithEmailAndPassword(email, pass)
-                .addOnSuccessListener { authResult ->
-                    val userId = authResult.user?.uid
-                    if (userId != null) {
-                        // Check if user exists in Firestore
-                        FirebaseFirestore.getInstance().collection("Users").document(userId).get()
-                            .addOnSuccessListener { document ->
-                                if (document.exists()) {
-                                    toast("Login successful! Welcome back.")
-                                    navigateToDashboard()
-                                } else {
-                                    toast("User profile not found. Please register again.")
-                                    auth.signOut()
-                                }
-                            }
-                    }
+        // Switch Logic
+        tabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
+            override fun onTabSelected(tab: TabLayout.Tab?) {
+                if (tab?.position == 0) {
+                    isEmailMode = true
+                    layoutEmail.visibility = View.VISIBLE
+                    layoutMobile.visibility = View.GONE
+                    btnLoginAction.text = "Login"
+                } else {
+                    isEmailMode = false
+                    layoutEmail.visibility = View.GONE
+                    layoutMobile.visibility = View.VISIBLE
+                    btnLoginAction.text = "Send OTP"
                 }
-                .addOnFailureListener { e ->
-                    toast("Authentication failed. Please check your credentials.")
-                }
-        }
+            }
+            override fun onTabUnselected(tab: TabLayout.Tab?) {}
+            override fun onTabReselected(tab: TabLayout.Tab?) {}
+        })
 
-        // FORGOT PASSWORD
-        tvForgotPassword.setOnClickListener {
-            val email = etEmail.text.toString().trim()
-            if (email.isEmpty()) {
-                toast("Please enter your registered email to reset password.")
+        btnLoginAction.setOnClickListener {
+            if (isEmailMode) {
+                performEmailLogin(etEmail.text.toString(), etPassword.text.toString())
             } else {
-                auth.sendPasswordResetEmail(email).addOnSuccessListener {
-                    toast("Password reset link has been sent to your email.")
-                }.addOnFailureListener {
-                    toast("Error: Could not send reset email.")
+                if (verificationId == null) {
+                    sendOtp(ccp.fullNumberWithPlus, etMobile.text.toString(), layoutOtp, btnLoginAction)
+                } else {
+                    verifyOtp(etOtp.text.toString())
                 }
             }
         }
 
-        // NAVIGATION TO REGISTER
-        tvGoRegister.setOnClickListener {
+        view.findViewById<TextView>(R.id.tvForgotPassword).setOnClickListener {
+            showForgotPasswordDialog(etEmail.text.toString())
+        }
+
+        view.findViewById<TextView>(R.id.tvGoRegister).setOnClickListener {
             requireActivity().supportFragmentManager.beginTransaction()
-                .setCustomAnimations(android.R.anim.slide_in_left, android.R.anim.slide_out_right)
-                .replace(R.id.auth_container, RegisterFragment())
-                .addToBackStack(null)
-                .commit()
+                .replace(R.id.auth_container, RegisterFragment()).addToBackStack(null).commit()
         }
     }
 
-    private fun navigateToDashboard() {
-        val intent = Intent(requireContext(), MainActivity::class.java)
-        startActivity(intent)
-        requireActivity().finish()
+    private fun performEmailLogin(email: String, pass: String) {
+        if (email.isEmpty() || pass.isEmpty()) { toast("Please fill credentials"); return }
+
+        auth.signInWithEmailAndPassword(email, pass).addOnSuccessListener { result ->
+            checkUserInFirestore(result.user?.uid)
+        }.addOnFailureListener { toast("Auth Failed: ${it.message}") }
     }
 
-    private fun toast(msg: String) = Toast.makeText(requireContext(), msg, Toast.LENGTH_SHORT).show()
+    private fun sendOtp(fullPhone: String, mobile: String, otpLayout: View, btn: Button) {
+        if (mobile.length < 10) { toast("Invalid Number"); return }
+
+        PhoneAuthProvider.verifyPhoneNumber(PhoneAuthOptions.newBuilder(auth)
+            .setPhoneNumber(fullPhone).setTimeout(60L, TimeUnit.SECONDS)
+            .setActivity(requireActivity())
+            .setCallbacks(object : PhoneAuthProvider.OnVerificationStateChangedCallbacks() {
+                override fun onVerificationCompleted(c: PhoneAuthCredential) { loginWithCredential(c) }
+                override fun onVerificationFailed(e: FirebaseException) { toast(e.message ?: "Error") }
+                override fun onCodeSent(id: String, token: PhoneAuthProvider.ForceResendingToken) {
+                    verificationId = id
+                    otpLayout.visibility = View.VISIBLE
+                    btn.text = "Verify & Login"
+                    toast("OTP Sent!")
+                }
+            }).build())
+    }
+
+    private fun verifyOtp(code: String) {
+        if (code.length < 6) { toast("Enter full OTP"); return }
+        loginWithCredential(PhoneAuthProvider.getCredential(verificationId!!, code))
+    }
+
+    private fun loginWithCredential(credential: PhoneAuthCredential) {
+        auth.signInWithCredential(credential).addOnSuccessListener { result ->
+            checkUserInFirestore(result.user?.uid)
+        }.addOnFailureListener { toast("Login Failed") }
+    }
+
+    private fun checkUserInFirestore(uid: String?) {
+        if (uid == null) return
+        db.collection("Users").document(uid).get().addOnSuccessListener { doc ->
+            if (doc.exists()) {
+                startActivity(Intent(requireContext(), MainActivity::class.java))
+                requireActivity().finish()
+            } else {
+                toast("Profile not found. Please register."); auth.signOut()
+            }
+        }
+    }
+
+    private fun showForgotPasswordDialog(email: String) {
+        val input = EditText(requireContext()).apply { hint = "Registered Email"; setText(email) }
+        MaterialAlertDialogBuilder(requireContext()).setTitle("Reset Password").setView(input)
+            .setPositiveButton("Send Link") { _, _ ->
+                auth.sendPasswordResetEmail(input.text.toString()).addOnSuccessListener { toast("Link Sent!") }
+            }.show()
+    }
+
+    private fun toast(m: String) = Toast.makeText(requireContext(), m, Toast.LENGTH_SHORT).show()
 }

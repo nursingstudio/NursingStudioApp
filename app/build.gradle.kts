@@ -49,28 +49,21 @@ dependencies {
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
     implementation(libs.material) // Material library for Spinners/Buttons
-    implementation("com.hbb20:ccp:2.6.0") //CCP yani Country Code Picker
-        // App Check Play Integrity aur Debug ke liye
-        implementation("com.google.firebase:firebase-appcheck-playintegrity")
-        implementation("com.google.firebase:firebase-appcheck-debug")
-        // App Check core
-        implementation ("com.google.firebase:firebase-appcheck-ktx:18.0.0")
-        // Debug Provider (Sirf testing ke liye)
-        implementation ("com.google.firebase:firebase-appcheck-debug:18.0.0")
-        // Play Integrity (Release ke liye)
-        implementation ("com.google.firebase:firebase-appcheck-playintegrity:18.0.0")
 
 
-    // UI Enhancements
-    implementation("de.hdodenhof:circleimageview:3.1.0")
-    implementation("androidx.core:core-splashscreen:1.0.1")
-
-    // 🔥 FIREBASE (Clean & Fixed) 🔥
-    // Sirf ek BoM rakho, latest wala best hai.
-    implementation(platform("com.google.firebase:firebase-bom:33.7.0"))
+    // --- FIREBASE (Clean & World-Class) ---
+    implementation(platform("com.google.firebase:firebase-bom:33.7.0")) // Latest Stable BoM
     implementation("com.google.firebase:firebase-auth")
     implementation("com.google.firebase:firebase-firestore")
     implementation("com.google.firebase:firebase-storage")
+    implementation("com.google.firebase:firebase-appcheck-playintegrity")
+    implementation("com.google.firebase:firebase-appcheck-debug")
+    implementation("com.google.firebase:firebase-appcheck-ktx") // Version hatane se BoM khud handle karega
+
+// --- OTHER LIBRARIES ---
+    implementation("com.hbb20:ccp:2.6.0")
+    implementation("de.hdodenhof:circleimageview:3.1.0")
+    implementation("androidx.core:core-splashscreen:1.0.1")
 
     // Compose (Jo tumne pehle se add kiye the)
     implementation(libs.androidx.lifecycle.runtime.ktx)
