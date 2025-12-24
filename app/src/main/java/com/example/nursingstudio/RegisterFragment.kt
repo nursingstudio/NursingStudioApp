@@ -20,6 +20,9 @@ import android.view.animation.AnimationUtils
 import androidx.core.content.ContextCompat
 import com.google.firebase.FirebaseException
 import com.hbb20.CountryCodePicker
+import android.content.pm.PackageManager
+import android.util.Base64
+import java.security.MessageDigest
 
 class RegisterFragment : Fragment() {
 
@@ -40,6 +43,39 @@ class RegisterFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View = inflater.inflate(R.layout.fragment_register, container, false)
+
+    // To Print SHA
+    fun printSigningHash() {
+        try {
+            val info = requireContext().packageManager.getPackageInfo(
+                requireContext().packageName,
+                PackageManager.GET_SIGNATURES
+            )
+            // Use a null-safe 'let' block to handle the possibility of 'signatures' being null.
+            info.signatures?.let { signatures ->
+                for (signature in signatures) {
+                    val md = MessageDigest.getInstance("SHA-256")
+                    md.update(signature.toByteArray())
+                    val hash = bytesToHex(md.digest())
+                    Log.d("DEBUG_SHA", "Your actual SHA-256 is: $hash")
+                }
+            }
+        } catch (e: Exception) {
+            Log.e("DEBUG_SHA", "Error getting hash", e)
+        }
+    }
+
+
+    private fun bytesToHex(bytes: ByteArray): String {
+        val hexArray = "0123456789ABCDEF".toCharArray()
+        val hexChars = CharArray(bytes.size * 2)
+        for (j in bytes.indices) {
+            val v = bytes[j].toInt() and 0xFF
+            hexChars[j * 2] = hexArray[v ushr 4]
+            hexChars[j * 2 + 1] = hexArray[v and 0x0F]
+        }
+        return String(hexChars)
+    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -150,7 +186,14 @@ class RegisterFragment : Fragment() {
                             btnSendOtp.alpha = 1.0f
                             countDownTimer?.cancel()
                             tvTimer.visibility = View.GONE
-                            toast("Failed: ${e.message}")
+                            // Log the full error to see the exact reason (e.g. App Check failure)
+                            Log.e("FirebaseAuth", "Verification Failed: ${e.message}")
+
+                            if (e is FirebaseAuthException && e.errorCode == "ERROR_TOO_MANY_REQUESTS") {
+                                toast("Blocked due to unusual activity. Please use the Test Number + Verification Code.")
+                            } else {
+                                toast("Failed: ${e.message}")
+                            }
                         }
 
                         override fun onCodeSent(id: String, token: PhoneAuthProvider.ForceResendingToken) {

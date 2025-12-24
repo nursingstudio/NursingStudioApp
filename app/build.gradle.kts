@@ -50,7 +50,6 @@ dependencies {
     implementation(libs.androidx.constraintlayout)
     implementation(libs.material) // Material library for Spinners/Buttons
 
-
     // --- FIREBASE (Clean & World-Class) ---
     implementation(platform("com.google.firebase:firebase-bom:33.7.0")) // Latest Stable BoM
     implementation("com.google.firebase:firebase-auth")
@@ -59,6 +58,10 @@ dependencies {
     implementation("com.google.firebase:firebase-appcheck-playintegrity")
     implementation("com.google.firebase:firebase-appcheck-debug")
     implementation("com.google.firebase:firebase-appcheck-ktx") // Version hatane se BoM khud handle karega
+
+    // This allows Firebase to trigger the ReCAPTCHA invisible flow
+    implementation("com.google.android.gms:play-services-safetynet:18.1.0")
+
 
 // --- OTHER LIBRARIES ---
     implementation("com.hbb20:ccp:2.6.0")
