@@ -33,37 +33,31 @@ class LoginFragment : Fragment() {
         auth = FirebaseAuth.getInstance()
         db = FirebaseFirestore.getInstance()
 
-        // View Mappings
         val tabLayout = view.findViewById<TabLayout>(R.id.loginTabLayout)
         val layoutEmail = view.findViewById<LinearLayout>(R.id.layoutEmailLogin)
         val layoutMobile = view.findViewById<LinearLayout>(R.id.layoutMobileLogin)
         val btnLoginAction = view.findViewById<Button>(R.id.btnLoginAction)
         val etEmail = view.findViewById<EditText>(R.id.etEmail)
         val etPassword = view.findViewById<EditText>(R.id.etPassword)
-
-        // Mobile Fields
         val etMobile = view.findViewById<EditText>(R.id.etMobileLogin)
         val etOtp = view.findViewById<EditText>(R.id.etOtpLogin)
         val layoutOtp = view.findViewById<View>(R.id.layoutOtpLogin)
         val ccp = view.findViewById<CountryCodePicker>(R.id.ccpLogin)
 
-        // 🔥 VITAL STEP: CCP ko mobile field se connect karo
         ccp.registerCarrierNumberEditText(etMobile)
-
 
         // Switch Logic
         tabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
             override fun onTabSelected(tab: TabLayout.Tab?) {
-                if (tab?.position == 0) {
-                    isEmailMode = true
+                isEmailMode = tab?.position == 0
+                if (isEmailMode) {
                     layoutEmail.visibility = View.VISIBLE
                     layoutMobile.visibility = View.GONE
                     btnLoginAction.text = "Login"
                 } else {
-                    isEmailMode = false
                     layoutEmail.visibility = View.GONE
                     layoutMobile.visibility = View.VISIBLE
-                    btnLoginAction.text = "Send OTP"
+                    btnLoginAction.text = if (verificationId == null) "Send OTP" else "Verify & Login"
                 }
             }
             override fun onTabUnselected(tab: TabLayout.Tab?) {}
@@ -87,14 +81,12 @@ class LoginFragment : Fragment() {
         }
 
         view.findViewById<TextView>(R.id.tvGoRegister).setOnClickListener {
-            requireActivity().supportFragmentManager.beginTransaction()
-                .replace(R.id.auth_container, RegisterFragment()).addToBackStack(null).commit()
+            navigateToRegister()
         }
     }
 
     private fun performEmailLogin(email: String, pass: String) {
         if (email.isEmpty() || pass.isEmpty()) { toast("Please fill credentials"); return }
-
         auth.signInWithEmailAndPassword(email, pass).addOnSuccessListener { result ->
             checkUserInFirestore(result.user?.uid)
         }.addOnFailureListener { toast("Auth Failed: ${it.message}") }
@@ -102,7 +94,6 @@ class LoginFragment : Fragment() {
 
     private fun sendOtp(fullPhone: String, mobile: String, otpLayout: View, btn: Button) {
         if (mobile.length < 10) { toast("Invalid Number"); return }
-
         PhoneAuthProvider.verifyPhoneNumber(PhoneAuthOptions.newBuilder(auth)
             .setPhoneNumber(fullPhone).setTimeout(60L, TimeUnit.SECONDS)
             .setActivity(requireActivity())
@@ -126,19 +117,37 @@ class LoginFragment : Fragment() {
     private fun loginWithCredential(credential: PhoneAuthCredential) {
         auth.signInWithCredential(credential).addOnSuccessListener { result ->
             checkUserInFirestore(result.user?.uid)
-        }.addOnFailureListener { toast("Login Failed") }
+        }.addOnFailureListener { toast("OTP Verification Failed") }
     }
 
     private fun checkUserInFirestore(uid: String?) {
         if (uid == null) return
         db.collection("Users").document(uid).get().addOnSuccessListener { doc ->
             if (doc.exists()) {
+                toast("Welcome back! ✨")
                 startActivity(Intent(requireContext(), MainActivity::class.java))
                 requireActivity().finish()
             } else {
-                toast("Profile not found. Please register."); auth.signOut()
+                // 🔥 Sexy Material Dialog for Redirection
+                MaterialAlertDialogBuilder(requireContext())
+                    .setTitle("Profile Not Found")
+                    .setMessage("Aapka account nahi mila. Kya aap pehle register karna chahenge?")
+                    .setCancelable(false)
+                    .setPositiveButton("Register Now") { _, _ ->
+                        auth.signOut() // Sign out so they can register fresh
+                        navigateToRegister()
+                    }
+                    .setNegativeButton("Cancel") { _, _ -> auth.signOut() }
+                    .show()
             }
         }
+    }
+
+    private fun navigateToRegister() {
+        requireActivity().supportFragmentManager.beginTransaction()
+            .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
+            .replace(R.id.auth_container, RegisterFragment())
+            .commit()
     }
 
     private fun showForgotPasswordDialog(email: String) {
