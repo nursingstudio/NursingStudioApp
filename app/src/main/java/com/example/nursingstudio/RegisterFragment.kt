@@ -171,32 +171,79 @@ class RegisterFragment : Fragment() {
 
             // 2. Get other values
             val name = etName.text.toString().trim()
+            val mobile = etMobile.text.toString().trim()
             val email = etEmail.text.toString().trim()
             val pass = etPassword.text.toString().trim()
             val district = etDistrict.text.toString().trim()
+            val address  = etAddress.text.toString().trim()
             val pincode = etPincode.text.toString().trim()
             val regNumber = etRegNumber.text.toString().trim()
 
-            // --- STEP 1: Strict Validation ---
-            if (name.isEmpty()) { etName.error = "Name is required"; return@setOnClickListener }
+            // --- Step 2: Strict Validation Logic ---
 
-            if (email.isEmpty()) { etEmail.error = "Email is required"; return@setOnClickListener }
-            if (pass.length < 6) { etPassword.error = "Password must be 6+ chars"; return@setOnClickListener }
-            if (district.isEmpty()) { etDistrict.error = "District is required"; return@setOnClickListener }
-            if (pincode.length != 6) { etPincode.error = "Enter valid 6-digit Pincode"; return@setOnClickListener }
+            // 1. Basic Details
+            if (name.isEmpty()) { etName.error = "Please enter your full name"; etName.requestFocus(); return@setOnClickListener }
 
-            // Check if RadioGroup "Yes" is selected but Reg Number is empty
-            if (rgNursingReg.checkedRadioButtonId == R.id.rbRegYes && regNumber.isEmpty()) {
-                etRegNumber.error = "Registration number is required"; return@setOnClickListener
+            // Spinner Validation (Check if first item is still selected)
+            if (spGender.selectedItemPosition == 0) { toast("Please select Gender"); return@setOnClickListener }
+
+            // DOB Validation
+            if (spDay.selectedItemPosition == 0 || spMonth.selectedItemPosition == 0 || spYear.selectedItemPosition == 0) {
+                toast("Complete Date of Birth is required"); return@setOnClickListener
             }
 
-            if (!isOtpVerified) {
-                toast("Please verify your mobile number first!"); return@setOnClickListener
+            if (spMarital.selectedItemPosition == 0) { toast("Select Marital Status"); return@setOnClickListener }
+            if (spReligion.selectedItemPosition == 0) { toast("Select Religion"); return@setOnClickListener }
+
+            // 2. Education & Occupation (With "Other" check)
+            if (spEducation.selectedItemPosition == 0) { toast("Select Education"); return@setOnClickListener }
+            if (spEducation.selectedItem.toString() == "Other" && etEducationOther.text.toString().trim().isEmpty()) {
+                etEducationOther.error = "Please specify your education"; etEducationOther.requestFocus(); return@setOnClickListener
             }
 
-            if (!cbTerms.isChecked) {
-                toast("Please accept Terms and Conditions"); return@setOnClickListener
+            if (spOccupation.selectedItemPosition == 0) { toast("Select Occupation"); return@setOnClickListener }
+            if (spOccupation.selectedItem.toString() == "Other" && etOccupationOther.text.toString().trim().isEmpty()) {
+                etOccupationOther.error = "Please specify your occupation"; etOccupationOther.requestFocus(); return@setOnClickListener
             }
+
+            // 3. Contact & Auth
+            if (mobile.isEmpty()) { etMobile.error = "Mobile number is required"; etMobile.requestFocus(); return@setOnClickListener }
+            if (!isOtpVerified) { toast("Please verify your mobile via OTP first!"); return@setOnClickListener }
+
+            if (email.isEmpty()) { etEmail.error = "Email is required"; etEmail.requestFocus(); return@setOnClickListener }
+            if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) { etEmail.error = "Invalid Email format"; return@setOnClickListener }
+
+            if (pass.length < 6) { etPassword.error = "Password must be at least 6 characters"; etPassword.requestFocus(); return@setOnClickListener }
+
+            // 4. Address Details
+            if (spCountry.selectedItem.toString() == "Bharat (India)" && spStateIndia.selectedItemPosition == 0) {
+                toast("Please select your State"); return@setOnClickListener
+            }
+            // Agar Bharat se bahar hai toh State Other mandatory
+            if (spCountry.selectedItem.toString() == "Other" && etStateOther.text.toString().trim().isEmpty()) {
+                etStateOther.error = "State/Region is required"; etStateOther.requestFocus(); return@setOnClickListener
+            }
+
+            if (district.isEmpty()) { etDistrict.error = "District is required"; etDistrict.requestFocus(); return@setOnClickListener }
+            if (address.isEmpty()) { etAddress.error = "Full address is required"; etAddress.requestFocus(); return@setOnClickListener }
+            if (pincode.length != 6) { etPincode.error = "Enter a valid 6-digit Pincode"; etPincode.requestFocus(); return@setOnClickListener }
+
+            // 5. Nursing Registration (Conditional)
+            if (rgNursingReg.checkedRadioButtonId == R.id.rbRegYes) {
+                if (etRegNumber.text.toString().trim().isEmpty()) {
+                    etRegNumber.error = "Registration Number is mandatory"; etRegNumber.requestFocus(); return@setOnClickListener
+                }
+                if (etRegState.text.toString().trim().isEmpty()) {
+                    etRegState.error = "Registration State is mandatory"; etRegState.requestFocus(); return@setOnClickListener
+                }
+            }
+
+            // 6. Terms
+            if (!cbTerms.isChecked) { toast("You must accept Terms & Conditions"); return@setOnClickListener }
+
+            // --- AGAR SAB SAHI HAI TOH DATA SAVE KARO ---
+            // proceedWithRegistration()
+
 
 
             btnRegister.isEnabled = false // Prevent multiple clicks
