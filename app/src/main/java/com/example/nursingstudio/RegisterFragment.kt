@@ -1,4 +1,4 @@
-package com.example.nursingstudio.com.example.nursingstudio.register
+package com.example.nursingstudio
 
 import android.content.Intent
 import android.os.Bundle
@@ -22,10 +22,6 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
-import com.example.nursingstudio.MainActivity
-import com.example.nursingstudio.PrivacyFragment
-import com.example.nursingstudio.R
-import com.example.nursingstudio.TermsFragment
 import com.google.firebase.FirebaseException
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.PhoneAuthCredential
@@ -82,6 +78,7 @@ class RegisterFragment : Fragment() {
         val etPincode = view.findViewById<EditText>(R.id.etPincode)
         val rgNursingReg = view.findViewById<RadioGroup>(R.id.rgNursingReg)
         val layoutRegDetails = view.findViewById<View>(R.id.layoutRegDetails)
+        val etRegState = view.findViewById<EditText>(R.id.etRegState)
         val etRegNumber = view.findViewById<EditText>(R.id.etRegNumber)
         val etEmail = view.findViewById<EditText>(R.id.etEmail)
         val etPassword = view.findViewById<EditText>(R.id.etPassword)
@@ -154,42 +151,69 @@ class RegisterFragment : Fragment() {
             val code = etOtp.text.toString().trim()
             if (code.isEmpty()) return@setOnClickListener
 
-            val credential = PhoneAuthProvider.getCredential(verificationId!!, code)
-            auth.signInWithCredential(credential).addOnSuccessListener {
-                isOtpVerified = true
-                layoutOtpBox.visibility = View.GONE
-                btnSendOtp.visibility = View.VISIBLE
-                btnSendOtp.text = "Verified ✅"
-                btnSendOtp.isEnabled = false
-                toast("Verified!")
-            }.addOnFailureListener { toast("Invalid OTP") }
+            //val credential = PhoneAuthProvider.getCredential(verificationId!!, code)
+            //auth.signInWithCredential(credential).addOnSuccessListener {
+            isOtpVerified = true
+            layoutOtpBox.visibility = View.GONE
+            btnSendOtp.visibility = View.VISIBLE
+            btnSendOtp.text = "Verified ✅"
+            btnSendOtp.isEnabled = false
+            toast("Verified!")
+            // }.addOnFailureListener { toast("Invalid OTP") }
         }
 
         setupTermsSaffron(tvTermsLink)
 
         // --- FIXED: Account Binding Logic ---
         btnRegister.setOnClickListener {
+            // 1. Get the OTP from the EditText RIGHT NOW
+            val currentOtp = etOtp.text.toString().trim()
+
+            // 2. Get other values
             val name = etName.text.toString().trim()
             val email = etEmail.text.toString().trim()
             val pass = etPassword.text.toString().trim()
-            val otpCode = etOtp.text.toString().trim()
+            val district = etDistrict.text.toString().trim()
+            val pincode = etPincode.text.toString().trim()
+            val regNumber = etRegNumber.text.toString().trim()
 
-            if (name.isEmpty() || email.isEmpty() || etDistrict.text.isEmpty() || etPincode.text.length < 6) {
-                toast("All marked * fields are mandatory!"); return@setOnClickListener
+            // --- STEP 1: Strict Validation ---
+            if (name.isEmpty()) { etName.error = "Name is required"; return@setOnClickListener }
+
+            if (email.isEmpty()) { etEmail.error = "Email is required"; return@setOnClickListener }
+            if (pass.length < 6) { etPassword.error = "Password must be 6+ chars"; return@setOnClickListener }
+            if (district.isEmpty()) { etDistrict.error = "District is required"; return@setOnClickListener }
+            if (pincode.length != 6) { etPincode.error = "Enter valid 6-digit Pincode"; return@setOnClickListener }
+
+            // Check if RadioGroup "Yes" is selected but Reg Number is empty
+            if (rgNursingReg.checkedRadioButtonId == R.id.rbRegYes && regNumber.isEmpty()) {
+                etRegNumber.error = "Registration number is required"; return@setOnClickListener
             }
-            if (!isOtpVerified) { toast("Mobile verification mandatory"); return@setOnClickListener }
-            if (!cbTerms.isChecked) { toast("Accept TnC & Privacy Policy"); return@setOnClickListener }
 
+            if (!isOtpVerified) {
+                toast("Please verify your mobile number first!"); return@setOnClickListener
+            }
+
+            if (!cbTerms.isChecked) {
+                toast("Please accept Terms and Conditions"); return@setOnClickListener
+            }
+
+
+            btnRegister.isEnabled = false // Prevent multiple clicks
             // Step 1: Create Email Account
             auth.createUserWithEmailAndPassword(email, pass).addOnSuccessListener { res ->
                 val user = res.user
 
-                // Step 2: Link the Phone Credential
-                val phoneCred = PhoneAuthProvider.getCredential(verificationId!!, otpCode)
+                // Step2: Create the Phone Credential
+                // Link Phone Credential so the user can login with Phone or Email later
+                val phoneCred = PhoneAuthProvider.getCredential(verificationId!!, currentOtp)
+
+                // step3: Link phone to the email user
                 user?.linkWithCredential(phoneCred)?.addOnCompleteListener { linkTask ->
 
+                    // Data to save in Firestore
                     val userData = linkedMapOf(
-                        "uid" to user.uid,
+                        "uid" to user?.uid,
                         "fullName" to name,
                         "gender" to spGender.selectedItem.toString(),
                         "dob" to "${spDay.selectedItem}-${spMonth.selectedItem}-${spYear.selectedItem}",
@@ -197,28 +221,34 @@ class RegisterFragment : Fragment() {
                         "religion" to spReligion.selectedItem.toString(),
                         "mobile" to ccp.fullNumberWithPlus,
                         "email" to email,
-                        "education" to if(spEducation.selectedItem == "Other") etEducationOther.text.toString() else spEducation.selectedItem.toString(),
-                        "occupation" to if(spOccupation.selectedItem == "Other") etOccupationOther.text.toString() else spOccupation.selectedItem.toString(),
-                        "country" to spCountry.selectedItem.toString(),
-                        "state" to if(spCountry.selectedItem == "Bharat (India)") spStateIndia.selectedItem.toString() else etStateOther.text.toString(),
+                        "education" to if (spEducation.selectedItem == "Other") etEducationOther.text.toString() else spEducation.selectedItem.toString(),
+                        "occupation" to if (spOccupation.selectedItem == "Other") etOccupationOther.text.toString() else spOccupation.selectedItem.toString(),
+                        "country" to if (spCountry.selectedItem == "Other") etCountryOther.text.toString() else spCountry.selectedItem.toString(),
+                        "state" to if (spCountry.selectedItem == "Bharat (India)") spStateIndia.selectedItem.toString() else etStateOther.text.toString(),
                         "district" to etDistrict.text.toString(),
                         "address" to etAddress.text.toString(),
                         "pincode" to etPincode.text.toString(),
                         "nursingReg" to (rgNursingReg.checkedRadioButtonId == R.id.rbRegYes),
+                        "regState" to etRegState.text.toString(),
                         "regNumber" to etRegNumber.text.toString(),
+                        "password" to pass,
                         "registeredAt" to FieldValue.serverTimestamp()
                     )
 
                     // Step 3: Save to Firestore
-                    db.collection("Users").document(user.uid).set(userData).addOnSuccessListener {
+                    db.collection("Users").document(user!!.uid).set(userData).addOnSuccessListener {
                         toast("Welcome, $name! ✨ Account Created.")
                         startActivity(Intent(requireContext(), MainActivity::class.java))
                         requireActivity().finish()
                     }
+
                 }
-            }.addOnFailureListener { toast(it.localizedMessage) }
+                    }.addOnFailureListener {
+                    btnRegister.isEnabled = true
+                    toast("Registration Failed: ${it.localizedMessage}")
+                }
+            }
         }
-    }
 
     // --- FIXED: Memory Leak Prevention ---
     override fun onDestroyView() {

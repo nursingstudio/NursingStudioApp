@@ -9,7 +9,6 @@ import android.os.Looper
 import android.view.animation.AnimationUtils
 import android.widget.ImageView
 import android.view.View
-import com.example.nursingstudio.com.example.nursingstudio.login.LoginFragment
 
 
 class AuthActivity : AppCompatActivity() {

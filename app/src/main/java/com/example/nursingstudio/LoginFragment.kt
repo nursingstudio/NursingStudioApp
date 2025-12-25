@@ -1,4 +1,5 @@
-package com.example.nursingstudio.com.example.nursingstudio.login
+package com.example.nursingstudio
+
 
 import android.content.Intent
 import android.os.Bundle
@@ -12,9 +13,6 @@ import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
-import com.example.nursingstudio.MainActivity
-import com.example.nursingstudio.R
-import com.example.nursingstudio.com.example.nursingstudio.register.RegisterFragment
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.tabs.TabLayout
 import com.google.firebase.FirebaseException
