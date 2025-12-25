@@ -131,7 +131,7 @@ class LoginFragment : Fragment() {
                 // 🔥 Sexy Material Dialog for Redirection
                 MaterialAlertDialogBuilder(requireContext())
                     .setTitle("Profile Not Found")
-                    .setMessage("Aapka account nahi mila. Kya aap pehle register karna chahenge?")
+                    .setMessage("Account not found. Create a new account to get started.")
                     .setCancelable(false)
                     .setPositiveButton("Register Now") { _, _ ->
                         auth.signOut() // Sign out so they can register fresh

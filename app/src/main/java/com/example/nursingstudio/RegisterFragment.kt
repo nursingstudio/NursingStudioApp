@@ -2,6 +2,7 @@ package com.example.nursingstudio
 
 import android.os.Bundle
 import android.os.CountDownTimer
+import android.telephony.PhoneNumberFormattingTextWatcher
 import android.text.SpannableString
 import android.text.Spanned
 import android.text.TextPaint
@@ -72,7 +73,7 @@ class RegisterFragment : Fragment() {
         val cbTerms = view.findViewById<CheckBox>(R.id.cbTerms)
         val tvTermsLink = view.findViewById<TextView>(R.id.tvTermsLink)
 
-        // --- FIXED MOBILE ISSUE ---
+        // 1. CCP setup simple rakho
         ccp.registerCarrierNumberEditText(etMobile)
 
 
@@ -103,36 +104,51 @@ class RegisterFragment : Fragment() {
 
 
         // --- OTP Verification Logic ---
-       // Button click par Firebase ke liye perfect format nikalo
+        //Send OTP Button ki logic update karo
         btnSendOtp.setOnClickListener {
-            // Number se saare spaces aur kachra saaf karo
-            val rawNumber = etMobile.text.toString().replace("\\s".toRegex(), "")
+            val mobileInput = etMobile.text.toString().trim()
 
-            if (rawNumber.length != 10) {
-                toast("Please enter exactly 10 digits")
+            // 1. Check karo ki pure 10 digits hain (spaces hata kar)
+            val digitsOnly = mobileInput.replace("\\s".toRegex(), "")
+
+            if (digitsOnly.length != 10) {
+                toast("Please enter a valid 10-digit number")
                 return@setOnClickListener
             }
 
-            // Firebase world-class format: +911234567890
-            val finalPhoneNumber = ccp.selectedCountryCodeWithPlus + rawNumber
+            // 2. Firebase format (+91 94609 67545)
+            val part1 = digitsOnly.substring(0, 5)
+            val part2 = digitsOnly.substring(5, 10)
 
-            // Ab is finalPhoneNumber ko Firebase ke verifyPhoneNumber mein bhejo
-            sendFirebaseOtp(finalPhoneNumber)
+            // Yahi hai wo "formattedForFirebase" jise neeche use karna hai
+            val formattedForFirebase = "${ccp.selectedCountryCodeWithPlus} $part1 $part2"
 
+            toast("Sending OTP to $formattedForFirebase...")
 
-            PhoneAuthProvider.verifyPhoneNumber(PhoneAuthOptions.newBuilder(auth)
-                .setPhoneNumber(rawNumber).setTimeout(60L, TimeUnit.SECONDS).setActivity(requireActivity())
+            // 3. Firebase Phone Auth Logic
+            val options = PhoneAuthOptions.newBuilder(auth)
+                .setPhoneNumber(formattedForFirebase) // <-- Yahan 'number' hata kar 'formattedForFirebase' dalo
+                .setTimeout(60L, TimeUnit.SECONDS)
+                .setActivity(requireActivity())
                 .setCallbacks(object : PhoneAuthProvider.OnVerificationStateChangedCallbacks() {
                     override fun onCodeSent(id: String, token: PhoneAuthProvider.ForceResendingToken) {
-                        verificationId = id; resendToken = token; layoutOtpBox.visibility = View.VISIBLE
-                        btnSendOtp.visibility = View.GONE; startTimer(tvTimer, btnResendOtp)
-                        toast("OTP Sent to $rawNumber")
+                        verificationId = id
+                        resendToken = token
+                        layoutOtpBox.visibility = View.VISIBLE
+                        btnSendOtp.visibility = View.GONE
+                        startTimer(tvTimer, btnResendOtp)
+                        toast("OTP Sent to $formattedForFirebase") // <-- Yahan bhi change kar diya
                     }
-                    override fun onVerificationFailed(e: FirebaseException) { toast(e.localizedMessage) }
-                    override fun onVerificationCompleted(p0: PhoneAuthCredential) { etOtp.setText(p0.smsCode) }
-                }).build())
-        }
+                    override fun onVerificationFailed(e: FirebaseException) {
+                        toast("Failed: ${e.localizedMessage}")
+                    }
+                    override fun onVerificationCompleted(p0: PhoneAuthCredential) {
+                        etOtp.setText(p0.smsCode)
+                    }
+                }).build()
 
+            PhoneAuthProvider.verifyPhoneNumber(options)
+        }
         btnVerifyOtp.setOnClickListener {
             val code = etOtp.text.toString().trim()
             if (code.isEmpty()) return@setOnClickListener
@@ -193,7 +209,7 @@ class RegisterFragment : Fragment() {
             (2026 downTo 1970).map { it.toString() }.toMutableList().apply { add(0, "YYYY") },
             listOf("Select Marital *", "Unmarried", "Married", "Divorced", "Widow/Widower"),
             listOf("Select Religion *", "Hindu", "Sikh", "Jain", "Muslim", "Christian", "Buddhist", "Other"),
-            listOf("Select Education *", "ANM", "GNM", "B.Sc. Nursing", "Post Basic B.Sc. Nursing, M.Sc. Nursing", "PhD Nursing", "Other"),
+            listOf("Select Education *", "ANM", "GNM", "B.Sc. Nursing", "Post Basic B.Sc. Nursing", "M.Sc. Nursing", "PhD Nursing", "Other"),
             listOf("Select Occupation *", "Student", "Preparation (Competitive Exam)", "Private Job (Hospital/Clinic)", "Contractual Job (Govt. Hospital)", "Private Job + Preparation", "Nursing Officer", "CHO", "Nursing Tutor", "SNO", "Ward Incharge", "Metron", "ANS", "DNS", "Nursing Superintendent", "Other"),
             listOf("Bharat (India)", "Other"),
             listOf("Select State/UT *", "Andhra Pradesh","Arunachal Pradesh","Assam","Bihar","Chhattisgarh","Goa","Gujarat","Haryana","Himachal Pradesh","Jharkhand","Karnataka","Kerala","Madhya Pradesh","Maharashtra","Manipur","Meghalaya","Mizoram","Nagaland","Odisha","Punjab","Rajasthan","Sikkim","Tamil Nadu","Telangana","Tripura","Uttar Pradesh","Uttarakhand","West Bengal","Andaman and Nicobar Islands","Chandigarh","Dadra & Nagar Haveli and Daman & Diu","Delhi","Jammu & Kashmir","Ladakh","Lakshadweep","Puducherry")

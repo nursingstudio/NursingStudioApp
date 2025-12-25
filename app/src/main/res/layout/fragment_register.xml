@@ -70,8 +70,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="50dp"
                         android:hint="Mobile Number *"
-                        android:inputType="number"
-                        android:maxLength="10"
+                        android:inputType="phone"
                         android:background="@null" />
                 </LinearLayout>
 
