@@ -157,6 +157,14 @@
                 android:textStyle="bold"
                 app:backgroundTint="@color/saffron" />
 
+            <ProgressBar
+                android:id="@+id/loginProgress"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_gravity="center"
+                android:visibility="gone"
+                android:indeterminateTint="@color/white" />
+
             <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

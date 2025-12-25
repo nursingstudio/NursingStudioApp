@@ -1,21 +1,38 @@
-package com.example.nursingstudio
+package com.example.nursingstudio.com.example.nursingstudio.register
 
+import android.content.Intent
 import android.os.Bundle
 import android.os.CountDownTimer
-import android.telephony.PhoneNumberFormattingTextWatcher
 import android.text.SpannableString
 import android.text.Spanned
 import android.text.TextPaint
 import android.text.method.LinkMovementMethod
 import android.text.style.ClickableSpan
-import android.view.*
-import android.widget.*
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
+import android.widget.Button
+import android.widget.CheckBox
+import android.widget.EditText
+import android.widget.RadioGroup
+import android.widget.Spinner
+import android.widget.TextView
+import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import com.example.nursingstudio.MainActivity
+import com.example.nursingstudio.PrivacyFragment
+import com.example.nursingstudio.R
+import com.example.nursingstudio.TermsFragment
 import com.google.firebase.FirebaseException
-import com.google.firebase.auth.*
-import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.PhoneAuthCredential
+import com.google.firebase.auth.PhoneAuthOptions
+import com.google.firebase.auth.PhoneAuthProvider
 import com.google.firebase.firestore.FieldValue
+import com.google.firebase.firestore.FirebaseFirestore
 import com.hbb20.CountryCodePicker
 import java.util.concurrent.TimeUnit
 
@@ -36,7 +53,7 @@ class RegisterFragment : Fragment() {
         auth = FirebaseAuth.getInstance()
         db = FirebaseFirestore.getInstance()
 
-        // --- 1. View Mapping ---
+        // --- View Mapping ---
         val etName = view.findViewById<EditText>(R.id.etName)
         val spGender = view.findViewById<Spinner>(R.id.spGender)
         val spDay = view.findViewById<Spinner>(R.id.spDay)
@@ -66,19 +83,15 @@ class RegisterFragment : Fragment() {
         val rgNursingReg = view.findViewById<RadioGroup>(R.id.rgNursingReg)
         val layoutRegDetails = view.findViewById<View>(R.id.layoutRegDetails)
         val etRegNumber = view.findViewById<EditText>(R.id.etRegNumber)
-        val etRegState = view.findViewById<EditText>(R.id.etRegState) // Naya field
         val etEmail = view.findViewById<EditText>(R.id.etEmail)
         val etPassword = view.findViewById<EditText>(R.id.etPassword)
         val btnRegister = view.findViewById<Button>(R.id.btnRegister)
         val cbTerms = view.findViewById<CheckBox>(R.id.cbTerms)
         val tvTermsLink = view.findViewById<TextView>(R.id.tvTermsLink)
 
-        // 1. CCP setup simple rakho
         ccp.registerCarrierNumberEditText(etMobile)
 
-
-        // --- 2. Spinner Setup ---
-
+        // --- Spinner Setup ---
         setupAllSpinners(spGender, spDay, spMonth, spYear, spMarital, spReligion, spEducation, spOccupation, spCountry, spStateIndia)
 
         // Visibility Logics
@@ -102,32 +115,19 @@ class RegisterFragment : Fragment() {
             override fun onNothingSelected(p0: AdapterView<*>?) {}
         }
 
-
-        // --- OTP Verification Logic ---
-        //Send OTP Button ki logic update karo
+        // --- OTP Logic ---
         btnSendOtp.setOnClickListener {
             val mobileInput = etMobile.text.toString().trim()
-
-            // 1. Check karo ki pure 10 digits hain (spaces hata kar)
             val digitsOnly = mobileInput.replace("\\s".toRegex(), "")
-
             if (digitsOnly.length != 10) {
                 toast("Please enter a valid 10-digit number")
                 return@setOnClickListener
             }
 
-            // 2. Firebase format (+91 94609 67545)
-            val part1 = digitsOnly.substring(0, 5)
-            val part2 = digitsOnly.substring(5, 10)
+            val formattedForFirebase = "${ccp.selectedCountryCodeWithPlus}${digitsOnly}"
 
-            // Yahi hai wo "formattedForFirebase" jise neeche use karna hai
-            val formattedForFirebase = "${ccp.selectedCountryCodeWithPlus} $part1 $part2"
-
-            toast("Sending OTP to $formattedForFirebase...")
-
-            // 3. Firebase Phone Auth Logic
             val options = PhoneAuthOptions.newBuilder(auth)
-                .setPhoneNumber(formattedForFirebase) // <-- Yahan 'number' hata kar 'formattedForFirebase' dalo
+                .setPhoneNumber(formattedForFirebase)
                 .setTimeout(60L, TimeUnit.SECONDS)
                 .setActivity(requireActivity())
                 .setCallbacks(object : PhoneAuthProvider.OnVerificationStateChangedCallbacks() {
@@ -137,7 +137,7 @@ class RegisterFragment : Fragment() {
                         layoutOtpBox.visibility = View.VISIBLE
                         btnSendOtp.visibility = View.GONE
                         startTimer(tvTimer, btnResendOtp)
-                        toast("OTP Sent to $formattedForFirebase") // <-- Yahan bhi change kar diya
+                        toast("OTP Sent to $formattedForFirebase")
                     }
                     override fun onVerificationFailed(e: FirebaseException) {
                         toast("Failed: ${e.localizedMessage}")
@@ -146,59 +146,84 @@ class RegisterFragment : Fragment() {
                         etOtp.setText(p0.smsCode)
                     }
                 }).build()
-
             PhoneAuthProvider.verifyPhoneNumber(options)
         }
+
+        // --- FIXED: OTP Verification without creating ghost user ---
         btnVerifyOtp.setOnClickListener {
             val code = etOtp.text.toString().trim()
             if (code.isEmpty()) return@setOnClickListener
-            auth.signInWithCredential(PhoneAuthProvider.getCredential(verificationId!!, code)).addOnSuccessListener {
-                isOtpVerified = true; layoutOtpBox.visibility = View.GONE; btnSendOtp.visibility = View.VISIBLE
-                btnSendOtp.text = "Verified ✅"; btnSendOtp.isEnabled = false; toast("Verified!")
-            }
+
+            val credential = PhoneAuthProvider.getCredential(verificationId!!, code)
+            auth.signInWithCredential(credential).addOnSuccessListener {
+                isOtpVerified = true
+                layoutOtpBox.visibility = View.GONE
+                btnSendOtp.visibility = View.VISIBLE
+                btnSendOtp.text = "Verified ✅"
+                btnSendOtp.isEnabled = false
+                toast("Verified!")
+            }.addOnFailureListener { toast("Invalid OTP") }
         }
 
-        setupTermsSaffron(tvTermsLink) // Ise call karo
+        setupTermsSaffron(tvTermsLink)
 
-        // --- Complete Registration & Data Sync ---
+        // --- FIXED: Account Binding Logic ---
         btnRegister.setOnClickListener {
             val name = etName.text.toString().trim()
             val email = etEmail.text.toString().trim()
             val pass = etPassword.text.toString().trim()
+            val otpCode = etOtp.text.toString().trim()
 
-            // Strict Validation
             if (name.isEmpty() || email.isEmpty() || etDistrict.text.isEmpty() || etPincode.text.length < 6) {
                 toast("All marked * fields are mandatory!"); return@setOnClickListener
             }
             if (!isOtpVerified) { toast("Mobile verification mandatory"); return@setOnClickListener }
             if (!cbTerms.isChecked) { toast("Accept TnC & Privacy Policy"); return@setOnClickListener }
 
+            // Step 1: Create Email Account
             auth.createUserWithEmailAndPassword(email, pass).addOnSuccessListener { res ->
-                val userData = linkedMapOf(
-                    "uid" to res.user!!.uid,
-                    "fullName" to name,
-                    "gender" to spGender.selectedItem.toString(),
-                    "dob" to "${spDay.selectedItem}-${spMonth.selectedItem}-${spYear.selectedItem}",
-                    "maritalStatus" to spMarital.selectedItem.toString(),
-                    "religion" to spReligion.selectedItem.toString(),
-                    "mobile" to ccp.fullNumberWithPlus,
-                    "email" to email,
-                    "education" to if(spEducation.selectedItem == "Other") etEducationOther.text.toString() else spEducation.selectedItem.toString(),
-                    "occupation" to if(spOccupation.selectedItem == "Other") etOccupationOther.text.toString() else spOccupation.selectedItem.toString(),
-                    "country" to spCountry.selectedItem.toString(),
-                    "state" to spStateIndia.selectedItem.toString(),
-                    "district" to etDistrict.text.toString(),
-                    "address" to etAddress.text.toString(),
-                    "pincode" to etPincode.text.toString(),
-                    "nursingReg" to (rgNursingReg.checkedRadioButtonId == R.id.rbRegYes),
-                    "regNumber" to etRegNumber.text.toString(),
-                    "registeredAt" to FieldValue.serverTimestamp()
-                )
-                db.collection("Users").document(res.user!!.uid).set(userData).addOnSuccessListener {
-                    toast("Welcome, $name! ✨ Account Created.")
+                val user = res.user
+
+                // Step 2: Link the Phone Credential
+                val phoneCred = PhoneAuthProvider.getCredential(verificationId!!, otpCode)
+                user?.linkWithCredential(phoneCred)?.addOnCompleteListener { linkTask ->
+
+                    val userData = linkedMapOf(
+                        "uid" to user.uid,
+                        "fullName" to name,
+                        "gender" to spGender.selectedItem.toString(),
+                        "dob" to "${spDay.selectedItem}-${spMonth.selectedItem}-${spYear.selectedItem}",
+                        "maritalStatus" to spMarital.selectedItem.toString(),
+                        "religion" to spReligion.selectedItem.toString(),
+                        "mobile" to ccp.fullNumberWithPlus,
+                        "email" to email,
+                        "education" to if(spEducation.selectedItem == "Other") etEducationOther.text.toString() else spEducation.selectedItem.toString(),
+                        "occupation" to if(spOccupation.selectedItem == "Other") etOccupationOther.text.toString() else spOccupation.selectedItem.toString(),
+                        "country" to spCountry.selectedItem.toString(),
+                        "state" to if(spCountry.selectedItem == "Bharat (India)") spStateIndia.selectedItem.toString() else etStateOther.text.toString(),
+                        "district" to etDistrict.text.toString(),
+                        "address" to etAddress.text.toString(),
+                        "pincode" to etPincode.text.toString(),
+                        "nursingReg" to (rgNursingReg.checkedRadioButtonId == R.id.rbRegYes),
+                        "regNumber" to etRegNumber.text.toString(),
+                        "registeredAt" to FieldValue.serverTimestamp()
+                    )
+
+                    // Step 3: Save to Firestore
+                    db.collection("Users").document(user.uid).set(userData).addOnSuccessListener {
+                        toast("Welcome, $name! ✨ Account Created.")
+                        startActivity(Intent(requireContext(), MainActivity::class.java))
+                        requireActivity().finish()
+                    }
                 }
             }.addOnFailureListener { toast(it.localizedMessage) }
         }
+    }
+
+    // --- FIXED: Memory Leak Prevention ---
+    override fun onDestroyView() {
+        super.onDestroyView()
+        countDownTimer?.cancel()
     }
 
     private fun setupAllSpinners(vararg s: Spinner) {
@@ -215,11 +240,13 @@ class RegisterFragment : Fragment() {
             listOf("Select State/UT *", "Andhra Pradesh","Arunachal Pradesh","Assam","Bihar","Chhattisgarh","Goa","Gujarat","Haryana","Himachal Pradesh","Jharkhand","Karnataka","Kerala","Madhya Pradesh","Maharashtra","Manipur","Meghalaya","Mizoram","Nagaland","Odisha","Punjab","Rajasthan","Sikkim","Tamil Nadu","Telangana","Tripura","Uttar Pradesh","Uttarakhand","West Bengal","Andaman and Nicobar Islands","Chandigarh","Dadra & Nagar Haveli and Daman & Diu","Delhi","Jammu & Kashmir","Ladakh","Lakshadweep","Puducherry")
         )
         for (i in s.indices) {
-            s[i].adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_dropdown_item, lists[i])
+            s[i].adapter = ArrayAdapter(
+                requireContext(),
+                android.R.layout.simple_spinner_dropdown_item,
+                lists[i]
+            )
         }
     }
-
-
 
     private fun startTimer(tv: TextView, btn: TextView) {
         tv.visibility = View.VISIBLE; btn.visibility = View.GONE
@@ -237,41 +264,31 @@ class RegisterFragment : Fragment() {
     private fun setupTermsSaffron(tv: TextView) {
         val fullText = "I have read and agree to the Terms & Conditions and Privacy Policy."
         val spannable = SpannableString(fullText)
-
         val tcClick = object : ClickableSpan() {
-            override fun onClick(v: View) {
-                openFragment(TermsFragment())
-            }
+            override fun onClick(v: View) { openFragment(TermsFragment()) }
             override fun updateDrawState(ds: TextPaint) {
                 ds.color = ContextCompat.getColor(requireContext(), R.color.saffron)
                 ds.isUnderlineText = true
             }
         }
-
         val ppClick = object : ClickableSpan() {
-            override fun onClick(v: View) {
-                openFragment(PrivacyFragment())
-            }
+            override fun onClick(v: View) { openFragment(PrivacyFragment()) }
             override fun updateDrawState(ds: TextPaint) {
                 ds.color = ContextCompat.getColor(requireContext(), R.color.saffron)
                 ds.isUnderlineText = true
             }
         }
-
         spannable.setSpan(tcClick, fullText.indexOf("Terms & Conditions"), fullText.indexOf("Terms & Conditions") + 18, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
         spannable.setSpan(ppClick, fullText.indexOf("Privacy Policy"), fullText.indexOf("Privacy Policy") + 14, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
-
         tv.text = spannable
         tv.movementMethod = LinkMovementMethod.getInstance()
     }
 
     private fun openFragment(fragment: Fragment) {
         requireActivity().supportFragmentManager.beginTransaction()
-            .replace(R.id.auth_container, fragment) // 'auth_container' tumhare activity ki ID honi chahiye
+            .replace(R.id.auth_container, fragment)
             .addToBackStack(null).commit()
     }
 
     private fun toast(m: String) = Toast.makeText(requireContext(), m, Toast.LENGTH_SHORT).show()
 }
-
-private fun RegisterFragment.sendFirebaseOtp(finalPhoneNumber: String) {}
