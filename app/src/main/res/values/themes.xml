@@ -24,7 +24,7 @@
 
     <style name="Theme.NursingStudio" parent="Base.Theme.NursingStudio" />
 
-    <style name="Theme.NursingStudio.Splash" parent="Theme.Material3.DayNight.NoActionBar">
+    <style name="Theme.NursingStudio.Splash" parent="Theme.Material3.Light.NoActionBar">
         <item name="android:windowBackground">@color/splash_bg</item>
         <item name="android:statusBarColor">@color/splash_bg</item>
     </style>
@@ -43,6 +43,12 @@
         <item name="android:textSize">16sp</item>
         <item name="android:textStyle">bold</item>
         <item name="android:textColor">@color/saffron_dark</item>
+    </style>
+
+    <style name="ToolbarTitleBold">
+        <item name="android:textStyle">bold</item>
+        <item name="android:textSize">20sp</item>
+        <item name="android:textColor">@color/white</item> <item name="android:fontFamily">sans-serif-medium</item>
     </style>
 
 </resources>

@@ -57,7 +57,7 @@ class MyPageFragment : Fragment() {
             db.collection("Users").document(userId).get().addOnSuccessListener { doc ->
                 if (doc.exists()) {
                     // RegisterFragment ke Keys ke saath Matching
-                    tvName.text = doc.getString("name") ?: "Student"
+                    tvName.text = doc.getString("name") ?: "_"
                     tvGender.text = doc.getString("gender") ?: "-"
                     tvEmail.text = doc.getString("email") ?: "-"
                     tvMobile.text = doc.getString("mobile") ?: "-"
