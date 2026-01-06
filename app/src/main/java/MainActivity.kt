@@ -5,26 +5,20 @@ import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Bundle
 import android.util.Base64
-import android.util.Log
 import android.widget.ImageView
 import android.widget.TextView
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.Fragment
+import com.example.nursingstudio.profile.ProfileFragment
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.navigation.NavigationView
-import com.google.firebase.FirebaseApp
-import com.google.firebase.appcheck.FirebaseAppCheck
-import com.google.firebase.appcheck.debug.DebugAppCheckProviderFactory
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
-import com.example.nursingstudio.BuildConfig
-import com.google.firebase.appcheck.playintegrity.PlayIntegrityAppCheckProviderFactory
 
 
 class MainActivity : AppCompatActivity() {
@@ -96,7 +90,7 @@ class MainActivity : AppCompatActivity() {
         updateDrawerHeader()
 
         headerView.setOnClickListener {
-            loadFragment(MyPageFragment())
+            loadFragment(ProfileFragment())
             drawerLayout.closeDrawer(GravityCompat.START)
         }
 
@@ -121,7 +115,7 @@ class MainActivity : AppCompatActivity() {
                 R.id.nav_quiz -> loadFragment(QuizFragment())
                 R.id.nav_pdf -> loadFragment(PdfFragment())
                 R.id.nav_video -> loadFragment(VideoFragment())
-                R.id.nav_mypage -> loadFragment(MyPageFragment())
+                R.id.nav_profile -> loadFragment(ProfileFragment())
                 else -> false
             }
             true
@@ -163,7 +157,7 @@ class MainActivity : AppCompatActivity() {
         tvHeaderMobile.text = mobile
         tvDrawerSubscription.text = if (subType == "Premium") "Premium Version" else "Free Version"
 
-        // Profile image logic (Mypage se synchronized)
+        // Profile image logic (ProfileFragment se synchronized)
         val profileSp = getSharedPreferences(PROFILE_PREF, MODE_PRIVATE)
         val encoded = profileSp.getString(KEY_PROFILE_IMAGE, null)
 

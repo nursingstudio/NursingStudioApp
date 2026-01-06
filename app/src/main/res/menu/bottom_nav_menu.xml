@@ -22,8 +22,8 @@
         android:title="Videos" />
 
     <item
-        android:id="@+id/nav_mypage"
+        android:id="@+id/nav_profile"
         android:icon="@drawable/ic_person_24"
-        android:title="My Page" />
+        android:title="Profile" />
 
 </menu>
