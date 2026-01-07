@@ -51,4 +51,9 @@
         <item name="android:textColor">@color/white</item> <item name="android:fontFamily">sans-serif-medium</item>
     </style>
 
+    <style name="SaffronCheckbox" parent="Widget.AppCompat.CompoundButton.CheckBox">
+        <item name="colorControlActivated">@color/saffron</item>
+        <item name="colorControlNormal">#757575</item>
+    </style>
+
 </resources>

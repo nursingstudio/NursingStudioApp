@@ -110,9 +110,9 @@
             <EditText android:id="@+id/etPincode" android:layout_width="match_parent" android:layout_height="50dp" android:hint="@string/hint_pincode_req" android:inputType="number" android:maxLength="6" android:background="@drawable/edittext_background" android:layout_marginTop="8dp" />
 
             <TextView style="@style/SectionHeaderStyle" android:text="@string/label_nursing_reg_title" />
-            <RadioGroup android:id="@+id/rgNursingReg" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:layout_marginTop="4dp">
-                <RadioButton android:id="@+id/rbRegYes" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Yes" android:buttonTint="@color/saffron"/>
-                <RadioButton android:id="@+id/rbRegNo" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="No" android:checked="true" android:buttonTint="@color/saffron" />
+            <RadioGroup android:id="@+id/rgNursingReg" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:layout_marginTop="4dp" app:theme="@style/Theme.AppCompat.Light">
+                <RadioButton android:id="@+id/rbRegYes" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Yes" android:buttonTint="@color/radio_selector"/>
+                <RadioButton android:id="@+id/rbRegNo" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="No" android:checked="true" android:buttonTint="@color/radio_selector" />
             </RadioGroup>
 
             <LinearLayout android:id="@+id/layoutRegDetails" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:visibility="gone" android:layout_marginTop="8dp">
@@ -128,19 +128,29 @@
                 android:orientation="horizontal"
                 android:layout_marginTop="20dp"
                 android:gravity="center_vertical">
-                <CheckBox
+
+                <androidx.appcompat.widget.AppCompatCheckBox
                     android:id="@+id/cbTerms"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:buttonTint="@color/saffron" />
+                    android:theme="@style/SaffronCheckbox"
+                    android:checked="false"
+                    app:buttonTint="@color/saffron"
+
+                    android:minWidth="0dp"
+                    android:minHeight="0dp"
+                    android:paddingStart="0dp"
+                    android:paddingLeft="0dp"
+                    android:translationX="-4dp" />
+
                 <TextView
                     android:id="@+id/tvTermsLink"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textSize="14sp"
                     android:text="@string/label_terms_agree"
-                    android:textColor="@color/text_secondary"
-                    android:layout_marginStart="8dp" />
+                    android:layout_marginStart="4dp"
+                    android:textColor="@color/text_secondary" />
             </LinearLayout>
 
             <Button
