@@ -29,7 +29,6 @@ import java.util.concurrent.TimeUnit
 class RegisterFragment : Fragment() {
 
     private lateinit var auth: FirebaseAuth
-    // ViewModel initialization
     private val viewModel: RegisterViewModel by viewModels()
 
     private var verificationId: String? = null
@@ -163,7 +162,6 @@ class RegisterFragment : Fragment() {
             val name = etName.text.toString().trim()
             val currentOtp = etOtp.text.toString().trim()
 
-            // Validation (Keep all your strict checks)
             if (name.isEmpty()) { etName.error = "Name required"; etName.requestFocus(); return@setOnClickListener }
             if (spGender.selectedItemPosition == 0) { toast("Select Gender"); return@setOnClickListener }
             if (spDay.selectedItemPosition == 0 || spMonth.selectedItemPosition == 0 || spYear.selectedItemPosition == 0) { toast("Complete DOB required"); return@setOnClickListener }
@@ -172,7 +170,6 @@ class RegisterFragment : Fragment() {
             if (pass.length < 6) { etPassword.error = "Min 6 chars"; return@setOnClickListener }
             if (!cbTerms.isChecked) { toast("Accept Terms"); return@setOnClickListener }
 
-            // Prepare Data Map
             val userData = mutableMapOf<String, Any>(
                 "fullName" to name,
                 "gender" to spGender.selectedItem.toString(),
@@ -195,8 +192,12 @@ class RegisterFragment : Fragment() {
                 "registeredAt" to FieldValue.serverTimestamp()
             )
 
-            val phoneCred = PhoneAuthProvider.getCredential(verificationId!!, currentOtp)
-            viewModel.startRegistration(email, pass, phoneCred, userData)
+            if (verificationId != null) {
+                val phoneCred = PhoneAuthProvider.getCredential(verificationId!!, currentOtp)
+                viewModel.startRegistration(email, pass, phoneCred, userData)
+            } else {
+                toast("Please verify mobile number")
+            }
         }
     }
 
@@ -215,11 +216,14 @@ class RegisterFragment : Fragment() {
             listOf("Bharat (India)", "Other"),
             listOf("Select State/UT *", "Andhra Pradesh","Arunachal Pradesh","Assam","Bihar","Chhattisgarh","Goa","Gujarat","Haryana","Himachal Pradesh","Jharkhand","Karnataka","Kerala","Madhya Pradesh","Maharashtra","Manipur","Meghalaya","Mizoram","Nagaland","Odisha","Punjab","Rajasthan","Sikkim","Tamil Nadu","Telangana","Tripura","Uttar Pradesh","Uttarakhand","West Bengal","Andaman and Nicobar Islands","Chandigarh","Dadra & Nagar Haveli and Daman & Diu","Delhi","Jammu & Kashmir","Ladakh","Lakshadweep","Puducherry")
         )
-        for (i in s.indices) { s[i].adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_dropdown_item, lists[i]) }
+        for (i in s.indices) {
+            s[i].adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_dropdown_item, lists[i])
+        }
     }
 
     private fun startTimer(tv: TextView, btn: TextView) {
         tv.visibility = View.VISIBLE; btn.visibility = View.GONE
+        countDownTimer?.cancel()
         countDownTimer = object : CountDownTimer(60000, 1000) {
             override fun onTick(m: Long) { tv.text = "Resend in ${m/1000}s" }
             override fun onFinish() { tv.visibility = View.GONE; btn.visibility = View.VISIBLE }
@@ -236,19 +240,29 @@ class RegisterFragment : Fragment() {
         val spannable = SpannableString(fullText)
         val tcClick = object : ClickableSpan() {
             override fun onClick(v: View) { openFragment(TermsFragment()) }
-            override fun updateDrawState(ds: TextPaint) { ds.color = ContextCompat.getColor(requireContext(), R.color.saffron); ds.isUnderlineText = true }
+            override fun updateDrawState(ds: TextPaint) {
+                ds.color = ContextCompat.getColor(requireContext(), R.color.saffron)
+                ds.isUnderlineText = true
+            }
         }
         val ppClick = object : ClickableSpan() {
             override fun onClick(v: View) { openFragment(PrivacyFragment()) }
-            override fun updateDrawState(ds: TextPaint) { ds.color = ContextCompat.getColor(requireContext(), R.color.saffron); ds.isUnderlineText = true }
+            override fun updateDrawState(ds: TextPaint) {
+                ds.color = ContextCompat.getColor(requireContext(), R.color.saffron)
+                ds.isUnderlineText = true
+            }
         }
-        spannable.setSpan(tcClick, fullText.indexOf("Terms & Conditions"), fullText.indexOf("Terms & Conditions") + 18, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
-        spannable.setSpan(ppClick, fullText.indexOf("Privacy Policy"), fullText.indexOf("Privacy Policy") + 14, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+        val tcStart = fullText.indexOf("Terms & Conditions")
+        val ppStart = fullText.indexOf("Privacy Policy")
+        if (tcStart != -1) spannable.setSpan(tcClick, tcStart, tcStart + 18, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+        if (ppStart != -1) spannable.setSpan(ppClick, ppStart, ppStart + 14, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
         tv.text = spannable; tv.movementMethod = LinkMovementMethod.getInstance()
     }
 
     private fun openFragment(fragment: Fragment) {
-        requireActivity().supportFragmentManager.beginTransaction().replace(R.id.auth_container, fragment).addToBackStack(null).commit()
+        requireActivity().supportFragmentManager.beginTransaction()
+            .replace(R.id.auth_container, fragment)
+            .addToBackStack(null).commit()
     }
 
     private fun toast(m: String) = Toast.makeText(requireContext(), m, Toast.LENGTH_SHORT).show()

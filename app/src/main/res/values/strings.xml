@@ -17,6 +17,29 @@
         <string name="btn_logout">Logout Account</string>
         <string name="user"></string>
 
+    <string name="title_login">Login</string>
+    <string name="tab_email">Email</string>
+    <string name="tab_mobile">Mobile</string>
+    <string name="hint_email">Email Address</string>
+    <string name="hint_password">Password</string>
+    <string name="hint_otp">Enter 6-digit OTP</string>
+    <string name="btn_login">Login</string>
+    <string name="btn_send_otp">Send OTP</string>
+    <string name="btn_verify_login">Verify &amp; Login</string>
+    <string name="label_forgot_password">Forgot Password?</string>
+    <string name="label_go_register">New User? Register Now</string>
+
+    <string name="title_register">Create Account</string>
+    <string name="hint_full_name">Full Name</string>
+    <string name="hint_mobile">Mobile Number</string>
+    <string name="btn_register">Register Now</string>
+    <string name="label_go_login">Already have an account? Login</string>
+
+    <string name="err_empty_fields">Please enter all details</string>
+    <string name="err_invalid_mobile">Enter a valid 10-digit number</string>
+    <string name="msg_otp_sent">OTP Sent to %1$s</string>
+    <string name="msg_reset_link_sent">Password reset link sent!</string>
+
         <string name="msg_welcome_back">Welcome back! ✨</string>
         <string name="error_profile_not_found">Profile not found!</string>
         <string name="error_fetch_failed">Failed to fetch data</string>
@@ -46,6 +69,41 @@
 
     <string name="latest_update">Latest Update</string>
     <string name="latest_update_text">New nursing vacancy notification released.</string>
+
+    <string name="option_cancel">Cancel</string>
+    <string name="btn_send_link">Send Link</string>
+
+    <string name="title_create_account">Create Account</string>
+    <string name="label_personal_details">Personal Details</string>
+    <string name="label_gender_req">Gender *</string>
+    <string name="label_dob_req">Date of Birth *</string>
+    <string name="label_marital_req">Marital Status *</string>
+    <string name="label_religion_req">Religion *</string>
+    <string name="label_occ_edu">Occupation &amp; Education</string>
+    <string name="label_contact_ver">Contact &amp; Verification</string>
+    <string name="label_address_details">Address Details</string>
+    <string name="label_nursing_reg_title">Nursing Registration</string>
+
+    <string name="hint_full_name_req">Full Name *</string>
+    <string name="hint_spec_edu">Specify Education *</string>
+    <string name="hint_spec_occ">Specify Occupation *</string>
+    <string name="hint_mobile_req">Mobile Number *</string>
+    <string name="btn_verify_otp">Verify OTP</string>
+    <string name="hint_otp_req">Enter 6-Digit OTP *</string>
+    <string name="timer_format">Resend in %1$s</string>
+    <string name="btn_resend_otp">Resend OTP</string>
+    <string name="hint_email_req">Email Address *</string>
+    <string name="hint_country_req">Enter Country Name *</string>
+    <string name="hint_state_req">Enter State/Region *</string>
+    <string name="hint_district_req">District *</string>
+    <string name="hint_address_req">Full Address *</string>
+    <string name="hint_pincode_req">Pincode *</string>
+    <string name="hint_reg_state">Registration State *</string>
+    <string name="hint_reg_num">Registration Number *</string>
+    <string name="hint_set_pass">Set Password *</string>
+    <string name="btn_complete_reg">Complete Registration</string>
+    <string name="label_terms_agree">I have read and agree to the Terms &amp; Conditions and Privacy Policy.</string>
+
 
     <string name="terms_text">
 By using this application, you agree to comply with all applicable laws and regulations.

@@ -19,7 +19,7 @@
         android:id="@+id/tvAppTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Nursing Studio"
+        android:text="@string/app_name"
         android:textSize="24sp"
         android:textStyle="bold"
         android:textColor="@color/saffron_dark"
@@ -53,7 +53,8 @@
                 android:layout_marginBottom="20dp"
                 android:background="@drawable/tab_background"
                 app:tabIndicator="@drawable/tab_indicator"
-                app:tabIndicatorColor="@null"  app:tabIndicatorAnimationMode="elastic"
+                app:tabIndicatorColor="@null"
+                app:tabIndicatorAnimationMode="elastic"
                 app:tabIndicatorFullWidth="true"
                 app:tabIndicatorGravity="stretch"
                 app:tabIndicatorHeight="45dp"
@@ -64,8 +65,8 @@
                 app:tabGravity="fill"
                 app:tabMode="fixed">
 
-                <com.google.android.material.tabs.TabItem android:text="Email" />
-                <com.google.android.material.tabs.TabItem android:text="Mobile" />
+                <com.google.android.material.tabs.TabItem android:text="@string/tab_email" />
+                <com.google.android.material.tabs.TabItem android:text="@string/tab_mobile" />
             </com.google.android.material.tabs.TabLayout>
 
             <LinearLayout
@@ -79,7 +80,7 @@
                     style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="Email Address"
+                    android:hint="@string/hint_email"
                     app:startIconDrawable="@drawable/ic_email">
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/etEmail"
@@ -93,7 +94,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="12dp"
-                    android:hint="Password"
+                    android:hint="@string/hint_password"
                     app:passwordToggleEnabled="true"
                     app:startIconDrawable="@drawable/ic_lock">
                     <com.google.android.material.textfield.TextInputEditText
@@ -122,7 +123,7 @@
                     style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="Mobile Number">
+                    android:hint="@string/hint_mobile">
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/etMobileLogin"
                         android:layout_width="match_parent"
@@ -136,7 +137,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="12dp"
-                    android:hint="Enter 6-Digit OTP"
+                    android:hint="@string/hint_otp"
                     android:visibility="gone">
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/etOtpLogin"
@@ -151,7 +152,7 @@
                 android:id="@+id/btnLoginAction"
                 android:layout_width="match_parent"
                 android:layout_height="55dp"
-                android:text="Login"
+                android:text="@string/btn_login"
                 android:layout_marginTop="24dp"
                 app:cornerRadius="16dp"
                 android:textStyle="bold"
@@ -174,7 +175,7 @@
                     android:id="@+id/tvForgotPassword"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Forgot Password?"
+                    android:text="@string/label_forgot_password"
                     android:textColor="@color/saffron_dark"
                     android:textStyle="bold"
                     android:layout_alignParentStart="true" />
@@ -183,7 +184,7 @@
                     android:id="@+id/tvGoRegister"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="New User? Join Us"
+                    android:text="@string/label_go_register"
                     android:textColor="@color/text_secondary"
                     android:textStyle="bold"
                     android:layout_alignParentEnd="true" />

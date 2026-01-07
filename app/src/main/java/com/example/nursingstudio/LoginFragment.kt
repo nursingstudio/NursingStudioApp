@@ -51,14 +51,16 @@ class LoginFragment : Fragment() {
                 isEmailMode = tab?.position == 0
                 verificationId = null
                 layoutOtp.visibility = View.GONE
+
+                // Strings using getString()
                 if (isEmailMode) {
                     layoutEmail.visibility = View.VISIBLE
                     layoutMobile.visibility = View.GONE
-                    btnLoginAction.text = "Login"
+                    btnLoginAction.text = getString(R.string.btn_login)
                 } else {
                     layoutEmail.visibility = View.GONE
                     layoutMobile.visibility = View.VISIBLE
-                    btnLoginAction.text = "Send OTP"
+                    btnLoginAction.text = getString(R.string.btn_send_otp)
                 }
             }
             override fun onTabUnselected(tab: TabLayout.Tab?) {}
@@ -71,7 +73,7 @@ class LoginFragment : Fragment() {
                 is LoginResult.Loading -> toggleLoading(true, btnLoginAction, progressBar)
                 is LoginResult.Success -> {
                     toggleLoading(false, btnLoginAction, progressBar)
-                    toast("Welcome back! ✨")
+                    toast(getString(R.string.msg_welcome_back))
                     startActivity(Intent(requireContext(), MainActivity::class.java))
                     requireActivity().finish()
                 }
@@ -91,16 +93,16 @@ class LoginFragment : Fragment() {
             if (isEmailMode) {
                 val email = etEmail.text.toString().trim()
                 val pass = etPassword.text.toString().trim()
-                if (email.isEmpty() || pass.isEmpty()) toast("Enter credentials")
+                if (email.isEmpty() || pass.isEmpty()) toast(getString(R.string.err_empty_fields))
                 else viewModel.loginWithEmail(email, pass)
             } else {
                 if (verificationId == null) {
                     val mobile = etMobile.text.toString().trim()
-                    if (mobile.length < 10) toast("Enter valid number")
+                    if (mobile.length < 10) toast(getString(R.string.err_invalid_mobile))
                     else sendOtp(ccp.fullNumberWithPlus, layoutOtp, btnLoginAction, progressBar)
                 } else {
                     val otp = etOtp.text.toString().trim()
-                    if (otp.length < 6) toast("Enter 6-digit OTP")
+                    if (otp.length < 6) toast(getString(R.string.hint_otp)) // Reusing otp hint string for validation
                     else {
                         val credential = PhoneAuthProvider.getCredential(verificationId!!, otp)
                         viewModel.loginWithPhone(credential)
@@ -133,8 +135,8 @@ class LoginFragment : Fragment() {
                     toggleLoading(false, btn, pb)
                     verificationId = id
                     otpLayout.visibility = View.VISIBLE
-                    btn.text = "Verify & Login"
-                    toast("OTP Sent")
+                    btn.text = getString(R.string.btn_verify_login)
+                    toast(getString(R.string.msg_otp_sent, fullPhone))
                 }
             }).build()
         PhoneAuthProvider.verifyPhoneNumber(options)
@@ -142,11 +144,11 @@ class LoginFragment : Fragment() {
 
     private fun showNoProfileDialog() {
         MaterialAlertDialogBuilder(requireContext())
-            .setTitle("Profile Not Found")
-            .setMessage("Please register first.")
+            .setTitle(getString(R.string.error_profile_not_found))
+            .setMessage(getString(R.string.error_profile_not_found)) // Or a specific message string
             .setCancelable(false)
-            .setPositiveButton("Register Now") { _, _ -> auth.signOut(); navigateToRegister() }
-            .setNegativeButton("Cancel") { _, _ -> auth.signOut() }.show()
+            .setPositiveButton(getString(R.string.title_register)) { _, _ -> auth.signOut(); navigateToRegister() }
+            .setNegativeButton(getString(R.string.option_cancel)) { _, _ -> auth.signOut() }.show()
     }
 
     private fun toggleLoading(isLoading: Boolean, btn: Button, pb: ProgressBar) {
@@ -162,13 +164,21 @@ class LoginFragment : Fragment() {
     }
 
     private fun showForgotPasswordDialog(email: String) {
-        val input = EditText(requireContext()).apply { hint = "Registered Email"; setText(email) }
+        val input = EditText(requireContext()).apply {
+            hint = getString(R.string.hint_email)
+            setText(email)
+        }
         MaterialAlertDialogBuilder(requireContext())
-            .setTitle("Reset Password").setView(input)
-            .setPositiveButton("Send Link") { _, _ ->
+            .setTitle(getString(R.string.label_forgot_password)).setView(input)
+            .setPositiveButton(getString(R.string.btn_send_link)) { _, _ ->
                 val mail = input.text.toString().trim()
-                if (mail.isNotEmpty()) auth.sendPasswordResetEmail(mail).addOnSuccessListener { toast("Link Sent!") }
-            }.setNegativeButton("Cancel", null).show()
+                if (mail.isNotEmpty()) {
+                    auth.sendPasswordResetEmail(mail).addOnSuccessListener {
+                        toast(getString(R.string.msg_reset_link_sent))
+                    }
+                }
+            }
+            .setNegativeButton(getString(R.string.option_cancel), null).show()
     }
 
     private fun toast(m: String) = Toast.makeText(requireContext(), m, Toast.LENGTH_SHORT).show()
