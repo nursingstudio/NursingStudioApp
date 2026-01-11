@@ -15,11 +15,11 @@ class SocialHandlesFragment : Fragment() {
 
     companion object {
         // Yahi wale links jo tumne MainActivity me use kiye the
-        private const val URL_YOUTUBE  = "https://youtube.com/@risingbharat2025"
+        private const val URL_YOUTUBE  = "https://youtube.com/@NursingStudio2026"
         private const val URL_WHATSAPP = "https://whatsapp.com/channel/0029Vb6Sjdq6BIEapKtNUE2L"
         private const val URL_TELEGRAM = "https://telegram.me/NursingStudio"
         private const val URL_ARATTAI  = "https://aratt.ai/@nursingstudio"
-        private const val URL_INSTA    = "https://instagram.com/risingbharat2025"
+        private const val URL_INSTA    = "https://instagram.com/NursingStudio2026"
         private const val URL_TWITTER  = "https://twitter.com/"
         private const val URL_FACEBOOK = "https://facebook.com/"
     }
