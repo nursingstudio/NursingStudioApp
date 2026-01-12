@@ -10,18 +10,19 @@ class RegisterRepository {
     private val auth = FirebaseAuth.getInstance()
     private val db = FirebaseFirestore.getInstance()
 
-    // Email/Pass se account banana
+    // Create New User
     fun createUser(email: String, pass: String): Task<AuthResult> {
         return auth.createUserWithEmailAndPassword(email, pass)
     }
 
-    // Phone link karna (World-class binding)
+    // Link Phone Credential to the created account
     fun linkPhone(credential: AuthCredential): Task<AuthResult>? {
         return auth.currentUser?.linkWithCredential(credential)
     }
 
-    // Firestore mein data save karna
+    // Save All details (including Material Date Picker selection)
     fun saveUserData(uid: String, userData: Map<String, Any>): Task<Void> {
+        // "Users" collection mein professional structure ke sath data save hoga
         return db.collection("Users").document(uid).set(userData)
     }
 }

@@ -1,15 +1,13 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
-    // Compose plugin ko tabhi rakhna agar tum Compose use kar rahe ho,
-    // par tumhara RegisterFragment XML based hai, toh ye thik hai rehne do.
     alias(libs.plugins.kotlin.compose)
     id("com.google.gms.google-services")
 }
 
 android {
     namespace = "com.example.nursingstudio"
-    compileSdk = 36 // Tip: 36 abhi preview mein ho sakta hai, 35 zyada stable hai.
+    compileSdk = 36 // Professional stable version
 
     defaultConfig {
         applicationId = "com.example.nursingstudio"
@@ -30,14 +28,19 @@ android {
             )
         }
     }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
+
     kotlinOptions {
         jvmTarget = "11"
     }
+
+    // Fixed: Dono features ko ek hi block mein aur sahi format mein dala hai
     buildFeatures {
+        viewBinding = true
         buildConfig = true
     }
 }
@@ -48,27 +51,24 @@ dependencies {
     implementation(libs.androidx.appcompat)
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
-    implementation(libs.material) // Material library for Spinners/Buttons
+    implementation(libs.material)
 
-    // --- FIREBASE (Clean & World-Class) ---
-    implementation(platform("com.google.firebase:firebase-bom:33.7.0")) // Latest Stable BoM
+    // --- FIREBASE (BoM managed) ---
+    implementation(platform("com.google.firebase:firebase-bom:33.7.0"))
     implementation("com.google.firebase:firebase-auth")
     implementation("com.google.firebase:firebase-firestore")
     implementation("com.google.firebase:firebase-storage")
     implementation("com.google.firebase:firebase-appcheck-playintegrity")
     implementation("com.google.firebase:firebase-appcheck-debug")
-    implementation("com.google.firebase:firebase-appcheck-ktx") // Version hatane se BoM khud handle karega
-
-    // This allows Firebase to trigger the ReCAPTCHA invisible flow
+    implementation("com.google.firebase:firebase-appcheck-ktx")
     implementation("com.google.android.gms:play-services-safetynet:18.1.0")
 
-
-// --- OTHER LIBRARIES ---
+    // --- OTHER LIBRARIES ---
     implementation("com.hbb20:ccp:2.6.0")
     implementation("de.hdodenhof:circleimageview:3.1.0")
     implementation("androidx.core:core-splashscreen:1.0.1")
 
-    // Compose (Jo tumne pehle se add kiye the)
+    // Compose
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
     implementation(platform(libs.androidx.compose.bom))
@@ -77,10 +77,9 @@ dependencies {
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
 
-    // ViewModel aur LiveData ke liye
+    // ViewModel & LiveData
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.2")
     implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.6.2")
-// Activity/Fragment KTX extensions ke liye (Easy ViewModel initialization)
     implementation("androidx.fragment:fragment-ktx:1.6.1")
 
     // Testing

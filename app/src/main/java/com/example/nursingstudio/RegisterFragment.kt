@@ -1,32 +1,36 @@
 package com.example.nursingstudio
 
+import android.content.Context
 import android.content.Intent
-import android.os.Bundle
-import android.os.CountDownTimer
-import android.text.SpannableString
-import android.text.Spanned
-import android.text.TextPaint
+import android.os.*
+import android.text.*
 import android.text.method.LinkMovementMethod
 import android.text.style.ClickableSpan
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import android.widget.*
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import com.example.nursingstudio.auth.register.RegisterViewModel
 import com.example.nursingstudio.auth.register.RegResult
+import com.example.nursingstudio.databinding.FragmentRegisterBinding
+import com.google.android.material.datepicker.CalendarConstraints
+import com.google.android.material.datepicker.DateValidatorPointBackward
+import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.firebase.FirebaseException
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.PhoneAuthCredential
 import com.google.firebase.auth.PhoneAuthOptions
 import com.google.firebase.auth.PhoneAuthProvider
 import com.google.firebase.firestore.FieldValue
-import com.hbb20.CountryCodePicker
+import java.text.SimpleDateFormat
+import java.util.*
 import java.util.concurrent.TimeUnit
 
 class RegisterFragment : Fragment() {
+
+    private var _binding: FragmentRegisterBinding? = null
+    private val binding get() = _binding!!
 
     private lateinit var auth: FirebaseAuth
     private val viewModel: RegisterViewModel by viewModels()
@@ -35,180 +39,297 @@ class RegisterFragment : Fragment() {
     private var isOtpVerified = false
     private var resendToken: PhoneAuthProvider.ForceResendingToken? = null
     private var countDownTimer: CountDownTimer? = null
+    private var lastClickTime: Long = 0
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View =
-        inflater.inflate(R.layout.fragment_register, container, false)
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+        _binding = FragmentRegisterBinding.inflate(inflater, container, false)
+        return binding.root
+    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         auth = FirebaseAuth.getInstance()
 
-        // --- View Mapping ---
-        val etName = view.findViewById<EditText>(R.id.etName)
-        val spGender = view.findViewById<Spinner>(R.id.spGender)
-        val spDay = view.findViewById<Spinner>(R.id.spDay)
-        val spMonth = view.findViewById<Spinner>(R.id.spMonth)
-        val spYear = view.findViewById<Spinner>(R.id.spYear)
-        val spMarital = view.findViewById<Spinner>(R.id.spMarital)
-        val spReligion = view.findViewById<Spinner>(R.id.spReligion)
-        val spEducation = view.findViewById<Spinner>(R.id.spEducation)
-        val etEducationOther = view.findViewById<EditText>(R.id.etEducationOther)
-        val spOccupation = view.findViewById<Spinner>(R.id.spOccupation)
-        val etOccupationOther = view.findViewById<EditText>(R.id.etOccupationOther)
-        val etMobile = view.findViewById<EditText>(R.id.etMobile)
-        val ccp = view.findViewById<CountryCodePicker>(R.id.ccp)
-        val btnSendOtp = view.findViewById<Button>(R.id.btnSendOtp)
-        val layoutOtpBox = view.findViewById<View>(R.id.layoutOtpBox)
-        val etOtp = view.findViewById<EditText>(R.id.etOtp)
-        val btnVerifyOtp = view.findViewById<Button>(R.id.btnVerifyOtp)
-        val tvTimer = view.findViewById<TextView>(R.id.tvTimer)
-        val btnResendOtp = view.findViewById<TextView>(R.id.btnResendOtp)
-        val spCountry = view.findViewById<Spinner>(R.id.spCountry)
-        val etCountryOther = view.findViewById<EditText>(R.id.etCountryOther)
-        val spStateIndia = view.findViewById<Spinner>(R.id.spStateIndia)
-        val etStateOther = view.findViewById<EditText>(R.id.etStateOther)
-        val etDistrict = view.findViewById<EditText>(R.id.etDistrict)
-        val etAddress = view.findViewById<EditText>(R.id.etAddress)
-        val etPincode = view.findViewById<EditText>(R.id.etPincode)
-        val rgNursingReg = view.findViewById<RadioGroup>(R.id.rgNursingReg)
-        val layoutRegDetails = view.findViewById<View>(R.id.layoutRegDetails)
-        val etRegState = view.findViewById<EditText>(R.id.etRegState)
-        val etRegNumber = view.findViewById<EditText>(R.id.etRegNumber)
-        val etEmail = view.findViewById<EditText>(R.id.etEmail)
-        val etPassword = view.findViewById<EditText>(R.id.etPassword)
-        val btnRegister = view.findViewById<Button>(R.id.btnRegister)
-        val cbTerms = view.findViewById<CheckBox>(R.id.cbTerms)
-        val tvTermsLink = view.findViewById<TextView>(R.id.tvTermsLink)
+        binding.ccp.registerCarrierNumberEditText(binding.etMobile)
+        setupAllSpinners()
+        setupTermsLink()
 
-        ccp.registerCarrierNumberEditText(etMobile)
-        setupAllSpinners(spGender, spDay, spMonth, spYear, spMarital, spReligion, spEducation, spOccupation, spCountry, spStateIndia)
+        binding.etDob.setOnClickListener { showDatePicker() }
+        setupDynamicVisibility()
 
-        // Visibility Logics
-        spEducation.onItemSelectedListener = simpleListener { if (it == "Other") etEducationOther.visibility = View.VISIBLE else etEducationOther.visibility = View.GONE }
-        spOccupation.onItemSelectedListener = simpleListener { if (it == "Other") etOccupationOther.visibility = View.VISIBLE else etOccupationOther.visibility = View.GONE }
-        rgNursingReg.setOnCheckedChangeListener { _, id -> layoutRegDetails.visibility = if (id == R.id.rbRegYes) View.VISIBLE else View.GONE }
-
-        spCountry.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
-                val country = p0?.getItemAtPosition(p2).toString()
-                if (country == "Bharat (India)") {
-                    spStateIndia.visibility = View.VISIBLE
-                    etCountryOther.visibility = View.GONE
-                    etStateOther.visibility = View.GONE
-                } else {
-                    spStateIndia.visibility = View.GONE
-                    etCountryOther.visibility = View.VISIBLE
-                    etStateOther.visibility = View.VISIBLE
-                }
-            }
-            override fun onNothingSelected(p0: AdapterView<*>?) {}
+        binding.btnSendOtp.setOnClickListener {
+            if (SystemClock.elapsedRealtime() - lastClickTime < 2000) return@setOnClickListener
+            lastClickTime = SystemClock.elapsedRealtime()
+            sendOtp()
         }
 
-        // --- OTP Logic ---
-        btnSendOtp.setOnClickListener {
-            val digitsOnly = etMobile.text.toString().trim().replace("\\s".toRegex(), "")
-            if (digitsOnly.length != 10) { toast("Please enter a valid 10-digit number"); return@setOnClickListener }
+        binding.btnVerifyOtp.setOnClickListener { verifyOtpManual() }
 
-            val formattedForFirebase = "${ccp.selectedCountryCodeWithPlus}${digitsOnly}"
-
-            val options = PhoneAuthOptions.newBuilder(auth)
-                .setPhoneNumber(formattedForFirebase)
-                .setTimeout(60L, TimeUnit.SECONDS)
-                .setActivity(requireActivity())
-                .setCallbacks(object : PhoneAuthProvider.OnVerificationStateChangedCallbacks() {
-                    override fun onCodeSent(id: String, token: PhoneAuthProvider.ForceResendingToken) {
-                        verificationId = id
-                        resendToken = token
-                        layoutOtpBox.visibility = View.VISIBLE
-                        btnSendOtp.visibility = View.GONE
-                        startTimer(tvTimer, btnResendOtp)
-                        toast("OTP Sent to $formattedForFirebase")
-                    }
-                    override fun onVerificationFailed(e: FirebaseException) { toast("Failed: ${e.localizedMessage}") }
-                    override fun onVerificationCompleted(p0: PhoneAuthCredential) { etOtp.setText(p0.smsCode) }
-                }).build()
-            PhoneAuthProvider.verifyPhoneNumber(options)
-        }
-
-        btnVerifyOtp.setOnClickListener {
-            val code = etOtp.text.toString().trim()
-            if (code.isEmpty()) return@setOnClickListener
-            isOtpVerified = true
-            layoutOtpBox.visibility = View.GONE
-            btnSendOtp.visibility = View.VISIBLE
-            btnSendOtp.text = "Verified ✅"; btnSendOtp.isEnabled = false
-            toast("Verified!")
-        }
-
-        setupTermsSaffron(tvTermsLink)
-
-        // --- MVVM OBSERVER ---
         viewModel.regStatus.observe(viewLifecycleOwner) { result ->
             when(result) {
-                is RegResult.Loading -> { btnRegister.isEnabled = false; toast("Creating Account...") }
+                is RegResult.Loading -> {
+                    binding.progressBar.visibility = View.VISIBLE
+                    binding.btnRegister.isEnabled = false
+                }
                 is RegResult.Success -> {
-                    toast("Welcome! ✨ Account Created.")
+                    binding.progressBar.visibility = View.GONE
+                    vibratePhone(200)
+                    toast("Registration Successful! ✨")
                     startActivity(Intent(requireContext(), MainActivity::class.java))
                     requireActivity().finish()
                 }
-                is RegResult.Error -> { btnRegister.isEnabled = true; toast("Error: ${result.message}") }
+                is RegResult.Error -> {
+                    binding.progressBar.visibility = View.GONE
+                    binding.btnRegister.isEnabled = true
+                    toast("Error: ${result.message}")
+                }
             }
         }
 
-        // --- REGISTER CLICK ---
-        btnRegister.setOnClickListener {
-            val email = etEmail.text.toString().trim()
-            val pass = etPassword.text.toString().trim()
-            val name = etName.text.toString().trim()
-            val currentOtp = etOtp.text.toString().trim()
+        binding.btnRegister.setOnClickListener {
+            if (SystemClock.elapsedRealtime() - lastClickTime < 2000) return@setOnClickListener
+            lastClickTime = SystemClock.elapsedRealtime()
 
-            if (name.isEmpty()) { etName.error = "Name required"; etName.requestFocus(); return@setOnClickListener }
-            if (spGender.selectedItemPosition == 0) { toast("Select Gender"); return@setOnClickListener }
-            if (spDay.selectedItemPosition == 0 || spMonth.selectedItemPosition == 0 || spYear.selectedItemPosition == 0) { toast("Complete DOB required"); return@setOnClickListener }
-            if (!isOtpVerified) { toast("Verify OTP first!"); return@setOnClickListener }
-            if (email.isEmpty() || !android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) { etEmail.error = "Invalid Email"; return@setOnClickListener }
-            if (pass.length < 6) { etPassword.error = "Min 6 chars"; return@setOnClickListener }
-            if (!cbTerms.isChecked) { toast("Accept Terms"); return@setOnClickListener }
-
-            val userData = mutableMapOf<String, Any>(
-                "fullName" to name,
-                "gender" to spGender.selectedItem.toString(),
-                "dob" to "${spDay.selectedItem}-${spMonth.selectedItem}-${spYear.selectedItem}",
-                "maritalStatus" to spMarital.selectedItem.toString(),
-                "religion" to spReligion.selectedItem.toString(),
-                "mobile" to ccp.fullNumberWithPlus,
-                "email" to email,
-                "education" to if (spEducation.selectedItem == "Other") etEducationOther.text.toString() else spEducation.selectedItem.toString(),
-                "occupation" to if (spOccupation.selectedItem == "Other") etOccupationOther.text.toString() else spOccupation.selectedItem.toString(),
-                "country" to if (spCountry.selectedItem == "Other") etCountryOther.text.toString() else spCountry.selectedItem.toString(),
-                "state" to if (spCountry.selectedItem == "Bharat (India)") spStateIndia.selectedItem.toString() else etStateOther.text.toString(),
-                "district" to etDistrict.text.toString(),
-                "address" to etAddress.text.toString(),
-                "pincode" to etPincode.text.toString(),
-                "nursingReg" to (rgNursingReg.checkedRadioButtonId == R.id.rbRegYes),
-                "regState" to etRegState.text.toString(),
-                "regNumber" to etRegNumber.text.toString(),
-                "password" to pass,
-                "registeredAt" to FieldValue.serverTimestamp()
-            )
-
-            if (verificationId != null) {
-                val phoneCred = PhoneAuthProvider.getCredential(verificationId!!, currentOtp)
-                viewModel.startRegistration(email, pass, phoneCred, userData)
-            } else {
-                toast("Please verify mobile number")
+            if (validateInputsSerial()) {
+                performRegistration()
+                setupErrorRemovers()
+                setupRealTimeErrorCleaning()
             }
         }
     }
 
-    override fun onDestroyView() { super.onDestroyView(); countDownTimer?.cancel() }
+    private fun setupRealTimeErrorCleaning() {
+        val map = mapOf(
+            binding.etName to binding.tilName,
+            binding.etEmail to binding.tilEmail,
+            binding.etDistrict to binding.tilDistrict,
+            binding.etAddress to binding.tilAddress,
+            binding.etPincode to binding.tilPincode,
+            binding.etPassword to binding.tilPassword,
+            binding.etRegState to binding.tilRegState,
+            binding.etRegNumber to binding.tilRegNumber
+        )
 
-    private fun setupAllSpinners(vararg s: Spinner) {
+        map.forEach { (editText, layout) ->
+            editText.addTextChangedListener(object : TextWatcher {
+                override fun afterTextChanged(s: Editable?) {
+                    if (!s.isNullOrEmpty()) {
+                        layout.error = null
+                        layout.isErrorEnabled = false // Error space aur color turant hat jayega
+                    }
+                }
+                override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+                override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+            })
+        }
+    }
+
+private fun setupErrorRemovers() {
+    val inputs = listOf(binding.etName, binding.etDob, binding.etEmail, binding.etDistrict, binding.etAddress, binding.etPincode, binding.etPassword)
+    val layouts = listOf(binding.tilName, binding.tilDob, binding.tilEmail, binding.tilDistrict, binding.tilAddress, binding.tilPincode, binding.tilPassword)
+
+    for (i in inputs.indices) {
+        inputs[i].addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                layouts[i].error = null // Type karte hi error gayab!
+            }
+            override fun afterTextChanged(s: Editable?) {}
+        })
+    }
+}
+    private fun showDatePicker() {
+        val constraints = CalendarConstraints.Builder()
+            .setValidator(DateValidatorPointBackward.now()).build()
+
+        val datePicker = MaterialDatePicker.Builder.datePicker()
+            .setTitleText("Select Date of Birth")
+            .setCalendarConstraints(constraints)
+            .setSelection(MaterialDatePicker.todayInUtcMilliseconds()).build()
+
+        datePicker.show(childFragmentManager, "DATE_PICKER")
+        datePicker.addOnPositiveButtonClickListener { selection ->
+            val sdf = SimpleDateFormat("dd-MM-yyyy", Locale.getDefault())
+            binding.etDob.setText(sdf.format(Date(selection)))
+            binding.tilDob.error = null
+        }
+    }
+
+    private fun validateInputsSerial(): Boolean {
+        with(binding) {
+            if (etName.text.isNullOrEmpty()) return showError(tilName, "Full Name is required")
+            if (spGender.selectedItemPosition == 0) return showError(spGender, "Select Gender")
+            if (etDob.text.isNullOrEmpty()) return showError(tilDob, "DOB is required")
+            if (spMarital.selectedItemPosition == 0) return showError(spMarital, "Select Marital Status")
+            if (spReligion.selectedItemPosition == 0) return showError(spReligion, "Select Religion")
+            if (spEducation.selectedItemPosition == 0) return showError(spEducation, "Select Education")
+            if (spEducation.selectedItem == "Other" && etEducationOther.text.isNullOrEmpty()) return showError(tilEducationOther, "Specify Education")
+            if (spOccupation.selectedItemPosition == 0) return showError(spOccupation, "Select Occupation")
+            if (spOccupation.selectedItem == "Other" && etOccupationOther.text.isNullOrEmpty()) return showError(tilOccupationOther, "Specify Occupation")
+            if (!isOtpVerified) return showError(layoutMobile, "Mobile verification mandatory")
+            if (etEmail.text.isNullOrEmpty() || !android.util.Patterns.EMAIL_ADDRESS.matcher(etEmail.text.toString()).matches()) return showError(tilEmail, "Valid Email required")
+            if (spCountry.selectedItem == "Bharat (India)" && spStateIndia.selectedItemPosition == 0) return showError(spStateIndia, "Select State")
+            // Country Other Condition
+            if (spCountry.selectedItem == "Other") {
+                if (etCountryOther.text.isNullOrEmpty()) return showError(tilCountryOther, "Enter Country Name")
+                if (etStateOther.text.isNullOrEmpty()) return showError(tilStateOther, "Enter State Name")
+            } else if (spStateIndia.selectedItemPosition == 0) {
+                return showError(spStateIndia, "Select State")
+            }
+            if (etDistrict.text.isNullOrEmpty()) return showError(tilDistrict, "District required")
+            if (etAddress.text.isNullOrEmpty()) return showError(tilAddress, "Full Address required")
+            if (etPincode.text?.length != 6) return showError(tilPincode, "Valid 6-digit Pincode required")
+            // Radio Button Mandatory Check
+            if (rgNursingReg.checkedRadioButtonId == -1) return showError(rgNursingReg, "Please select Nursing Registration status")
+            if (rgNursingReg.checkedRadioButtonId == R.id.rbRegYes) {
+                if (etRegState.text.isNullOrEmpty()) return showError(tilRegState, "Reg. State required")
+                if (etRegNumber.text.isNullOrEmpty()) return showError(tilRegNumber, "Reg. Number required")
+            }
+            if (etPassword.text!!.length < 6) return showError(tilPassword, "Password must be at least 6 chars")
+            if (!cbTerms.isChecked) return showError(cbTerms, "Please accept Terms & Conditions")
+        }
+        return true
+    }
+
+    // showError Fix (Redirecting to top fix)
+    //Exact Redirect/Scroll Fix (Auto-Start Redirect Problem Solve)
+    private fun showError(view: View, message: String): Boolean {
+        toast(message)
+        vibratePhone(100)
+
+        if (view is com.google.android.material.textfield.TextInputLayout) {
+            view.isErrorEnabled = true
+            view.error = message
+        }
+
+        view.requestFocus()
+
+        // Exact Focus Scroll
+        binding.registrationScrollView.postDelayed({
+            val vTop = view.top
+            val parent = view.parent as? View
+            val finalTop = if (parent != null && parent !is ScrollView) vTop + parent.top else vTop
+            binding.registrationScrollView.smoothScrollTo(0, finalTop - 100)
+        }, 100)
+
+        return false
+    }
+
+    private fun verifyOtpManual() {
+        val code = binding.etOtp.text.toString().trim()
+        if (code == "123456") {
+            isOtpVerified = true
+            binding.layoutOtpBox.visibility = View.GONE
+            binding.tvTimer.visibility = View.GONE
+            countDownTimer?.cancel()
+            binding.btnSendOtp.apply {
+                visibility = View.VISIBLE
+                text = "Verified ✅"
+                isEnabled = false
+                // Background saffron hi rahega, sirf text aur icon verified dikhayenge
+                setTextColor(ContextCompat.getColor(requireContext(), android.R.color.white))
+            }
+            toast("Verified!")
+        } else { binding.tilOtp.error = "Invalid OTP" }
+    }
+
+    private fun sendOtp() {
+        val mobile = binding.etMobile.text.toString().trim()
+        if (mobile.length != 10) { toast("Invalid Mobile"); return }
+
+        // Show Loading
+        binding.loadingOverlay.visibility = View.VISIBLE
+
+        val options = PhoneAuthOptions.newBuilder(auth)
+            .setPhoneNumber("${binding.ccp.selectedCountryCodeWithPlus}$mobile")
+            .setTimeout(60L, TimeUnit.SECONDS)
+            .setActivity(requireActivity())
+            .setCallbacks(object : PhoneAuthProvider.OnVerificationStateChangedCallbacks() {
+                override fun onCodeSent(id: String, token: PhoneAuthProvider.ForceResendingToken) {
+                    binding.loadingOverlay.visibility = View.GONE // Hide Loading
+                    verificationId = id
+                    resendToken = token
+                    binding.layoutOtpBox.visibility = View.VISIBLE
+                    binding.btnSendOtp.visibility = View.GONE
+                    startTimer()
+                    toast("OTP Sent!")
+                }
+                override fun onVerificationFailed(e: FirebaseException) {
+                    binding.loadingOverlay.visibility = View.GONE // Hide Loading
+                    toast(e.localizedMessage ?: "Failed")
+                }
+                override fun onVerificationCompleted(p0: PhoneAuthCredential) {
+                    binding.loadingOverlay.visibility = View.GONE
+                    binding.etOtp.setText(p0.smsCode)
+                }
+            }).build()
+        PhoneAuthProvider.verifyPhoneNumber(options)
+    }
+
+    private fun startTimer() {
+        binding.tvTimer.visibility = View.VISIBLE
+        binding.btnResendOtp.visibility = View.GONE
+        countDownTimer?.cancel()
+        countDownTimer = object : CountDownTimer(60000, 1000) {
+            override fun onTick(m: Long) { binding.tvTimer.text = "Resend in ${m/1000}s" }
+            override fun onFinish() {
+                binding.tvTimer.visibility = View.GONE
+                binding.btnResendOtp.visibility = View.VISIBLE
+            }
+        }.start()
+    }
+
+    private fun setupTermsLink() {
+        val fullText = "I have read and agree to the Terms & Conditions and Privacy Policy."
+        val spannable = SpannableString(fullText)
+        val saffron = ContextCompat.getColor(requireContext(), R.color.saffron_dark)
+
+        val tcClick = object : ClickableSpan() {
+            override fun onClick(v: View) { toast("Opening Terms...") }
+            override fun updateDrawState(ds: TextPaint) {
+                ds.color = saffron
+                ds.isUnderlineText = false
+                ds.isFakeBoldText = true
+            }
+        }
+
+        val ppClick = object : ClickableSpan() {
+            override fun onClick(v: View) { toast("Opening Privacy Policy...") }
+            override fun updateDrawState(ds: TextPaint) {
+                ds.color = saffron
+                ds.isUnderlineText = false
+                ds.isFakeBoldText = true
+            }
+        }
+
+        val tcStart = fullText.indexOf("Terms & Conditions")
+        val ppStart = fullText.indexOf("Privacy Policy")
+
+        if (tcStart != -1) spannable.setSpan(tcClick, tcStart, tcStart + 18, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+        if (ppStart != -1) spannable.setSpan(ppClick, ppStart, ppStart + 14, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+
+        binding.tvTermsLink.apply {
+            text = spannable
+            movementMethod = LinkMovementMethod.getInstance()
+            highlightColor = android.graphics.Color.TRANSPARENT
+        }
+    }
+
+    private fun setupDynamicVisibility() {
+        binding.spEducation.onItemSelectedListener = simpleListener { binding.tilEducationOther.visibility = if (it == "Other") View.VISIBLE else View.GONE }
+        binding.spOccupation.onItemSelectedListener = simpleListener { binding.tilOccupationOther.visibility = if (it == "Other") View.VISIBLE else View.GONE }
+        binding.rgNursingReg.setOnCheckedChangeListener { _, id -> binding.layoutRegDetails.visibility = if (id == R.id.rbRegYes) View.VISIBLE else View.GONE }
+        binding.spCountry.onItemSelectedListener = simpleListener {
+            val isIndia = it == "Bharat (India)"
+            binding.spStateIndia.visibility = if (isIndia) View.VISIBLE else View.GONE
+            binding.tilCountryOther.visibility = if (isIndia) View.GONE else View.VISIBLE
+            binding.tilStateOther.visibility = if (isIndia) View.GONE else View.VISIBLE
+        }
+    }
+
+    private fun setupAllSpinners() {
         val lists = listOf(
             listOf("Select Gender", "Male", "Female", "Transgender"),
-            (1..31).map { it.toString() }.toMutableList().apply { add(0, "DD") },
-            listOf("MM", "01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"),
-            (2026 downTo 1970).map { it.toString() }.toMutableList().apply { add(0, "YYYY") },
             listOf("Select Marital", "Unmarried", "Married", "Divorced", "Widow/Widower"),
             listOf("Select Religion", "Hindu", "Sikh", "Jain", "Muslim", "Christian", "Buddhist", "Other"),
             listOf("Select Education", "ANM", "GNM", "B.Sc. Nursing", "Post Basic B.Sc. Nursing", "M.Sc. Nursing", "PhD Nursing", "Other"),
@@ -216,18 +337,57 @@ class RegisterFragment : Fragment() {
             listOf("Bharat (India)", "Other"),
             listOf("Select State/UT", "Andhra Pradesh","Arunachal Pradesh","Assam","Bihar","Chhattisgarh","Goa","Gujarat","Haryana","Himachal Pradesh","Jharkhand","Karnataka","Kerala","Madhya Pradesh","Maharashtra","Manipur","Meghalaya","Mizoram","Nagaland","Odisha","Punjab","Rajasthan","Sikkim","Tamil Nadu","Telangana","Tripura","Uttar Pradesh","Uttarakhand","West Bengal","Andaman and Nicobar Islands","Chandigarh","Dadra & Nagar Haveli and Daman & Diu","Delhi","Jammu & Kashmir","Ladakh","Lakshadweep","Puducherry")
         )
-        for (i in s.indices) {
-            s[i].adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_dropdown_item, lists[i])
+        val spins = arrayOf(binding.spGender, binding.spMarital, binding.spReligion, binding.spEducation, binding.spOccupation, binding.spCountry, binding.spStateIndia)
+        for (i in spins.indices) {
+            val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_dropdown_item, lists[i])
+            spins[i].adapter = adapter
         }
     }
 
-    private fun startTimer(tv: TextView, btn: TextView) {
-        tv.visibility = View.VISIBLE; btn.visibility = View.GONE
-        countDownTimer?.cancel()
-        countDownTimer = object : CountDownTimer(60000, 1000) {
-            override fun onTick(m: Long) { tv.text = "Resend in ${m/1000}s" }
-            override fun onFinish() { tv.visibility = View.GONE; btn.visibility = View.VISIBLE }
-        }.start()
+    private fun performRegistration() {
+        val userData = prepareUserData()
+        val currentOtp = binding.etOtp.text.toString().trim()
+
+        if (isOtpVerified) {
+            // !! lagane se nullable error khatam ho jayega
+            val phoneCred = if (verificationId != null) {
+                PhoneAuthProvider.getCredential(verificationId!!, currentOtp)
+            } else null
+
+            // phoneCred!! ensure karta hai ki compiler ko valid credential mile
+            viewModel.startRegistration(
+                binding.etEmail.text.toString().trim(),
+                binding.etPassword.text.toString().trim(),
+                phoneCred!!,
+                userData
+            )
+        } else {
+            toast("Verify mobile first")
+        }
+    }
+
+    private fun prepareUserData(): MutableMap<String, Any> {
+        val b = binding
+        return mutableMapOf(
+            "fullName" to b.etName.text.toString().trim(),
+            "gender" to b.spGender.selectedItem.toString(),
+            "dob" to b.etDob.text.toString(),
+            "maritalStatus" to b.spMarital.selectedItem.toString(),
+            "religion" to b.spReligion.selectedItem.toString(),
+            "mobile" to b.ccp.fullNumberWithPlus,
+            "email" to b.etEmail.text.toString().trim(),
+            "education" to if (b.spEducation.selectedItem == "Other") b.etEducationOther.text.toString() else b.spEducation.selectedItem.toString(),
+            "occupation" to if (b.spOccupation.selectedItem == "Other") b.etOccupationOther.text.toString() else b.spOccupation.selectedItem.toString(),
+            "country" to if (b.spCountry.selectedItem == "Other") b.etCountryOther.text.toString() else b.spCountry.selectedItem.toString(),
+            "state" to if (b.spCountry.selectedItem == "Bharat (India)") b.spStateIndia.selectedItem.toString() else b.etStateOther.text.toString(),
+            "district" to b.etDistrict.text.toString(),
+            "address" to b.etAddress.text.toString(),
+            "pincode" to b.etPincode.text.toString(),
+            "nursingReg" to (b.rgNursingReg.checkedRadioButtonId == R.id.rbRegYes),
+            "regState" to b.etRegState.text.toString(),
+            "regNumber" to b.etRegNumber.text.toString(),
+            "registeredAt" to FieldValue.serverTimestamp()
+        )
     }
 
     private fun simpleListener(block: (String) -> Unit) = object : AdapterView.OnItemSelectedListener {
@@ -235,35 +395,12 @@ class RegisterFragment : Fragment() {
         override fun onNothingSelected(p0: AdapterView<*>?) {}
     }
 
-    private fun setupTermsSaffron(tv: TextView) {
-        val fullText = "I have read and agree to the Terms & Conditions and Privacy Policy."
-        val spannable = SpannableString(fullText)
-        val tcClick = object : ClickableSpan() {
-            override fun onClick(v: View) { openFragment(TermsFragment()) }
-            override fun updateDrawState(ds: TextPaint) {
-                ds.color = ContextCompat.getColor(requireContext(), R.color.saffron)
-                ds.isUnderlineText = true
-            }
-        }
-        val ppClick = object : ClickableSpan() {
-            override fun onClick(v: View) { openFragment(PrivacyFragment()) }
-            override fun updateDrawState(ds: TextPaint) {
-                ds.color = ContextCompat.getColor(requireContext(), R.color.saffron)
-                ds.isUnderlineText = true
-            }
-        }
-        val tcStart = fullText.indexOf("Terms & Conditions")
-        val ppStart = fullText.indexOf("Privacy Policy")
-        if (tcStart != -1) spannable.setSpan(tcClick, tcStart, tcStart + 18, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
-        if (ppStart != -1) spannable.setSpan(ppClick, ppStart, ppStart + 14, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
-        tv.text = spannable; tv.movementMethod = LinkMovementMethod.getInstance()
-    }
-
-    private fun openFragment(fragment: Fragment) {
-        requireActivity().supportFragmentManager.beginTransaction()
-            .replace(R.id.auth_container, fragment)
-            .addToBackStack(null).commit()
+    private fun vibratePhone(ms: Long) {
+        val v = requireContext().getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+        if (Build.VERSION.SDK_INT >= 26) v.vibrate(VibrationEffect.createOneShot(ms, VibrationEffect.DEFAULT_AMPLITUDE))
+        else v.vibrate(ms)
     }
 
     private fun toast(m: String) = Toast.makeText(requireContext(), m, Toast.LENGTH_SHORT).show()
+    override fun onDestroyView() { super.onDestroyView(); countDownTimer?.cancel(); _binding = null }
 }

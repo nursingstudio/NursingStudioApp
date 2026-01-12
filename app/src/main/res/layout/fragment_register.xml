@@ -1,78 +1,176 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@color/app_background"
-    android:scrollbars="none"
-    android:fillViewport="true"
-    android:clipToPadding="false"
-    android:paddingTop="24dp"
-    android:paddingBottom="100dp"> <LinearLayout
-    android:orientation="vertical"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:padding="16dp">
+    android:layout_height="match_parent">
 
-    <com.google.android.material.card.MaterialCardView
+    <ScrollView
+        android:id="@+id/registrationScrollView"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:cardCornerRadius="24dp"
-        app:cardElevation="8dp"
-        android:layout_marginBottom="20dp">
+        android:layout_height="match_parent"
+        android:background="@color/app_background"
+        android:fillViewport="true"
+        android:scrollbars="none"
+        android:fitsSystemWindows="true"
+        android:paddingTop="16dp"
+        android:clipToPadding="false">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="20dp">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/title_create_account"
-                android:textSize="22sp"
-                android:textStyle="bold"
-                android:textColor="@color/saffron_dark"
-                android:layout_marginBottom="10dp"/>
+            android:padding="12dp">
+            <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:cardCornerRadius="24dp"
+            app:cardElevation="8dp"
+            android:layout_marginBottom="20dp">
+                <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+                    <TextView
+            android:id="@+id/tvTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/title_create_account"
+            android:textSize="22sp"
+            android:textStyle="bold"
+            android:textColor="@color/saffron_dark"
+            android:layout_marginBottom="12dp"/>
 
             <TextView style="@style/SectionHeaderStyle" android:text="@string/label_personal_details" />
 
-            <EditText
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/tilName"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/hint_full_name_req"
+                app:errorEnabled="true"
+                app:boxStrokeColor="@color/saffron"
+                app:hintTextColor="@color/saffron"
+                app:errorIconDrawable="@null">
+                <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/etName"
                 android:layout_width="match_parent"
-                android:layout_height="50dp"
-                android:hint="@string/hint_full_name_req"
+                android:layout_height="wrap_content"
+                android:inputType="textPersonName"
+                android:imeOptions="actionNext"/>
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <TextView android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/label_gender_req"
+                android:layout_marginTop="8dp"
+                android:textStyle="bold"/>
+            <Spinner android:id="@+id/spGender"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:background="@drawable/spinner_bg"
+                android:layout_marginTop="4dp"/>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/tilDob"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:hint="@string/label_dob_req"
+                app:errorEnabled="true"
+                app:errorIconDrawable="@null"
+                app:boxStrokeColor="@color/saffron"
+                app:hintTextColor="@color/saffron"
+                app:startIconDrawable="@android:drawable/ic_menu_my_calendar">
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etDob"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:focusable="false"
+                    android:clickable="true" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <TextView android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/label_marital_req"
+                android:layout_marginTop="8dp"
+                android:textStyle="bold"/>
+            <Spinner android:id="@+id/spMarital"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:background="@drawable/spinner_bg"/>
+
+            <TextView android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/label_religion_req"
+                android:layout_marginTop="8dp"
+                android:textStyle="bold"/>
+            <Spinner android:id="@+id/spReligion"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:background="@drawable/spinner_bg"/>
+
+            <TextView style="@style/SectionHeaderStyle"
+                android:text="@string/label_occ_edu" />
+
+            <Spinner android:id="@+id/spEducation"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:background="@drawable/spinner_bg"/>
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/tilEducationOther"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                app:errorEnabled="true"
+                app:errorIconDrawable="@null"
+                app:boxStrokeColor="@color/saffron"
+                app:hintTextColor="@color/saffron"
+                android:layout_marginTop="4dp">
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etEducationOther"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/hint_spec_edu" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <Spinner android:id="@+id/spOccupation"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:layout_marginTop="8dp"
+                android:background="@drawable/spinner_bg"/>
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/tilOccupationOther"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                app:errorEnabled="true"
+                app:errorIconDrawable="@null"
+                app:boxStrokeColor="@color/saffron"
+                app:hintTextColor="@color/saffron"
+                android:layout_marginTop="4dp">
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etOccupationOther"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/hint_spec_occ" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <TextView style="@style/SectionHeaderStyle"
+                android:text="@string/label_contact_ver" />
+
+            <LinearLayout
+                android:id="@+id/layoutMobile"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:orientation="horizontal"
                 android:background="@drawable/edittext_background"
-                android:padding="10dp" />
-
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/label_gender_req" android:layout_marginTop="12dp"/>
-            <Spinner android:id="@+id/spGender" android:layout_width="match_parent" android:layout_height="48dp" android:background="@drawable/spinner_bg"/>
-
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/label_dob_req" android:layout_marginTop="12dp"/>
-            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal">
-                <Spinner android:id="@+id/spDay" android:layout_width="0dp" android:layout_weight="1" android:layout_height="48dp" android:background="@drawable/spinner_bg"/>
-                <Spinner android:id="@+id/spMonth" android:layout_width="0dp" android:layout_weight="1.2" android:layout_height="48dp" android:background="@drawable/spinner_bg" android:layout_marginHorizontal="4dp"/>
-                <Spinner android:id="@+id/spYear" android:layout_width="0dp" android:layout_weight="1.2" android:layout_height="48dp" android:background="@drawable/spinner_bg"/>
-            </LinearLayout>
-
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/label_marital_req" android:layout_marginTop="12dp"/>
-            <Spinner android:id="@+id/spMarital" android:layout_width="match_parent" android:layout_height="48dp" android:background="@drawable/spinner_bg"/>
-
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/label_religion_req" android:layout_marginTop="12dp"/>
-            <Spinner android:id="@+id/spReligion" android:layout_width="match_parent" android:layout_height="48dp" android:background="@drawable/spinner_bg"/>
-
-            <TextView style="@style/SectionHeaderStyle" android:text="@string/label_occ_edu" />
-
-            <Spinner android:id="@+id/spEducation" android:layout_width="match_parent" android:layout_height="48dp" android:background="@drawable/spinner_bg"/>
-            <EditText android:id="@+id/etEducationOther" android:layout_width="match_parent" android:layout_height="50dp" android:hint="@string/hint_spec_edu" android:visibility="gone" android:background="@drawable/edittext_background" android:layout_marginTop="4dp" />
-
-            <Spinner android:id="@+id/spOccupation" android:layout_width="match_parent" android:layout_height="48dp" android:layout_marginTop="12dp" android:background="@drawable/spinner_bg"/>
-            <EditText android:id="@+id/etOccupationOther" android:layout_width="match_parent" android:layout_height="50dp" android:hint="@string/hint_spec_occ" android:visibility="gone" android:background="@drawable/edittext_background" android:layout_marginTop="4dp" />
-
-            <TextView style="@style/SectionHeaderStyle" android:text="@string/label_contact_ver" />
-
-            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:background="@drawable/edittext_background" android:gravity="center_vertical">
+                android:gravity="center_vertical"
+                android:paddingEnd="12dp">
                 <com.hbb20.CountryCodePicker
                     android:id="@+id/ccp"
                     android:layout_width="wrap_content"
@@ -82,89 +180,344 @@
                 <EditText
                     android:id="@+id/etMobile"
                     android:layout_width="match_parent"
-                    android:layout_height="50dp"
+                    android:layout_height="match_parent"
                     android:hint="@string/hint_mobile_req"
                     android:inputType="phone"
-                    android:background="@null" />
+                    android:background="@null"
+                    android:maxLength="10"
+                    android:imeOptions="actionNext"/>
             </LinearLayout>
 
-            <Button android:id="@+id/btnSendOtp" android:layout_width="match_parent" android:layout_height="50dp" android:text="@string/btn_send_otp" android:layout_marginTop="10dp" android:backgroundTint="@color/saffron" />
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnSendOtp"
+                android:layout_width="match_parent"
+                android:layout_height="54dp"
+                android:text="@string/btn_send_otp"
+                android:layout_marginTop="8dp"
+                app:cornerRadius="12dp"
+                android:backgroundTint="@color/saffron" />
 
-            <LinearLayout android:id="@+id/layoutOtpBox" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:visibility="gone">
-                <EditText android:id="@+id/etOtp" android:layout_width="match_parent" android:layout_height="50dp" android:hint="@string/hint_otp_req" android:inputType="number" android:maxLength="6" android:background="@drawable/edittext_background" android:layout_marginTop="10dp"/>
-                <Button android:id="@+id/btnVerifyOtp" android:layout_width="match_parent" android:layout_height="50dp" android:text="@string/btn_verify_otp" android:backgroundTint="@color/saffron_dark" android:layout_marginTop="5dp"/>
+            <LinearLayout android:id="@+id/layoutOtpBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:visibility="gone">
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/tilOtp"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    app:errorEnabled="true"
+                    app:errorIconDrawable="@null"
+                    app:boxStrokeColor="@color/saffron"
+                    app:hintTextColor="@color/saffron"
+                    android:hint="@string/hint_otp_req">
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/etOtp"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="number"
+                        android:maxLength="6"/>
+                </com.google.android.material.textfield.TextInputLayout>
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnVerifyOtp"
+                    android:layout_width="match_parent"
+                    android:layout_height="54dp"
+                    android:text="@string/btn_verify_otp"
+                    app:cornerRadius="12dp"
+                    android:backgroundTint="@color/saffron_dark"
+                    android:layout_marginTop="6dp"/>
             </LinearLayout>
 
-            <TextView android:id="@+id/tvTimer" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/timer_format" android:visibility="gone" android:layout_gravity="center" android:layout_marginTop="5dp"/>
-            <TextView android:id="@+id/btnResendOtp" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/btn_resend_otp" android:textColor="@color/saffron_dark" android:visibility="gone" android:layout_gravity="center" android:textStyle="bold" android:layout_marginTop="5dp"/>
+            <TextView android:id="@+id/tvTimer"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/timer_format"
+                android:visibility="gone"
+                android:layout_gravity="center"
+                android:layout_marginTop="6dp"
+                android:textColor="@color/text_secondary"/>
+            <TextView android:id="@+id/btnResendOtp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/btn_resend_otp"
+                android:textColor="@color/saffron_dark"
+                android:visibility="gone"
+                android:layout_gravity="center"
+                android:textStyle="bold"
+                android:layout_marginTop="6dp"/>
 
-            <EditText android:id="@+id/etEmail" android:layout_width="match_parent" android:layout_height="50dp" android:hint="@string/hint_email_req" android:inputType="textEmailAddress" android:background="@drawable/edittext_background" android:layout_marginTop="15dp" />
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/tilEmail"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                app:errorEnabled="true"
+                app:errorIconDrawable="@null"
+                app:boxStrokeColor="@color/saffron"
+                app:hintTextColor="@color/saffron"
+                android:hint="@string/hint_email_req">
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etEmail"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="textEmailAddress" />
+            </com.google.android.material.textfield.TextInputLayout>
 
             <TextView style="@style/SectionHeaderStyle" android:text="@string/label_address_details" />
-            <Spinner android:id="@+id/spCountry" android:layout_width="match_parent" android:layout_height="48dp" android:background="@drawable/spinner_bg"/>
-            <EditText android:id="@+id/etCountryOther" android:layout_width="match_parent" android:layout_height="50dp" android:hint="@string/hint_country_req" android:visibility="gone" android:background="@drawable/edittext_background" android:layout_marginTop="4dp"/>
-            <Spinner android:id="@+id/spStateIndia" android:layout_width="match_parent" android:layout_height="48dp" android:layout_marginTop="8dp" android:background="@drawable/spinner_bg"/>
-            <EditText android:id="@+id/etStateOther" android:layout_width="match_parent" android:layout_height="50dp" android:hint="@string/hint_state_req" android:visibility="gone" android:background="@drawable/edittext_background" android:layout_marginTop="8dp"/>
-            <EditText android:id="@+id/etDistrict" android:layout_width="match_parent" android:layout_height="50dp" android:hint="@string/hint_district_req" android:background="@drawable/edittext_background" android:layout_marginTop="8dp" />
-            <EditText android:id="@+id/etAddress" android:layout_width="match_parent" android:layout_height="60dp" android:hint="@string/hint_address_req" android:background="@drawable/edittext_background" android:layout_marginTop="8dp" android:padding="10dp" />
-            <EditText android:id="@+id/etPincode" android:layout_width="match_parent" android:layout_height="50dp" android:hint="@string/hint_pincode_req" android:inputType="number" android:maxLength="6" android:background="@drawable/edittext_background" android:layout_marginTop="8dp" />
+
+            <Spinner android:id="@+id/spCountry"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:background="@drawable/spinner_bg"/>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/tilCountryOther"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                app:errorEnabled="true"
+                app:errorIconDrawable="@null"
+                app:boxStrokeColor="@color/saffron"
+                app:hintTextColor="@color/saffron"
+                android:layout_marginTop="6dp">
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etCountryOther"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/hint_country_req" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <Spinner android:id="@+id/spStateIndia"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:layout_marginTop="6dp"
+                android:background="@drawable/spinner_bg"/>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/tilStateOther"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                app:errorEnabled="true"
+                app:errorIconDrawable="@null"
+                app:boxStrokeColor="@color/saffron"
+                app:hintTextColor="@color/saffron"
+                android:layout_marginTop="6dp">
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etStateOther"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/hint_state_req" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/tilDistrict"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                app:errorEnabled="true"
+                app:errorIconDrawable="@null"
+                app:boxStrokeColor="@color/saffron"
+                app:hintTextColor="@color/saffron"
+                android:hint="@string/hint_district_req">
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etDistrict"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/tilAddress"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                app:errorEnabled="true"
+                app:errorIconDrawable="@null"
+                app:boxStrokeColor="@color/saffron"
+                app:hintTextColor="@color/saffron"
+                android:hint="@string/hint_address_req">
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etAddress"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="top"
+                    android:inputType="textMultiLine"
+                    android:lines="3" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/tilPincode"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                app:errorEnabled="true"
+                app:errorIconDrawable="@null"
+                app:boxStrokeColor="@color/saffron"
+                app:hintTextColor="@color/saffron"
+                android:hint="@string/hint_pincode_req">
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etPincode"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="number"
+                    android:maxLength="6" />
+            </com.google.android.material.textfield.TextInputLayout>
 
             <TextView style="@style/SectionHeaderStyle" android:text="@string/label_nursing_reg_title" />
-            <RadioGroup android:id="@+id/rgNursingReg" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:layout_marginTop="4dp" app:theme="@style/Theme.AppCompat.Light">
-                <RadioButton android:id="@+id/rbRegYes" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Yes" android:buttonTint="@color/radio_selector"/>
-                <RadioButton android:id="@+id/rbRegNo" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="No" android:checked="true" android:buttonTint="@color/radio_selector" />
-            </RadioGroup>
-
-            <LinearLayout android:id="@+id/layoutRegDetails" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:visibility="gone" android:layout_marginTop="8dp">
-                <EditText android:id="@+id/etRegState" android:layout_width="match_parent" android:layout_height="50dp" android:hint="@string/hint_reg_state" android:background="@drawable/edittext_background" />
-                <EditText android:id="@+id/etRegNumber" android:layout_width="match_parent" android:layout_height="50dp" android:hint="@string/hint_reg_num" android:layout_marginTop="8dp" android:background="@drawable/edittext_background" />
-            </LinearLayout>
-
-            <EditText android:id="@+id/etPassword" android:layout_width="match_parent" android:layout_height="50dp" android:hint="@string/hint_set_pass" android:inputType="textPassword" android:background="@drawable/edittext_background" android:layout_marginTop="20dp" />
-
-            <LinearLayout
+            <RadioGroup
+                android:id="@+id/rgNursingReg"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
-                android:layout_marginTop="20dp"
-                android:gravity="center_vertical">
+                android:layout_marginBottom="8dp">
+                <com.google.android.material.radiobutton.MaterialRadioButton
+                    android:id="@+id/rbRegYes"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/yes"
+                    app:buttonTint="@color/saffron" />
+                <com.google.android.material.radiobutton.MaterialRadioButton
+                    android:id="@+id/rbRegNo"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/no"
+                    app:buttonTint="@color/saffron" />
+            </RadioGroup>
 
-                <androidx.appcompat.widget.AppCompatCheckBox
+            <LinearLayout android:id="@+id/layoutRegDetails"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:visibility="gone"
+                android:layout_marginTop="4dp">
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/tilRegState"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:errorEnabled="true"
+                    app:errorIconDrawable="@null"
+                    app:boxStrokeColor="@color/saffron"
+                    app:hintTextColor="@color/saffron"
+                    android:hint="@string/hint_reg_state">
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/etRegState"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content" />
+                </com.google.android.material.textfield.TextInputLayout>
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/tilRegNumber"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    app:errorEnabled="true"
+                    app:errorIconDrawable="@null"
+                    app:boxStrokeColor="@color/saffron"
+                    app:hintTextColor="@color/saffron"
+                    android:hint="@string/hint_reg_num">
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/etRegNumber"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content" />
+                </com.google.android.material.textfield.TextInputLayout>
+            </LinearLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/tilPassword"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                app:errorEnabled="true"
+                app:errorIconDrawable="@null"
+                app:boxStrokeColor="@color/saffron"
+                app:hintTextColor="@color/saffron"
+                android:hint="@string/hint_set_pass"
+                app:passwordToggleEnabled="true"
+                app:passwordToggleTint="@color/saffron">
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etPassword"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="textPassword"
+                    android:imeOptions="actionDone"/>
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:paddingBottom="8dp">
+
+                <com.google.android.material.checkbox.MaterialCheckBox
                     android:id="@+id/cbTerms"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:theme="@style/SaffronCheckbox"
-                    android:checked="false"
-                    app:buttonTint="@color/saffron"
-
+                    android:layout_alignParentStart="true"
+                    android:layout_centerVertical="false"
+                    android:layout_marginTop="-4dp"
                     android:minWidth="0dp"
                     android:minHeight="0dp"
-                    android:paddingStart="0dp"
-                    android:paddingLeft="0dp"
-                    android:translationX="-4dp" />
+                    app:buttonTint="@color/saffron" />
 
                 <TextView
                     android:id="@+id/tvTermsLink"
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_toEndOf="@id/cbTerms"
                     android:textSize="14sp"
-                    android:text="@string/label_terms_agree"
-                    android:layout_marginStart="4dp"
-                    android:textColor="@color/text_secondary" />
-            </LinearLayout>
+                    android:lineSpacingExtra="4sp"
+                    android:textColor="@color/text_secondary"
+                    android:paddingStart="4dp"
+                    android:paddingEnd="8dp" />
+            </RelativeLayout>
 
-            <Button
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnRegister"
                 android:layout_width="match_parent"
                 android:layout_height="60dp"
                 android:text="@string/btn_complete_reg"
                 android:textStyle="bold"
-                android:layout_marginTop="24dp"
-                android:layout_marginBottom="20dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="16dp"
                 android:backgroundTint="@color/saffron_dark"
-                app:cornerRadius="30dp"/>
+                app:cornerRadius="32dp"
+                android:textSize="17sp"/>
+
+            <ProgressBar
+                android:id="@+id/progressBar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:visibility="gone"
+                android:indeterminateTint="@color/saffron" />
 
         </LinearLayout>
-    </com.google.android.material.card.MaterialCardView>
-</LinearLayout>
-</ScrollView>
+        </com.google.android.material.card.MaterialCardView>
+        </LinearLayout>
+    </ScrollView>
+
+    <RelativeLayout
+        android:id="@+id/loadingOverlay"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#80000000"
+        android:visibility="gone"
+        android:clickable="true"
+        android:focusable="true">
+        <ProgressBar
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:indeterminateTint="@color/saffron" />
+    </RelativeLayout>
+</FrameLayout>

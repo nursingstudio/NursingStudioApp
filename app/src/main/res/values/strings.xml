@@ -118,6 +118,8 @@ Personal information such as name, email, and mobile number is securely stored.
 We do not sell or share user data with third parties.
 OTP and authentication are handled via trusted providers.
 </string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
 
 
 </resources>
