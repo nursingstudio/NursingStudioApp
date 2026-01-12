@@ -12,7 +12,6 @@
 
         <!-- Heading -->
         <TextView
-            android:id="@+id/tvSocialTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Stay Connected"
@@ -22,7 +21,6 @@
             android:layout_marginBottom="4dp" />
 
         <TextView
-            android:id="@+id/tvSocialSubtitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Follow Nursing Studio on your favourite platforms."

@@ -26,6 +26,8 @@ import com.google.firebase.firestore.FieldValue
 import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.TimeUnit
+import android.view.inputmethod.InputMethodManager
+import com.google.android.material.internal.ViewUtils.hideKeyboard
 
 class RegisterFragment : Fragment() {
 
@@ -50,20 +52,29 @@ class RegisterFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         auth = FirebaseAuth.getInstance()
 
+        setupUniversalErrorCleaner()
         binding.ccp.registerCarrierNumberEditText(binding.etMobile)
         setupAllSpinners()
         setupTermsLink()
-
         binding.etDob.setOnClickListener { showDatePicker() }
         setupDynamicVisibility()
+
+        // Resend Button Click Listener (Jo tune miss kiya tha)
+        binding.btnResendOtp.setOnClickListener {
+            sendOtp()
+        }
 
         binding.btnSendOtp.setOnClickListener {
             if (SystemClock.elapsedRealtime() - lastClickTime < 2000) return@setOnClickListener
             lastClickTime = SystemClock.elapsedRealtime()
+            hideKeyboard() //Keyboard hide krne ke liye
             sendOtp()
         }
 
-        binding.btnVerifyOtp.setOnClickListener { verifyOtpManual() }
+        binding.btnVerifyOtp.setOnClickListener {
+            hideKeyboard()
+            verifyOtpManual()
+        }
 
         viewModel.regStatus.observe(viewLifecycleOwner) { result ->
             when(result) {
@@ -92,30 +103,36 @@ class RegisterFragment : Fragment() {
 
             if (validateInputsSerial()) {
                 performRegistration()
-                setupErrorRemovers()
-                setupRealTimeErrorCleaning()
+
             }
         }
     }
 
-    private fun setupRealTimeErrorCleaning() {
-        val map = mapOf(
+
+    private fun setupUniversalErrorCleaner() {
+        // Saare TextInputLayouts aur unke EditTexts ka map
+        val inputMap = mapOf(
             binding.etName to binding.tilName,
+            binding.etDob to binding.tilDob,
             binding.etEmail to binding.tilEmail,
             binding.etDistrict to binding.tilDistrict,
             binding.etAddress to binding.tilAddress,
             binding.etPincode to binding.tilPincode,
             binding.etPassword to binding.tilPassword,
             binding.etRegState to binding.tilRegState,
-            binding.etRegNumber to binding.tilRegNumber
+            binding.etRegNumber to binding.tilRegNumber,
+            binding.etEducationOther to binding.tilEducationOther,
+            binding.etOccupationOther to binding.tilOccupationOther,
+            binding.etCountryOther to binding.tilCountryOther,
+            binding.etStateOther to binding.tilStateOther
         )
 
-        map.forEach { (editText, layout) ->
+        inputMap.forEach { (editText, layout) ->
             editText.addTextChangedListener(object : TextWatcher {
                 override fun afterTextChanged(s: Editable?) {
                     if (!s.isNullOrEmpty()) {
                         layout.error = null
-                        layout.isErrorEnabled = false // Error space aur color turant hat jayega
+                        layout.isErrorEnabled = false // Ye line niche ka gap turant khatam kar degi
                     }
                 }
                 override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
@@ -124,34 +141,46 @@ class RegisterFragment : Fragment() {
         }
     }
 
-private fun setupErrorRemovers() {
-    val inputs = listOf(binding.etName, binding.etDob, binding.etEmail, binding.etDistrict, binding.etAddress, binding.etPincode, binding.etPassword)
-    val layouts = listOf(binding.tilName, binding.tilDob, binding.tilEmail, binding.tilDistrict, binding.tilAddress, binding.tilPincode, binding.tilPassword)
-
-    for (i in inputs.indices) {
-        inputs[i].addTextChangedListener(object : TextWatcher {
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                layouts[i].error = null // Type karte hi error gayab!
-            }
-            override fun afterTextChanged(s: Editable?) {}
-        })
-    }
-}
     private fun showDatePicker() {
-        val constraints = CalendarConstraints.Builder()
-            .setValidator(DateValidatorPointBackward.now()).build()
+        // 1. TimeZone set karein
+        val timeZoneUTC = TimeZone.getTimeZone("UTC")
 
+        // 2. Aaj ki date (Max Limit)
+        val today = Calendar.getInstance(timeZoneUTC).timeInMillis
+
+        // 3. 1947 ki date (Min Limit)
+        val startCalendar = Calendar.getInstance(timeZoneUTC)
+        startCalendar.set(1947, Calendar.JANUARY, 1)
+        val startDate = startCalendar.timeInMillis
+
+        // 4. Default Selection: Aaj se 17 saal piche (Nursing Rule)
+        val defaultCalendar = Calendar.getInstance(timeZoneUTC)
+        defaultCalendar.add(Calendar.YEAR, -17) // 17 saal minus kar diye
+        val defaultSelection = defaultCalendar.timeInMillis
+
+        // 5. Constraints banana
+        val constraints = CalendarConstraints.Builder()
+            .setStart(startDate) // 1947 se pehle block
+            .setEnd(today)       // Aaj ke baad block
+            .setOpenAt(defaultSelection) // Calendar khulte hi 17 saal piche wala saal dikhayega
+            .setValidator(DateValidatorPointBackward.now()) // Future dates block
+            .build()
+
+        // 6. DatePicker build karna
         val datePicker = MaterialDatePicker.Builder.datePicker()
+            .setTheme(R.style.CustomMaterialCalendar)
             .setTitleText("Select Date of Birth")
             .setCalendarConstraints(constraints)
-            .setSelection(MaterialDatePicker.todayInUtcMilliseconds()).build()
+            .setSelection(defaultSelection) // Gola (Selection) 17 saal piche wali date par hoga
+            .build()
 
         datePicker.show(childFragmentManager, "DATE_PICKER")
+
         datePicker.addOnPositiveButtonClickListener { selection ->
             val sdf = SimpleDateFormat("dd-MM-yyyy", Locale.getDefault())
             binding.etDob.setText(sdf.format(Date(selection)))
             binding.tilDob.error = null
+            binding.tilDob.isErrorEnabled = false
         }
     }
 
@@ -215,28 +244,71 @@ private fun setupErrorRemovers() {
         return false
     }
 
+    private fun hideKeyboard() {
+        val imm = requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        imm.hideSoftInputFromWindow(view?.windowToken, 0)
+    }
     private fun verifyOtpManual() {
         val code = binding.etOtp.text.toString().trim()
-        if (code == "123456") {
-            isOtpVerified = true
-            binding.layoutOtpBox.visibility = View.GONE
-            binding.tvTimer.visibility = View.GONE
-            countDownTimer?.cancel()
-            binding.btnSendOtp.apply {
-                visibility = View.VISIBLE
-                text = "Verified ✅"
-                isEnabled = false
-                // Background saffron hi rahega, sirf text aur icon verified dikhayenge
-                setTextColor(ContextCompat.getColor(requireContext(), android.R.color.white))
+        if (code.length != 6) {
+            toast("Enter 6 digit OTP")
+            return
+        }
+
+        if (verificationId != null) {
+            // Loading chalu karo
+            binding.progressBar.visibility = View.VISIBLE
+
+            val credential = PhoneAuthProvider.getCredential(verificationId!!, code)
+
+            // ASLI FIREBASE CHECK (123456 gayab!)
+            auth.signInWithCredential(credential).addOnCompleteListener { task ->
+                binding.progressBar.visibility = View.GONE
+                if (task.isSuccessful) {
+                    isOtpVerified = true
+
+                    // Saari OTP wali gandagi gayab karo
+                    binding.layoutOtpBox.visibility = View.GONE
+                    binding.tvTimer.visibility = View.GONE
+                    binding.btnResendOtp.visibility = View.GONE
+                    countDownTimer?.cancel()
+
+                    // Mobile Number LOCK kardo (Task 7)
+                    binding.etMobile.isEnabled = false
+                    binding.ccp.setCcpClickable(false)
+                    binding.etMobile.alpha = 0.7f
+
+                    binding.btnSendOtp.apply {
+                        visibility = View.VISIBLE
+                        text = "Verified ✅"
+                        isEnabled = false
+                        setTextColor(ContextCompat.getColor(requireContext(), android.R.color.white))
+                    }
+                    toast("Mobile Verified Successfully! 🎉")
+                } else {
+                    binding.tilOtp.error = "Wrong OTP! Try again"
+                    vibratePhone(100)
+                }
             }
-            toast("Verified!")
-        } else { binding.tilOtp.error = "Invalid OTP" }
+        } else {
+            toast("Verification ID missing, try resending")
+        }
     }
 
     private fun sendOtp() {
         val mobile = binding.etMobile.text.toString().trim()
-        if (mobile.length != 10) { toast("Invalid Mobile"); return }
 
+        // 10 digits check
+        if (mobile.length != 10) {
+            // Agar tilMobile nahi mil raha, toh toast dikha do aur focus etMobile par kar do
+            toast("Enter 10 digit mobile number")
+            binding.etMobile.requestFocus()
+            vibratePhone(100)
+            return
+        }
+
+        // Keyboard hide logic
+        hideKeyboard()
         // Show Loading
         binding.loadingOverlay.visibility = View.VISIBLE
 
@@ -246,24 +318,32 @@ private fun setupErrorRemovers() {
             .setActivity(requireActivity())
             .setCallbacks(object : PhoneAuthProvider.OnVerificationStateChangedCallbacks() {
                 override fun onCodeSent(id: String, token: PhoneAuthProvider.ForceResendingToken) {
-                    binding.loadingOverlay.visibility = View.GONE // Hide Loading
+                    binding.loadingOverlay.visibility = View.GONE
                     verificationId = id
                     resendToken = token
                     binding.layoutOtpBox.visibility = View.VISIBLE
                     binding.btnSendOtp.visibility = View.GONE
                     startTimer()
-                    toast("OTP Sent!")
+                    toast("OTP Sent! Check Inbox!")
                 }
                 override fun onVerificationFailed(e: FirebaseException) {
-                    binding.loadingOverlay.visibility = View.GONE // Hide Loading
-                    toast(e.localizedMessage ?: "Failed")
+                    binding.loadingOverlay.visibility = View.GONE
+                    toast("Failed: ${e.localizedMessage}")
                 }
                 override fun onVerificationCompleted(p0: PhoneAuthCredential) {
                     binding.loadingOverlay.visibility = View.GONE
                     binding.etOtp.setText(p0.smsCode)
+                    // Auto verify agar sim isi phone mein ho
+                    if (p0.smsCode != null) verifyOtpManual()
                 }
-            }).build()
-        PhoneAuthProvider.verifyPhoneNumber(options)
+            })
+
+        // Resend token use karna zaroori hai agar button click kiya hai
+        if (resendToken != null) {
+            options.setForceResendingToken(resendToken!!)
+        }
+
+        PhoneAuthProvider.verifyPhoneNumber(options.build())
     }
 
     private fun startTimer() {
@@ -316,17 +396,28 @@ private fun setupErrorRemovers() {
     }
 
     private fun setupDynamicVisibility() {
-        binding.spEducation.onItemSelectedListener = simpleListener { binding.tilEducationOther.visibility = if (it == "Other") View.VISIBLE else View.GONE }
-        binding.spOccupation.onItemSelectedListener = simpleListener { binding.tilOccupationOther.visibility = if (it == "Other") View.VISIBLE else View.GONE }
-        binding.rgNursingReg.setOnCheckedChangeListener { _, id -> binding.layoutRegDetails.visibility = if (id == R.id.rbRegYes) View.VISIBLE else View.GONE }
-        binding.spCountry.onItemSelectedListener = simpleListener {
+        // Education Spinner: tilEducationOther pass kiya
+        binding.spEducation.onItemSelectedListener = simpleListener(binding.tilEducationOther) {
+            binding.tilEducationOther.visibility = if (it == "Other") View.VISIBLE else View.GONE
+        }
+
+        // Occupation Spinner: tilOccupationOther pass kiya
+        binding.spOccupation.onItemSelectedListener = simpleListener(binding.tilOccupationOther) {
+            binding.tilOccupationOther.visibility = if (it == "Other") View.VISIBLE else View.GONE
+        }
+
+        binding.rgNursingReg.setOnCheckedChangeListener { _, id ->
+            binding.layoutRegDetails.visibility = if (id == R.id.rbRegYes) View.VISIBLE else View.GONE
+        }
+
+        // Country Spinner: null pass kar sakte hain kyunki iska koi fix TextInputLayout nahi hai
+        binding.spCountry.onItemSelectedListener = simpleListener(null) {
             val isIndia = it == "Bharat (India)"
             binding.spStateIndia.visibility = if (isIndia) View.VISIBLE else View.GONE
             binding.tilCountryOther.visibility = if (isIndia) View.GONE else View.VISIBLE
             binding.tilStateOther.visibility = if (isIndia) View.GONE else View.VISIBLE
         }
     }
-
     private fun setupAllSpinners() {
         val lists = listOf(
             listOf("Select Gender", "Male", "Female", "Transgender"),
@@ -390,11 +481,19 @@ private fun setupErrorRemovers() {
         )
     }
 
-    private fun simpleListener(block: (String) -> Unit) = object : AdapterView.OnItemSelectedListener {
-        override fun onItemSelected(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) { block(p0?.getItemAtPosition(p2).toString()) }
-        override fun onNothingSelected(p0: AdapterView<*>?) {}
-    }
-
+    private fun simpleListener(layout: com.google.android.material.textfield.TextInputLayout?, block: (String) -> Unit) =
+        object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
+                val selected = p0?.getItemAtPosition(p2).toString()
+                // Agar Select wala option nahi hai, to error hata do
+                if (p2 > 0) {
+                    layout?.error = null
+                    layout?.isErrorEnabled = false
+                }
+                block(selected)
+            }
+            override fun onNothingSelected(p0: AdapterView<*>?) {}
+        }
     private fun vibratePhone(ms: Long) {
         val v = requireContext().getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
         if (Build.VERSION.SDK_INT >= 26) v.vibrate(VibrationEffect.createOneShot(ms, VibrationEffect.DEFAULT_AMPLITUDE))

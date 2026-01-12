@@ -12,7 +12,6 @@
 
         <!-- Heading -->
         <TextView
-            android:id="@+id/tvSettingsTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Settings"
@@ -22,7 +21,6 @@
             android:layout_marginBottom="4dp" />
 
         <TextView
-            android:id="@+id/tvSettingsSub"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Customize your Nursing Studio experience."
@@ -32,7 +30,6 @@
 
         <!-- SECTION: Notifications -->
         <TextView
-            android:id="@+id/tvNotificationsHeader"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Notifications"
@@ -66,7 +63,6 @@
 
         <!-- SECTION: Test preferences -->
         <TextView
-            android:id="@+id/tvQuizHeader"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Test preferences"
@@ -100,7 +96,6 @@
 
         <!-- Motivation toggle -->
         <TextView
-            android:id="@+id/tvMotivationHeader"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Motivation"
@@ -134,7 +129,6 @@
 
         <!-- SECTION: Support & Info -->
         <TextView
-            android:id="@+id/tvSupportHeader"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Support &amp; Info"
@@ -177,7 +171,6 @@
 
         <!-- Sub-heading for legal section -->
         <TextView
-            android:id="@+id/tvLegalHeader"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Legal &amp; App Information"

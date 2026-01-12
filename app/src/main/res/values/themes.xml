@@ -1,40 +1,5 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
 
-    <style name="Base.Theme.NursingStudio" parent="Theme.Material3.Light.NoActionBar">
-        <item name="colorPrimary">@color/saffron</item>
-        <item name="colorOnPrimary">@android:color/white</item>
-        <item name="colorPrimaryContainer">@color/saffron_light</item>
-
-        <item name="colorSecondary">@color/saffron</item>
-        <item name="colorOnSecondary">@android:color/white</item>
-        <item name="colorTertiary">@color/saffron_dark</item>
-        <item name="colorAccent">@color/saffron</item>
-
-        <item name="colorControlActivated">@color/saffron</item>
-        <item name="colorControlNormal">@color/text_secondary</item>
-
-        <item name="colorOnSurface">@color/text_primary</item>
-        <item name="android:colorBackground">@color/app_background</item>
-        <item name="android:textColorPrimary">@color/text_primary</item>
-        <item name="android:textColorSecondary">@color/text_secondary</item>
-        <item name="android:textColorLink">@color/saffron</item>
-
-        <item name="android:statusBarColor">@color/saffron_dark</item>
-        <item name="android:navigationBarColor">@color/saffron_dark</item>
-
-        <item name="passwordToggleTint">@color/saffron</item>
-        <item name="colorOutline">@color/saffron</item>
-        <item name="colorOnSurfaceVariant">@color/text_secondary</item>
-
-        <item name="colorPrimaryVariant">@color/saffron_dark</item>
-        <item name="android:textColorHint">@color/text_secondary</item>
-
-        <item name="boxStrokeColor">@color/saffron</item>
-        <item name="boxStrokeErrorColor">#FF0000</item>
-
-
-    </style>
-
 
     <style name="Theme.NursingStudio.Splash" parent="Theme.Material3.Light.NoActionBar">
         <item name="android:windowBackground">@color/splash_bg</item>
@@ -58,17 +23,6 @@
         <item name="android:fontFamily">sans-serif-medium</item>
     </style>
 
-    <style name="SaffronRadioStyle" parent="Widget.AppCompat.CompoundButton.RadioButton">
-        <item name="android:buttonTint">@color/saffron</item>
-        <item name="colorControlNormal">@color/saffron</item>
-        <item name="colorControlActivated">@color/saffron</item>
-    </style>
-
-    <style name="SaffronCheckbox" parent="Widget.AppCompat.CompoundButton.CheckBox">
-        <item name="colorControlActivated">@color/saffron</item>
-        <item name="colorControlNormal">#757575</item>
-    </style>
-
     <style name="Theme.NursingStudio" parent="Theme.Material3.Light.NoActionBar">
         <item name="colorPrimary">@color/saffron</item>
         <item name="colorSecondary">@color/saffron</item>
@@ -77,12 +31,26 @@
         <item name="colorControlActivated">@color/saffron</item>
         <item name="android:listChoiceIndicatorSingle">@color/saffron</item>
 
+        <item name="colorOnPrimary">@color/white</item>
+
+        <item name="colorTertiary">@color/saffron_dark</item>
+        <item name="colorPrimaryContainer">@color/app_background</item>
+        <item name="colorOnPrimaryContainer">@color/saffron_dark</item>
+
         <item name="android:datePickerStyle">@style/CustomDatePicker</item>
     </style>
 
     <style name="CustomDatePicker" parent="android:Widget.Material.Light.DatePicker">
         <item name="android:headerBackground">@color/saffron</item>
         <item name="android:dayOfWeekBackground">@color/saffron_dark</item>
+    </style>
+
+    <style name="CustomMaterialCalendar" parent="ThemeOverlay.Material3.MaterialCalendar">
+        <item name="colorPrimary">@color/saffron</item>
+        <item name="colorOnPrimary">@color/white</item>
+        <item name="colorSurface">@color/white</item>
+        <item name="colorOnSurface">@color/text_primary</item>
+        <item name="colorSecondary">@color/saffron_dark</item>
     </style>
 
 </resources>

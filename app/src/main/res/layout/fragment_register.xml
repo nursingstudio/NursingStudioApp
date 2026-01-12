@@ -12,7 +12,7 @@
         android:fillViewport="true"
         android:scrollbars="none"
         android:fitsSystemWindows="true"
-        android:paddingTop="16dp"
+        android:paddingTop="0dp"
         android:clipToPadding="false">
 
         <LinearLayout
@@ -32,16 +32,18 @@
             android:orientation="vertical"
             android:padding="16dp">
                     <TextView
-            android:id="@+id/tvTitle"
-            android:layout_width="wrap_content"
+                        android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/title_create_account"
             android:textSize="22sp"
             android:textStyle="bold"
             android:textColor="@color/saffron_dark"
-            android:layout_marginBottom="12dp"/>
+            android:layout_marginBottom="2dp"/>
 
-            <TextView style="@style/SectionHeaderStyle" android:text="@string/label_personal_details" />
+            <TextView style="@style/SectionHeaderStyle"
+                android:layout_marginTop="4dp"
+                android:layout_marginBottom="4dp"
+                android:text="@string/label_personal_details" />
 
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/tilName"
@@ -49,7 +51,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="@string/hint_full_name_req"
-                app:errorEnabled="true"
+                app:errorEnabled="false"
                 app:boxStrokeColor="@color/saffron"
                 app:hintTextColor="@color/saffron"
                 app:errorIconDrawable="@null">
@@ -64,7 +66,7 @@
             <TextView android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/label_gender_req"
-                android:layout_marginTop="8dp"
+                android:layout_marginTop="4dp"
                 android:textStyle="bold"/>
             <Spinner android:id="@+id/spGender"
                 android:layout_width="match_parent"
@@ -77,9 +79,9 @@
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
+                android:layout_marginTop="4dp"
                 android:hint="@string/label_dob_req"
-                app:errorEnabled="true"
+                app:errorEnabled="false"
                 app:errorIconDrawable="@null"
                 app:boxStrokeColor="@color/saffron"
                 app:hintTextColor="@color/saffron"
@@ -95,7 +97,7 @@
             <TextView android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/label_marital_req"
-                android:layout_marginTop="8dp"
+                android:layout_marginTop="4dp"
                 android:textStyle="bold"/>
             <Spinner android:id="@+id/spMarital"
                 android:layout_width="match_parent"
@@ -105,7 +107,7 @@
             <TextView android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/label_religion_req"
-                android:layout_marginTop="8dp"
+                android:layout_marginTop="4dp"
                 android:textStyle="bold"/>
             <Spinner android:id="@+id/spReligion"
                 android:layout_width="match_parent"
@@ -113,6 +115,8 @@
                 android:background="@drawable/spinner_bg"/>
 
             <TextView style="@style/SectionHeaderStyle"
+                android:layout_marginTop="4dp"
+                android:layout_marginBottom="4dp"
                 android:text="@string/label_occ_edu" />
 
             <Spinner android:id="@+id/spEducation"
@@ -125,7 +129,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:visibility="gone"
-                app:errorEnabled="true"
+                app:errorEnabled="false"
                 app:errorIconDrawable="@null"
                 app:boxStrokeColor="@color/saffron"
                 app:hintTextColor="@color/saffron"
@@ -140,7 +144,7 @@
             <Spinner android:id="@+id/spOccupation"
                 android:layout_width="match_parent"
                 android:layout_height="48dp"
-                android:layout_marginTop="8dp"
+                android:layout_marginTop="4dp"
                 android:background="@drawable/spinner_bg"/>
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/tilOccupationOther"
@@ -148,7 +152,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:visibility="gone"
-                app:errorEnabled="true"
+                app:errorEnabled="false"
                 app:errorIconDrawable="@null"
                 app:boxStrokeColor="@color/saffron"
                 app:hintTextColor="@color/saffron"
@@ -161,6 +165,8 @@
             </com.google.android.material.textfield.TextInputLayout>
 
             <TextView style="@style/SectionHeaderStyle"
+                android:layout_marginTop="4dp"
+                android:layout_marginBottom="4dp"
                 android:text="@string/label_contact_ver" />
 
             <LinearLayout
@@ -193,7 +199,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="54dp"
                 android:text="@string/btn_send_otp"
-                android:layout_marginTop="8dp"
+                android:layout_marginTop="4dp"
                 app:cornerRadius="12dp"
                 android:backgroundTint="@color/saffron" />
 
@@ -207,8 +213,8 @@
                     style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    app:errorEnabled="true"
+                    android:layout_marginTop="4dp"
+                    app:errorEnabled="false"
                     app:errorIconDrawable="@null"
                     app:boxStrokeColor="@color/saffron"
                     app:hintTextColor="@color/saffron"
@@ -227,7 +233,7 @@
                     android:text="@string/btn_verify_otp"
                     app:cornerRadius="12dp"
                     android:backgroundTint="@color/saffron_dark"
-                    android:layout_marginTop="6dp"/>
+                    android:layout_marginTop="4dp"/>
             </LinearLayout>
 
             <TextView android:id="@+id/tvTimer"
@@ -236,7 +242,7 @@
                 android:text="@string/timer_format"
                 android:visibility="gone"
                 android:layout_gravity="center"
-                android:layout_marginTop="6dp"
+                android:layout_marginTop="4dp"
                 android:textColor="@color/text_secondary"/>
             <TextView android:id="@+id/btnResendOtp"
                 android:layout_width="wrap_content"
@@ -246,15 +252,15 @@
                 android:visibility="gone"
                 android:layout_gravity="center"
                 android:textStyle="bold"
-                android:layout_marginTop="6dp"/>
+                android:layout_marginTop="4dp"/>
 
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/tilEmail"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
-                app:errorEnabled="true"
+                android:layout_marginTop="4dp"
+                app:errorEnabled="false"
                 app:errorIconDrawable="@null"
                 app:boxStrokeColor="@color/saffron"
                 app:hintTextColor="@color/saffron"
@@ -266,7 +272,10 @@
                     android:inputType="textEmailAddress" />
             </com.google.android.material.textfield.TextInputLayout>
 
-            <TextView style="@style/SectionHeaderStyle" android:text="@string/label_address_details" />
+            <TextView style="@style/SectionHeaderStyle"
+                android:layout_marginTop="4dp"
+                android:layout_marginBottom="4dp"
+                android:text="@string/label_address_details" />
 
             <Spinner android:id="@+id/spCountry"
                 android:layout_width="match_parent"
@@ -279,11 +288,11 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:visibility="gone"
-                app:errorEnabled="true"
+                app:errorEnabled="false"
                 app:errorIconDrawable="@null"
                 app:boxStrokeColor="@color/saffron"
                 app:hintTextColor="@color/saffron"
-                android:layout_marginTop="6dp">
+                android:layout_marginTop="4dp">
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/etCountryOther"
                     android:layout_width="match_parent"
@@ -294,7 +303,7 @@
             <Spinner android:id="@+id/spStateIndia"
                 android:layout_width="match_parent"
                 android:layout_height="48dp"
-                android:layout_marginTop="6dp"
+                android:layout_marginTop="4dp"
                 android:background="@drawable/spinner_bg"/>
 
             <com.google.android.material.textfield.TextInputLayout
@@ -303,11 +312,11 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:visibility="gone"
-                app:errorEnabled="true"
+                app:errorEnabled="false"
                 app:errorIconDrawable="@null"
                 app:boxStrokeColor="@color/saffron"
                 app:hintTextColor="@color/saffron"
-                android:layout_marginTop="6dp">
+                android:layout_marginTop="4dp">
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/etStateOther"
                     android:layout_width="match_parent"
@@ -320,8 +329,8 @@
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="6dp"
-                app:errorEnabled="true"
+                android:layout_marginTop="4dp"
+                app:errorEnabled="false"
                 app:errorIconDrawable="@null"
                 app:boxStrokeColor="@color/saffron"
                 app:hintTextColor="@color/saffron"
@@ -337,8 +346,8 @@
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="6dp"
-                app:errorEnabled="true"
+                android:layout_marginTop="4dp"
+                app:errorEnabled="false"
                 app:errorIconDrawable="@null"
                 app:boxStrokeColor="@color/saffron"
                 app:hintTextColor="@color/saffron"
@@ -357,8 +366,8 @@
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="6dp"
-                app:errorEnabled="true"
+                android:layout_marginTop="4dp"
+                app:errorEnabled="false"
                 app:errorIconDrawable="@null"
                 app:boxStrokeColor="@color/saffron"
                 app:hintTextColor="@color/saffron"
@@ -371,13 +380,19 @@
                     android:maxLength="6" />
             </com.google.android.material.textfield.TextInputLayout>
 
-            <TextView style="@style/SectionHeaderStyle" android:text="@string/label_nursing_reg_title" />
+                    <TextView
+                        style="@style/SectionHeaderStyle"
+                        android:layout_marginTop="4dp"
+                        android:layout_marginBottom="4dp"
+                        android:text="@string/label_nursing_reg_title" />
+
             <RadioGroup
                 android:id="@+id/rgNursingReg"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
-                android:layout_marginBottom="8dp">
+                android:layout_marginTop="-10dp"
+                android:layout_marginBottom="-8dp">
                 <com.google.android.material.radiobutton.MaterialRadioButton
                     android:id="@+id/rbRegYes"
                     android:layout_width="wrap_content"
@@ -385,7 +400,6 @@
                     android:text="@string/yes"
                     app:buttonTint="@color/saffron" />
                 <com.google.android.material.radiobutton.MaterialRadioButton
-                    android:id="@+id/rbRegNo"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/no"
@@ -397,13 +411,13 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:visibility="gone"
-                android:layout_marginTop="4dp">
+                android:layout_marginTop="0dp">
                 <com.google.android.material.textfield.TextInputLayout
                     android:id="@+id/tilRegState"
                     style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    app:errorEnabled="true"
+                    app:errorEnabled="false"
                     app:errorIconDrawable="@null"
                     app:boxStrokeColor="@color/saffron"
                     app:hintTextColor="@color/saffron"
@@ -419,7 +433,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="4dp"
-                    app:errorEnabled="true"
+                    app:errorEnabled="false"
                     app:errorIconDrawable="@null"
                     app:boxStrokeColor="@color/saffron"
                     app:hintTextColor="@color/saffron"
@@ -436,8 +450,8 @@
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
-                app:errorEnabled="true"
+                android:layout_marginTop="4dp"
+                app:errorEnabled="false"
                 app:errorIconDrawable="@null"
                 app:boxStrokeColor="@color/saffron"
                 app:hintTextColor="@color/saffron"
@@ -455,7 +469,7 @@
             <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
+                android:layout_marginTop="4dp"
                 android:paddingBottom="8dp">
 
                 <com.google.android.material.checkbox.MaterialCheckBox
@@ -487,7 +501,7 @@
                 android:layout_height="60dp"
                 android:text="@string/btn_complete_reg"
                 android:textStyle="bold"
-                android:layout_marginTop="16dp"
+                android:layout_marginTop="4dp"
                 android:layout_marginBottom="16dp"
                 android:backgroundTint="@color/saffron_dark"
                 app:cornerRadius="32dp"

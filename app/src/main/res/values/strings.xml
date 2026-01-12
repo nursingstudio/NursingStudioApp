@@ -1,9 +1,7 @@
 <resources>
     <string name="app_name">Nursing Studio</string>
-    <string name="title_activity_drawer_header">drawer_header</string>
-    <string name="nursing_studio">Nursing Studio</string>
 
-        <string name="title_profile">Profile</string>
+    <string name="title_profile">Profile</string>
         <string name="label_personal_info">Personal Information</string>
         <string name="label_gender">Gender</string>
         <string name="label_dob">Date of Birth</string>
@@ -15,9 +13,7 @@
         <string name="label_address">Full Address</string>
         <string name="label_nursing_reg">Nursing Registered: %1$s</string>
         <string name="btn_logout">Logout Account</string>
-        <string name="user"></string>
 
-    <string name="title_login">Login</string>
     <string name="tab_email">Email</string>
     <string name="tab_mobile">Mobile</string>
     <string name="hint_email">Email Address</string>
@@ -30,10 +26,7 @@
     <string name="label_go_register">New User? Register Now</string>
 
     <string name="title_register">Create Account</string>
-    <string name="hint_full_name">Full Name</string>
     <string name="hint_mobile">Mobile Number</string>
-    <string name="btn_register">Register Now</string>
-    <string name="label_go_login">Already have an account? Login</string>
 
     <string name="err_empty_fields">Please enter all details</string>
     <string name="err_invalid_mobile">Enter a valid 10-digit number</string>
@@ -42,10 +35,6 @@
 
         <string name="msg_welcome_back">Welcome back! ✨</string>
         <string name="error_profile_not_found">Profile not found!</string>
-        <string name="error_fetch_failed">Failed to fetch data</string>
-        <string name="dialog_update_photo">Update Profile Picture</string>
-        <string name="option_camera">Take Photo</string>
-        <string name="option_gallery">Choose from Gallery</string>
 
     <string name="welcome_user">Welcome, %1$s</string>
     <string name="welcome_subtitle">Start smart preparation for your nursing exams</string>
@@ -59,12 +48,6 @@
     <string name="pdfs">PDFs</string>
     <string name="videos">Videos</string>
     <string name="progress">Progress</string>
-    <string name="subscription">Subscription</string>
-    <string name="notice">Notice Board</string>
-    <string name="settings">Settings</string>
-    <string name="share_app">Share this App"</string>
-    <string name="social_dialog">Quick Follow</string>
-    <string name="profile">Profile</string>
 
 
     <string name="latest_update">Latest Update</string>
@@ -102,22 +85,8 @@
     <string name="hint_reg_num">Registration Number *</string>
     <string name="hint_set_pass">Set Password *</string>
     <string name="btn_complete_reg">Complete Registration</string>
-    <string name="label_terms_agree">I have read and agree to the Terms &amp; Conditions and Privacy Policy.</string>
 
 
-    <string name="terms_text">
-By using this application, you agree to comply with all applicable laws and regulations.
-The app is provided for educational purposes only.
-Unauthorized use, data misuse, or content redistribution is prohibited.
-We reserve the right to update these terms at any time.
-</string>
-
-    <string name="privacy_text">
-We respect your privacy.
-Personal information such as name, email, and mobile number is securely stored.
-We do not sell or share user data with third parties.
-OTP and authentication are handled via trusted providers.
-</string>
     <string name="yes">Yes</string>
     <string name="no">No</string>
 

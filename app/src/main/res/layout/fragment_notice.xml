@@ -18,7 +18,6 @@
             android:layout_marginBottom="8dp" />
 
         <TextView
-            android:id="@+id/tvNoticeContent"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Abhi koi notice nahi hai. Jaldi hi important updates yahan dikhai jayengi."

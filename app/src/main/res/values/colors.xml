@@ -9,16 +9,13 @@
 <!-- Text colors -->
 <color name="text_primary">#222222</color>
 <color name="text_secondary">#555555</color>
-<color name="text_muted">#888888</color>
 
-<!-- jo bhi tumhare existing colors (purple_500, white, etc.) hain, unko yahin rehne do -->
-    <color name="black">#FF000000</color>
+    <!-- jo bhi tumhare existing colors (purple_500, white, etc.) hain, unko yahin rehne do -->
     <color name="white">#FFFFFFFF</color>
 
 <!--- Splash background color -->
     <color name="splash_bg">#FF9933</color> <!-- saffron -->
 
 <!-- new color -->
-    <color name="saffron_light">#33FF9933</color>
 
 </resources>
