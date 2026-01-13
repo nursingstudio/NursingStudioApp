@@ -98,6 +98,7 @@ class RegisterFragment : Fragment() {
         }
 
         binding.btnRegister.setOnClickListener {
+            hideKeyboard()
             if (SystemClock.elapsedRealtime() - lastClickTime < 2000) return@setOnClickListener
             lastClickTime = SystemClock.elapsedRealtime()
 

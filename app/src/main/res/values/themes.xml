@@ -26,13 +26,16 @@
     <style name="Theme.NursingStudio" parent="Theme.Material3.Light.NoActionBar">
         <item name="colorPrimary">@color/saffron</item>
         <item name="colorSecondary">@color/saffron</item>
-        <item name="colorAccent">@color/saffron</item>
 
-        <item name="colorControlActivated">@color/saffron</item>
         <item name="android:listChoiceIndicatorSingle">@color/saffron</item>
-
+        <item name="colorControlActivated">@color/saffron</item>
+        <item name="colorAccent">@color/saffron</item>
         <item name="colorOnPrimary">@color/white</item>
 
+        <item name="android:textCursorDrawable">@null</item>
+        <item name="android:textSelectHandle">@null</item>
+        <item name="android:textSelectHandleLeft">@null</item>
+        <item name="android:textSelectHandleRight">@null</item>
         <item name="colorTertiary">@color/saffron_dark</item>
         <item name="colorPrimaryContainer">@color/app_background</item>
         <item name="colorOnPrimaryContainer">@color/saffron_dark</item>
@@ -52,5 +55,7 @@
         <item name="colorOnSurface">@color/text_primary</item>
         <item name="colorSecondary">@color/saffron_dark</item>
     </style>
+
+
 
 </resources>
