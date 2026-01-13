@@ -27,6 +27,8 @@ import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.TimeUnit
 import android.view.inputmethod.InputMethodManager
+import androidx.core.widget.NestedScrollView
+import com.example.nursingstudio.databinding.LayoutPolicyBottomSheetBinding
 import com.google.android.material.internal.ViewUtils.hideKeyboard
 
 class RegisterFragment : Fragment() {
@@ -360,24 +362,73 @@ class RegisterFragment : Fragment() {
         }.start()
     }
 
+    private fun showPolicyBottomSheet(title: String, content: CharSequence) {
+        val bottomSheetDialog = com.google.android.material.bottomsheet.BottomSheetDialog(requireContext(), R.style.BottomSheetDialogTheme)
+        val sheetBinding = LayoutPolicyBottomSheetBinding.inflate(layoutInflater)
+        bottomSheetDialog.setContentView(sheetBinding.root)
+
+        sheetBinding.tvPolicyTitle.text = title
+        sheetBinding.tvPolicyContent.text = content
+
+        // Scroll Logic: Bottom tak pahunchne par button enable hoga
+        sheetBinding.scrollContainer.setOnScrollChangeListener(NestedScrollView.OnScrollChangeListener { v, _, scrollY, _, _ ->
+            val child = v.getChildAt(0)
+            // Check if user reached bottom (diff <= 0)
+            val diff = (child.bottom - (v.height + scrollY))
+
+            if (diff <= 0 && !sheetBinding.btnAccept.isEnabled) {
+                sheetBinding.btnAccept.isEnabled = true
+                // Smoothly alpha change karke Saffron highlight kar do
+                sheetBinding.btnAccept.animate().alpha(1f).setDuration(500).start()
+                vibratePhone(50) // User ko feedback milega
+            }
+        })
+
+        sheetBinding.btnAccept.setOnClickListener {
+            bottomSheetDialog.dismiss()
+        }
+
+        bottomSheetDialog.show()
+    }
+
     private fun setupTermsLink() {
         val fullText = "I have read and agree to the Terms & Conditions and Privacy Policy."
         val spannable = SpannableString(fullText)
         val saffron = ContextCompat.getColor(requireContext(), R.color.saffron_dark)
 
+        // 1. Terms & Conditions ka block
         val tcClick = object : ClickableSpan() {
-            override fun onClick(v: View) { toast("Opening Terms...") }
+            override fun onClick(v: View) {
+                // Strings.xml se text uthaya aur HTML format (Bold tags) enable kiya
+                val tncHtml = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                    Html.fromHtml(getString(R.string.tnc_content), Html.FROM_HTML_MODE_COMPACT)
+                } else {
+                    Html.fromHtml(getString(R.string.tnc_content))
+                }
+                showPolicyBottomSheet("Terms & Conditions", tncHtml)
+            }
+
             override fun updateDrawState(ds: TextPaint) {
-                ds.color = saffron
+                ds.color = saffron // Saffron color wahi rahega
                 ds.isUnderlineText = false
                 ds.isFakeBoldText = true
             }
         }
 
+// 2. Privacy Policy ka block (Isko bhi aise hi replace kar do)
         val ppClick = object : ClickableSpan() {
-            override fun onClick(v: View) { toast("Opening Privacy Policy...") }
+            override fun onClick(v: View) {
+                // Strings.xml se Privacy wala text uthaya
+                val privacyHtml = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                    Html.fromHtml(getString(R.string.privacy_content), Html.FROM_HTML_MODE_COMPACT)
+                } else {
+                    Html.fromHtml(getString(R.string.privacy_content))
+                }
+                showPolicyBottomSheet("Privacy Policy", privacyHtml)
+            }
+
             override fun updateDrawState(ds: TextPaint) {
-                ds.color = saffron
+                ds.color = saffron // Saffron color wahi rahega
                 ds.isUnderlineText = false
                 ds.isFakeBoldText = true
             }

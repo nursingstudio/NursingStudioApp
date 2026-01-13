@@ -1,6 +1,54 @@
 <resources>
     <string name="app_name">Nursing Studio</string>
 
+    <string name="tnc_content">
+        <![CDATA[
+        <font color="#FF9933"><b>YOUR PRIVACY &amp; SECURITY IS OUR TOP PRIORITY.</b></font><br><br>
+
+        <b>1. SINGLE DEVICE POLICY:</b><br>
+        To maintain account security, one User ID is strictly limited to <b>ONE MOBILE DEVICE ONLY</b>. Accessing Nursing Studio on multiple devices (Mobiles, Tablets, or Laptops) simultaneously is prohibited.<br><br>
+
+        <b>2. ANTI-PIRACY &amp; SECURITY:</b><br>
+        Our content (Video Lectures, PDFs, and Test Series) is protected by high-end encryption. Any attempt to bypass security, including screen recording or screenshots, will trigger an <b>AUTOMATIC PERMANENT BAN</b>.<br><br>
+
+        <b>3. ZERO TOLERANCE POLICY:</b><br>
+        Any suspicious activity or attempt to tamper with the app will lead to an <b>IMMEDIATE ACCOUNT BAN</b> followed by strict <b>LEGAL ACTION</b> under the IT Act 2000.<br><br>
+
+        <b>4. CONTENT RIGHTS:</b><br>
+        All study materials are the intellectual property of Nursing Studio. Copying, editing, distributing, or selling our content is a criminal offense.<br><br>
+
+        <b>5. LEGAL PROCEEDINGS:</b><br>
+        Unauthorized sharing of content will lead to <b>CRIMINAL INVESTIGATION</b> and heavy financial penalties as per Indian Intellectual Property laws.<br><br>
+
+        <b>6. REFUND POLICY:</b><br>
+        Digital content access is non-refundable once purchased.
+        ]]>
+    </string>
+
+        <string name="privacy_content">
+        <![CDATA[
+        <font color="#FF9933"><b>YOUR PRIVACY IS OUR TOP PRIORITY.</b></font><br><br>
+
+        <b>1. DATA ENCRYPTION:</b><br>
+        Your personal details are encrypted and stored on world-class <b>GOOGLE FIREBASE</b> servers. Your trust is our biggest asset.<br><br>
+
+        <b>2. ZERO DATA SHARING:</b><br>
+        We do not sell or share your information with any third-party marketing agencies. Your data stays with us.<br><br>
+
+        <b>3. DEVICE IDENTIFICATION:</b><br>
+        We collect your unique <b>DEVICE ID</b> to enforce our Single Device Policy and prevent unauthorized access.<br><br>
+
+        <b>4. STRICT MONITORING:</b><br>
+        We monitor login patterns to ensure security. Any unauthorized login attempts will result in <b>PERMANENT TERMINATION</b> and <b>LEGAL PROCEEDINGS</b>.<br><br>
+
+        <b>5. APP PERMISSIONS:</b><br>
+        We require Storage access for PDF downloads and Camera for profile updates. No other private data is accessed.<br><br>
+
+        <b>6. SECURITY AUDITS:</b><br>
+        Regular security audits are performed to ensure your learning environment is safe and professional.
+        ]]>
+    </string>
+
     <string name="title_profile">Profile</string>
         <string name="label_personal_info">Personal Information</string>
         <string name="label_gender">Gender</string>
@@ -90,5 +138,8 @@
     <string name="yes">Yes</string>
     <string name="no">No</string>
 
+    <string name="policy_btn_text">I Understand</string>
+    <string name="policy_title_tnc">Terms &amp; Conditions</string>
+    <string name="policy_title_privacy">Privacy Policy</string>
 
 </resources>
