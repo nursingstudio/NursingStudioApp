@@ -15,6 +15,7 @@ import android.widget.Toast
 class SettingsFragment : Fragment() {
 
     companion object {
+        private const val KEY_VIBRATION = "enable_vibration"
         private const val PREF_SETTINGS = "settings_prefs"
         private const val KEY_NOTIFICATIONS = "enable_notifications"
         private const val KEY_QUIZ_SOUND = "enable_quiz_sound"
@@ -108,7 +109,25 @@ class SettingsFragment : Fragment() {
         btnAbout.setOnClickListener {
             openStaticPage("about")
         }
+
+        // Vibration toggle
+        // 1. Switch ko find karo
+        val switchVibration = view.findViewById<com.google.android.material.switchmaterial.SwitchMaterial>(R.id.switch_vibration)
+
+// 2. Saved state load karo (AppSettings manager ki madad se)
+        switchVibration.isChecked = AppSettings.isVibrationEnabled(requireContext())
+
+// 3. Click listener lagao jo data save kare
+        switchVibration.setOnCheckedChangeListener { _, isChecked ->
+            AppSettings.setVibration(requireContext(), isChecked)
+
+            // Test karne ke liye chota sa vibration agar ON kiya hai toh
+            if (isChecked) {
+                AppSettings.triggerVibration(requireContext(), 50)
+            }
+        }
     }
+
 
     private fun openUrl(url: String) {
         try {

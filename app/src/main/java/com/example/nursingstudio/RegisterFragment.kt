@@ -86,7 +86,7 @@ class RegisterFragment : Fragment() {
                 }
                 is RegResult.Success -> {
                     binding.progressBar.visibility = View.GONE
-                    vibratePhone(200)
+                    AppSettings.triggerVibration(requireContext(), 200)
                     toast("Registration Successful! ✨")
                     startActivity(Intent(requireContext(), MainActivity::class.java))
                     requireActivity().finish()
@@ -227,7 +227,7 @@ class RegisterFragment : Fragment() {
     //Exact Redirect/Scroll Fix (Auto-Start Redirect Problem Solve)
     private fun showError(view: View, message: String): Boolean {
         toast(message)
-        vibratePhone(100)
+        AppSettings.triggerVibration(requireContext(), 100)
 
         if (view is com.google.android.material.textfield.TextInputLayout) {
             view.isErrorEnabled = true
@@ -290,7 +290,7 @@ class RegisterFragment : Fragment() {
                     toast("Mobile Verified Successfully! 🎉")
                 } else {
                     binding.tilOtp.error = "Wrong OTP! Try again"
-                    vibratePhone(100)
+                    AppSettings.triggerVibration(requireContext(), 100)
                 }
             }
         } else {
@@ -306,7 +306,7 @@ class RegisterFragment : Fragment() {
             // Agar tilMobile nahi mil raha, toh toast dikha do aur focus etMobile par kar do
             toast("Enter 10 digit mobile number")
             binding.etMobile.requestFocus()
-            vibratePhone(100)
+            AppSettings.triggerVibration(requireContext(), 100)
             return
         }
 
@@ -321,6 +321,7 @@ class RegisterFragment : Fragment() {
             .setActivity(requireActivity())
             .setCallbacks(object : PhoneAuthProvider.OnVerificationStateChangedCallbacks() {
                 override fun onCodeSent(id: String, token: PhoneAuthProvider.ForceResendingToken) {
+                    AppSettings.triggerVibration(requireContext(), 50) // Chota jhatka
                     binding.loadingOverlay.visibility = View.GONE
                     verificationId = id
                     resendToken = token
@@ -380,7 +381,7 @@ class RegisterFragment : Fragment() {
                 sheetBinding.btnAccept.isEnabled = true
                 // Smoothly alpha change karke Saffron highlight kar do
                 sheetBinding.btnAccept.animate().alpha(1f).setDuration(500).start()
-                vibratePhone(50) // User ko feedback milega
+                AppSettings.triggerVibration(requireContext(), 50) // User ko feedback milega
             }
         })
 
@@ -546,11 +547,7 @@ class RegisterFragment : Fragment() {
             }
             override fun onNothingSelected(p0: AdapterView<*>?) {}
         }
-    private fun vibratePhone(ms: Long) {
-        val v = requireContext().getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
-        if (Build.VERSION.SDK_INT >= 26) v.vibrate(VibrationEffect.createOneShot(ms, VibrationEffect.DEFAULT_AMPLITUDE))
-        else v.vibrate(ms)
-    }
+
 
     private fun toast(m: String) = Toast.makeText(requireContext(), m, Toast.LENGTH_SHORT).show()
     override fun onDestroyView() { super.onDestroyView(); countDownTimer?.cancel(); _binding = null }
