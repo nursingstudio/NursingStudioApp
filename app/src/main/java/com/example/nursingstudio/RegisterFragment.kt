@@ -109,6 +109,19 @@ class RegisterFragment : Fragment() {
 
             }
         }
+// Buttons push effect
+        // --- 1. CALL YAHAN HONI CHAHIYE ---
+        setupButtonEffects()
+    } // onViewCreated ka bracket
+
+    // --- 2. FUNCTION YAHAN HONA CHAHIYE (BAHAR) ---
+    private fun setupButtonEffects() {
+        with(binding) {
+            AppSettings.setPushEffect(btnSendOtp)
+            AppSettings.setPushEffect(btnVerifyOtp)
+            AppSettings.setPushEffect(btnRegister)
+            AppSettings.setPushEffect(btnResendOtp)
+        }
     }
 
 
