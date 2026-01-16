@@ -26,12 +26,10 @@
     <style name="Theme.NursingStudio" parent="Theme.Material3.Light.NoActionBar">
         <item name="colorPrimary">@color/saffron</item>
         <item name="colorSecondary">@color/saffron</item>
-
         <item name="android:listChoiceIndicatorSingle">@color/saffron</item>
         <item name="colorControlActivated">@color/saffron</item>
         <item name="colorAccent">@color/saffron</item>
         <item name="colorOnPrimary">@color/white</item>
-
         <item name="android:textCursorDrawable">@null</item>
         <item name="android:textSelectHandle">@null</item>
         <item name="android:textSelectHandleLeft">@null</item>
@@ -39,8 +37,19 @@
         <item name="colorTertiary">@color/saffron_dark</item>
         <item name="colorPrimaryContainer">@color/app_background</item>
         <item name="colorOnPrimaryContainer">@color/saffron_dark</item>
-
         <item name="android:datePickerStyle">@style/CustomDatePicker</item>
+
+        // before splash, added these lines.... start //
+        <item name="colorControlNormal">#757575</item>
+        <item name="android:statusBarColor">#FFD580</item>
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="colorOnSurfaceVariant">#555555</item>
+        <item name="colorOnSurface">@color/text_primary</item>
+        <item name="colorOutline">#757575</item>
+        // before splash, added these lines.... end //
+
+
+
     </style>
 
     <style name="CustomDatePicker" parent="android:Widget.Material.Light.DatePicker">
