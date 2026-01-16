@@ -1,11 +1,14 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
 
-
+// splash screen theme //
     <style name="Theme.NursingStudio.Splash" parent="Theme.Material3.Light.NoActionBar">
         <item name="android:windowBackground">@color/splash_bg</item>
         <item name="android:statusBarColor">@color/splash_bg</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowFullscreen">false</item>
     </style>
 
+    // section header //
     <style name="SectionHeaderStyle">
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
@@ -16,6 +19,7 @@
         <item name="android:textColor">@color/saffron_dark</item>
     </style>
 
+    // toolbar title //
     <style name="ToolbarTitleBold">
         <item name="android:textStyle">bold</item>
         <item name="android:textSize">20sp</item>
@@ -23,6 +27,7 @@
         <item name="android:fontFamily">sans-serif-medium</item>
     </style>
 
+    // main theme //
     <style name="Theme.NursingStudio" parent="Theme.Material3.Light.NoActionBar">
         <item name="colorPrimary">@color/saffron</item>
         <item name="colorSecondary">@color/saffron</item>
@@ -48,15 +53,15 @@
         <item name="colorOutline">#757575</item>
         // before splash, added these lines.... end //
 
-
-
     </style>
 
+    // date picker //
     <style name="CustomDatePicker" parent="android:Widget.Material.Light.DatePicker">
         <item name="android:headerBackground">@color/saffron</item>
         <item name="android:dayOfWeekBackground">@color/saffron_dark</item>
     </style>
 
+    // calendar //
     <style name="CustomMaterialCalendar" parent="ThemeOverlay.Material3.MaterialCalendar">
         <item name="colorPrimary">@color/saffron</item>
         <item name="colorOnPrimary">@color/white</item>
@@ -65,6 +70,7 @@
         <item name="colorSecondary">@color/saffron_dark</item>
     </style>
 
+    // bottom sheet //
     <style name="BottomSheetDialogTheme" parent="Theme.Design.Light.BottomSheetDialog">
         <item name="bottomSheetStyle">@style/CustomBottomSheetStyle</item>
     </style>
