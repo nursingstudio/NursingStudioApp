@@ -67,6 +67,7 @@ dependencies {
     implementation("com.hbb20:ccp:2.6.0")
     implementation("de.hdodenhof:circleimageview:3.1.0")
     implementation("androidx.core:core-splashscreen:1.0.1")
+    implementation("com.airbnb.android:lottie:6.1.0") // Latest version use kar
 
     // Compose
     implementation(libs.androidx.lifecycle.runtime.ktx)

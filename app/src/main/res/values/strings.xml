@@ -142,4 +142,7 @@
     <string name="policy_title_tnc">Terms &amp; Conditions</string>
     <string name="policy_title_privacy">Privacy Policy</string>
 
+    <string name="app_logo_desc">Nursing Studio Logo</string>
+    <string name="powered_by">Powered by Nursing Studio</string>
+
 </resources>
