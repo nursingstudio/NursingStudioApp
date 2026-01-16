@@ -1,22 +1,43 @@
-package com.example.nursingstudio
+package com.example.nursingstudio.auth.register
 
 import android.content.Context
 import android.content.Intent
-import android.os.*
-import android.text.*
+import android.graphics.Color
+import android.os.Build
+import android.os.Bundle
+import android.os.CountDownTimer
+import android.os.SystemClock
+import android.text.Editable
+import android.text.Html
+import android.text.SpannableString
+import android.text.Spanned
+import android.text.TextPaint
+import android.text.TextWatcher
 import android.text.method.LinkMovementMethod
 import android.text.style.ClickableSpan
-import android.view.*
-import android.widget.*
+import android.util.Patterns
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.view.inputmethod.InputMethodManager
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
+import android.widget.ScrollView
+import android.widget.Toast
 import androidx.core.content.ContextCompat
+import androidx.core.widget.NestedScrollView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import com.example.nursingstudio.auth.register.RegisterViewModel
-import com.example.nursingstudio.auth.register.RegResult
+import com.example.nursingstudio.AppSettings
+import com.example.nursingstudio.MainActivity
+import com.example.nursingstudio.R
 import com.example.nursingstudio.databinding.FragmentRegisterBinding
+import com.example.nursingstudio.databinding.LayoutPolicyBottomSheetBinding
+import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.datepicker.CalendarConstraints
 import com.google.android.material.datepicker.DateValidatorPointBackward
 import com.google.android.material.datepicker.MaterialDatePicker
+import com.google.android.material.textfield.TextInputLayout
 import com.google.firebase.FirebaseException
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.PhoneAuthCredential
@@ -24,12 +45,11 @@ import com.google.firebase.auth.PhoneAuthOptions
 import com.google.firebase.auth.PhoneAuthProvider
 import com.google.firebase.firestore.FieldValue
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Calendar
+import java.util.Date
+import java.util.Locale
+import java.util.TimeZone
 import java.util.concurrent.TimeUnit
-import android.view.inputmethod.InputMethodManager
-import androidx.core.widget.NestedScrollView
-import com.example.nursingstudio.databinding.LayoutPolicyBottomSheetBinding
-import com.google.android.material.internal.ViewUtils.hideKeyboard
 
 class RegisterFragment : Fragment() {
 
@@ -212,7 +232,7 @@ class RegisterFragment : Fragment() {
             if (spOccupation.selectedItemPosition == 0) return showError(spOccupation, "Select Occupation")
             if (spOccupation.selectedItem == "Other" && etOccupationOther.text.isNullOrEmpty()) return showError(tilOccupationOther, "Specify Occupation")
             if (!isOtpVerified) return showError(layoutMobile, "Mobile verification mandatory")
-            if (etEmail.text.isNullOrEmpty() || !android.util.Patterns.EMAIL_ADDRESS.matcher(etEmail.text.toString()).matches()) return showError(tilEmail, "Valid Email required")
+            if (etEmail.text.isNullOrEmpty() || !Patterns.EMAIL_ADDRESS.matcher(etEmail.text.toString()).matches()) return showError(tilEmail, "Valid Email required")
             if (spCountry.selectedItem == "Bharat (India)" && spStateIndia.selectedItemPosition == 0) return showError(spStateIndia, "Select State")
             // Country Other Condition
             if (spCountry.selectedItem == "Other") {
@@ -242,7 +262,7 @@ class RegisterFragment : Fragment() {
         toast(message)
         AppSettings.triggerVibration(requireContext(), 100)
 
-        if (view is com.google.android.material.textfield.TextInputLayout) {
+        if (view is TextInputLayout) {
             view.isErrorEnabled = true
             view.error = message
         }
@@ -377,7 +397,7 @@ class RegisterFragment : Fragment() {
     }
 
     private fun showPolicyBottomSheet(title: String, content: CharSequence) {
-        val bottomSheetDialog = com.google.android.material.bottomsheet.BottomSheetDialog(requireContext(), R.style.BottomSheetDialogTheme)
+        val bottomSheetDialog = BottomSheetDialog(requireContext(), R.style.BottomSheetDialogTheme)
         val sheetBinding = LayoutPolicyBottomSheetBinding.inflate(layoutInflater)
         bottomSheetDialog.setContentView(sheetBinding.root)
 
@@ -457,7 +477,7 @@ class RegisterFragment : Fragment() {
         binding.tvTermsLink.apply {
             text = spannable
             movementMethod = LinkMovementMethod.getInstance()
-            highlightColor = android.graphics.Color.TRANSPARENT
+            highlightColor = Color.TRANSPARENT
         }
     }
 
@@ -496,7 +516,11 @@ class RegisterFragment : Fragment() {
         )
         val spins = arrayOf(binding.spGender, binding.spMarital, binding.spReligion, binding.spEducation, binding.spOccupation, binding.spCountry, binding.spStateIndia)
         for (i in spins.indices) {
-            val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_dropdown_item, lists[i])
+            val adapter = ArrayAdapter(
+                requireContext(),
+                android.R.layout.simple_spinner_dropdown_item,
+                lists[i]
+            )
             spins[i].adapter = adapter
         }
     }
@@ -547,7 +571,7 @@ class RegisterFragment : Fragment() {
         )
     }
 
-    private fun simpleListener(layout: com.google.android.material.textfield.TextInputLayout?, block: (String) -> Unit) =
+    private fun simpleListener(layout: TextInputLayout?, block: (String) -> Unit) =
         object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
                 val selected = p0?.getItemAtPosition(p2).toString()

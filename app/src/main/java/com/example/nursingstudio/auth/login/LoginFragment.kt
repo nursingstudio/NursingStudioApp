@@ -1,19 +1,30 @@
-package com.example.nursingstudio
+package com.example.nursingstudio.auth.login
 
 import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.*
+import android.widget.Button
+import android.widget.EditText
+import android.widget.LinearLayout
+import android.widget.ProgressBar
+import android.widget.TextView
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import com.example.nursingstudio.MainActivity
+import com.example.nursingstudio.R
+import com.example.nursingstudio.auth.register.RegisterFragment
 import com.example.nursingstudio.auth.login.LoginResult
 import com.example.nursingstudio.auth.login.LoginViewModel
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.tabs.TabLayout
 import com.google.firebase.FirebaseException
-import com.google.firebase.auth.*
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.PhoneAuthCredential
+import com.google.firebase.auth.PhoneAuthOptions
+import com.google.firebase.auth.PhoneAuthProvider
 import com.hbb20.CountryCodePicker
 import java.util.concurrent.TimeUnit
 
