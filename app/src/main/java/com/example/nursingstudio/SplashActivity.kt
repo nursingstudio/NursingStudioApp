@@ -13,10 +13,19 @@ import androidx.lifecycle.lifecycleScope // Ye add karein
 import com.airbnb.lottie.LottieAnimationView
 import kotlinx.coroutines.delay // Ye add karein
 import kotlinx.coroutines.launch // Ye add karein
+import android.os.Build
 
 class SplashActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        // --- YE LINE SABSE PEHLE ADD KAREIN ---
+        // Isse Android 12 ka default white splash hat jayega
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            splashScreen.setOnExitAnimationListener { splashProvider ->
+                splashProvider.remove()
+            }
+        }
+
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_splash)
 
