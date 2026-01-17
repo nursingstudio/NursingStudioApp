@@ -75,15 +75,26 @@ class SplashActivity : AppCompatActivity() {
     }
 
 
-        private fun checkSessionAndNavigate() {
+    private fun checkSessionAndNavigate() {
         val sp = getSharedPreferences("session", MODE_PRIVATE)
         val intent = if (sp.getBoolean("logged_in", false)) {
             Intent(this, MainActivity::class.java)
         } else {
             Intent(this, AuthActivity::class.java)
         }
+
+        // Agli screen ko background mein pehle hi ready karne ke liye flag
+        intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION)
         startActivity(intent)
-        overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out) // Smooth Transition
+
+        // Modern Professional Transition
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            overrideActivityTransition(OVERRIDE_TRANSITION_OPEN, android.R.anim.fade_in, android.R.anim.fade_out)
+        } else {
+            @Suppress("DEPRECATION")
+            overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
+        }
+
         finish()
     }
 }
