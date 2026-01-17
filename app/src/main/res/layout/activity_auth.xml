@@ -4,15 +4,6 @@
     android:layout_height="match_parent"
     android:background="#121212">
 
-    <!-- Splash Logo -->
-    <ImageView
-        android:id="@+id/imgSplash"
-        android:layout_width="260dp"
-        android:layout_height="260dp"
-        android:layout_gravity="center"
-        android:src="@drawable/ic_splash_logo"
-        android:scaleType="fitCenter" />
-
     <!-- Fragment container (login/register) -->
     <FrameLayout
         android:id="@+id/auth_container"

@@ -60,10 +60,10 @@ class SplashActivity : AppCompatActivity() {
                     // OvershootInterpolator(2.0f) hi wo "Spring/Jhatka" effect deta hai
                     .setInterpolator(android.view.animation.OvershootInterpolator(3.0f))
                     .withEndAction {
-                        // Jab logo settle ho jaye, tab 1.2 sec baad next screen
+                        // Jab logo settle ho jaye, tab 1.2/2 sec baad next screen
                         Handler(Looper.getMainLooper()).postDelayed({
                             checkSessionAndNavigate()
-                        }, 1200)
+                        }, 600)
                     }
                     .start()
 
