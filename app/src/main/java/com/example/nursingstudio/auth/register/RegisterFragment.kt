@@ -262,6 +262,13 @@ class RegisterFragment : Fragment() {
         toast(message)
         AppSettings.triggerVibration(requireContext(), 100)
 
+        // Reset Background for Spinner specifically
+        if (view is android.widget.Spinner) {
+            view.background = ContextCompat.getDrawable(requireContext(), R.drawable.spinner_error_bg)
+            // Note: We DO NOT call view.setError() here because it creates that ugly bubble
+        }
+
+        // Standard Error for TextInputLayouts
         if (view is TextInputLayout) {
             view.isErrorEnabled = true
             view.error = message
@@ -269,12 +276,11 @@ class RegisterFragment : Fragment() {
 
         view.requestFocus()
 
-        // Exact Focus Scroll
         binding.registrationScrollView.postDelayed({
             val vTop = view.top
             val parent = view.parent as? View
             val finalTop = if (parent != null && parent !is ScrollView) vTop + parent.top else vTop
-            binding.registrationScrollView.smoothScrollTo(0, finalTop - 100)
+            binding.registrationScrollView.smoothScrollTo(0, finalTop - 150)
         }, 100)
 
         return false
@@ -504,6 +510,7 @@ class RegisterFragment : Fragment() {
             binding.tilStateOther.visibility = if (isIndia) View.GONE else View.VISIBLE
         }
     }
+
     private fun setupAllSpinners() {
         val lists = listOf(
             listOf("Select Gender", "Male", "Female", "Transgender"),
@@ -515,6 +522,7 @@ class RegisterFragment : Fragment() {
             listOf("Select State/UT", "Andhra Pradesh","Arunachal Pradesh","Assam","Bihar","Chhattisgarh","Goa","Gujarat","Haryana","Himachal Pradesh","Jharkhand","Karnataka","Kerala","Madhya Pradesh","Maharashtra","Manipur","Meghalaya","Mizoram","Nagaland","Odisha","Punjab","Rajasthan","Sikkim","Tamil Nadu","Telangana","Tripura","Uttar Pradesh","Uttarakhand","West Bengal","Andaman and Nicobar Islands","Chandigarh","Dadra & Nagar Haveli and Daman & Diu","Delhi","Jammu & Kashmir","Ladakh","Lakshadweep","Puducherry")
         )
         val spins = arrayOf(binding.spGender, binding.spMarital, binding.spReligion, binding.spEducation, binding.spOccupation, binding.spCountry, binding.spStateIndia)
+
         for (i in spins.indices) {
             val adapter = ArrayAdapter(
                 requireContext(),
@@ -522,8 +530,20 @@ class RegisterFragment : Fragment() {
                 lists[i]
             )
             spins[i].adapter = adapter
+
+            // --- WORLD CLASS FIX: UNIVERSAL RESET ---
+            spins[i].onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+                override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                    if (position > 0) {
+                        // Reset background to normal when valid item is selected
+                        parent?.background = ContextCompat.getDrawable(requireContext(), R.drawable.spinner_bg)
+                    }
+                }
+                override fun onNothingSelected(parent: AdapterView<*>?) {}
+            }
         }
     }
+
 
     private fun performRegistration() {
         val userData = prepareUserData()
@@ -575,8 +595,10 @@ class RegisterFragment : Fragment() {
         object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
                 val selected = p0?.getItemAtPosition(p2).toString()
-                // Agar Select wala option nahi hai, to error hata do
+
+                // Professional Fix: Reset border to normal when item is selected
                 if (p2 > 0) {
+                    p0?.background = ContextCompat.getDrawable(requireContext(), R.drawable.spinner_bg)
                     layout?.error = null
                     layout?.isErrorEnabled = false
                 }
@@ -584,6 +606,7 @@ class RegisterFragment : Fragment() {
             }
             override fun onNothingSelected(p0: AdapterView<*>?) {}
         }
+
 
 
     private fun toast(m: String) = Toast.makeText(requireContext(), m, Toast.LENGTH_SHORT).show()
