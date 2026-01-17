@@ -46,26 +46,36 @@ class SplashActivity : AppCompatActivity() {
         }
         // --- PRO ANIMATION END ---
 
-        lottie.addAnimatorListener(object : Animator.AnimatorListener {
-            override fun onAnimationEnd(animation: Animator) {
-                lottie.visibility = View.GONE
-                logo.visibility = View.VISIBLE
 
-                logo.alpha = 0f
-                logo.animate().alpha(1f).setDuration(800).withEndAction {
-                    // Jab logo fade-in ho jaye, tab next screen par jao
-                    Handler(Looper.getMainLooper()).postDelayed({
-                        checkSessionAndNavigate()
-                    }, 1000)
-                }.start()
+        // --- WORLD-CLASS LOGO POP-IN START ---
+        lottie.addAnimatorUpdateListener { animation ->
+            // Jab heartbeat 60% (0.6f) complete ho jaye, tab logo ko pop karwao
+            if (animation.animatedFraction >= 0.7f && logo.alpha == 0f) {
+
+                logo.animate()
+                    .alpha(1f)
+                    .scaleX(1f)
+                    .scaleY(1f)
+                    .setDuration(800) // Smooth duration
+                    // OvershootInterpolator(2.0f) hi wo "Spring/Jhatka" effect deta hai
+                    .setInterpolator(android.view.animation.OvershootInterpolator(3.0f))
+                    .withEndAction {
+                        // Jab logo settle ho jaye, tab 1.2 sec baad next screen
+                        Handler(Looper.getMainLooper()).postDelayed({
+                            checkSessionAndNavigate()
+                        }, 1200)
+                    }
+                    .start()
+
+                // Saath mein Lottie ko dheere se fade-out kar do
+                lottie.animate().alpha(0f).setDuration(400).start()
             }
-            override fun onAnimationStart(p0: Animator) {}
-            override fun onAnimationCancel(p0: Animator) {}
-            override fun onAnimationRepeat(p0: Animator) {}
-        })
+        }
+        // --- WORLD-CLASS LOGO POP-IN END ---
     }
 
-    private fun checkSessionAndNavigate() {
+
+        private fun checkSessionAndNavigate() {
         val sp = getSharedPreferences("session", MODE_PRIVATE)
         val intent = if (sp.getBoolean("logged_in", false)) {
             Intent(this, MainActivity::class.java)
