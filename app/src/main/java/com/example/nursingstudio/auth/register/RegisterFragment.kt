@@ -98,6 +98,10 @@ class RegisterFragment : Fragment() {
             verifyOtpManual()
         }
 
+        binding.tvChangeNumber.setOnClickListener {
+            unlockMobileField()
+        }
+
         viewModel.regStatus.observe(viewLifecycleOwner) { result ->
             when(result) {
                 is RegResult.Loading -> {
@@ -290,6 +294,24 @@ class RegisterFragment : Fragment() {
         val imm = requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
         imm.hideSoftInputFromWindow(view?.windowToken, 0)
     }
+
+    private fun unlockMobileField() {
+        countDownTimer?.cancel() // Timer ko turant roko
+
+        binding.etMobile.isEnabled = true
+        binding.ccp.setCcpClickable(true)
+        binding.etMobile.alpha = 1.0f
+
+        binding.layoutOtpBox.visibility = View.GONE
+        binding.tvChangeNumber.visibility = View.GONE
+        binding.tvTimer.visibility = View.GONE
+        binding.btnSendOtp.visibility = View.VISIBLE
+        binding.btnSendOtp.text = "Send OTP"
+
+        binding.etOtp.setText("") // Purana OTP saaf kardo
+        binding.etMobile.requestFocus() // Cursor wahan pahuncha do
+    }
+
     private fun verifyOtpManual() {
         val code = binding.etOtp.text.toString().trim()
         if (code.length != 6) {
@@ -315,7 +337,9 @@ class RegisterFragment : Fragment() {
                     binding.btnResendOtp.visibility = View.GONE
                     countDownTimer?.cancel()
 
-                    // Mobile Number LOCK kardo (Task 7)
+                    // --- YE LINE ADD KAREIN (Change Number hide karne ke liye) ---
+                    binding.tvChangeNumber.visibility = View.GONE
+                    // Mobile Number LOCK kardo
                     binding.etMobile.isEnabled = false
                     binding.ccp.setCcpClickable(false)
                     binding.etMobile.alpha = 0.7f
@@ -354,6 +378,11 @@ class RegisterFragment : Fragment() {
         // Show Loading
         binding.loadingOverlay.visibility = View.VISIBLE
 
+        // Loading ke just niche ye add karein
+        binding.etMobile.isEnabled = false
+        binding.ccp.setCcpClickable(false)
+        binding.etMobile.alpha = 0.6f // Visual feedback ki field lock hai
+
         val options = PhoneAuthOptions.newBuilder(auth)
             .setPhoneNumber("${binding.ccp.selectedCountryCodeWithPlus}$mobile")
             .setTimeout(60L, TimeUnit.SECONDS)
@@ -366,11 +395,25 @@ class RegisterFragment : Fragment() {
                     resendToken = token
                     binding.layoutOtpBox.visibility = View.VISIBLE
                     binding.btnSendOtp.visibility = View.GONE
+
+                    // --- NEW LOGIC START ---
+                    binding.etMobile.isEnabled = false
+                    binding.ccp.setCcpClickable(false)
+                    binding.etMobile.alpha = 0.6f
+                    binding.tvChangeNumber.visibility = View.VISIBLE // Ab dikhao change ka option
+                    // --- NEW LOGIC END ---
+
                     startTimer()
                     toast("OTP Sent! Check Inbox!")
                 }
                 override fun onVerificationFailed(e: FirebaseException) {
                     binding.loadingOverlay.visibility = View.GONE
+
+                    // Error aane par wapis unlock karein
+                    binding.etMobile.isEnabled = true
+                    binding.ccp.setCcpClickable(true)
+                    binding.etMobile.alpha = 1.0f
+
                     toast("Failed: ${e.localizedMessage}")
                 }
                 override fun onVerificationCompleted(p0: PhoneAuthCredential) {
@@ -391,10 +434,17 @@ class RegisterFragment : Fragment() {
 
     private fun startTimer() {
         binding.tvTimer.visibility = View.VISIBLE
+        // Professional: Timer sirf text dikhayega, click nahi hoga
+        binding.tvTimer.text = "Resend in 60s"
+
+        // YAHAN SE setOnClickListener HATA DIYA HAI
+
         binding.btnResendOtp.visibility = View.GONE
         countDownTimer?.cancel()
         countDownTimer = object : CountDownTimer(60000, 1000) {
-            override fun onTick(m: Long) { binding.tvTimer.text = "Resend in ${m/1000}s" }
+            override fun onTick(m: Long) {
+                binding.tvTimer.text = "Resend in ${m/1000}s"
+            }
             override fun onFinish() {
                 binding.tvTimer.visibility = View.GONE
                 binding.btnResendOtp.visibility = View.VISIBLE

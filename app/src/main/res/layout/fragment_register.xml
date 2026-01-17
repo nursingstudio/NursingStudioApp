@@ -241,23 +241,36 @@
                     android:layout_marginTop="4dp"/>
             </LinearLayout>
 
-            <TextView android:id="@+id/tvTimer"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/timer_format"
-                android:visibility="gone"
-                android:layout_gravity="center"
-                android:layout_marginTop="4dp"
-                android:textColor="@color/text_secondary"/>
-            <TextView android:id="@+id/btnResendOtp"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/btn_resend_otp"
-                android:textColor="@color/saffron_dark"
-                android:visibility="gone"
-                android:layout_gravity="center"
-                android:textStyle="bold"
-                android:layout_marginTop="4dp"/>
+                    <TextView android:id="@+id/tvTimer"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/timer_format"
+                        android:visibility="gone"
+                        android:layout_gravity="center"
+                        android:layout_marginTop="4dp"
+                        android:textColor="@color/text_secondary"/>
+
+                    <TextView
+                        android:id="@+id/tvChangeNumber"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Wrong number? Change it"
+                        android:textColor="@color/saffron_dark"
+                        android:textSize="12sp"
+                        android:textStyle="bold"
+                        android:visibility="gone"
+                        android:layout_gravity="center"
+                        android:padding="8dp" />
+
+                    <TextView android:id="@+id/btnResendOtp"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/btn_resend_otp"
+                        android:textColor="@color/saffron_dark"
+                        android:visibility="gone"
+                        android:layout_gravity="center"
+                        android:textStyle="bold"
+                        android:layout_marginTop="4dp"/>
 
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/tilEmail"
