@@ -13,17 +13,20 @@
         android:theme="@style/Theme.NursingStudio">
 
         <activity
-            android:name=".AuthActivity"
+            android:name=".SplashActivity"
             android:exported="true"
-            android:windowSoftInputMode="adjustResize"
             android:theme="@style/Theme.NursingStudio.Splash">
-
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
 
+        <activity
+            android:name=".AuthActivity"
+            android:exported="false"
+            android:theme="@style/Theme.NursingStudio.Splash"
+            android:windowSoftInputMode="adjustResize" />
 
         <activity
             android:name=".MainActivity"

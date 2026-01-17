@@ -38,7 +38,7 @@
         android:text="@string/powered_by"
         android:textColor="#FFD580"
         android:textSize="14sp"
-        android:layout_marginBottom="32dp"
+        android:layout_marginBottom="50dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />

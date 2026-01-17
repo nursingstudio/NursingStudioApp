@@ -7,8 +7,12 @@ import android.os.Handler
 import android.os.Looper
 import android.view.View
 import android.widget.ImageView
+import android.widget.TextView // Ye add karein
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope // Ye add karein
 import com.airbnb.lottie.LottieAnimationView
+import kotlinx.coroutines.delay // Ye add karein
+import kotlinx.coroutines.launch // Ye add karein
 
 class SplashActivity : AppCompatActivity() {
 
@@ -18,19 +22,33 @@ class SplashActivity : AppCompatActivity() {
 
         val lottie = findViewById<LottieAnimationView>(R.id.lottieAnimationView)
         val logo = findViewById<ImageView>(R.id.logoImageView)
+        val footerText = findViewById<TextView>(R.id.poweredByText)
+
+        // --- PRO ANIMATION START ---
+        val fullText = "Powered by Nursing Studio"
+        footerText.text = "" // Pehle khali rakhenge
+
+        lifecycleScope.launch {
+            delay(500) // Heartbeat shuru hone ke thodi der baad
+            for (letter in fullText) {
+                footerText.append(letter.toString())
+                delay(40) // Letters assemble speed (pro-level smooth)
+            }
+        }
+        // --- PRO ANIMATION END ---
 
         lottie.addAnimatorListener(object : Animator.AnimatorListener {
             override fun onAnimationEnd(animation: Animator) {
                 lottie.visibility = View.GONE
                 logo.visibility = View.VISIBLE
 
-                // Fade-in animation for logo
                 logo.alpha = 0f
-                logo.animate().alpha(1f).setDuration(1000).start()
-
-                Handler(Looper.getMainLooper()).postDelayed({
-                    checkSessionAndNavigate()
-                }, 1500)
+                logo.animate().alpha(1f).setDuration(800).withEndAction {
+                    // Jab logo fade-in ho jaye, tab next screen par jao
+                    Handler(Looper.getMainLooper()).postDelayed({
+                        checkSessionAndNavigate()
+                    }, 1000)
+                }.start()
             }
             override fun onAnimationStart(p0: Animator) {}
             override fun onAnimationCancel(p0: Animator) {}
@@ -46,6 +64,7 @@ class SplashActivity : AppCompatActivity() {
             Intent(this, AuthActivity::class.java)
         }
         startActivity(intent)
+        overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out) // Smooth Transition
         finish()
     }
 }
