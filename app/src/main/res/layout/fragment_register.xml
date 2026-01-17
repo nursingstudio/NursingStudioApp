@@ -397,25 +397,32 @@
                         android:layout_marginBottom="4dp"
                         android:text="@string/label_nursing_reg_title" />
 
-            <RadioGroup
-                android:id="@+id/rgNursingReg"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_marginTop="-10dp"
-                android:layout_marginBottom="-8dp">
-                <com.google.android.material.radiobutton.MaterialRadioButton
-                    android:id="@+id/rbRegYes"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/yes"
-                    app:buttonTint="@color/saffron" />
-                <com.google.android.material.radiobutton.MaterialRadioButton
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/no"
-                    app:buttonTint="@color/saffron" />
-            </RadioGroup>
+                    <RadioGroup
+                        android:id="@+id/rgNursingReg"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_marginTop="-10dp"
+                        android:layout_marginBottom="-8dp">
+
+                        <com.google.android.material.radiobutton.MaterialRadioButton
+                            android:id="@+id/rbRegYes"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/yes"
+                            android:textColor="@color/text_primary"
+                            app:useMaterialThemeColors="true"
+                            app:buttonTint="@color/saffron" />
+
+                        <com.google.android.material.radiobutton.MaterialRadioButton
+                            android:id="@+id/rbRegNo"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/no"
+                            android:textColor="@color/text_primary"
+                            app:useMaterialThemeColors="true"
+                            app:buttonTint="@color/saffron" />
+                    </RadioGroup>
 
             <LinearLayout android:id="@+id/layoutRegDetails"
                 android:layout_width="match_parent"

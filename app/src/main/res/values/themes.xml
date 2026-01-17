@@ -1,12 +1,24 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
 
+    // main theme //
+    <style name="Theme.NursingStudio" parent="Theme.Material3.Light.NoActionBar">
+        <item name="colorPrimary">@color/saffron</item>
+        <item name="colorOnPrimary">@color/white</item>
+
+        <item name="colorOnSurface">#444444</item>
+        <item name="colorOnSurfaceVariant">#757575</item>
+
+        <item name="colorControlNormal">#757575</item>
+        <item name="colorControlActivated">@color/saffron</item>
+
+        <item name="android:windowBackground">@color/app_background</item>
+    </style>
+
 // splash screen theme //
     <style name="Theme.NursingStudio.Splash" parent="Theme.Material3.Light.NoActionBar">
         <item name="android:windowBackground">@color/splash_bg</item>
         <item name="android:statusBarColor">@color/splash_bg</item>
         <item name="android:windowNoTitle">true</item>
-        <item name="android:windowFullscreen">false</item>
-        <item name="android:windowDisablePreview">true</item>
         <item name="android:windowIsTranslucent">true</item>
     </style>
 
@@ -27,34 +39,6 @@
         <item name="android:textSize">20sp</item>
         <item name="android:textColor">@color/white</item>
         <item name="android:fontFamily">sans-serif-medium</item>
-    </style>
-
-    // main theme //
-    <style name="Theme.NursingStudio" parent="Theme.Material3.Light.NoActionBar">
-        <item name="colorPrimary">@color/saffron</item>
-        <item name="colorSecondary">@color/saffron</item>
-        <item name="android:listChoiceIndicatorSingle">@color/saffron</item>
-        <item name="colorControlActivated">@color/saffron</item>
-        <item name="colorAccent">@color/saffron</item>
-        <item name="colorOnPrimary">@color/white</item>
-        <item name="android:textCursorDrawable">@null</item>
-        <item name="android:textSelectHandle">@null</item>
-        <item name="android:textSelectHandleLeft">@null</item>
-        <item name="android:textSelectHandleRight">@null</item>
-        <item name="colorTertiary">@color/saffron_dark</item>
-        <item name="colorPrimaryContainer">@color/app_background</item>
-        <item name="colorOnPrimaryContainer">@color/saffron_dark</item>
-        <item name="android:datePickerStyle">@style/CustomDatePicker</item>
-
-        // before splash, added these lines.... start //
-        <item name="colorControlNormal">#757575</item>
-        <item name="android:statusBarColor">#FFD580</item>
-        <item name="android:windowLightStatusBar">true</item>
-        <item name="colorOnSurfaceVariant">#555555</item>
-        <item name="colorOnSurface">@color/text_primary</item>
-        <item name="colorOutline">#757575</item>
-        // before splash, added these lines.... end //
-
     </style>
 
     // date picker //

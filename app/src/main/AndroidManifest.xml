@@ -25,7 +25,7 @@
         <activity
             android:name=".AuthActivity"
             android:exported="false"
-            android:theme="@style/Theme.NursingStudio.Splash"
+            android:theme="@style/Theme.NursingStudio"
             android:windowSoftInputMode="adjustResize" />
 
         <activity
