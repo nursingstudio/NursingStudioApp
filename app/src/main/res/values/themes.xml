@@ -12,6 +12,9 @@
         <item name="colorControlActivated">@color/saffron</item>
 
         <item name="android:windowBackground">@color/app_background</item>
+
+        <item name="android:textColorHighlight">#4DFFD580</item>
+
     </style>
 
 // splash screen theme //
