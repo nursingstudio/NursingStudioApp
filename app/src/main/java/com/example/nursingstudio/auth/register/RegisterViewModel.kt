@@ -3,10 +3,11 @@ package com.example.nursingstudio.auth.register
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.example.nursingstudio.data.repository.AuthRepository
 import com.google.firebase.auth.AuthCredential
 
 class RegisterViewModel : ViewModel() {
-    private val repository = RegisterRepository()
+    private val repository = AuthRepository()
     private val _regStatus = MutableLiveData<RegResult>()
     val regStatus: LiveData<RegResult> get() = _regStatus
 

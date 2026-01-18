@@ -3,10 +3,11 @@ package com.example.nursingstudio.auth.login
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.example.nursingstudio.data.repository.AuthRepository
 import com.google.firebase.auth.AuthCredential
 
 class LoginViewModel : ViewModel() {
-    private val repository = LoginRepository()
+    private val repository = AuthRepository()
 
     private val _loginStatus = MutableLiveData<LoginResult>()
     val loginStatus: LiveData<LoginResult> get() = _loginStatus

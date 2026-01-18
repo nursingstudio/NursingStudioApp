@@ -76,8 +76,10 @@ class SplashActivity : AppCompatActivity() {
 
 
     private fun checkSessionAndNavigate() {
-        val sp = getSharedPreferences("session", MODE_PRIVATE)
-        val intent = if (sp.getBoolean("logged_in", false)) {
+        // ViewModel ka use karke session check
+        val viewModel = androidx.lifecycle.ViewModelProvider(this)[SplashViewModel::class.java]
+
+        val intent = if (viewModel.isUserLoggedIn()) {
             Intent(this, MainActivity::class.java)
         } else {
             Intent(this, AuthActivity::class.java)
