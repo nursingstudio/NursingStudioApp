@@ -85,7 +85,8 @@
                         android:id="@+id/etEmail"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:inputType="textEmailAddress" />
+                        android:inputType="textEmailAddress"
+                        app:errorEnabled="false"/>
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <com.google.android.material.textfield.TextInputLayout
@@ -100,7 +101,8 @@
                         android:id="@+id/etPassword"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:inputType="textPassword" />
+                        android:inputType="textPassword"
+                        app:errorEnabled="false" />
                 </com.google.android.material.textfield.TextInputLayout>
             </LinearLayout>
 
@@ -127,7 +129,8 @@
                         android:id="@+id/etMobileLogin"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:inputType="phone" />
+                        android:inputType="phone"
+                        app:errorEnabled="false" />
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <com.google.android.material.textfield.TextInputLayout
@@ -143,7 +146,8 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:inputType="number"
-                        android:maxLength="6" />
+                        android:maxLength="6"
+                        app:errorEnabled="false" />
                 </com.google.android.material.textfield.TextInputLayout>
             </LinearLayout>
 

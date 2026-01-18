@@ -22,6 +22,8 @@ class AuthRepository {
     fun checkUserInFirestore(uid: String): Task<DocumentSnapshot> = db.collection("Users").document(uid).get()
     fun sendResetPassword(email: String) = auth.sendPasswordResetEmail(email)
 
+    // Ise Repository ke andar add kar lo
+    fun resetPassword(email: String): Task<Void> = auth.sendPasswordResetEmail(email)
     // --- REGISTER LOGIC ---
     fun createUser(email: String, pass: String): Task<AuthResult> = auth.createUserWithEmailAndPassword(email, pass)
     fun linkPhone(credential: AuthCredential): Task<AuthResult>? = auth.currentUser?.linkWithCredential(credential)
