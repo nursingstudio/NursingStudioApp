@@ -63,6 +63,9 @@ dependencies {
     implementation("com.google.firebase:firebase-appcheck-ktx")
     implementation("com.google.android.gms:play-services-safetynet:18.1.0")
 
+    // Firebase Tasks ko Coroutines (await) ke sath chalane ke liye
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.7.3")
+
     // --- OTHER LIBRARIES ---
     implementation("com.hbb20:ccp:2.6.0")
     implementation("de.hdodenhof:circleimageview:3.1.0")

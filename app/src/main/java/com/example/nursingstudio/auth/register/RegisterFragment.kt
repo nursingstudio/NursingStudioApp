@@ -50,7 +50,6 @@ import java.util.Date
 import java.util.Locale
 import java.util.TimeZone
 import java.util.concurrent.TimeUnit
-
 class RegisterFragment : Fragment() {
 
     private var _binding: FragmentRegisterBinding? = null
@@ -102,6 +101,7 @@ class RegisterFragment : Fragment() {
             unlockMobileField()
         }
 
+        // Corrected Observer name
         viewModel.regStatus.observe(viewLifecycleOwner) { result ->
             when(result) {
                 is RegResult.Loading -> {
@@ -119,6 +119,23 @@ class RegisterFragment : Fragment() {
                     binding.progressBar.visibility = View.GONE
                     binding.btnRegister.isEnabled = true
                     toast("Error: ${result.message}")
+                }
+            }
+        }
+
+        // OTP Result ko observe karein
+        viewModel.otpStatus.observe(viewLifecycleOwner) { result ->
+            when(result) {
+                is OtpResult.Loading -> binding.progressBar.visibility = View.VISIBLE
+                is OtpResult.Success -> {
+                    binding.progressBar.visibility = View.GONE
+                    isOtpVerified = true
+                    handleOtpSuccessUI() // UI handle karne wala function
+                }
+                is OtpResult.Error -> {
+                    binding.progressBar.visibility = View.GONE
+                    binding.tilOtp.error = result.message
+                    AppSettings.triggerVibration(requireContext(), 100)
                 }
             }
         }
@@ -150,7 +167,6 @@ class RegisterFragment : Fragment() {
 
 
     private fun setupUniversalErrorCleaner() {
-        // Saare TextInputLayouts aur unke EditTexts ka map
         val inputMap = mapOf(
             binding.etName to binding.tilName,
             binding.etDob to binding.tilDob,
@@ -164,7 +180,8 @@ class RegisterFragment : Fragment() {
             binding.etEducationOther to binding.tilEducationOther,
             binding.etOccupationOther to binding.tilOccupationOther,
             binding.etCountryOther to binding.tilCountryOther,
-            binding.etStateOther to binding.tilStateOther
+            binding.etStateOther to binding.tilStateOther,
+            binding.etOtp to binding.tilOtp // <--- Ye line add kar di hai
         )
 
         inputMap.forEach { (editText, layout) ->
@@ -172,13 +189,24 @@ class RegisterFragment : Fragment() {
                 override fun afterTextChanged(s: Editable?) {
                     if (!s.isNullOrEmpty()) {
                         layout.error = null
-                        layout.isErrorEnabled = false // Ye line niche ka gap turant khatam kar degi
+                        layout.isErrorEnabled = false // Gap turant khatam!
                     }
                 }
                 override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
                 override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
             })
         }
+
+        // Mobile Field ke liye special cleaner (Kyunki ye TextInputLayout nahi hai)
+        binding.etMobile.addTextChangedListener(object : TextWatcher {
+            override fun afterTextChanged(s: Editable?) {
+                if (!s.isNullOrEmpty()) {
+                    binding.layoutMobile.background = ContextCompat.getDrawable(requireContext(), R.drawable.edittext_background)
+                }
+            }
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+        })
     }
 
     private fun showDatePicker() {
@@ -320,42 +348,9 @@ class RegisterFragment : Fragment() {
         }
 
         if (verificationId != null) {
-            // Loading chalu karo
-            binding.progressBar.visibility = View.VISIBLE
-
             val credential = PhoneAuthProvider.getCredential(verificationId!!, code)
-
-            // ASLI FIREBASE CHECK (123456 gayab!)
-            auth.signInWithCredential(credential).addOnCompleteListener { task ->
-                binding.progressBar.visibility = View.GONE
-                if (task.isSuccessful) {
-                    isOtpVerified = true
-
-                    // Saari OTP wali gandagi gayab karo
-                    binding.layoutOtpBox.visibility = View.GONE
-                    binding.tvTimer.visibility = View.GONE
-                    binding.btnResendOtp.visibility = View.GONE
-                    countDownTimer?.cancel()
-
-                    // --- YE LINE ADD KAREIN (Change Number hide karne ke liye) ---
-                    binding.tvChangeNumber.visibility = View.GONE
-                    // Mobile Number LOCK kardo
-                    binding.etMobile.isEnabled = false
-                    binding.ccp.setCcpClickable(false)
-                    binding.etMobile.alpha = 0.7f
-
-                    binding.btnSendOtp.apply {
-                        visibility = View.VISIBLE
-                        text = "Verified ✅"
-                        isEnabled = false
-                        setTextColor(ContextCompat.getColor(requireContext(), android.R.color.white))
-                    }
-                    toast("Mobile Verified Successfully! 🎉")
-                } else {
-                    binding.tilOtp.error = "Wrong OTP! Try again"
-                    AppSettings.triggerVibration(requireContext(), 100)
-                }
-            }
+            // AB FIREBASE NAHI, VIEWMODEL KO CALL KAREIN
+            viewModel.verifyOtp(credential)
         } else {
             toast("Verification ID missing, try resending")
         }
@@ -657,8 +652,24 @@ class RegisterFragment : Fragment() {
             override fun onNothingSelected(p0: AdapterView<*>?) {}
         }
 
+    private fun handleOtpSuccessUI() {
+        binding.layoutOtpBox.visibility = View.GONE
+        binding.tvTimer.visibility = View.GONE
+        binding.btnResendOtp.visibility = View.GONE
+        countDownTimer?.cancel()
+        binding.tvChangeNumber.visibility = View.GONE
+        binding.etMobile.isEnabled = false
+        binding.ccp.setCcpClickable(false)
+        binding.etMobile.alpha = 0.7f
 
-
+        binding.btnSendOtp.apply {
+            visibility = View.VISIBLE
+            text = "Verified ✅"
+            isEnabled = false
+            setTextColor(ContextCompat.getColor(requireContext(), android.R.color.white))
+        }
+        toast("Mobile Verified Successfully! 🎉")
+    }
     private fun toast(m: String) = Toast.makeText(requireContext(), m, Toast.LENGTH_SHORT).show()
     override fun onDestroyView() { super.onDestroyView(); countDownTimer?.cancel(); _binding = null }
 }
