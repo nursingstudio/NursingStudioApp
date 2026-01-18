@@ -13,7 +13,7 @@
         android:theme="@style/Theme.NursingStudio">
 
         <activity
-            android:name=".SplashActivity"
+            android:name=".splash.SplashActivity"
             android:exported="true"
             android:theme="@style/Theme.NursingStudio.Splash">
             <intent-filter>

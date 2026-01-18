@@ -20,16 +20,16 @@
 
     <ImageView
         android:id="@+id/logoImageView"
-        android:layout_width="220dp"
-        android:layout_height="220dp"
+        android:layout_width="180dp"
+        android:layout_height="180dp"
         android:src="@drawable/ic_splash_logo"
         android:alpha="0"
-        android:scaleX="0.5"
-        android:scaleY="0.5"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
+        android:scaleX="0.3"
+        android:scaleY="0.3"
+        app:layout_constraintBottom_toBottomOf="@id/lottieAnimationView"
+        app:layout_constraintEnd_toEndOf="@id/lottieAnimationView"
+        app:layout_constraintStart_toStartOf="@id/lottieAnimationView"
+        app:layout_constraintTop_toTopOf="@id/lottieAnimationView"
         android:contentDescription="@string/app_logo_desc"
         android:visibility="visible" />
 
