@@ -56,10 +56,11 @@ class HomeFragment : Fragment() {
 
         // Welcome text
         val tvWelcome = view.findViewById<TextView>(R.id.tvWelcome)
-        val session = requireActivity()
-            .getSharedPreferences("session", Context.MODE_PRIVATE)
 
-        val name = session.getString("reg_name", "User")
+        val session = requireActivity().getSharedPreferences("session", Context.MODE_PRIVATE)
+        val name = session.getString("reg_name", "User") // reg_name wahi hai jo MainActivity ne save kiya
+
+// R.string.welcome_user check karna "Welcome, %s" format mein ho
         tvWelcome.text = getString(R.string.welcome_user, name)
 
         // Daily motivation

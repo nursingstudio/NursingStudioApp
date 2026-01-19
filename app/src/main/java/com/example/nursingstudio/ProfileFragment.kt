@@ -49,7 +49,7 @@ class ProfileFragment : Fragment() {
                 val addr = "${it["address"]}, ${it["district"]}, ${it["state"]}, ${it["country"]} - ${it["pincode"]}"
                 setupRow(view.findViewById(R.id.rowAddress), getString(R.string.label_address), addr)
 
-                val isReg = it["nursingRegStatus"]?.toString() ?: "No"
+                val isReg = it["nursingRegStatus"]?.toString() ?: ""
                 view.findViewById<TextView>(R.id.tvNursingStatus).text = getString(R.string.label_nursing_reg, isReg)
             }
         }

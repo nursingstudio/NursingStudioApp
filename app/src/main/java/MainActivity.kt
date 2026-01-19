@@ -132,7 +132,7 @@ class MainActivity : AppCompatActivity() {
         val uid = auth.currentUser?.uid ?: return
         db.collection("Users").document(uid).get().addOnSuccessListener { doc ->
             if (doc.exists()) {
-                val name = doc.getString("name") ?: ""
+                val name = doc.getString("fullName") ?: ""
                 val mobile = doc.getString("mobile") ?: ""
 
                 // Saving in SharedPreferences for offline speed
