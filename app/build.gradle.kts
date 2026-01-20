@@ -58,13 +58,15 @@ dependencies {
     implementation("com.google.firebase:firebase-auth")
     implementation("com.google.firebase:firebase-firestore")
     implementation("com.google.firebase:firebase-storage")
-    implementation("com.google.firebase:firebase-appcheck-playintegrity")
     implementation("com.google.firebase:firebase-appcheck-debug")
     implementation("com.google.firebase:firebase-appcheck-ktx")
     implementation("com.google.android.gms:play-services-safetynet:18.1.0")
-
+    // Firebase App Check (Optional but recommended)
+    implementation("com.google.firebase:firebase-appcheck-playintegrity")
     // Firebase Tasks ko Coroutines (await) ke sath chalane ke liye
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.7.3")
+    // Play Integrity API ke liye
+    implementation("com.google.android.play:integrity:1.3.0")
 
     // --- OTHER LIBRARIES ---
     implementation("com.hbb20:ccp:2.6.0")

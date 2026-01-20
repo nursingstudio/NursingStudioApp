@@ -92,6 +92,9 @@ class LoginFragment : Fragment() {
                 verificationId = id
                 binding.layoutOtpLogin.visibility = View.VISIBLE
                 binding.btnLoginAction.text = "Verify & Login"
+                // World-class UI feedback
+                com.example.nursingstudio.AppSettings.triggerVibration(requireContext(), 100)
+                toast("OTP Sent Successfully! ✨")
             }
         } else {
             if (otp.length != 6) { toast("Enter 6 digit OTP"); return }

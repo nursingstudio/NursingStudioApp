@@ -29,6 +29,7 @@ import androidx.core.widget.NestedScrollView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import com.example.nursingstudio.AppSettings
+import com.example.nursingstudio.AuthActivity
 import com.example.nursingstudio.MainActivity
 import com.example.nursingstudio.R
 import com.example.nursingstudio.databinding.FragmentRegisterBinding
@@ -64,7 +65,11 @@ class RegisterFragment : Fragment() {
     private var countDownTimer: CountDownTimer? = null
     private var lastClickTime: Long = 0
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
         _binding = FragmentRegisterBinding.inflate(inflater, container, false)
         return binding.root
     }
@@ -103,11 +108,12 @@ class RegisterFragment : Fragment() {
 
         // Corrected Observer name
         viewModel.regStatus.observe(viewLifecycleOwner) { result ->
-            when(result) {
+            when (result) {
                 is RegResult.Loading -> {
                     binding.progressBar.visibility = View.VISIBLE
                     binding.btnRegister.isEnabled = false
                 }
+
                 is RegResult.Success -> {
                     binding.progressBar.visibility = View.GONE
                     AppSettings.triggerVibration(requireContext(), 200)
@@ -115,6 +121,7 @@ class RegisterFragment : Fragment() {
                     startActivity(Intent(requireContext(), MainActivity::class.java))
                     requireActivity().finish()
                 }
+
                 is RegResult.Error -> {
                     binding.progressBar.visibility = View.GONE
                     binding.btnRegister.isEnabled = true
@@ -125,13 +132,14 @@ class RegisterFragment : Fragment() {
 
         // OTP Result ko observe karein
         viewModel.otpStatus.observe(viewLifecycleOwner) { result ->
-            when(result) {
+            when (result) {
                 is OtpResult.Loading -> binding.progressBar.visibility = View.VISIBLE
                 is OtpResult.Success -> {
                     binding.progressBar.visibility = View.GONE
                     isOtpVerified = true
                     handleOtpSuccessUI() // UI handle karne wala function
                 }
+
                 is OtpResult.Error -> {
                     binding.progressBar.visibility = View.GONE
                     binding.tilOtp.error = result.message
@@ -192,7 +200,15 @@ class RegisterFragment : Fragment() {
                         layout.isErrorEnabled = false // Gap turant khatam!
                     }
                 }
-                override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+
+                override fun beforeTextChanged(
+                    s: CharSequence?,
+                    start: Int,
+                    count: Int,
+                    after: Int
+                ) {
+                }
+
                 override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
             })
         }
@@ -201,9 +217,11 @@ class RegisterFragment : Fragment() {
         binding.etMobile.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(s: Editable?) {
                 if (!s.isNullOrEmpty()) {
-                    binding.layoutMobile.background = ContextCompat.getDrawable(requireContext(), R.drawable.edittext_background)
+                    binding.layoutMobile.background =
+                        ContextCompat.getDrawable(requireContext(), R.drawable.edittext_background)
                 }
             }
+
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
         })
@@ -257,32 +275,79 @@ class RegisterFragment : Fragment() {
             if (etName.text.isNullOrEmpty()) return showError(tilName, "Full Name is required")
             if (spGender.selectedItemPosition == 0) return showError(spGender, "Select Gender")
             if (etDob.text.isNullOrEmpty()) return showError(tilDob, "DOB is required")
-            if (spMarital.selectedItemPosition == 0) return showError(spMarital, "Select Marital Status")
-            if (spReligion.selectedItemPosition == 0) return showError(spReligion, "Select Religion")
-            if (spEducation.selectedItemPosition == 0) return showError(spEducation, "Select Education")
-            if (spEducation.selectedItem == "Other" && etEducationOther.text.isNullOrEmpty()) return showError(tilEducationOther, "Specify Education")
-            if (spOccupation.selectedItemPosition == 0) return showError(spOccupation, "Select Occupation")
-            if (spOccupation.selectedItem == "Other" && etOccupationOther.text.isNullOrEmpty()) return showError(tilOccupationOther, "Specify Occupation")
+            if (spMarital.selectedItemPosition == 0) return showError(
+                spMarital,
+                "Select Marital Status"
+            )
+            if (spReligion.selectedItemPosition == 0) return showError(
+                spReligion,
+                "Select Religion"
+            )
+            if (spEducation.selectedItemPosition == 0) return showError(
+                spEducation,
+                "Select Education"
+            )
+            if (spEducation.selectedItem == "Other" && etEducationOther.text.isNullOrEmpty()) return showError(
+                tilEducationOther,
+                "Specify Education"
+            )
+            if (spOccupation.selectedItemPosition == 0) return showError(
+                spOccupation,
+                "Select Occupation"
+            )
+            if (spOccupation.selectedItem == "Other" && etOccupationOther.text.isNullOrEmpty()) return showError(
+                tilOccupationOther,
+                "Specify Occupation"
+            )
             if (!isOtpVerified) return showError(layoutMobile, "Mobile verification mandatory")
-            if (etEmail.text.isNullOrEmpty() || !Patterns.EMAIL_ADDRESS.matcher(etEmail.text.toString()).matches()) return showError(tilEmail, "Valid Email required")
-            if (spCountry.selectedItem == "Bharat (India)" && spStateIndia.selectedItemPosition == 0) return showError(spStateIndia, "Select State")
+            if (etEmail.text.isNullOrEmpty() || !Patterns.EMAIL_ADDRESS.matcher(etEmail.text.toString())
+                    .matches()
+            ) return showError(tilEmail, "Valid Email required")
+            if (spCountry.selectedItem == "Bharat (India)" && spStateIndia.selectedItemPosition == 0) return showError(
+                spStateIndia,
+                "Select State"
+            )
             // Country Other Condition
             if (spCountry.selectedItem == "Other") {
-                if (etCountryOther.text.isNullOrEmpty()) return showError(tilCountryOther, "Enter Country Name")
-                if (etStateOther.text.isNullOrEmpty()) return showError(tilStateOther, "Enter State Name")
+                if (etCountryOther.text.isNullOrEmpty()) return showError(
+                    tilCountryOther,
+                    "Enter Country Name"
+                )
+                if (etStateOther.text.isNullOrEmpty()) return showError(
+                    tilStateOther,
+                    "Enter State Name"
+                )
             } else if (spStateIndia.selectedItemPosition == 0) {
                 return showError(spStateIndia, "Select State")
             }
             if (etDistrict.text.isNullOrEmpty()) return showError(tilDistrict, "District required")
-            if (etAddress.text.isNullOrEmpty()) return showError(tilAddress, "Full Address required")
-            if (etPincode.text?.length != 6) return showError(tilPincode, "Valid 6-digit Pincode required")
+            if (etAddress.text.isNullOrEmpty()) return showError(
+                tilAddress,
+                "Full Address required"
+            )
+            if (etPincode.text?.length != 6) return showError(
+                tilPincode,
+                "Valid 6-digit Pincode required"
+            )
             // Radio Button Mandatory Check
-            if (rgNursingReg.checkedRadioButtonId == -1) return showError(rgNursingReg, "Please select Nursing Registration status")
+            if (rgNursingReg.checkedRadioButtonId == -1) return showError(
+                rgNursingReg,
+                "Please select Nursing Registration status"
+            )
             if (rgNursingReg.checkedRadioButtonId == R.id.rbRegYes) {
-                if (etRegState.text.isNullOrEmpty()) return showError(tilRegState, "Reg. State required")
-                if (etRegNumber.text.isNullOrEmpty()) return showError(tilRegNumber, "Reg. Number required")
+                if (etRegState.text.isNullOrEmpty()) return showError(
+                    tilRegState,
+                    "Reg. State required"
+                )
+                if (etRegNumber.text.isNullOrEmpty()) return showError(
+                    tilRegNumber,
+                    "Reg. Number required"
+                )
             }
-            if (etPassword.text!!.length < 6) return showError(tilPassword, "Password must be at least 6 chars")
+            if (etPassword.text!!.length < 6) return showError(
+                tilPassword,
+                "Password must be at least 6 chars"
+            )
             if (!cbTerms.isChecked) return showError(cbTerms, "Please accept Terms & Conditions")
         }
         return true
@@ -296,7 +361,8 @@ class RegisterFragment : Fragment() {
 
         // Reset Background for Spinner specifically
         if (view is android.widget.Spinner) {
-            view.background = ContextCompat.getDrawable(requireContext(), R.drawable.spinner_error_bg)
+            view.background =
+                ContextCompat.getDrawable(requireContext(), R.drawable.spinner_error_bg)
             // Note: We DO NOT call view.setError() here because it creates that ugly bubble
         }
 
@@ -319,7 +385,8 @@ class RegisterFragment : Fragment() {
     }
 
     private fun hideKeyboard() {
-        val imm = requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        val imm =
+            requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
         imm.hideSoftInputFromWindow(view?.windowToken, 0)
     }
 
@@ -359,72 +426,34 @@ class RegisterFragment : Fragment() {
     private fun sendOtp() {
         val mobile = binding.etMobile.text.toString().trim()
 
-        // 10 digits check
         if (mobile.length != 10) {
-            // Agar tilMobile nahi mil raha, toh toast dikha do aur focus etMobile par kar do
             toast("Enter 10 digit mobile number")
             binding.etMobile.requestFocus()
             AppSettings.triggerVibration(requireContext(), 100)
             return
         }
 
-        // Keyboard hide logic
         hideKeyboard()
-        // Show Loading
         binding.loadingOverlay.visibility = View.VISIBLE
 
-        // Loading ke just niche ye add karein
+        // Visual feedback: Lock fields
         binding.etMobile.isEnabled = false
         binding.ccp.setCcpClickable(false)
-        binding.etMobile.alpha = 0.6f // Visual feedback ki field lock hai
+        binding.etMobile.alpha = 0.6f
 
-        val options = PhoneAuthOptions.newBuilder(auth)
-            .setPhoneNumber("${binding.ccp.selectedCountryCodeWithPlus}$mobile")
-            .setTimeout(60L, TimeUnit.SECONDS)
-            .setActivity(requireActivity())
-            .setCallbacks(object : PhoneAuthProvider.OnVerificationStateChangedCallbacks() {
-                override fun onCodeSent(id: String, token: PhoneAuthProvider.ForceResendingToken) {
-                    AppSettings.triggerVibration(requireContext(), 50) // Chota jhatka
-                    binding.loadingOverlay.visibility = View.GONE
-                    verificationId = id
-                    resendToken = token
-                    binding.layoutOtpBox.visibility = View.VISIBLE
-                    binding.btnSendOtp.visibility = View.GONE
+        // --- ⭐ Master Hub Call (World-Class Security) ⭐ ---
+        (activity as? AuthActivity)?.sendOtp(mobile) { id ->
+            binding.loadingOverlay.visibility = View.GONE
+            verificationId = id
 
-                    // --- NEW LOGIC START ---
-                    binding.etMobile.isEnabled = false
-                    binding.ccp.setCcpClickable(false)
-                    binding.etMobile.alpha = 0.6f
-                    binding.tvChangeNumber.visibility = View.VISIBLE // Ab dikhao change ka option
-                    // --- NEW LOGIC END ---
+            // Tumhari purani UI Logic (Safe and Secure)
+            binding.layoutOtpBox.visibility = View.VISIBLE
+            binding.btnSendOtp.visibility = View.GONE
+            binding.tvChangeNumber.visibility = View.VISIBLE
 
-                    startTimer()
-                    toast("OTP Sent! Check Inbox!")
-                }
-                override fun onVerificationFailed(e: FirebaseException) {
-                    binding.loadingOverlay.visibility = View.GONE
-
-                    // Error aane par wapis unlock karein
-                    binding.etMobile.isEnabled = true
-                    binding.ccp.setCcpClickable(true)
-                    binding.etMobile.alpha = 1.0f
-
-                    toast("Failed: ${e.localizedMessage}")
-                }
-                override fun onVerificationCompleted(p0: PhoneAuthCredential) {
-                    binding.loadingOverlay.visibility = View.GONE
-                    binding.etOtp.setText(p0.smsCode)
-                    // Auto verify agar sim isi phone mein ho
-                    if (p0.smsCode != null) verifyOtpManual()
-                }
-            })
-
-        // Resend token use karna zaroori hai agar button click kiya hai
-        if (resendToken != null) {
-            options.setForceResendingToken(resendToken!!)
+            startTimer()
+            toast("OTP Sent Successfully! ✨")
         }
-
-        PhoneAuthProvider.verifyPhoneNumber(options.build())
     }
 
     private fun startTimer() {
