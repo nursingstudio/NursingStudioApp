@@ -25,6 +25,7 @@ class LoginFragment : Fragment() {
     private val binding get() = _binding!!
     private val viewModel: LoginViewModel by viewModels()
     private var verificationId: String? = null
+    private var countDownTimer: android.os.CountDownTimer? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = FragmentLoginBinding.inflate(inflater, container, false)
@@ -69,6 +70,13 @@ class LoginFragment : Fragment() {
             // Fragment transaction logic to Register
                 (activity as? AuthActivity)?.showRegister()
             }
+        binding.tvChangeNumber.setOnClickListener { unlockMobileField() }
+        binding.btnResendOtp.setOnClickListener {
+            // Resend ke liye pehle verificationId null karo taki fresh call ho
+            verificationId = null
+            binding.layoutOtpLogin.visibility = View.GONE // Reset view to send mode
+            performMobileLogin()
+        }
     }
 
     private fun performEmailLogin() {
@@ -86,18 +94,36 @@ class LoginFragment : Fragment() {
         val otp = binding.etOtpLogin.text.toString().trim()
 
         if (binding.layoutOtpLogin.visibility == View.GONE) {
-            if (mobile.length != 10) { toast("Enter 10 digit number"); return }
-            // Yahan OTP Send karne ka logic AuthActivity se call hoga
-            (activity as? com.example.nursingstudio.AuthActivity)?.sendOtp(mobile) { id ->
+            // ... (Puraana mobile send logic same rahega)
+            if (mobile.length != 10) {
+                binding.etMobileLogin.error = "Enter 10 digit number" // Red Border
+                return
+            }
+            // ... (Aapka existing sendOtp code)
+            binding.loadingOverlay.visibility = View.VISIBLE
+            (activity as? AuthActivity)?.sendOtp(mobile) { id ->
+                binding.loadingOverlay.visibility = View.GONE
                 verificationId = id
                 binding.layoutOtpLogin.visibility = View.VISIBLE
+                binding.tvChangeNumber.visibility = View.VISIBLE
+                binding.etMobileLogin.isEnabled = false
+                binding.etMobileLogin.alpha = 0.6f
+                startLoginTimer()
                 binding.btnLoginAction.text = "Verify & Login"
-                // World-class UI feedback
-                com.example.nursingstudio.AppSettings.triggerVibration(requireContext(), 100)
+                AppSettings.triggerVibration(requireContext(), 100)
                 toast("OTP Sent Successfully! ✨")
             }
         } else {
-            if (otp.length != 6) { toast("Enter 6 digit OTP"); return }
+            // OTP Verification Logic
+            if (otp.length != 6) {
+                // World-Class Red Border Error
+                binding.etOtpLogin.error = "Enter 6 digit OTP"
+                binding.etOtpLogin.requestFocus()
+                return
+            }
+
+            binding.etOtpLogin.error = null // Error clear karo
+            binding.loadingOverlay.visibility = View.VISIBLE
             val credential = PhoneAuthProvider.getCredential(verificationId!!, otp)
             viewModel.loginWithPhone(credential)
         }
@@ -105,34 +131,74 @@ class LoginFragment : Fragment() {
 
     private fun observeViewModel() {
         viewModel.loginStatus.observe(viewLifecycleOwner) { result ->
+            if (result !is LoginResult.Loading) {
+                binding.loadingOverlay.visibility = View.GONE
+            }
+
             when (result) {
                 is LoginResult.Loading -> {
-                    binding.loginProgress.visibility = View.VISIBLE
-                    binding.btnLoginAction.visibility = View.INVISIBLE
+                    binding.loadingOverlay.visibility = View.VISIBLE
                 }
                 is LoginResult.Success -> {
-                    startActivity(Intent(requireContext(), MainActivity::class.java))
-                    requireActivity().finish()
+                    // World-Class Way: Pehle overlay hatao, fir navigate karo
+                    binding.loadingOverlay.visibility = View.GONE
+                    val intent = Intent(requireContext(), MainActivity::class.java)
+                    intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                    startActivity(intent)
+                    requireActivity().finish() // Ab crash nahi hoga
                 }
                 is LoginResult.NoProfile -> {
-                    toast("No profile found. Please Register first.")
-                    binding.loginProgress.visibility = View.GONE
-                    binding.btnLoginAction.visibility = View.VISIBLE
+                    binding.loadingOverlay.visibility = View.GONE
+                    toast("No profile found. Redirecting to Register...")
+                    (activity as? AuthActivity)?.showRegister()
                 }
                 is LoginResult.Error -> {
-                    binding.loginProgress.visibility = View.GONE
-                    binding.btnLoginAction.visibility = View.VISIBLE
+                    binding.loadingOverlay.visibility = View.GONE
+                    // Professional Red Border for Wrong OTP
+                    if (binding.layoutOtpLogin.visibility == View.VISIBLE) {
+                        binding.etOtpLogin.error = "Invalid OTP. Please try again."
+                    }
                     toast(result.message)
+                    binding.btnLoginAction.text = if (binding.layoutOtpLogin.visibility == View.VISIBLE) "Verify & Login" else "Login"
                 }
             }
         }
     }
-
     private fun toast(m: String) = Toast.makeText(requireContext(), m, Toast.LENGTH_SHORT).show()
 
     private fun hideKeyboard() {
         val imm = requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
         imm.hideSoftInputFromWindow(view?.windowToken, 0)
+    }
+
+    private fun startLoginTimer() {
+        binding.tvTimer.visibility = View.VISIBLE
+        binding.btnResendOtp.visibility = View.GONE
+
+        countDownTimer?.cancel()
+        countDownTimer = object : android.os.CountDownTimer(60000, 1000) {
+            override fun onTick(m: Long) {
+                binding.tvTimer.text = "Resend in ${m / 1000}s"
+            }
+            override fun onFinish() {
+                binding.tvTimer.visibility = View.GONE
+                binding.btnResendOtp.visibility = View.VISIBLE
+            }
+        }.start()
+    }
+
+    private fun unlockMobileField() {
+        countDownTimer?.cancel()
+        binding.etMobileLogin.isEnabled = true
+        binding.ccpLogin.setCcpClickable(true)
+        binding.etMobileLogin.alpha = 1.0f
+        binding.layoutOtpLogin.visibility = View.GONE
+        binding.tvChangeNumber.visibility = View.GONE
+        binding.tvTimer.visibility = View.GONE
+        binding.btnResendOtp.visibility = View.GONE
+        binding.btnLoginAction.text = "Login"
+        binding.etOtpLogin.setText("")
+        binding.etMobileLogin.requestFocus()
     }
 
     override fun onDestroyView() { super.onDestroyView(); _binding = null }

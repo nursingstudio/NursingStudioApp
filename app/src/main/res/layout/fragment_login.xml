@@ -7,9 +7,10 @@
 
     <ImageView
         android:id="@+id/imgLogo"
-        android:layout_width="80dp"
-        android:layout_height="80dp"
-        android:src="@mipmap/ic_launcher_round"
+        android:layout_width="150dp"
+        android:layout_height="150dp"
+        android:src="@drawable/ic_splash_logo"
+        android:scaleType="centerInside"
         app:layout_constraintTop_toTopOf="parent"
         android:layout_marginTop="80dp"
         app:layout_constraintStart_toStartOf="parent"
@@ -85,8 +86,7 @@
                         android:id="@+id/etEmail"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:inputType="textEmailAddress"
-                        app:errorEnabled="false"/>
+                        android:inputType="textEmailAddress" />
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <com.google.android.material.textfield.TextInputLayout
@@ -101,8 +101,7 @@
                         android:id="@+id/etPassword"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:inputType="textPassword"
-                        app:errorEnabled="false" />
+                        android:inputType="textPassword" />
                 </com.google.android.material.textfield.TextInputLayout>
             </LinearLayout>
 
@@ -129,8 +128,7 @@
                         android:id="@+id/etMobileLogin"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:inputType="phone"
-                        app:errorEnabled="false" />
+                        android:inputType="phone" />
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <com.google.android.material.textfield.TextInputLayout
@@ -146,28 +144,51 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:inputType="number"
-                        android:maxLength="6"
-                        app:errorEnabled="false" />
+                        android:maxLength="6" />
+
                 </com.google.android.material.textfield.TextInputLayout>
             </LinearLayout>
+
+            <TextView android:id="@+id/tvTimer"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/timer_format"
+                android:visibility="gone"
+                android:layout_gravity="center"
+                android:layout_marginTop="4dp"
+                android:textColor="@color/text_secondary"/>
+
+            <TextView
+                android:id="@+id/tvChangeNumber"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Wrong number? Change it"
+                android:textColor="@color/saffron_dark"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                android:visibility="gone"
+                android:layout_gravity="center"
+                android:padding="8dp" />
+
+            <TextView android:id="@+id/btnResendOtp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/btn_resend_otp"
+                android:textColor="@color/saffron_dark"
+                android:visibility="gone"
+                android:layout_gravity="center"
+                android:textStyle="bold"
+                android:layout_marginTop="4dp"/>
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnLoginAction"
                 android:layout_width="match_parent"
                 android:layout_height="55dp"
                 android:text="@string/btn_login"
-                android:layout_marginTop="24dp"
+                android:layout_marginTop="12dp"
                 app:cornerRadius="16dp"
                 android:textStyle="bold"
                 app:backgroundTint="@color/saffron" />
-
-            <ProgressBar
-                android:id="@+id/loginProgress"
-                android:layout_width="30dp"
-                android:layout_height="30dp"
-                android:layout_gravity="center"
-                android:visibility="gone"
-                android:indeterminateTint="@color/white" />
 
             <RelativeLayout
                 android:layout_width="match_parent"
@@ -199,12 +220,37 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Securely Powered by Nursing Studio"
+        android:text="@string/secured_by"
         android:alpha="0.7"
         android:textSize="14sp"
         android:layout_marginBottom="60dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
+
+    <FrameLayout
+        android:id="@+id/loadingOverlay"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#80000000"
+        android:elevation="100dp"
+        android:visibility="gone"
+        android:clickable="true"
+        android:focusable="true">
+
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:layout_gravity="center"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="8dp">
+
+            <ProgressBar
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_gravity="center"
+                android:indeterminateTint="@color/saffron" />
+        </com.google.android.material.card.MaterialCardView>
+    </FrameLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
