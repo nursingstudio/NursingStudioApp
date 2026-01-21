@@ -46,12 +46,19 @@ class LoginFragment : Fragment() {
     private fun setupTabSelection() {
         binding.loginTabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
             override fun onTabSelected(tab: TabLayout.Tab?) {
+                // World-Class: Switch hote hi purane errors aur text clear karo
+                clearAllErrors()
+                clearAllFields()
+
                 if (tab?.position == 0) {
                     binding.layoutEmailLogin.visibility = View.VISIBLE
                     binding.layoutMobileLogin.visibility = View.GONE
+                    binding.btnLoginAction.text = "Login"
                 } else {
                     binding.layoutEmailLogin.visibility = View.GONE
                     binding.layoutMobileLogin.visibility = View.VISIBLE
+                    // Agar OTP layout khula reh gaya tha switch ke waqt toh use reset karo
+                    unlockMobileField()
                 }
             }
             override fun onTabUnselected(tab: TabLayout.Tab?) {}
@@ -80,23 +87,35 @@ class LoginFragment : Fragment() {
     }
 
     private fun performEmailLogin() {
-        val email = binding.etEmail.text.toString().trim()
-        val pass = binding.etPassword.text.toString().trim()
+        val email = binding.tilEmail.text.toString().trim()
+        val pass = binding.tilPassword.text.toString().trim()
 
-        if (email.isEmpty()) { toast("Enter Email"); return }
-        if (pass.isEmpty()) { toast("Enter Password"); return }
+        clearAllErrors() // Naya check shuru karne se pehle purane errors hatao
+
+        if (email.isEmpty()) {
+            binding.tilEmail.error = "Email is required"
+            return
+        }
+        if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+            binding.tilEmail.error = "Invalid Email format"
+            return
+        }
+        if (pass.isEmpty()) {
+            binding.tilPassword.error = "Password is required"
+            return
+        }
 
         viewModel.loginWithEmail(email, pass)
     }
 
     private fun performMobileLogin() {
-        val mobile = binding.etMobileLogin.text.toString().trim()
-        val otp = binding.etOtpLogin.text.toString().trim()
+        val mobile = binding.tilMobile.text.toString().trim()
+        val otp = binding.tilOtp.text.toString().trim()
 
         if (binding.layoutOtpLogin.visibility == View.GONE) {
             // ... (Puraana mobile send logic same rahega)
             if (mobile.length != 10) {
-                binding.etMobileLogin.error = "Enter 10 digit number" // Red Border
+                binding.tilMobile.error = "Enter 10 digit number" // TIL use karo border ke liye
                 return
             }
             // ... (Aapka existing sendOtp code)
@@ -106,8 +125,8 @@ class LoginFragment : Fragment() {
                 verificationId = id
                 binding.layoutOtpLogin.visibility = View.VISIBLE
                 binding.tvChangeNumber.visibility = View.VISIBLE
-                binding.etMobileLogin.isEnabled = false
-                binding.etMobileLogin.alpha = 0.6f
+                binding.tilMobile.isEnabled = false
+                binding.tilMobile.alpha = 0.6f
                 startLoginTimer()
                 binding.btnLoginAction.text = "Verify & Login"
                 AppSettings.triggerVibration(requireContext(), 100)
@@ -117,12 +136,12 @@ class LoginFragment : Fragment() {
             // OTP Verification Logic
             if (otp.length != 6) {
                 // World-Class Red Border Error
-                binding.etOtpLogin.error = "Enter 6 digit OTP"
-                binding.etOtpLogin.requestFocus()
+                binding.tilOtp.error = "Enter 6 digit OTP"
+                binding.tilOtp.requestFocus()
                 return
             }
 
-            binding.etOtpLogin.error = null // Error clear karo
+            binding.tilOtp.error = null // Error clear karo
             binding.loadingOverlay.visibility = View.VISIBLE
             val credential = PhoneAuthProvider.getCredential(verificationId!!, otp)
             viewModel.loginWithPhone(credential)
@@ -156,7 +175,7 @@ class LoginFragment : Fragment() {
                     binding.loadingOverlay.visibility = View.GONE
                     // Professional Red Border for Wrong OTP
                     if (binding.layoutOtpLogin.visibility == View.VISIBLE) {
-                        binding.etOtpLogin.error = "Invalid OTP. Please try again."
+                        binding.tilOtp.error = "Invalid OTP. Please try again."
                     }
                     toast(result.message)
                     binding.btnLoginAction.text = if (binding.layoutOtpLogin.visibility == View.VISIBLE) "Verify & Login" else "Login"
@@ -189,17 +208,30 @@ class LoginFragment : Fragment() {
 
     private fun unlockMobileField() {
         countDownTimer?.cancel()
-        binding.etMobileLogin.isEnabled = true
+        binding.tilMobile.isEnabled = true
         binding.ccpLogin.setCcpClickable(true)
-        binding.etMobileLogin.alpha = 1.0f
+        binding.tilMobile.alpha = 1.0f
         binding.layoutOtpLogin.visibility = View.GONE
         binding.tvChangeNumber.visibility = View.GONE
         binding.tvTimer.visibility = View.GONE
         binding.btnResendOtp.visibility = View.GONE
         binding.btnLoginAction.text = "Login"
-        binding.etOtpLogin.setText("")
-        binding.etMobileLogin.requestFocus()
+        binding.tilOtp.setText("")
+        binding.tilMobile.requestFocus()
     }
 
+    private fun clearAllErrors() {
+        binding.tilEmail.error = null
+        binding.tilPassword.error = null
+        binding.tilMobile.error = null
+        binding.tilOtp.error = null
+    }
+
+    private fun clearAllFields() {
+        binding.tilEmail.setText("")
+        binding.tilPassword.setText("")
+        binding.tilMobile.setText("")
+        binding.tilOtp.setText("")
+    }
     override fun onDestroyView() { super.onDestroyView(); _binding = null }
 }

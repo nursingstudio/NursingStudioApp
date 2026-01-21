@@ -83,7 +83,7 @@
                     android:hint="@string/hint_email"
                     app:startIconDrawable="@drawable/ic_email">
                     <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/etEmail"
+                        android:id="@+id/tilEmail"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:inputType="textEmailAddress" />
@@ -98,7 +98,7 @@
                     app:passwordToggleEnabled="true"
                     app:startIconDrawable="@drawable/ic_lock">
                     <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/etPassword"
+                        android:id="@+id/tilPassword"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:inputType="textPassword" />
@@ -125,7 +125,7 @@
                     android:layout_height="wrap_content"
                     android:hint="@string/hint_mobile">
                     <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/etMobileLogin"
+                        android:id="@+id/tilMobile"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:inputType="phone" />
@@ -140,7 +140,7 @@
                     android:hint="@string/hint_otp"
                     android:visibility="gone">
                     <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/etOtpLogin"
+                        android:id="@+id/tilOtp"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:inputType="number"
