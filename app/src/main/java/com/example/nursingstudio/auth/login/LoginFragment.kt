@@ -59,12 +59,18 @@ class LoginFragment : Fragment() {
                 if (tab?.position == 0) {
                     binding.layoutEmailLogin.visibility = View.VISIBLE
                     binding.layoutMobileLogin.visibility = View.GONE
+                    // Ye line gap fix karegi: Timer aur baki views ko GONE karke layout refresh karega
+                    binding.tvTimer.visibility = View.GONE
+                    binding.btnResendOtp.visibility = View.GONE
+                    binding.tvChangeNumber.visibility = View.GONE
                     binding.btnLoginAction.text = "Login"
                 } else {
                     binding.layoutEmailLogin.visibility = View.GONE
                     binding.layoutMobileLogin.visibility = View.VISIBLE
                     unlockMobileField()
                 }
+                // Force layout refresh to kill the gap
+                binding.root.requestLayout()
             }
             override fun onTabUnselected(tab: TabLayout.Tab?) {}
             override fun onTabReselected(tab: TabLayout.Tab?) {}
@@ -88,6 +94,9 @@ class LoginFragment : Fragment() {
             verificationId = null
             binding.tilOtp.visibility = View.GONE // Reset view to send mode
             performMobileLogin()
+        }
+        binding.tvForgotPassword.setOnClickListener {
+            showForgotPasswordSheet()
         }
     }
 
@@ -234,6 +243,9 @@ class LoginFragment : Fragment() {
         binding.tilPassword.isErrorEnabled = false
         binding.tilMobile.isErrorEnabled = false
         binding.tilOtp.isErrorEnabled = false
+        // Gap fix karne ke liye ye lines add karein
+        binding.layoutEmailLogin.requestLayout()
+        binding.layoutMobileLogin.requestLayout()
     }
 
     private fun clearAllFields() {
@@ -280,5 +292,54 @@ class LoginFragment : Fragment() {
         })
     }
 
+    private fun showForgotPasswordSheet() {
+        val dialog = com.google.android.material.bottomsheet.BottomSheetDialog(requireContext(), R.style.BottomSheetDialogTheme)
+        val view = layoutInflater.inflate(R.layout.layout_forgot_password, null)
+
+        val btnReset = view.findViewById<com.google.android.material.button.MaterialButton>(R.id.btnResetPassword)
+        val etForgotEmail = view.findViewById<com.google.android.material.textfield.TextInputEditText>(R.id.etForgotEmail)
+        val tilForgotEmail = view.findViewById<com.google.android.material.textfield.TextInputLayout>(R.id.tilForgotEmail)
+
+        // Type karte hi error hatane ke liye
+        etForgotEmail.addTextChangedListener(object : android.text.TextWatcher {
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                tilForgotEmail.error = null
+                tilForgotEmail.isErrorEnabled = false
+            }
+            override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
+            override fun afterTextChanged(p0: android.text.Editable?) {}
+        })
+
+        btnReset.setOnClickListener {
+            val email = etForgotEmail.text.toString().trim()
+            if (email.isEmpty()) {
+                tilForgotEmail.isErrorEnabled = true
+                tilForgotEmail.error = "Please enter your registered email"
+            } else if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+                tilForgotEmail.isErrorEnabled = true
+                tilForgotEmail.error = "Invalid email format"
+            } else {
+                // Success Logic: Reset Link Send
+                sendPasswordReset(email, dialog)
+            }
+        }
+        dialog.setContentView(view)
+        dialog.show()
+    }
+
+    private fun sendPasswordReset(email: String, dialog: com.google.android.material.bottomsheet.BottomSheetDialog) {
+        binding.loadingOverlay.visibility = View.VISIBLE // Main screen par loading dikhao
+
+        com.google.firebase.auth.FirebaseAuth.getInstance().sendPasswordResetEmail(email)
+            .addOnCompleteListener { task ->
+                binding.loadingOverlay.visibility = View.GONE
+                if (task.isSuccessful) {
+                    dialog.dismiss()
+                    toast("Reset link sent! Please check your email inbox. 📧")
+                } else {
+                    toast("Error: ${task.exception?.message}")
+                }
+            }
+    }
     override fun onDestroyView() { super.onDestroyView(); _binding = null }
 }
