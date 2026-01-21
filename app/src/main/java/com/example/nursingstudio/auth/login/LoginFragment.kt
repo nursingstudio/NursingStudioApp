@@ -37,6 +37,7 @@ class LoginFragment : Fragment() {
 
         setupTabSelection()
         setupClickListeners()
+        setupTextWatchers() // Naya function
         observeViewModel()
 
         // Button Effects
@@ -46,9 +47,14 @@ class LoginFragment : Fragment() {
     private fun setupTabSelection() {
         binding.loginTabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
             override fun onTabSelected(tab: TabLayout.Tab?) {
-                // World-Class: Switch hote hi purane errors aur text clear karo
                 clearAllErrors()
                 clearAllFields()
+
+                // Naya logic: Timer ko force stop karo
+                countDownTimer?.cancel()
+                binding.tvTimer.visibility = View.GONE
+                binding.btnResendOtp.visibility = View.GONE
+                binding.tvChangeNumber.visibility = View.GONE
 
                 if (tab?.position == 0) {
                     binding.layoutEmailLogin.visibility = View.VISIBLE
@@ -57,7 +63,6 @@ class LoginFragment : Fragment() {
                 } else {
                     binding.layoutEmailLogin.visibility = View.GONE
                     binding.layoutMobileLogin.visibility = View.VISIBLE
-                    // Agar OTP layout khula reh gaya tha switch ke waqt toh use reset karo
                     unlockMobileField()
                 }
             }
@@ -81,18 +86,19 @@ class LoginFragment : Fragment() {
         binding.btnResendOtp.setOnClickListener {
             // Resend ke liye pehle verificationId null karo taki fresh call ho
             verificationId = null
-            binding.layoutOtpLogin.visibility = View.GONE // Reset view to send mode
+            binding.tilOtp.visibility = View.GONE // Reset view to send mode
             performMobileLogin()
         }
     }
 
     private fun performEmailLogin() {
-        val email = binding.tilEmail.text.toString().trim()
-        val pass = binding.tilPassword.text.toString().trim()
+        val email = binding.etEmail.text.toString().trim()
+        val pass = binding.etPassword.text.toString().trim()
 
         clearAllErrors() // Naya check shuru karne se pehle purane errors hatao
 
         if (email.isEmpty()) {
+            binding.tilEmail.isErrorEnabled = true // Space on karein
             binding.tilEmail.error = "Email is required"
             return
         }
@@ -101,6 +107,7 @@ class LoginFragment : Fragment() {
             return
         }
         if (pass.isEmpty()) {
+            binding.tilPassword.isErrorEnabled = true // Space on karein
             binding.tilPassword.error = "Password is required"
             return
         }
@@ -109,12 +116,13 @@ class LoginFragment : Fragment() {
     }
 
     private fun performMobileLogin() {
-        val mobile = binding.tilMobile.text.toString().trim()
-        val otp = binding.tilOtp.text.toString().trim()
+        val mobile = binding.etMobileLogin.text.toString().trim()
+        val otp = binding.etOtpLogin.text.toString().trim()
 
-        if (binding.layoutOtpLogin.visibility == View.GONE) {
+        if (binding.tilOtp.visibility == View.GONE) {
             // ... (Puraana mobile send logic same rahega)
             if (mobile.length != 10) {
+                binding.tilMobile.isErrorEnabled = true
                 binding.tilMobile.error = "Enter 10 digit number" // TIL use karo border ke liye
                 return
             }
@@ -123,7 +131,7 @@ class LoginFragment : Fragment() {
             (activity as? AuthActivity)?.sendOtp(mobile) { id ->
                 binding.loadingOverlay.visibility = View.GONE
                 verificationId = id
-                binding.layoutOtpLogin.visibility = View.VISIBLE
+                binding.tilOtp.visibility = View.VISIBLE
                 binding.tvChangeNumber.visibility = View.VISIBLE
                 binding.tilMobile.isEnabled = false
                 binding.tilMobile.alpha = 0.6f
@@ -136,6 +144,7 @@ class LoginFragment : Fragment() {
             // OTP Verification Logic
             if (otp.length != 6) {
                 // World-Class Red Border Error
+                binding.tilOtp.isErrorEnabled = true
                 binding.tilOtp.error = "Enter 6 digit OTP"
                 binding.tilOtp.requestFocus()
                 return
@@ -159,12 +168,12 @@ class LoginFragment : Fragment() {
                     binding.loadingOverlay.visibility = View.VISIBLE
                 }
                 is LoginResult.Success -> {
-                    // World-Class Way: Pehle overlay hatao, fir navigate karo
                     binding.loadingOverlay.visibility = View.GONE
-                    val intent = Intent(requireContext(), MainActivity::class.java)
+                    val context = context ?: return@observe // Safe check
+                    val intent = Intent(context, MainActivity::class.java)
                     intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
                     startActivity(intent)
-                    requireActivity().finish() // Ab crash nahi hoga
+                    activity?.finish()
                 }
                 is LoginResult.NoProfile -> {
                     binding.loadingOverlay.visibility = View.GONE
@@ -174,11 +183,11 @@ class LoginFragment : Fragment() {
                 is LoginResult.Error -> {
                     binding.loadingOverlay.visibility = View.GONE
                     // Professional Red Border for Wrong OTP
-                    if (binding.layoutOtpLogin.visibility == View.VISIBLE) {
+                    if (binding.tilOtp.visibility == View.VISIBLE) {
                         binding.tilOtp.error = "Invalid OTP. Please try again."
                     }
                     toast(result.message)
-                    binding.btnLoginAction.text = if (binding.layoutOtpLogin.visibility == View.VISIBLE) "Verify & Login" else "Login"
+                    binding.btnLoginAction.text = if (binding.tilOtp.visibility == View.VISIBLE) "Verify & Login" else "Login"
                 }
             }
         }
@@ -211,27 +220,65 @@ class LoginFragment : Fragment() {
         binding.tilMobile.isEnabled = true
         binding.ccpLogin.setCcpClickable(true)
         binding.tilMobile.alpha = 1.0f
-        binding.layoutOtpLogin.visibility = View.GONE
+        binding.tilOtp.visibility = View.GONE
         binding.tvChangeNumber.visibility = View.GONE
         binding.tvTimer.visibility = View.GONE
         binding.btnResendOtp.visibility = View.GONE
         binding.btnLoginAction.text = "Login"
-        binding.tilOtp.setText("")
+        binding.etOtpLogin.setText("")
         binding.tilMobile.requestFocus()
     }
 
     private fun clearAllErrors() {
-        binding.tilEmail.error = null
-        binding.tilPassword.error = null
-        binding.tilMobile.error = null
-        binding.tilOtp.error = null
+        binding.tilEmail.isErrorEnabled = false
+        binding.tilPassword.isErrorEnabled = false
+        binding.tilMobile.isErrorEnabled = false
+        binding.tilOtp.isErrorEnabled = false
     }
 
     private fun clearAllFields() {
-        binding.tilEmail.setText("")
-        binding.tilPassword.setText("")
-        binding.tilMobile.setText("")
-        binding.tilOtp.setText("")
+        binding.etEmail.setText("")
+        binding.etPassword.setText("")
+        binding.etMobileLogin.setText("")
+        binding.etOtpLogin.setText("")
     }
+
+    private fun setupTextWatchers() {
+        binding.etEmail.addTextChangedListener(object : android.text.TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                binding.tilEmail.error = null
+            }
+            override fun afterTextChanged(s: android.text.Editable?) {}
+        })
+
+        binding.etPassword.addTextChangedListener(object : android.text.TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                binding.tilPassword.error = null
+                // Password eye icon wapas dikhane ke liye password visibility toggle reset
+                binding.tilPassword.isErrorEnabled = false
+                binding.tilPassword.isErrorEnabled = true
+            }
+            override fun afterTextChanged(s: android.text.Editable?) {}
+        })
+
+        binding.etMobileLogin.addTextChangedListener(object : android.text.TextWatcher {
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                binding.tilMobile.error = null
+            }
+            override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
+            override fun afterTextChanged(p0: android.text.Editable?) {}
+        })
+
+        binding.etOtpLogin.addTextChangedListener(object : android.text.TextWatcher {
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                binding.tilOtp.error = null
+            }
+            override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
+            override fun afterTextChanged(p0: android.text.Editable?) {}
+        })
+    }
+
     override fun onDestroyView() { super.onDestroyView(); _binding = null }
 }
