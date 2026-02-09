@@ -8,6 +8,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
+import android.widget.LinearLayout
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -49,28 +50,37 @@ class LoginFragment : Fragment() {
             override fun onTabSelected(tab: TabLayout.Tab?) {
                 clearAllErrors()
                 clearAllFields()
-
-                // Naya logic: Timer ko force stop karo
                 countDownTimer?.cancel()
-                binding.tvTimer.visibility = View.GONE
-                binding.btnResendOtp.visibility = View.GONE
-                binding.tvChangeNumber.visibility = View.GONE
+
+                val params = binding.btnLoginAction.layoutParams as androidx.constraintlayout.widget.ConstraintLayout.LayoutParams
 
                 if (tab?.position == 0) {
+                    // Email Mode
                     binding.layoutEmailLogin.visibility = View.VISIBLE
                     binding.layoutMobileLogin.visibility = View.GONE
-                    // Ye line gap fix karegi: Timer aur baki views ko GONE karke layout refresh karega
-                    binding.tvTimer.visibility = View.GONE
-                    binding.btnResendOtp.visibility = View.GONE
-                    binding.tvChangeNumber.visibility = View.GONE
                     binding.btnLoginAction.text = "Login"
+
+                    // Button ko specifically Email layout ke niche anchor karo
+                    params.topToBottom = binding.layoutEmailLogin.id
+                    params.topMargin = 32 // Pixels mein (aap isse adjust kar sakte ho 32 ya 48)
                 } else {
+                    // Mobile Mode
                     binding.layoutEmailLogin.visibility = View.GONE
                     binding.layoutMobileLogin.visibility = View.VISIBLE
                     unlockMobileField()
+
+                    // Button ko specifically Mobile layout ke niche anchor karo
+                    params.topToBottom = binding.layoutMobileLogin.id
+                    params.topMargin = 32
                 }
-                // Force layout refresh to kill the gap
-                binding.root.requestLayout()
+
+                // Force apply params
+                binding.btnLoginAction.layoutParams = params
+
+                // WORLD-CLASS TRICK: Layout ko force refresh karne ke liye
+                binding.root.post {
+                    binding.root.requestLayout()
+                }
             }
             override fun onTabUnselected(tab: TabLayout.Tab?) {}
             override fun onTabReselected(tab: TabLayout.Tab?) {}
@@ -239,11 +249,23 @@ class LoginFragment : Fragment() {
     }
 
     private fun clearAllErrors() {
+        // Sabhi errors aur space reserve band karo
         binding.tilEmail.isErrorEnabled = false
         binding.tilPassword.isErrorEnabled = false
         binding.tilMobile.isErrorEnabled = false
         binding.tilOtp.isErrorEnabled = false
-        // Gap fix karne ke liye ye lines add karein
+
+        binding.tilEmail.error = null
+        binding.tilPassword.error = null
+
+        // Sabhi mobile views ko GONE karo taaki wo space na khayein
+        binding.tvTimer.visibility = View.GONE
+        binding.btnResendOtp.visibility = View.GONE
+        binding.tvChangeNumber.visibility = View.GONE
+
+        // Refresh layout instantly
+        binding.root.requestLayout()
+        // Inhe GONE karne se extra space khatam hogi
         binding.layoutEmailLogin.requestLayout()
         binding.layoutMobileLogin.requestLayout()
     }
