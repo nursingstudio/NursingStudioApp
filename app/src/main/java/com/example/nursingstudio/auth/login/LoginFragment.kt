@@ -60,27 +60,21 @@ class LoginFragment : Fragment() {
                     binding.layoutMobileLogin.visibility = View.GONE
                     binding.btnLoginAction.text = "Login"
 
-                    // Button ko specifically Email layout ke niche anchor karo
+                    // Magic Line: Button ko Email layout ke niche baandho
                     params.topToBottom = binding.layoutEmailLogin.id
-                    params.topMargin = 32 // Pixels mein (aap isse adjust kar sakte ho 32 ya 48)
                 } else {
                     // Mobile Mode
                     binding.layoutEmailLogin.visibility = View.GONE
                     binding.layoutMobileLogin.visibility = View.VISIBLE
                     unlockMobileField()
 
-                    // Button ko specifically Mobile layout ke niche anchor karo
+                    // Magic Line: Button ko Mobile layout ke niche baandho
                     params.topToBottom = binding.layoutMobileLogin.id
-                    params.topMargin = 32
                 }
 
-                // Force apply params
+                // Re-apply params and force refresh layout
                 binding.btnLoginAction.layoutParams = params
-
-                // WORLD-CLASS TRICK: Layout ko force refresh karne ke liye
-                binding.root.post {
-                    binding.root.requestLayout()
-                }
+                binding.root.post { binding.root.requestLayout() }
             }
             override fun onTabUnselected(tab: TabLayout.Tab?) {}
             override fun onTabReselected(tab: TabLayout.Tab?) {}
