@@ -28,7 +28,11 @@ class LoginFragment : Fragment() {
     private var verificationId: String? = null
     private var countDownTimer: android.os.CountDownTimer? = null
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
         _binding = FragmentLoginBinding.inflate(inflater, container, false)
         return binding.root
     }
@@ -52,7 +56,8 @@ class LoginFragment : Fragment() {
                 clearAllFields()
                 countDownTimer?.cancel()
 
-                val params = binding.btnLoginAction.layoutParams as androidx.constraintlayout.widget.ConstraintLayout.LayoutParams
+                val params =
+                    binding.btnLoginAction.layoutParams as androidx.constraintlayout.widget.ConstraintLayout.LayoutParams
 
                 // Standard Margin calculation (World-class practice)
                 val marginInPx = (12 * resources.displayMetrics.density).toInt()
@@ -75,6 +80,7 @@ class LoginFragment : Fragment() {
                 binding.btnLoginAction.layoutParams = params
                 binding.root.post { binding.root.requestLayout() }
             }
+
             override fun onTabUnselected(tab: TabLayout.Tab?) {}
             override fun onTabReselected(tab: TabLayout.Tab?) {}
         })
@@ -89,8 +95,8 @@ class LoginFragment : Fragment() {
 
         binding.tvGoRegister.setOnClickListener {
             // Fragment transaction logic to Register
-                (activity as? AuthActivity)?.showRegister()
-            }
+            (activity as? AuthActivity)?.showRegister()
+        }
         binding.tvChangeNumber.setOnClickListener { unlockMobileField() }
         binding.btnResendOtp.setOnClickListener {
             // Resend ke liye pehle verificationId null karo taki fresh call ho
@@ -171,43 +177,55 @@ class LoginFragment : Fragment() {
 
     private fun observeViewModel() {
         viewModel.loginStatus.observe(viewLifecycleOwner) { result ->
-            if (result !is LoginResult.Loading) {
+            // Har state mein loading handle karein
+            if (result is LoginViewModel.LoginResult.Loading) {
+                binding.loadingOverlay.visibility = View.VISIBLE
+            } else {
                 binding.loadingOverlay.visibility = View.GONE
             }
 
             when (result) {
-                is LoginResult.Loading -> {
-                    binding.loadingOverlay.visibility = View.VISIBLE
-                }
-                is LoginResult.Success -> {
+                is LoginViewModel.LoginResult.Success -> {
+                    countDownTimer?.cancel() // Navigating se pehle timer roko
                     binding.loadingOverlay.visibility = View.GONE
-                    val context = context ?: return@observe // Safe check
-                    val intent = Intent(context, MainActivity::class.java)
-                    intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-                    startActivity(intent)
-                    activity?.finish()
-                }
-                is LoginResult.NoProfile -> {
-                    binding.loadingOverlay.visibility = View.GONE
-                    toast("No profile found. Redirecting to Register...")
-                    (activity as? AuthActivity)?.showRegister()
-                }
-                is LoginResult.Error -> {
-                    binding.loadingOverlay.visibility = View.GONE
-                    // Professional Red Border for Wrong OTP
-                    if (binding.tilOtp.visibility == View.VISIBLE) {
-                        binding.tilOtp.error = "Invalid OTP. Please try again."
+                    if (isAdded && activity != null && !requireActivity().isFinishing) {
+                        val intent = Intent(requireContext(), MainActivity::class.java)
+                        intent.flags =
+                            Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                        startActivity(intent)
+                        requireActivity().finish() // 'activity?.finish()' se behtar ye hai
                     }
-                    toast(result.message)
-                    binding.btnLoginAction.text = if (binding.tilOtp.visibility == View.VISIBLE) "Verify & Login" else "Login"
                 }
+
+                is LoginViewModel.LoginResult.NoProfile -> {
+                    countDownTimer?.cancel() // Navigating se pehle timer roko
+                    binding.loadingOverlay.visibility = View.GONE
+                    if (isAdded && activity != null && !requireActivity().isFinishing) {
+                        toast("No profile found. Redirecting to Register...")
+                        (activity as? AuthActivity)?.showRegister()
+                    }
+                }
+
+                is LoginViewModel.LoginResult.Error -> {
+                    toast(result.message)
+                    if (binding.tilOtp.visibility == View.VISIBLE) {
+                        binding.tilOtp.error = result.message
+                        binding.btnLoginAction.text = "Verify & Login"
+                    } else {
+                        binding.btnLoginAction.text = "Login"
+                    }
+                }
+
+                else -> {}
             }
         }
     }
+
     private fun toast(m: String) = Toast.makeText(requireContext(), m, Toast.LENGTH_SHORT).show()
 
     private fun hideKeyboard() {
-        val imm = requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        val imm =
+            requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
         imm.hideSoftInputFromWindow(view?.windowToken, 0)
     }
 
@@ -218,8 +236,15 @@ class LoginFragment : Fragment() {
         countDownTimer?.cancel()
         countDownTimer = object : android.os.CountDownTimer(60000, 1000) {
             override fun onTick(m: Long) {
-                binding.tvTimer.text = "Resend in ${m / 1000}s"
+                // WORLD-CLASS SAFETY CHECK: Agar binding null hai ya fragment detach ho gaya hai toh kuch mat karo
+                if (_binding != null && isAdded) {
+                    binding.tvTimer.text = "Resend in ${m / 1000}s"
+                } else {
+                    // Agar fragment khatam ho gaya hai toh timer ko yahin stop kar do
+                    countDownTimer?.cancel()
+                }
             }
+
             override fun onFinish() {
                 binding.tvTimer.visibility = View.GONE
                 binding.btnResendOtp.visibility = View.VISIBLE
@@ -279,6 +304,7 @@ class LoginFragment : Fragment() {
                 binding.tilEmail.error = null
                 binding.tilEmail.isErrorEnabled = false
             }
+
             override fun afterTextChanged(s: android.text.Editable?) {}
         })
 
@@ -288,6 +314,7 @@ class LoginFragment : Fragment() {
                 binding.tilPassword.error = null
                 binding.tilPassword.isErrorEnabled = false
             }
+
             override fun afterTextChanged(s: android.text.Editable?) {}
         })
 
@@ -297,6 +324,7 @@ class LoginFragment : Fragment() {
                 binding.tilMobile.error = null
                 binding.tilMobile.isErrorEnabled = false
             }
+
             override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
             override fun afterTextChanged(p0: android.text.Editable?) {}
         })
@@ -305,18 +333,25 @@ class LoginFragment : Fragment() {
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                 binding.tilOtp.error = null
             }
+
             override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
             override fun afterTextChanged(p0: android.text.Editable?) {}
         })
     }
 
     private fun showForgotPasswordSheet() {
-        val dialog = com.google.android.material.bottomsheet.BottomSheetDialog(requireContext(), R.style.BottomSheetDialogTheme)
+        val dialog = com.google.android.material.bottomsheet.BottomSheetDialog(
+            requireContext(),
+            R.style.BottomSheetDialogTheme
+        )
         val view = layoutInflater.inflate(R.layout.layout_forgot_password, null)
 
-        val btnReset = view.findViewById<com.google.android.material.button.MaterialButton>(R.id.btnResetPassword)
-        val etForgotEmail = view.findViewById<com.google.android.material.textfield.TextInputEditText>(R.id.etForgotEmail)
-        val tilForgotEmail = view.findViewById<com.google.android.material.textfield.TextInputLayout>(R.id.tilForgotEmail)
+        val btnReset =
+            view.findViewById<com.google.android.material.button.MaterialButton>(R.id.btnResetPassword)
+        val etForgotEmail =
+            view.findViewById<com.google.android.material.textfield.TextInputEditText>(R.id.etForgotEmail)
+        val tilForgotEmail =
+            view.findViewById<com.google.android.material.textfield.TextInputLayout>(R.id.tilForgotEmail)
 
         // Type karte hi error hatane ke liye
         etForgotEmail.addTextChangedListener(object : android.text.TextWatcher {
@@ -324,6 +359,7 @@ class LoginFragment : Fragment() {
                 tilForgotEmail.error = null
                 tilForgotEmail.isErrorEnabled = false
             }
+
             override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
             override fun afterTextChanged(p0: android.text.Editable?) {}
         })
@@ -345,7 +381,10 @@ class LoginFragment : Fragment() {
         dialog.show()
     }
 
-    private fun sendPasswordReset(email: String, dialog: com.google.android.material.bottomsheet.BottomSheetDialog) {
+    private fun sendPasswordReset(
+        email: String,
+        dialog: com.google.android.material.bottomsheet.BottomSheetDialog
+    ) {
         binding.loadingOverlay.visibility = View.VISIBLE // Main screen par loading dikhao
 
         com.google.firebase.auth.FirebaseAuth.getInstance().sendPasswordResetEmail(email)
@@ -359,5 +398,13 @@ class LoginFragment : Fragment() {
                 }
             }
     }
-    override fun onDestroyView() { super.onDestroyView(); _binding = null }
+
+    override fun onDestroyView() {
+        // Fragment band hote hi timer ko turant cancel karein
+        countDownTimer?.cancel()
+        countDownTimer = null
+
+        super.onDestroyView()
+        _binding = null
+    }
 }

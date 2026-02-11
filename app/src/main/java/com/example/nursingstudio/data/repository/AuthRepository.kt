@@ -24,6 +24,10 @@ class AuthRepository {
 
     fun sendResetPassword(email: String) = auth.sendPasswordResetEmail(email)
 
+    fun signOut() {
+        com.google.firebase.auth.FirebaseAuth.getInstance().signOut()
+    }
+
     // Ise Repository ke andar add kar lo
     fun resetPassword(email: String): Task<Void> = auth.sendPasswordResetEmail(email)
 

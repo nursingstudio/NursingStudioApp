@@ -27,7 +27,6 @@ class LoginViewModel : ViewModel() {
     fun loginWithPhone(credential: AuthCredential) {
         viewModelScope.launch {
             _loginStatus.value = LoginResult.Loading
-            // Naya Repository function call
             val result = repository.verifyOtp(credential)
 
             result.onSuccess { pair ->
@@ -35,26 +34,35 @@ class LoginViewModel : ViewModel() {
                 if (isProfileComplete) {
                     _loginStatus.value = LoginResult.Success
                 } else {
+                    // Profile nahi hai toh login session turant khatam karo
+                    repository.signOut()
                     _loginStatus.value = LoginResult.NoProfile
                 }
             }.onFailure { e ->
+                // Ye block missing tha, ise add karna zaroori hai crash rokne ke liye
                 _loginStatus.value = LoginResult.Error(e.localizedMessage ?: "Verification Failed")
             }
         }
     }
 
     private fun verifyUser(uid: String?) {
-        if (uid == null) { _loginStatus.value = LoginResult.Error("User ID not found"); return }
+        if (uid == null) {
+            _loginStatus.value = LoginResult.Error("User ID not found"); return
+        }
         repository.checkUserInFirestore(uid).addOnSuccessListener { doc ->
-            if (doc.exists()) _loginStatus.value = LoginResult.Success
-            else _loginStatus.value = LoginResult.NoProfile
-        }.addOnFailureListener { _loginStatus.value = LoginResult.Error("Database Error") }
+            if (doc.exists()) {
+                _loginStatus.value = LoginResult.Success
+            } else {
+                repository.signOut() // Profile nahi hai toh Firebase session clear karo
+                _loginStatus.value = LoginResult.NoProfile
+            }
+        }
     }
-}
 
-sealed class LoginResult {
-    object Loading : LoginResult()
-    object Success : LoginResult()
-    object NoProfile : LoginResult()
-    data class Error(val message: String) : LoginResult()
+    sealed class LoginResult {
+        object Loading : LoginResult()
+        object Success : LoginResult()
+        object NoProfile : LoginResult()
+        data class Error(val message: String) : LoginResult()
+    }
 }

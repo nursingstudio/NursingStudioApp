@@ -109,10 +109,9 @@ class AuthActivity : AppCompatActivity() {
                     android.widget.Toast.makeText(this@AuthActivity, "Error: ${e.message}", android.widget.Toast.LENGTH_LONG).show()
                 }
                 override fun onVerificationCompleted(credential: PhoneAuthCredential) {
-                    // AUTO-VERIFICATION LOGIC
-                    if (credential.smsCode != null) {
-                        signInWithPhoneAuthCredential(credential)
-                    }
+                    // Isko khali chhod do! Kyunki humara LoginFragment ka ViewModel
+                    // pehle se hi OTP manual/auto handle karne ke liye ready hai.
+                    // Dono jagah se login trigger hone se crash hota hai.
                 }
             }).build()
         PhoneAuthProvider.verifyPhoneNumber(options)
@@ -132,17 +131,22 @@ class AuthActivity : AppCompatActivity() {
 
     private fun checkUserInFirestore() {
         val uid = auth.currentUser?.uid ?: return
-        val db = com.google.firebase.firestore.FirebaseFirestore.getInstance()
 
+        // Agar activity khatam ho rahi hai toh aage mat badho (Crash Stop)
+        if (isFinishing) return
+
+        val db = com.google.firebase.firestore.FirebaseFirestore.getInstance()
         db.collection("Users").document(uid).get().addOnSuccessListener { doc ->
+            if (isFinishing) return@addOnSuccessListener // Re-check before navigation
+
             if (doc.exists()) {
-                // User purana hai, Home par bhej do
                 startActivity(Intent(this, MainActivity::class.java))
                 finish()
             } else {
-                // User naya hai, Register screen par bhej do
                 showRegister()
             }
+        }.addOnFailureListener {
+            // Safe error handling
         }
     }
 }
