@@ -202,7 +202,12 @@ class LoginFragment : Fragment() {
                     binding.loadingOverlay.visibility = View.GONE
                     if (isAdded && activity != null && !requireActivity().isFinishing) {
                         toast("No profile found. Redirecting to Register...")
-                        (activity as? AuthActivity)?.showRegister()
+                        // Ek chhota sa delay taaki user Toast padh sake aur animation smooth lage
+                        binding.root.postDelayed({
+                            if (isAdded) {
+                                (activity as? AuthActivity)?.showRegister()
+                            }
+                        }, 1000) // 1second ka delay professional feel ke liye
                     }
                 }
 

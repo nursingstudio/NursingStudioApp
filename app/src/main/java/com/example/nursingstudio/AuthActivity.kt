@@ -64,13 +64,19 @@ class AuthActivity : AppCompatActivity() {
     private fun replaceFragment(fragment: Fragment, addToBackStack: Boolean) {
         val transaction = supportFragmentManager.beginTransaction()
 
-        // World-class smooth transition (Fade in/out)
-        transaction.setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
+        // ⭐ WORLD-CLASS PREMIUM ANIMATION ⭐
+        // Parameters: (Enter, Exit, PopEnter, PopExit)
+        transaction.setCustomAnimations(
+            R.anim.slide_in_right,  // Naya fragment aate waqt
+            R.anim.slide_out_left,  // Purana fragment jaate waqt
+            R.anim.slide_in_left,   // Back dabane par purana wapas aate waqt
+            R.anim.slide_out_right  // Back dabane par naya jaate waqt
+        )
 
         transaction.replace(R.id.auth_container, fragment)
 
         if (addToBackStack) {
-            transaction.addToBackStack(null) // Taki register se back dabane par login pe aaye
+            transaction.addToBackStack(null)
         }
 
         transaction.commit()
