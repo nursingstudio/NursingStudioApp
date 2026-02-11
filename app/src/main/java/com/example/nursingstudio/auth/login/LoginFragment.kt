@@ -54,25 +54,24 @@ class LoginFragment : Fragment() {
 
                 val params = binding.btnLoginAction.layoutParams as androidx.constraintlayout.widget.ConstraintLayout.LayoutParams
 
+                // Standard Margin calculation (World-class practice)
+                val marginInPx = (12 * resources.displayMetrics.density).toInt()
+                params.topMargin = marginInPx
+
                 if (tab?.position == 0) {
                     // Email Mode
                     binding.layoutEmailLogin.visibility = View.VISIBLE
                     binding.layoutMobileLogin.visibility = View.GONE
                     binding.btnLoginAction.text = "Login"
-
-                    // Magic Line: Button ko Email layout ke niche baandho
                     params.topToBottom = binding.layoutEmailLogin.id
                 } else {
                     // Mobile Mode
                     binding.layoutEmailLogin.visibility = View.GONE
                     binding.layoutMobileLogin.visibility = View.VISIBLE
                     unlockMobileField()
-
-                    // Magic Line: Button ko Mobile layout ke niche baandho
                     params.topToBottom = binding.layoutMobileLogin.id
                 }
 
-                // Re-apply params and force refresh layout
                 binding.btnLoginAction.layoutParams = params
                 binding.root.post { binding.root.requestLayout() }
             }
@@ -243,25 +242,26 @@ class LoginFragment : Fragment() {
     }
 
     private fun clearAllErrors() {
-        // Sabhi errors aur space reserve band karo
+        // IsErrorEnabled = false karne se hi extra space khatam hoti hai
+        binding.tilEmail.error = null
         binding.tilEmail.isErrorEnabled = false
+
+        binding.tilPassword.error = null
         binding.tilPassword.isErrorEnabled = false
+
+        binding.tilMobile.error = null
         binding.tilMobile.isErrorEnabled = false
+
+        binding.tilOtp.error = null
         binding.tilOtp.isErrorEnabled = false
 
-        binding.tilEmail.error = null
-        binding.tilPassword.error = null
-
-        // Sabhi mobile views ko GONE karo taaki wo space na khayein
+        // Mobile specific views ko GONE karein
         binding.tvTimer.visibility = View.GONE
         binding.btnResendOtp.visibility = View.GONE
         binding.tvChangeNumber.visibility = View.GONE
 
-        // Refresh layout instantly
-        binding.root.requestLayout()
-        // Inhe GONE karne se extra space khatam hogi
-        binding.layoutEmailLogin.requestLayout()
-        binding.layoutMobileLogin.requestLayout()
+        // Agar mobile layout me OTP field visible thi to use hide karein
+        binding.tilOtp.visibility = View.GONE
     }
 
     private fun clearAllFields() {
@@ -275,7 +275,9 @@ class LoginFragment : Fragment() {
         binding.etEmail.addTextChangedListener(object : android.text.TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                // Typing shuru hote hi error aur uski reserved space dono hatao
                 binding.tilEmail.error = null
+                binding.tilEmail.isErrorEnabled = false
             }
             override fun afterTextChanged(s: android.text.Editable?) {}
         })
@@ -284,16 +286,16 @@ class LoginFragment : Fragment() {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                 binding.tilPassword.error = null
-                // Password eye icon wapas dikhane ke liye password visibility toggle reset
                 binding.tilPassword.isErrorEnabled = false
-                binding.tilPassword.isErrorEnabled = true
             }
             override fun afterTextChanged(s: android.text.Editable?) {}
         })
 
+        // Mobile aur OTP watchers ke liye bhi same logic:
         binding.etMobileLogin.addTextChangedListener(object : android.text.TextWatcher {
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                 binding.tilMobile.error = null
+                binding.tilMobile.isErrorEnabled = false
             }
             override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
             override fun afterTextChanged(p0: android.text.Editable?) {}
