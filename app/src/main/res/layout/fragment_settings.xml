@@ -15,7 +15,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Settings"
+            android:text="@string/settings"
             android:textSize="22sp"
             android:textStyle="bold"
             android:textColor="@color/text_primary"
@@ -24,7 +24,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Customize your Nursing Studio experience."
+            android:text="@string/customize_your_nursing_studio_experience"
             android:textSize="14sp"
             android:textColor="@color/text_secondary"
             android:layout_marginBottom="16dp" />
@@ -33,7 +33,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Notifications"
+            android:text="@string/notifications"
             android:textStyle="bold"
             android:textSize="16sp"
             android:textColor="@color/text_primary"
@@ -52,7 +52,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="New test / update alerts"
+                android:text="@string/new_test_update_alerts"
                 android:textSize="14sp"
                 android:textColor="@color/text_primary" />
 
@@ -66,7 +66,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Test preferences"
+            android:text="@string/test_preferences"
             android:textStyle="bold"
             android:textSize="16sp"
             android:textColor="@color/text_primary"
@@ -85,7 +85,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="Sound in online tests"
+                android:text="@string/sound_in_online_tests"
                 android:textSize="14sp"
                 android:textColor="@color/text_primary" />
 
@@ -100,7 +100,18 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
-            android:text="App Vibration"
+            android:text="@string/app_vibration"
+            android:textSize="16sp"
+            android:textColor="@color/text_primary"
+            android:padding="10dp"
+            app:useMaterialThemeColors="true" />
+
+        <com.google.android.material.switchmaterial.SwitchMaterial
+            android:id="@+id/switch_biometric"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:text="@string/biometric_login_fingerprint"
             android:textSize="16sp"
             android:textColor="@color/text_primary"
             android:padding="10dp"
@@ -110,7 +121,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Motivation"
+            android:text="@string/motivation"
             android:textStyle="bold"
             android:textSize="16sp"
             android:textColor="@color/text_primary"
@@ -129,7 +140,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="Show motivational quote on Home"
+                android:text="@string/show_motivational_quote_on_home"
                 android:textSize="14sp"
                 android:textColor="@color/text_primary" />
 
@@ -143,7 +154,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Support &amp; Info"
+            android:text="@string/support_amp_info"
             android:textStyle="bold"
             android:textSize="16sp"
             android:textColor="@color/text_primary"
@@ -162,7 +173,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:background="@drawable/bg_button_primary_rounded"
-                android:text="Rate on Play Store"
+                android:text="@string/rate_on_play_store"
                 android:textAllCaps="false"
                 android:textSize="14sp"
                 android:textColor="@android:color/white"
@@ -174,7 +185,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:background="@drawable/bg_button_primary_rounded"
-                android:text="Need help? Contact support"
+                android:text="@string/need_help_contact_support"
                 android:textAllCaps="false"
                 android:textSize="14sp"
                 android:textColor="@android:color/white"
@@ -185,7 +196,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Legal &amp; App Information"
+            android:text="@string/legal_amp_app_information"
             android:textStyle="bold"
             android:textSize="14sp"
             android:textColor="@color/text_secondary"
@@ -206,7 +217,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
                 android:background="@drawable/bg_button_outline_rounded"
-                android:text="Privacy Policy"
+                android:text="@string/privacy_policy"
                 android:textAllCaps="false"
                 android:textSize="13sp"
                 android:textColor="@color/text_primary" />
@@ -217,7 +228,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
                 android:background="@drawable/bg_button_outline_rounded"
-                android:text="Terms of Use"
+                android:text="@string/terms_of_use"
                 android:textAllCaps="false"
                 android:textSize="13sp"
                 android:textColor="@color/text_primary" />
@@ -228,7 +239,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
                 android:background="@drawable/bg_button_outline_rounded"
-                android:text="Disclaimer"
+                android:text="@string/disclaimer"
                 android:textAllCaps="false"
                 android:textSize="13sp"
                 android:textColor="@color/text_primary" />
@@ -240,7 +251,7 @@
                 android:layout_marginTop="4dp"
                 android:layout_marginBottom="8dp"
                 android:background="@drawable/bg_button_outline_rounded"
-                android:text="About Nursing Studio"
+                android:text="@string/about_nursing_studio"
                 android:textAllCaps="false"
                 android:textSize="13sp"
                 android:textColor="@color/text_primary" />

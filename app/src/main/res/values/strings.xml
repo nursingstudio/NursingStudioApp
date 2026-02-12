@@ -146,5 +146,23 @@
     <string name="powered_by">Powered by Nursing Studio</string>
     <string name="secured_by">Securely Powered by Nursing Studio</string>
     <string name="wrong_number_change_it">Wrong number? Change it</string>
+    <string name="customize_your_nursing_studio_experience">Customize your Nursing Studio experience.</string>
+    <string name="settings">Settings</string>
+    <string name="notifications">Notifications</string>
+    <string name="new_test_update_alerts">New test / update alerts</string>
+    <string name="test_preferences">Test preferences</string>
+    <string name="sound_in_online_tests">Sound in online tests</string>
+    <string name="app_vibration">App Vibration</string>
+    <string name="biometric_login_fingerprint">Biometric Login (Fingerprint)</string>
+    <string name="motivation">Motivation</string>
+    <string name="show_motivational_quote_on_home">Show motivational quote on Home</string>
+    <string name="support_amp_info"><![CDATA[Support & Info]]></string>
+    <string name="rate_on_play_store">Rate on Play Store</string>
+    <string name="need_help_contact_support">Need help? Contact support</string>
+    <string name="legal_amp_app_information"><![CDATA[Legal & App Information]]></string>
+    <string name="privacy_policy">Privacy Policy</string>
+    <string name="terms_of_use">Terms of Use</string>
+    <string name="disclaimer">Disclaimer</string>
+    <string name="about_nursing_studio">About Nursing Studio</string>
 
 </resources>

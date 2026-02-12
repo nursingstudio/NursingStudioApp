@@ -67,6 +67,10 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.7.3")
     // Play Integrity API ke liye
     implementation("com.google.android.play:integrity:1.3.0")
+    // Biometric Authentication Library
+    implementation("androidx.biometric:biometric:1.2.0-alpha05")
+    // Encrypted Storage ke liye
+    implementation("androidx.security:security-crypto:1.1.0-alpha06")
 
     // --- OTHER LIBRARIES ---
     implementation("com.hbb20:ccp:2.6.0")

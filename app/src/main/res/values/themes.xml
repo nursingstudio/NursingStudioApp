@@ -77,4 +77,12 @@
         <item name="android:background">@android:color/transparent</item>
     </style>
 
+    // MaterialAlertDialog //
+    <style name="MaterialAlertDialog_Rounded" parent="ThemeOverlay.MaterialComponents.MaterialAlertDialog">
+        <item name="shapeAppearanceOverlay">@style/ShapeAppearanceOverlay.App.Card.Rounded</item>
+    </style>
+
+    <style name="ShapeAppearanceOverlay.App.Card.Rounded" parent="">
+        <item name="cornerSize">24dp</item>
+    </style>
 </resources>

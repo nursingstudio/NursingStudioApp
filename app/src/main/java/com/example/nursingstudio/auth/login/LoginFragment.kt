@@ -19,6 +19,7 @@ import com.google.android.material.tabs.TabLayout
 import com.google.firebase.auth.PhoneAuthProvider
 import com.example.nursingstudio.AppSettings
 import com.example.nursingstudio.AuthActivity
+import com.example.nursingstudio.utils.BiometricSettingsManager
 
 class LoginFragment : Fragment() {
 
@@ -47,6 +48,14 @@ class LoginFragment : Fragment() {
 
         // Button Effects
         AppSettings.setPushEffect(binding.btnLoginAction)
+        // Check for returning biometric user
+        val bioManager = BiometricSettingsManager(requireContext())
+        if (bioManager.isBiometricEnabled()) {
+            // Chhota delay taaki UI load ho jaye phir prompt aaye
+            binding.root.postDelayed({
+                showBiometricPrompt()
+            }, 500)
+        }
     }
 
     private fun setupTabSelection() {
@@ -62,6 +71,7 @@ class LoginFragment : Fragment() {
                 // Standard Margin calculation (World-class practice)
                 val marginInPx = (12 * resources.displayMetrics.density).toInt()
                 params.topMargin = marginInPx
+                params.bottomMargin = 0 // Extra bottom space remove karne ke liye
 
                 if (tab?.position == 0) {
                     // Email Mode
@@ -186,14 +196,20 @@ class LoginFragment : Fragment() {
 
             when (result) {
                 is LoginViewModel.LoginResult.Success -> {
-                    countDownTimer?.cancel() // Navigating se pehle timer roko
+                    countDownTimer?.cancel()
                     binding.loadingOverlay.visibility = View.GONE
-                    if (isAdded && activity != null && !requireActivity().isFinishing) {
-                        val intent = Intent(requireContext(), MainActivity::class.java)
-                        intent.flags =
-                            Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-                        startActivity(intent)
-                        requireActivity().finish() // 'activity?.finish()' se behtar ye hai
+
+                    val bioManager = BiometricSettingsManager(requireContext())
+                    val currentEmail = binding.etEmail.text.toString().trim()
+                    val currentPass = binding.etPassword.text.toString().trim()
+
+                    // Professional logic: Agar email tab par hai aur biometric enabled nahi hai
+                    if (binding.loginTabLayout.selectedTabPosition == 0 && !bioManager.isBiometricEnabled()) {
+                        // User ko setup dialog dikhao, wo dialog khud proceedToHome() call karega
+                        showBiometricSetupDialog(currentEmail, currentPass)
+                    } else {
+                        // Agar mobile login hai ya biometric already on hai, toh seedha home
+                        proceedToHome()
                     }
                 }
 
@@ -232,6 +248,15 @@ class LoginFragment : Fragment() {
         val imm =
             requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
         imm.hideSoftInputFromWindow(view?.windowToken, 0)
+    }
+
+    private fun proceedToHome() {
+        if (isAdded && !requireActivity().isFinishing) {
+            val intent = Intent(requireContext(), MainActivity::class.java)
+            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            startActivity(intent)
+            requireActivity().finish()
+        }
     }
 
     private fun startLoginTimer() {
@@ -284,6 +309,13 @@ class LoginFragment : Fragment() {
 
         binding.tilOtp.error = null
         binding.tilOtp.isErrorEnabled = false
+
+        // World-class refinement: Layout ko force request karein gaps fix karne ke liye
+        binding.btnLoginAction.post {
+            val params = binding.btnLoginAction.layoutParams as androidx.constraintlayout.widget.ConstraintLayout.LayoutParams
+            params.topMargin = (12 * resources.displayMetrics.density).toInt()
+            binding.btnLoginAction.layoutParams = params
+        }
 
         // Mobile specific views ko GONE karein
         binding.tvTimer.visibility = View.GONE
@@ -402,6 +434,49 @@ class LoginFragment : Fragment() {
                     toast("Error: ${task.exception?.message}")
                 }
             }
+    }
+
+    private fun showBiometricPrompt() {
+        val executor = androidx.core.content.ContextCompat.getMainExecutor(requireContext())
+        val biometricPrompt = androidx.biometric.BiometricPrompt(this, executor,
+            object : androidx.biometric.BiometricPrompt.AuthenticationCallback() {
+                override fun onAuthenticationSucceeded(result: androidx.biometric.BiometricPrompt.AuthenticationResult) {
+                    super.onAuthenticationSucceeded(result)
+                    // World-class Auto Login: Saved credentials se login karein
+                    val manager = BiometricSettingsManager(requireContext())
+                    val email = manager.getSavedEmail()
+                    val pass = manager.getSavedPass()
+                    if (email != null && pass != null) {
+                        viewModel.loginWithEmail(email, pass)
+                    }
+                }
+            })
+
+        val promptInfo = androidx.biometric.BiometricPrompt.PromptInfo.Builder()
+            .setTitle("Quick Login")
+            .setSubtitle("Use your fingerprint to login securely")
+            .setNegativeButtonText("Use Password")
+            .build()
+
+        biometricPrompt.authenticate(promptInfo)
+    }
+
+    private fun showBiometricSetupDialog(email: String, pass: String) {
+        com.google.android.material.dialog.MaterialAlertDialogBuilder(requireContext(), R.style.MaterialAlertDialog_Rounded)
+            .setTitle("Enable Biometric?")
+            .setMessage("Do you want to use fingerprint for faster login next time?")
+            .setPositiveButton("Yes, Enable") { _, _ ->
+                val manager = BiometricSettingsManager(requireContext())
+                manager.setBiometricEnabled(true)
+                manager.saveCredentials(email, pass)
+                toast("Biometric Enabled! 🔒")
+                proceedToHome()
+            }
+            .setNegativeButton("Maybe Later") { _, _ ->
+                proceedToHome()
+            }
+            .setCancelable(false)
+            .show()
     }
 
     override fun onDestroyView() {

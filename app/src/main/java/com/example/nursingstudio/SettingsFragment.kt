@@ -126,6 +126,24 @@ class SettingsFragment : Fragment() {
                 AppSettings.triggerVibration(requireContext(), 50)
             }
         }
+
+        // 1. View find karein
+        val switchBiometric = view.findViewById<com.google.android.material.switchmaterial.SwitchMaterial>(R.id.switch_biometric)
+        val bioManager = com.example.nursingstudio.utils.BiometricSettingsManager(requireContext())
+
+// 2. State load karein
+        switchBiometric.isChecked = bioManager.isBiometricEnabled()
+
+// 3. Click listener
+        switchBiometric.setOnCheckedChangeListener { _, isChecked ->
+            if (isChecked) {
+                // Banking apps ki tarah: Jab user ON karega, hum use bata sakte hain ki ye next login se kaam karega
+                bioManager.setBiometricEnabled(true)
+                Toast.makeText(requireContext(), "Biometric Enabled for next login", Toast.LENGTH_SHORT).show()
+            } else {
+                bioManager.setBiometricEnabled(false)
+            }
+        }
     }
 
 
