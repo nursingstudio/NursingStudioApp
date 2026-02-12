@@ -187,7 +187,6 @@ class LoginFragment : Fragment() {
 
     private fun observeViewModel() {
         viewModel.loginStatus.observe(viewLifecycleOwner) { result ->
-            // Har state mein loading handle karein
             if (result is LoginViewModel.LoginResult.Loading) {
                 binding.loadingOverlay.visibility = View.VISIBLE
             } else {
@@ -197,46 +196,37 @@ class LoginFragment : Fragment() {
             when (result) {
                 is LoginViewModel.LoginResult.Success -> {
                     countDownTimer?.cancel()
-                    binding.loadingOverlay.visibility = View.GONE
-
                     val bioManager = BiometricSettingsManager(requireContext())
-                    val currentEmail = binding.etEmail.text.toString().trim()
-                    val currentPass = binding.etPassword.text.toString().trim()
 
-                    // Professional logic: Agar email tab par hai aur biometric enabled nahi hai
-                    if (binding.loginTabLayout.selectedTabPosition == 0 && !bioManager.isBiometricEnabled()) {
-                        // User ko setup dialog dikhao, wo dialog khud proceedToHome() call karega
-                        showBiometricSetupDialog(currentEmail, currentPass)
+                    // Agar biometric enabled nahi hai, toh SETUP dikhao
+                    if (!bioManager.isBiometricEnabled()) {
+                        val currentTab = binding.loginTabLayout.selectedTabPosition
+                        if (currentTab == 0) {
+                            // Email Login Case
+                            val email = binding.etEmail.text.toString().trim()
+                            val pass = binding.etPassword.text.toString().trim()
+                            showBiometricSetupDialog(email, pass, true)
+                        } else {
+                            // Mobile Login Case
+                            val mobile = binding.etMobileLogin.text.toString().trim()
+                            showBiometricSetupDialog(mobile, "OTP_USER", false)
+                        }
                     } else {
-                        // Agar mobile login hai ya biometric already on hai, toh seedha home
                         proceedToHome()
                     }
                 }
-
                 is LoginViewModel.LoginResult.NoProfile -> {
-                    countDownTimer?.cancel() // Navigating se pehle timer roko
+                    countDownTimer?.cancel()
                     binding.loadingOverlay.visibility = View.GONE
-                    if (isAdded && activity != null && !requireActivity().isFinishing) {
-                        toast("No profile found. Redirecting to Register...")
-                        // Ek chhota sa delay taaki user Toast padh sake aur animation smooth lage
-                        binding.root.postDelayed({
-                            if (isAdded) {
-                                (activity as? AuthActivity)?.showRegister()
-                            }
-                        }, 1000) // 1second ka delay professional feel ke liye
-                    }
+                    toast("No profile found. Redirecting to Register...")
+                    binding.root.postDelayed({
+                        if (isAdded) (activity as? AuthActivity)?.showRegister()
+                    }, 1000)
                 }
-
                 is LoginViewModel.LoginResult.Error -> {
                     toast(result.message)
-                    if (binding.tilOtp.visibility == View.VISIBLE) {
-                        binding.tilOtp.error = result.message
-                        binding.btnLoginAction.text = "Verify & Login"
-                    } else {
-                        binding.btnLoginAction.text = "Login"
-                    }
+                    binding.btnLoginAction.text = if (binding.tilOtp.visibility == View.VISIBLE) "Verify & Login" else "Login"
                 }
-
                 else -> {}
             }
         }
@@ -469,21 +459,48 @@ class LoginFragment : Fragment() {
         biometricPrompt.authenticate(promptInfo)
     }
 
-    private fun showBiometricSetupDialog(email: String, pass: String) {
+    private fun showBiometricSetupDialog(identifier: String, pass: String, isEmail: Boolean) {
         com.google.android.material.dialog.MaterialAlertDialogBuilder(requireContext(), R.style.MaterialAlertDialog_Rounded)
-            .setTitle("Enable Biometric?")
-            .setMessage("Do you want to use fingerprint for faster login next time?")
-            .setPositiveButton("Yes, Enable") { _, _ ->
-                val manager = BiometricSettingsManager(requireContext())
-                manager.setBiometricEnabled(true)
-                manager.saveCredentials(email, pass)
-                toast("Biometric Enabled! 🔒")
-                proceedToHome()
+            .setTitle("Security Setup")
+            .setMessage("Enable Fingerprint & MPIN for faster login?")
+            .setPositiveButton("Setup Now") { _, _ ->
+                // Step 1: MPIN set karwao pehle (Professional way)
+                showMPINSetupDialogDuringLogin(identifier, pass, isEmail)
             }
-            .setNegativeButton("Maybe Later") { _, _ ->
-                proceedToHome()
-            }
+            .setNegativeButton("Maybe Later") { _, _ -> proceedToHome() }
             .setCancelable(false)
+            .show()
+    }
+
+    // Ye naya function hai LoginFragment ke liye
+    private fun showMPINSetupDialogDuringLogin(identifier: String, pass: String, isEmail: Boolean) {
+        val etMpin = android.widget.EditText(requireContext()).apply {
+            inputType = android.text.InputType.TYPE_CLASS_NUMBER
+            transformationMethod = android.text.method.PasswordTransformationMethod.getInstance()
+            filters = arrayOf(android.text.InputFilter.LengthFilter(4))
+            hint = "Create 4-Digit MPIN"
+            textAlignment = android.view.View.TEXT_ALIGNMENT_CENTER
+        }
+
+        com.google.android.material.dialog.MaterialAlertDialogBuilder(requireContext(), R.style.MaterialAlertDialog_Rounded)
+            .setTitle("Create Login MPIN")
+            .setView(etMpin)
+            .setPositiveButton("Save & Enable") { _, _ ->
+                val mpin = etMpin.text.toString()
+                if (mpin.length == 4) {
+                    val manager = BiometricSettingsManager(requireContext())
+                    manager.setBiometricEnabled(true)
+                    manager.saveMPIN(mpin)
+                    if (isEmail) manager.saveCredentials(identifier, pass)
+                    else manager.saveCredentials(identifier, "OTP_USER")
+
+                    Toast.makeText(requireContext(), "Biometric & MPIN Enabled! 🔒", Toast.LENGTH_SHORT).show()
+                    proceedToHome()
+                } else {
+                    Toast.makeText(requireContext(), "Invalid MPIN", Toast.LENGTH_SHORT).show()
+                    showMPINSetupDialogDuringLogin(identifier, pass, isEmail) // Retry
+                }
+            }
             .show()
     }
 
@@ -505,8 +522,15 @@ class LoginFragment : Fragment() {
                         dialog.dismiss()
                         val email = bioManager.getSavedEmail()
                         val pass = bioManager.getSavedPass()
+
                         if (email != null && pass != null) {
-                            viewModel.loginWithEmail(email, pass)
+                            if (pass == "OTP_USER") {
+                                // Agar mobile user hai toh seedha home (kyunki OTP session managed hota hai)
+                                proceedToHome()
+                            } else {
+                                // Email user hai toh re-login for security
+                                viewModel.loginWithEmail(email, pass)
+                            }
                         }
                     } else {
                         AppSettings.triggerVibration(requireContext(), 200) // Wrong MPIN feedback
