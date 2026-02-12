@@ -450,12 +450,20 @@ class LoginFragment : Fragment() {
                         viewModel.loginWithEmail(email, pass)
                     }
                 }
+                override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
+                    super.onAuthenticationError(errorCode, errString)
+                    // Agar user ne "Negative Button" (MPIN) dabaya ya biometric fail hua
+                    if (errorCode == androidx.biometric.BiometricPrompt.ERROR_NEGATIVE_BUTTON ||
+                        errorCode == androidx.biometric.BiometricPrompt.ERROR_USER_CANCELED) {
+                        showMpinBottomSheet()
+                    }
+                }
             })
 
         val promptInfo = androidx.biometric.BiometricPrompt.PromptInfo.Builder()
-            .setTitle("Quick Login")
-            .setSubtitle("Use your fingerprint to login securely")
-            .setNegativeButtonText("Use Password")
+            .setTitle("Secure Login")
+            .setSubtitle("Scan fingerprint or use MPIN")
+            .setNegativeButtonText("Use MPIN") // "Use Password" ki jagah "Use MPIN"
             .build()
 
         biometricPrompt.authenticate(promptInfo)
@@ -477,6 +485,74 @@ class LoginFragment : Fragment() {
             }
             .setCancelable(false)
             .show()
+    }
+
+    private fun showMpinBottomSheet() {
+        val dialog = com.google.android.material.bottomsheet.BottomSheetDialog(requireContext(), R.style.BottomSheetDialogTheme)
+        val view = layoutInflater.inflate(R.layout.layout_mpin_keypad, null)
+        var enteredMpin = ""
+        val bioManager = BiometricSettingsManager(requireContext())
+        val correctMpin = bioManager.getMPIN()
+
+        // Helper to handle key clicks
+        val handleKeyClick: (String) -> Unit = { key ->
+            if (enteredMpin.length < 4) {
+                enteredMpin += key
+                updateMpinDots(view, enteredMpin.length)
+
+                if (enteredMpin.length == 4) {
+                    if (enteredMpin == correctMpin) {
+                        dialog.dismiss()
+                        val email = bioManager.getSavedEmail()
+                        val pass = bioManager.getSavedPass()
+                        if (email != null && pass != null) {
+                            viewModel.loginWithEmail(email, pass)
+                        }
+                    } else {
+                        AppSettings.triggerVibration(requireContext(), 200) // Wrong MPIN feedback
+                        toast("Incorrect MPIN! Please try again.")
+                        enteredMpin = ""
+                        updateMpinDots(view, 0)
+                    }
+                }
+            }
+        }
+
+        // 1 to 9 Buttons setup
+        val numberButtons = listOf(
+            R.id.btnKey1 to "1", R.id.btnKey2 to "2", R.id.btnKey3 to "3",
+            R.id.btnKey4 to "4", R.id.btnKey5 to "5", R.id.btnKey6 to "6",
+            R.id.btnKey7 to "7", R.id.btnKey8 to "8", R.id.btnKey9 to "9",
+            R.id.btnKey0 to "0"
+        )
+
+        numberButtons.forEach { (id, value) ->
+            view.findViewById<com.google.android.material.button.MaterialButton>(id).setOnClickListener {
+                handleKeyClick(value)
+            }
+        }
+
+        // Delete Button logic
+        view.findViewById<com.google.android.material.button.MaterialButton>(R.id.btnKeyDel).setOnClickListener {
+            if (enteredMpin.isNotEmpty()) {
+                enteredMpin = enteredMpin.dropLast(1)
+                updateMpinDots(view, enteredMpin.length)
+            }
+        }
+
+        dialog.setContentView(view)
+        dialog.show()
+    }
+    private fun updateMpinDots(view: View, length: Int) {
+        val dotsLayout = view.findViewById<LinearLayout>(R.id.layoutMpinDots)
+        for (i in 0 until dotsLayout.childCount) {
+            val dot = dotsLayout.getChildAt(i)
+            if (i < length) {
+                dot.setBackgroundResource(R.drawable.mpin_dot_filled)
+            } else {
+                dot.setBackgroundResource(R.drawable.mpin_dot_empty)
+            }
+        }
     }
 
     override fun onDestroyView() {

@@ -11,6 +11,7 @@ import android.widget.Button
 import androidx.fragment.app.Fragment
 import androidx.appcompat.widget.SwitchCompat
 import android.widget.Toast
+import com.example.nursingstudio.utils.BiometricSettingsManager
 
 class SettingsFragment : Fragment() {
 
@@ -112,7 +113,8 @@ class SettingsFragment : Fragment() {
 
         // Vibration toggle
         // 1. Switch ko find karo
-        val switchVibration = view.findViewById<com.google.android.material.switchmaterial.SwitchMaterial>(R.id.switch_vibration)
+        val switchVibration =
+            view.findViewById<com.google.android.material.switchmaterial.SwitchMaterial>(R.id.switch_vibration)
 
 // 2. Saved state load karo (AppSettings manager ki madad se)
         switchVibration.isChecked = AppSettings.isVibrationEnabled(requireContext())
@@ -127,25 +129,25 @@ class SettingsFragment : Fragment() {
             }
         }
 
-        // 1. View find karein
-        val switchBiometric = view.findViewById<com.google.android.material.switchmaterial.SwitchMaterial>(R.id.switch_biometric)
-        val bioManager = com.example.nursingstudio.utils.BiometricSettingsManager(requireContext())
+// --- BIOMETRIC SWITCH LOGIC ---
+        val switchBiometric =
+            view.findViewById<com.google.android.material.switchmaterial.SwitchMaterial>(R.id.switch_biometric)
+        val bioManager =
+            com.example.nursingstudio.utils.BiometricSettingsManager(requireContext()) // Ensure path is correct
 
-// 2. State load karein
         switchBiometric.isChecked = bioManager.isBiometricEnabled()
 
-// 3. Click listener
         switchBiometric.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked) {
-                // Banking apps ki tarah: Jab user ON karega, hum use bata sakte hain ki ye next login se kaam karega
-                bioManager.setBiometricEnabled(true)
-                Toast.makeText(requireContext(), "Biometric Enabled for next login", Toast.LENGTH_SHORT).show()
+                // Switch ko verify hone tak wapas off kar dete hain professional apps ki tarah
+                switchBiometric.isChecked = false
+                showPasswordVerificationSheet()
             } else {
                 bioManager.setBiometricEnabled(false)
+                Toast.makeText(requireContext(), "Biometric disabled", Toast.LENGTH_SHORT).show()
             }
         }
     }
-
 
     private fun openUrl(url: String) {
         try {
@@ -170,5 +172,53 @@ class SettingsFragment : Fragment() {
             .replace(R.id.fragment_container, fragment)
             .addToBackStack(null)
             .commit()
+    }
+
+    private fun showPasswordVerificationSheet() {
+        val dialog = com.google.android.material.bottomsheet.BottomSheetDialog(requireContext(), R.style.BottomSheetDialogTheme)
+        val view = layoutInflater.inflate(R.layout.layout_verify_for_biometric, null)
+
+        val etPass = view.findViewById<com.google.android.material.textfield.TextInputEditText>(R.id.etVerifyPassword)
+        val btnVerify = view.findViewById<com.google.android.material.button.MaterialButton>(R.id.btnVerifyAndSetMPIN)
+
+        btnVerify.setOnClickListener {
+            val password = etPass.text.toString()
+            if (password.isNotEmpty()) {
+                dialog.dismiss()
+                showMPINSetupDialog()
+            } else {
+                Toast.makeText(requireContext(), "Please enter password", Toast.LENGTH_SHORT).show()
+            }
+        }
+        dialog.setContentView(view)
+        dialog.show()
+    }
+
+    private fun showMPINSetupDialog() {
+        val etMpin = android.widget.EditText(requireContext()).apply {
+            inputType = android.text.InputType.TYPE_CLASS_NUMBER
+            transformationMethod = android.text.method.PasswordTransformationMethod.getInstance()
+            filters = arrayOf(android.text.InputFilter.LengthFilter(4))
+            hint = "Enter 4 Digit MPIN"
+        }
+
+        com.google.android.material.dialog.MaterialAlertDialogBuilder(requireContext(), R.style.MaterialAlertDialog_Rounded)
+            .setTitle("Set Security MPIN")
+            .setView(etMpin)
+            .setPositiveButton("Set & Enable") { _, _ ->
+                val mpin = etMpin.text.toString()
+                if (mpin.length == 4) {
+                    val bioManager = com.example.nursingstudio.utils.BiometricSettingsManager(requireContext())
+                    bioManager.setBiometricEnabled(true)
+                    bioManager.saveMPIN(mpin)
+
+                    // Switch ko ON dikhane ke liye view ko dhundhna padega
+                    view?.findViewById<com.google.android.material.switchmaterial.SwitchMaterial>(R.id.switch_biometric)?.isChecked = true
+                    Toast.makeText(requireContext(), "Security MPIN & Biometric Set! 🔒", Toast.LENGTH_SHORT).show()
+                } else {
+                    Toast.makeText(requireContext(), "MPIN must be 4 digits", Toast.LENGTH_SHORT).show()
+                }
+            }
+            .show()
     }
 }

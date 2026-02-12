@@ -33,4 +33,17 @@ class BiometricSettingsManager(context: Context) {
 
     fun getSavedEmail(): String? = sharedPreferences.getString("saved_email", null)
     fun getSavedPass(): String? = sharedPreferences.getString("saved_pass", null)
+
+
+    // MPIN Save karne ke liye
+    fun saveMPIN(mpin: String) {
+        sharedPreferences.edit().putString("user_mpin", mpin).apply()
+    }
+
+    // MPIN Get karne ke liye
+    fun getMPIN(): String? = sharedPreferences.getString("user_mpin", null)
+
+    // Check if MPIN is set
+    fun isMPINSet(): Boolean = sharedPreferences.contains("user_mpin")
+
 }

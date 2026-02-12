@@ -164,5 +164,11 @@
     <string name="terms_of_use">Terms of Use</string>
     <string name="disclaimer">Disclaimer</string>
     <string name="about_nursing_studio">About Nursing Studio</string>
+    <string name="enter_password">Enter Password</string>
+    <string name="verify_amp_continue"><![CDATA[Verify & Continue]]></string>
+    <string name="please_enter_your_account_password_to_enable_biometric_security">Please enter your account password to enable biometric security.</string>
+    <string name="verify_identity">Verify Identity</string>
+    <string name="forgot_mpin">Forgot MPIN?</string>
+    <string name="enter_security_mpin">Enter Security MPIN</string>
 
 </resources>
