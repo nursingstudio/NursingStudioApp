@@ -85,4 +85,12 @@
     <style name="ShapeAppearanceOverlay.App.Card.Rounded" parent="">
         <item name="cornerSize">24dp</item>
     </style>
+
+    // MPIN //
+    <style name="MpinKeyStyle" parent="Widget.MaterialComponents.Button.TextButton">
+        android:insetTop="0dp"
+        android:insetBottom="0dp"
+        app:rippleColor="@color/saffron_light"
+        app:cornerRadius="40dp"
+        android:shape="oval"> </style>
 </resources>

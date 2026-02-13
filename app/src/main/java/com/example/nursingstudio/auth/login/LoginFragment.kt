@@ -20,6 +20,7 @@ import com.google.firebase.auth.PhoneAuthProvider
 import com.example.nursingstudio.AppSettings
 import com.example.nursingstudio.AuthActivity
 import com.example.nursingstudio.utils.BiometricSettingsManager
+import com.google.android.material.button.MaterialButton
 
 class LoginFragment : Fragment() {
 
@@ -557,6 +558,11 @@ class LoginFragment : Fragment() {
             view.findViewById<com.google.android.material.button.MaterialButton>(id).setOnClickListener {
                 handleKeyClick(value)
             }
+        }
+
+        // Biometric Icon Click par prompt dubara dikhane ke liye
+        view.findViewById<MaterialButton>(R.id.btnKeyBio).setOnClickListener {
+            showBiometricPrompt()
         }
 
         // Delete Button logic
