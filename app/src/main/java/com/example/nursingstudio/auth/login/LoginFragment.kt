@@ -183,26 +183,41 @@ class LoginFragment : Fragment() {
             }
 
             when (result) {
+                is LoginViewModel.LoginResult.Loading -> {
+                    binding.loadingOverlay.visibility = View.VISIBLE
+                }
                 is LoginViewModel.LoginResult.Success -> {
                     countDownTimer?.cancel()
                     val bioManager = BiometricSettingsManager(requireContext())
-
-                    // Agar biometric enabled nahi hai, toh SETUP dikhao
                     if (!bioManager.isBiometricEnabled()) {
                         val currentTab = binding.loginTabLayout.selectedTabPosition
                         if (currentTab == 0) {
-                            // Email Login Case
                             val email = binding.etEmail.text.toString().trim()
                             val pass = binding.etPassword.text.toString().trim()
                             showBiometricSetupDialog(email, pass, true)
                         } else {
-                            // Mobile Login Case
                             val mobile = binding.etMobileLogin.text.toString().trim()
                             showBiometricSetupDialog(mobile, "OTP_USER", false)
                         }
                     } else {
                         proceedToHome()
                     }
+                }
+                is LoginViewModel.LoginResult.Error -> {
+                    binding.loadingOverlay.visibility = View.GONE
+                    if (binding.tilOtp.visibility == View.VISIBLE) {
+                        binding.tilOtp.isErrorEnabled = true
+                        binding.tilOtp.error = "Invalid OTP! Please check and enter again."
+                        binding.tilOtp.requestFocus()
+                        AppSettings.triggerVibration(requireContext(), 200)
+                    } else if (binding.layoutEmailLogin.visibility == View.VISIBLE) {
+                        binding.tilPassword.isErrorEnabled = true
+                        binding.tilPassword.error = result.message
+                        binding.tilPassword.requestFocus()
+                    } else {
+                        toast(result.message)
+                    }
+                    binding.btnLoginAction.text = if (binding.tilOtp.visibility == View.VISIBLE) "Verify & Login" else "Login"
                 }
                 is LoginViewModel.LoginResult.NoProfile -> {
                     countDownTimer?.cancel()
@@ -212,11 +227,9 @@ class LoginFragment : Fragment() {
                         if (isAdded) (activity as? AuthActivity)?.showRegister()
                     }, 1000)
                 }
-                is LoginViewModel.LoginResult.Error -> {
-                    toast("Invalid OTP, please try again.")
-                    binding.btnLoginAction.text = if (binding.tilOtp.visibility == View.VISIBLE) "Verify & Login" else "Login"
+                else -> {
+                    binding.loadingOverlay.visibility = View.GONE
                 }
-                else -> {}
             }
         }
     }
