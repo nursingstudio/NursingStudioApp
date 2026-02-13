@@ -91,6 +91,15 @@ class SettingsFragment : Fragment() {
     }
 
     private fun showPasswordVerificationSheet() {
+        val type = bioManager.getLoginType()
+
+        // Professional Check: Agar Mobile user hai toh password mangne ka logic skip karo
+        if (type == 1 || bioManager.getSavedPass() == "OTP_USER") {
+            showMPINSetupDialogFromSettings()
+            return
+        }
+
+        // Email user ke liye purana sheet logic...
         val dialog = BottomSheetDialog(requireContext(), R.style.BottomSheetDialogTheme)
         val sheetView = layoutInflater.inflate(R.layout.layout_verify_for_biometric, null)
 

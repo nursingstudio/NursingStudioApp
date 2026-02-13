@@ -190,8 +190,12 @@ class LoginFragment : Fragment() {
                 is LoginViewModel.LoginResult.Success -> {
                     countDownTimer?.cancel()
                     val bioManager = BiometricSettingsManager(requireContext())
+                    val currentTab = binding.loginTabLayout.selectedTabPosition
+                    // YAHAN FIX HAI: Login type save karo pehle
+                    bioManager.saveLoginType(currentTab)
+
                     if (!bioManager.isBiometricEnabled()) {
-                        val currentTab = binding.loginTabLayout.selectedTabPosition
+
                         if (currentTab == 0) {
                             val email = binding.etEmail.text.toString().trim()
                             val pass = binding.etPassword.text.toString().trim()
@@ -436,12 +440,19 @@ class LoginFragment : Fragment() {
             object : androidx.biometric.BiometricPrompt.AuthenticationCallback() {
                 override fun onAuthenticationSucceeded(result: androidx.biometric.BiometricPrompt.AuthenticationResult) {
                     super.onAuthenticationSucceeded(result)
-                    // World-class Auto Login: Saved credentials se login karein
                     val manager = BiometricSettingsManager(requireContext())
-                    val email = manager.getSavedEmail()
+                    val type = manager.getLoginType()
+                    val identifier = manager.getSavedEmail() // This stores email or mobile
                     val pass = manager.getSavedPass()
-                    if (email != null && pass != null) {
-                        viewModel.loginWithEmail(email, pass)
+
+                    if (type == 0) { // Email User
+                        if (identifier != null && pass != null) {
+                            viewModel.loginWithEmail(identifier, pass)
+                        }
+                    } else { // Mobile User
+                        // Mobile user verified via Biometric/MPIN can go straight to home
+                        // because they already authenticated via OTP once
+                        proceedToHome()
                     }
                 }
                 override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
@@ -524,18 +535,16 @@ class LoginFragment : Fragment() {
                 if (enteredMpin.length == 4) {
                     if (enteredMpin == correctMpin) {
                         dialog.dismiss()
-                        val email = bioManager.getSavedEmail()
-                        val pass = bioManager.getSavedPass()
+                        val type = bioManager.getLoginType()
 
-                        if (email != null && pass != null) {
-                            if (pass == "OTP_USER") {
-                                // Agar mobile user hai toh seedha home (kyunki OTP session managed hota hai)
-                                proceedToHome()
-                            } else {
-                                // Email user hai toh re-login for security
-                                viewModel.loginWithEmail(email, pass)
-                            }
+                        if (type == 0) { // Email
+                            val email = bioManager.getSavedEmail()
+                            val pass = bioManager.getSavedPass()
+                            if (email != null && pass != null) viewModel.loginWithEmail(email, pass)
+                        } else { // Mobile
+                            proceedToHome()
                         }
+
                     } else {
                         AppSettings.triggerVibration(requireContext(), 200) // Wrong MPIN feedback
                         toast("Incorrect MPIN! Please try again.")

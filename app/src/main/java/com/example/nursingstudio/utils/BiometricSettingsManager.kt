@@ -6,28 +6,37 @@ import androidx.security.crypto.MasterKeys
 
 class BiometricSettingsManager(context: Context) {
 
-    // World-class AES256 encryption setup
+    // World-class constants setup using Companion Object
+    companion object {
+        private const val KEY_LOGIN_TYPE = "login_type" // 0 for Email, 1 for Mobile
+        private const val SECURE_PREFS_NAME = "nursing_studio_secure_prefs"
+    }
+
     private val masterKeyAlias = MasterKeys.getOrCreate(MasterKeys.AES256_GCM_SPEC)
 
     private val sharedPreferences = EncryptedSharedPreferences.create(
-        "nursing_studio_secure_prefs",
+        SECURE_PREFS_NAME,
         masterKeyAlias,
         context,
         EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
         EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
     )
 
-    // Check if biometric is enabled
-    fun isBiometricEnabled(): Boolean = sharedPreferences.getBoolean("biometric_enabled", false)
-
-    // Save preference
-    fun setBiometricEnabled(isEnabled: Boolean) {
-        sharedPreferences.edit().putBoolean("biometric_enabled", isEnabled).apply()
-        // Agar disable kiya hai, toh purana MPIN ya data clear nahi karenge jab tak user logout na kare
-        // Taaki next time ON karte waqt convenience rahe
+    // Login Type Logic (Email vs Mobile handle karne ke liye)
+    fun saveLoginType(type: Int) {
+        sharedPreferences.edit().putInt(KEY_LOGIN_TYPE, type).apply()
     }
 
-    // Save encrypted credentials
+    fun getLoginType(): Int = sharedPreferences.getInt(KEY_LOGIN_TYPE, 0)
+
+    // Biometric Preferences
+    fun isBiometricEnabled(): Boolean = sharedPreferences.getBoolean("biometric_enabled", false)
+
+    fun setBiometricEnabled(isEnabled: Boolean) {
+        sharedPreferences.edit().putBoolean("biometric_enabled", isEnabled).apply()
+    }
+
+    // Secure Credentials Storage
     fun saveCredentials(email: String, pass: String) {
         sharedPreferences.edit()
             .putString("saved_email", email)
@@ -37,7 +46,6 @@ class BiometricSettingsManager(context: Context) {
 
     fun getSavedEmail(): String? = sharedPreferences.getString("saved_email", null)
 
-    // Yahan default "OTP_USER" diya hai safety ke liye
     fun getSavedPass(): String = sharedPreferences.getString("saved_pass", "OTP_USER") ?: "OTP_USER"
 
     // MPIN Logic
@@ -49,7 +57,6 @@ class BiometricSettingsManager(context: Context) {
 
     fun isMPINSet(): Boolean = sharedPreferences.contains("user_mpin")
 
-    // World-Class Security: Logout par credentials clear karne ke liye
     fun clearAllSecureData() {
         sharedPreferences.edit().clear().apply()
     }
