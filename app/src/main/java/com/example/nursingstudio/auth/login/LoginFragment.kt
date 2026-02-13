@@ -47,6 +47,10 @@ class LoginFragment : Fragment() {
         setupTextWatchers() // Naya function
         observeViewModel()
 
+        // Tagline ko thoda animation dena (Optional but Professional)
+        binding.tvAppTagline.alpha = 0f
+        binding.tvAppTagline.animate().alpha(0.8f).setDuration(1000).start()
+
         // Button Effects
         AppSettings.setPushEffect(binding.btnLoginAction)
         // Check for returning biometric user

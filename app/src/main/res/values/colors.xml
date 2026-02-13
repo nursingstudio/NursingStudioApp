@@ -12,4 +12,6 @@
     <color name="splash_bg">#FF9933</color>
     <color name="error_red">#D32F2F</color>
     <color name="success_green">#388E3C</color>
+
+    <color name="greyish_blue">#546E7A</color>
 </resources>

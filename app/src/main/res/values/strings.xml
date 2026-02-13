@@ -170,5 +170,6 @@
     <string name="verify_identity">Verify Identity</string>
     <string name="forgot_mpin">Forgot MPIN?</string>
     <string name="enter_security_mpin">Enter Security MPIN</string>
+    <string name="Tag_line">Your Nursing Success Partner</string>
 
 </resources>
