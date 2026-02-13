@@ -65,32 +65,21 @@ class LoginFragment : Fragment() {
                 clearAllFields()
                 countDownTimer?.cancel()
 
-                val params =
-                    binding.btnLoginAction.layoutParams as androidx.constraintlayout.widget.ConstraintLayout.LayoutParams
-
-                // Standard Margin calculation (World-class practice)
-                val marginInPx = (12 * resources.displayMetrics.density).toInt()
-                params.topMargin = marginInPx
-                params.bottomMargin = 0 // Extra bottom space remove karne ke liye
-
+                // Barrier ki wajah se humein params change karne ki zarurat nahi hai
+                // Sirf visibility toggle karni hai
                 if (tab?.position == 0) {
-                    // Email Mode
                     binding.layoutEmailLogin.visibility = View.VISIBLE
                     binding.layoutMobileLogin.visibility = View.GONE
                     binding.btnLoginAction.text = "Login"
-                    params.topToBottom = binding.layoutEmailLogin.id
                 } else {
-                    // Mobile Mode
                     binding.layoutEmailLogin.visibility = View.GONE
                     binding.layoutMobileLogin.visibility = View.VISIBLE
                     unlockMobileField()
-                    params.topToBottom = binding.layoutMobileLogin.id
                 }
 
-                binding.btnLoginAction.layoutParams = params
-                binding.root.post { binding.root.requestLayout() }
+                // Force layout update taaki barrier recalculate ho jaye
+                binding.root.requestLayout()
             }
-
             override fun onTabUnselected(tab: TabLayout.Tab?) {}
             override fun onTabReselected(tab: TabLayout.Tab?) {}
         })
