@@ -213,7 +213,7 @@ class LoginFragment : Fragment() {
                     }, 1000)
                 }
                 is LoginViewModel.LoginResult.Error -> {
-                    toast(result.message)
+                    toast("Invalid OTP, please try again.")
                     binding.btnLoginAction.text = if (binding.tilOtp.visibility == View.VISIBLE) "Verify & Login" else "Login"
                 }
                 else -> {}
@@ -348,6 +348,7 @@ class LoginFragment : Fragment() {
         binding.etOtpLogin.addTextChangedListener(object : android.text.TextWatcher {
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                 binding.tilOtp.error = null
+                binding.tilOtp.isErrorEnabled = false
             }
 
             override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
