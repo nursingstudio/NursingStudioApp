@@ -28,7 +28,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.widget.NestedScrollView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import com.example.nursingstudio.AppSettings
+import com.example.nursingstudio.utils.AppSettings
 import com.example.nursingstudio.AuthActivity
 import com.example.nursingstudio.MainActivity
 import com.example.nursingstudio.R
@@ -39,10 +39,7 @@ import com.google.android.material.datepicker.CalendarConstraints
 import com.google.android.material.datepicker.DateValidatorPointBackward
 import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.android.material.textfield.TextInputLayout
-import com.google.firebase.FirebaseException
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.PhoneAuthCredential
-import com.google.firebase.auth.PhoneAuthOptions
 import com.google.firebase.auth.PhoneAuthProvider
 import com.google.firebase.firestore.FieldValue
 import java.text.SimpleDateFormat
@@ -50,7 +47,7 @@ import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 import java.util.TimeZone
-import java.util.concurrent.TimeUnit
+
 class RegisterFragment : Fragment() {
 
     private var _binding: FragmentRegisterBinding? = null
@@ -356,24 +353,29 @@ class RegisterFragment : Fragment() {
     // showError Fix (Redirecting to top fix)
     //Exact Redirect/Scroll Fix (Auto-Start Redirect Problem Solve)
     private fun showError(view: View, message: String): Boolean {
+        // 1. Toast message dikhao
         toast(message)
-        AppSettings.triggerVibration(requireContext(), 100)
 
-        // Reset Background for Spinner specifically
-        if (view is android.widget.Spinner) {
-            view.background =
-                ContextCompat.getDrawable(requireContext(), R.drawable.spinner_error_bg)
-            // Note: We DO NOT call view.setError() here because it creates that ugly bubble
+        // 2. CENTRAL AC: Shake + Vibrate Effect (One line for everything!)
+        AppSettings.triggerErrorEffect(requireContext(), view)
+
+        // 3. UI logic for different views
+        when (view) {
+            is android.widget.Spinner -> {
+                view.background = ContextCompat.getDrawable(requireContext(), R.drawable.spinner_error_bg)
+            }
+            is TextInputLayout -> {
+                view.isErrorEnabled = true
+                view.error = message
+            }
+            is android.widget.CheckBox -> {
+                // Checkbox ke liye optional red tint de sakte hain
+                view.buttonTintList = android.content.res.ColorStateList.valueOf(Color.RED)
+            }
         }
-
-        // Standard Error for TextInputLayouts
-        if (view is TextInputLayout) {
-            view.isErrorEnabled = true
-            view.error = message
-        }
-
         view.requestFocus()
 
+        // 4. Smooth Scroll Logic (Top-Level UX)
         binding.registrationScrollView.postDelayed({
             val vTop = view.top
             val parent = view.parent as? View
@@ -429,7 +431,8 @@ class RegisterFragment : Fragment() {
         if (mobile.length != 10) {
             toast("Enter 10 digit mobile number")
             binding.etMobile.requestFocus()
-            AppSettings.triggerVibration(requireContext(), 100)
+// Centralized effect call
+            AppSettings.triggerErrorEffect(requireContext(), binding.etMobile)
             return
         }
 

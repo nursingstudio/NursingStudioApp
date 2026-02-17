@@ -2,7 +2,6 @@ package com.example.nursingstudio.auth.login
 
 import android.content.Context
 import android.content.Intent
-import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -17,8 +16,8 @@ import com.example.nursingstudio.R
 import com.example.nursingstudio.databinding.FragmentLoginBinding
 import com.google.android.material.tabs.TabLayout
 import com.google.firebase.auth.PhoneAuthProvider
-import com.example.nursingstudio.AppSettings
 import com.example.nursingstudio.AuthActivity
+import com.example.nursingstudio.utils.AppSettings
 import com.example.nursingstudio.utils.BiometricSettingsManager
 import com.google.android.material.button.MaterialButton
 
@@ -122,15 +121,19 @@ class LoginFragment : Fragment() {
         if (email.isEmpty()) {
             binding.tilEmail.isErrorEnabled = true // Space on karein
             binding.tilEmail.error = "Email is required"
+            // CENTRAL AC: Shake + Vibrate
+            AppSettings.triggerErrorEffect(requireContext(), binding.tilEmail)
             return
         }
         if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
             binding.tilEmail.error = "Invalid Email format"
+            AppSettings.triggerErrorEffect(requireContext(), binding.tilEmail)
             return
         }
         if (pass.isEmpty()) {
             binding.tilPassword.isErrorEnabled = true // Space on karein
             binding.tilPassword.error = "Password is required"
+            AppSettings.triggerErrorEffect(requireContext(), binding.tilPassword)
             return
         }
 
@@ -146,6 +149,8 @@ class LoginFragment : Fragment() {
             if (mobile.length != 10) {
                 binding.tilMobile.isErrorEnabled = true
                 binding.tilMobile.error = "Enter 10 digit number" // TIL use karo border ke liye
+                // Shake Mobile Field
+                AppSettings.triggerErrorEffect(requireContext(), binding.tilMobile)
                 return
             }
             // ... (Aapka existing sendOtp code)
@@ -169,6 +174,8 @@ class LoginFragment : Fragment() {
                 binding.tilOtp.isErrorEnabled = true
                 binding.tilOtp.error = "Enter 6 digit OTP"
                 binding.tilOtp.requestFocus()
+                // Shake OTP Field
+                AppSettings.triggerErrorEffect(requireContext(), binding.tilOtp)
                 return
             }
 
@@ -408,9 +415,11 @@ class LoginFragment : Fragment() {
             if (email.isEmpty()) {
                 tilForgotEmail.isErrorEnabled = true
                 tilForgotEmail.error = "Please enter your registered email"
+                AppSettings.triggerErrorEffect(requireContext(), tilForgotEmail) // Shake it!
             } else if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
                 tilForgotEmail.isErrorEnabled = true
                 tilForgotEmail.error = "Invalid email format"
+                AppSettings.triggerErrorEffect(requireContext(), tilForgotEmail) // Shake it!
             } else {
                 // Success Logic: Reset Link Send
                 sendPasswordReset(email, dialog)

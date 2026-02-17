@@ -1,9 +1,14 @@
-package com.example.nursingstudio
+package com.example.nursingstudio.utils
 
 import android.content.Context
-import android.os.*
+import android.os.Build
+import android.os.VibrationEffect
+import android.os.Vibrator
+import android.os.VibratorManager
 import android.view.MotionEvent
 import android.view.View
+import android.view.animation.AnimationUtils
+import com.example.nursingstudio.R
 
 object AppSettings {
     private const val PREF_SETTINGS = "settings_prefs"
@@ -41,27 +46,36 @@ object AppSettings {
     }
 
     /**
-     * WORLD-CLASS PUSH EFFECT:
-     * Haptic Jhatka + Visual Shrink
+     * CENTRAL AC: Shake + Vibrate Error Animation
+     * Kisi bhi view par error aane par ise call karein
      */
+    fun triggerErrorEffect(context: Context, view: View) {
+        // 1. Shake Animation load aur start karein
+        val shake = AnimationUtils.loadAnimation(context, R.anim.shake)
+        view.startAnimation(shake)
+
+        // 2. Stronger Vibration for Error (50ms)
+        triggerVibration(context, 50)
+
+        // 3. Request focus taaki cursor wahan chala jaye
+        view.requestFocus()
+    }
+
     fun setPushEffect(view: View) {
         view.setOnTouchListener { v, event ->
             when (event.action) {
                 MotionEvent.ACTION_DOWN -> {
-                    // 1. Visual: Thoda chota karo
                     v.animate().scaleX(0.95f).scaleY(0.95f).setDuration(80).start()
-                    // 2. Haptic: Ek halka sa click feel (sirf 10ms)
                     triggerVibration(v.context, 10)
                 }
                 MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
-                    // Wapas normal size
                     v.animate().scaleX(1f).scaleY(1f).setDuration(80).start()
                     if (event.action == MotionEvent.ACTION_UP) {
-                        v.performClick() // Standard click register karne ke liye
+                        v.performClick()
                     }
                 }
             }
-            true // True isliye taaki hum touch event consume karein
+            true
         }
     }
 }
