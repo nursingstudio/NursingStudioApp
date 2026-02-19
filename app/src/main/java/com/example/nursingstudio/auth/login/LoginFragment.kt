@@ -409,23 +409,25 @@ class LoginFragment : Fragment() {
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                 val email = s.toString().trim()
 
-                // 1. Pehle purana error hatao
-                binding.tilEmail.error = null
+                // 1. Reset state
                 binding.tilEmail.isErrorEnabled = false
+                binding.tilEmail.error = null
+                binding.btnLoginAction.isEnabled = true
+                binding.btnLoginAction.alpha = 1.0f
 
-                // 2. Proactive Lock Check (World-Class Step)
+                // 2. Proactive Check (Combined Message)
                 if (isUserLocked(email)) {
-                    binding.tilEmail.isErrorEnabled = true
-                    binding.tilEmail.error = "This account is currently locked"
-                    binding.btnLoginAction.isEnabled = false // Button disable kar do
-                    binding.btnLoginAction.alpha = 0.5f     // Button ko faded dikhao
+                    val timeLeft = getRemainingLockTime(email) // Format: 05:45
 
-                    // User ko live timer dikhane ke liye toast ya chhota label use kar sakte hain
-                    toast("Locked! Remaining time: ${getRemainingLockTime(email)}")
-                } else {
-                    // Agar locked nahi hai toh button wapas enable karo
-                    binding.btnLoginAction.isEnabled = true
-                    binding.btnLoginAction.alpha = 1.0f
+                    binding.tilEmail.isErrorEnabled = true
+                    // Naya World-class combined message
+                    binding.tilEmail.error = "Account locked! Try after $timeLeft hours."
+
+                    // Button controls
+                    binding.btnLoginAction.isEnabled = false
+                    binding.btnLoginAction.alpha = 0.5f
+
+                    // Yahan se toast/bubble wala logic delete kar dein
                 }
             }
             override fun afterTextChanged(s: android.text.Editable?) {}
