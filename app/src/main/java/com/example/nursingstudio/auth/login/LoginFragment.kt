@@ -533,13 +533,24 @@ class LoginFragment : Fragment() {
     }
 
     private fun showMpinBottomSheet() {
-        val dialog = com.google.android.material.bottomsheet.BottomSheetDialog(requireContext(), R.style.BottomSheetDialogTheme)
+        // 1. Dialog initialization with Glass Theme
+        val dialog = com.google.android.material.bottomsheet.BottomSheetDialog(requireContext(), R.style.GlassBottomSheetDialogTheme)
         val view = layoutInflater.inflate(R.layout.layout_mpin_keypad, null)
+
         var enteredMpin = ""
         val bioManager = BiometricSettingsManager(requireContext())
         val correctMpin = bioManager.getMPIN()
 
-        // Helper to handle key clicks
+        // 2. APPLY GLASS EFFECT (World-Class Step)
+        dialog.window?.let { window ->
+            // Android 12 (API 31) aur upar ke liye background blur trigger karein
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
+                window.attributes.blurBehindRadius = 30
+                window.addFlags(android.view.WindowManager.LayoutParams.FLAG_BLUR_BEHIND)
+            }
+        }
+
+        // --- Baki logic same rahega (Keypad functionality) ---
         val handleKeyClick: (String) -> Unit = { key ->
             if (enteredMpin.length < 4) {
                 enteredMpin += key
@@ -549,17 +560,15 @@ class LoginFragment : Fragment() {
                     if (enteredMpin == correctMpin) {
                         dialog.dismiss()
                         val type = bioManager.getLoginType()
-
-                        if (type == 0) { // Email
+                        if (type == 0) {
                             val email = bioManager.getSavedEmail()
                             val pass = bioManager.getSavedPass()
                             if (email != null && pass != null) viewModel.loginWithEmail(email, pass)
-                        } else { // Mobile
+                        } else {
                             proceedToHome()
                         }
-
                     } else {
-                        AppSettings.triggerVibration(requireContext(), 200) // Wrong MPIN feedback
+                        AppSettings.triggerVibration(requireContext(), 200)
                         toast("Incorrect MPIN! Please try again.")
                         enteredMpin = ""
                         updateMpinDots(view, 0)
@@ -568,7 +577,6 @@ class LoginFragment : Fragment() {
             }
         }
 
-        // 1 to 9 Buttons setup
         val numberButtons = listOf(
             R.id.btnKey1 to "1", R.id.btnKey2 to "2", R.id.btnKey3 to "3",
             R.id.btnKey4 to "4", R.id.btnKey5 to "5", R.id.btnKey6 to "6",
@@ -577,18 +585,15 @@ class LoginFragment : Fragment() {
         )
 
         numberButtons.forEach { (id, value) ->
-            view.findViewById<com.google.android.material.button.MaterialButton>(id).setOnClickListener {
-                handleKeyClick(value)
-            }
+            view.findViewById<MaterialButton>(id).setOnClickListener { handleKeyClick(value) }
         }
 
-        // Biometric Icon Click par prompt dubara dikhane ke liye
         view.findViewById<MaterialButton>(R.id.btnKeyBio).setOnClickListener {
+            dialog.dismiss() // Important: Biometric khulne se pehle sheet hide karein
             showBiometricPrompt()
         }
 
-        // Delete Button logic
-        view.findViewById<com.google.android.material.button.MaterialButton>(R.id.btnKeyDel).setOnClickListener {
+        view.findViewById<MaterialButton>(R.id.btnKeyDel).setOnClickListener {
             if (enteredMpin.isNotEmpty()) {
                 enteredMpin = enteredMpin.dropLast(1)
                 updateMpinDots(view, enteredMpin.length)
