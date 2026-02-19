@@ -73,6 +73,9 @@ class LoginFragment : Fragment() {
             override fun onTabSelected(tab: TabLayout.Tab?) {
                 clearAllErrors()
                 clearAllFields()
+                // Tab change hone par button reset karein
+                binding.btnLoginAction.isEnabled = true
+                binding.btnLoginAction.alpha = 1.0f
                 countDownTimer?.cancel()
 
                 // Barrier ki wajah se humein params change karne ki zarurat nahi hai
@@ -240,6 +243,16 @@ class LoginFragment : Fragment() {
                 is LoginViewModel.LoginResult.Error -> {
                     binding.loadingOverlay.visibility = View.GONE
                     val email = binding.etEmail.text.toString().trim()
+                    val errorMessage = result.message ?: "An unexpected error occurred"
+
+                    if (binding.layoutEmailLogin.visibility == View.VISIBLE) {
+                        // Sirf tab error dikhao jab message empty na ho
+                        if (errorMessage.isNotEmpty()) {
+                            binding.tilPassword.isErrorEnabled = true
+                            binding.tilPassword.error = errorMessage
+                        }
+                    }
+
 
                     if (binding.layoutEmailLogin.visibility == View.VISIBLE) {
                         loginAttempts++
@@ -394,11 +407,27 @@ class LoginFragment : Fragment() {
         binding.etEmail.addTextChangedListener(object : android.text.TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                // Typing shuru hote hi error aur uski reserved space dono hatao
+                val email = s.toString().trim()
+
+                // 1. Pehle purana error hatao
                 binding.tilEmail.error = null
                 binding.tilEmail.isErrorEnabled = false
-            }
 
+                // 2. Proactive Lock Check (World-Class Step)
+                if (isUserLocked(email)) {
+                    binding.tilEmail.isErrorEnabled = true
+                    binding.tilEmail.error = "This account is currently locked"
+                    binding.btnLoginAction.isEnabled = false // Button disable kar do
+                    binding.btnLoginAction.alpha = 0.5f     // Button ko faded dikhao
+
+                    // User ko live timer dikhane ke liye toast ya chhota label use kar sakte hain
+                    toast("Locked! Remaining time: ${getRemainingLockTime(email)}")
+                } else {
+                    // Agar locked nahi hai toh button wapas enable karo
+                    binding.btnLoginAction.isEnabled = true
+                    binding.btnLoginAction.alpha = 1.0f
+                }
+            }
             override fun afterTextChanged(s: android.text.Editable?) {}
         })
 
@@ -727,14 +756,22 @@ class LoginFragment : Fragment() {
 
     // Updated functions with 'identifier' parameter
     private fun isUserLocked(identifier: String): Boolean {
+        if (identifier.isEmpty()) return false
+
         val prefs = requireContext().getSharedPreferences("login_lock", Context.MODE_PRIVATE)
-        val lockTime = prefs.getLong("lock_timestamp_$identifier", 0) // Unique key for each user
+        val lockTime = prefs.getLong("lock_timestamp_$identifier", 0)
         if (lockTime == 0L) return false
 
         val diff = System.currentTimeMillis() - lockTime
         val hoursPassed = diff / (1000 * 60 * 60)
 
-        return hoursPassed < LOCK_TIME_HOURS
+        return if (hoursPassed >= LOCK_TIME_HOURS) {
+            // Time over! Lock hata do
+            prefs.edit().remove("lock_timestamp_$identifier").apply()
+            false
+        } else {
+            true
+        }
     }
 
     private fun lockUser(identifier: String) {
