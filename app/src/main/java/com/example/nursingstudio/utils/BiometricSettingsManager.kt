@@ -48,6 +48,11 @@ class BiometricSettingsManager(context: Context) {
 
     fun getSavedPass(): String = sharedPreferences.getString("saved_pass", "OTP_USER") ?: "OTP_USER"
 
+    // Line-by-line Addition
+    fun isActualPasswordSaved(): Boolean {
+        val pass = getSavedPass()
+        return pass.isNotEmpty() && pass != "OTP_USER"
+    }
     // MPIN Logic
     fun saveMPIN(mpin: String) {
         sharedPreferences.edit().putString("user_mpin", mpin).apply()
