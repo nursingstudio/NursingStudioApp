@@ -49,21 +49,17 @@ import java.util.Locale
 import java.util.TimeZone
 
 class RegisterFragment : Fragment() {
-
     private var _binding: FragmentRegisterBinding? = null
     private val binding get() = _binding!!
-
     private lateinit var auth: FirebaseAuth
     private val viewModel: RegisterViewModel by viewModels()
-
     private var verificationId: String? = null
     private var isOtpVerified = false
     private var resendToken: PhoneAuthProvider.ForceResendingToken? = null
     private var countDownTimer: CountDownTimer? = null
     private var lastClickTime: Long = 0
-
-    // Inki madad se hum 1 Letter, 1 Number aur 1 Special Char check karenge
-    private val passwordPattern = "^(?=.*[A-Za-z])(?=.*\\d)(?=.*[@$!%*#?&])[A-Za-z\\d@$!%*#?&]{8,}$"
+    // Naya Pattern: 8 Chars, 1 Upper, 1 Lower, 1 Number, 1 Special Char
+    private val passwordPattern = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*#?&])[A-Za-z\\d@$!%*#?&]{8,}$"
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -347,12 +343,11 @@ class RegisterFragment : Fragment() {
             }
             // --- UPDATE: Strong Password Validation (8 Chars + Complexity) ---
             val password = binding.etPassword.text.toString().trim()
-            if (password.length < 8) {
-                return showError(tilPassword, "Password must be at least 8 characters")
-            }
             if (!password.matches(passwordPattern.toRegex())) {
-                return showError(tilPassword, "Password must contain at least 1 letter, 1 number and 1 special character (@$!%*#?&)")
+                // Professional Tip: User ko exact requirement batao taki wo irritate na ho
+                return showError(tilPassword, "Password needs: 8+ chars, 1 Upper, 1 Lower, 1 Number & 1 Special Char")
             }
+
             if (!cbTerms.isChecked) return showError(cbTerms, "Please accept Terms & Conditions")
         }
         return true
@@ -730,34 +725,31 @@ class RegisterFragment : Fragment() {
 
     private fun updateStrengthIndicator(pass: String) {
         var score = 0
+        val missingCriteria = mutableListOf<String>()
 
-        // Logic: Points system for professional feedback
-        if (pass.length >= 8) score++
-        if (pass.any { it.isDigit() }) score++
-        if (pass.any { it.isLetter() }) score++
-        if (pass.any { "@$!%*#?&".contains(it) }) score++
+        // Live Check Logic
+        if (pass.length >= 8) score++ else missingCriteria.add("8+ chars")
+        if (pass.any { it.isUpperCase() }) score++ else missingCriteria.add("1 Upper Case")
+        if (pass.any { it.isLowerCase() }) score++ else missingCriteria.add("1 Lower Case")
+        if (pass.any { it.isDigit() }) score++ else missingCriteria.add("1 Number")
+        if (pass.any { "@$!%*#?&".contains(it) }) score++ else missingCriteria.add("1 Special Char")
 
         val color: Int
         val label: String
         val progress: Int
 
-        when (score) {
-            1 -> {
+        when {
+            score <= 2 -> {
                 color = Color.RED
-                label = "Very Weak"
+                label = "Weak: Need ${missingCriteria.joinToString(", ")}"
                 progress = 25
             }
-            2 -> {
+            score <= 4 -> {
                 color = Color.parseColor("#FFA500") // Orange
-                label = "Weak (Need number/special char)"
-                progress = 50
+                label = "Medium: Need ${missingCriteria.joinToString(", ")}"
+                progress = 60
             }
-            3 -> {
-                color = Color.parseColor("#FFD700") // Yellow/Gold
-                label = "Medium (Add more variety)"
-                progress = 75
-            }
-            4 -> {
+            score == 5 -> {
                 color = Color.parseColor("#4CAF50") // Green
                 label = "Strong Password"
                 progress = 100

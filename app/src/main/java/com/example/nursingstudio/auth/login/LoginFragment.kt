@@ -258,15 +258,33 @@ class LoginFragment : Fragment() {
                 }
                 is LoginViewModel.LoginResult.Error -> {
                     binding.loadingOverlay.visibility = View.GONE
+
+                    // Fix: Email ko block se pehle define karein taaki niche 'isUserLocked' mein mil sake
                     val email = binding.etEmail.text.toString().trim()
-                    val errorMessage = result.message ?: "An unexpected error occurred"
+                    val errorMessage = result.message ?: ""
 
                     if (binding.layoutEmailLogin.visibility == View.VISIBLE) {
-                        // Sirf tab error dikhao jab message empty na ho
-                        if (errorMessage.isNotEmpty()) {
-                            binding.tilPassword.isErrorEnabled = true
-                            binding.tilPassword.error = errorMessage
+
+                        // World-Class Smart Converter Logic
+                        val friendlyMessage = when {
+                            errorMessage.contains("invalid-credential", true) ||
+                                    errorMessage.contains("wrong-password", true) -> "Incorrect Email or Password"
+
+                            errorMessage.contains("user-not-found", true) -> "Account not found. Please Register first."
+
+                            errorMessage.contains("network-request-failed", true) -> "No internet connection! Check your network."
+
+                            errorMessage.contains("too-many-requests", true) -> "Too many attempts! Please try again later."
+
+                            // Lock case handle karne ke liye (Agar Firebase se lock error aaye)
+                            isUserLocked(email) -> "Account locked! Try after ${getRemainingLockTime(email)} hours."
+
+                            else -> "Login Failed. Please check your details."
                         }
+
+                        binding.tilPassword.isErrorEnabled = true
+                        binding.tilPassword.error = friendlyMessage
+                        AppSettings.triggerErrorEffect(requireContext(), binding.tilPassword)
                     }
 
 
