@@ -125,6 +125,7 @@ class LoginFragment : Fragment() {
         val email = binding.etEmail.text.toString().trim()
         val pass = binding.etPassword.text.toString().trim()
 
+        // 1. Sabse pehle Lock Check (Agar locked hai toh aage badhne ka sawal hi nahi)
         if (isUserLocked(email)) {
             binding.tilPassword.isErrorEnabled = true
             binding.tilPassword.error = "This account is locked. Try after ${getRemainingLockTime(email)} hrs"
@@ -132,27 +133,42 @@ class LoginFragment : Fragment() {
             return
         }
 
-        clearAllErrors() // Naya check shuru karne se pehle purane errors hatao
+        clearAllErrors()
 
+        // 2. Email Validations
         if (email.isEmpty()) {
-            binding.tilEmail.isErrorEnabled = true // Space on karein
+            binding.tilEmail.isErrorEnabled = true
             binding.tilEmail.error = "Email is required"
-            // CENTRAL AC: Shake + Vibrate
             AppSettings.triggerErrorEffect(requireContext(), binding.tilEmail)
             return
         }
         if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+            binding.tilEmail.isErrorEnabled = true
             binding.tilEmail.error = "Invalid Email format"
             AppSettings.triggerErrorEffect(requireContext(), binding.tilEmail)
             return
         }
+
+        // 3. Password Validations (World-Class Update)
         if (pass.isEmpty()) {
-            binding.tilPassword.isErrorEnabled = true // Space on karein
+            binding.tilPassword.isErrorEnabled = true
             binding.tilPassword.error = "Password is required"
             AppSettings.triggerErrorEffect(requireContext(), binding.tilPassword)
             return
         }
 
+        // --- ⭐ NEW: Anti-Brute Force Filter ⭐ ---
+        // Kyunki ab humne Register mein password min 8 ka kar diya hai,
+        // toh 8 se chota password hamesha galat hi hoga.
+        // Ise yahan rokne se 'loginAttempts' count nahi badhega.
+        if (pass.length < 8) {
+            binding.tilPassword.isErrorEnabled = true
+            binding.tilPassword.error = "Incorrect password" // Error generic rakhein security ke liye
+            AppSettings.triggerErrorEffect(requireContext(), binding.tilPassword)
+            return // Yahan se exit! Attempt count safe rahega.
+        }
+
+        // 4. Sab sahi hai tabhi server hit karein
         viewModel.loginWithEmail(email, pass)
     }
 
@@ -404,67 +420,67 @@ class LoginFragment : Fragment() {
     }
 
     private fun setupTextWatchers() {
+        // 1. Email Watcher (With Lock Check & Button State)
         binding.etEmail.addTextChangedListener(object : android.text.TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                 val email = s.toString().trim()
+                val pass = binding.etPassword.text.toString().trim()
 
-                // 1. Reset state
                 binding.tilEmail.isErrorEnabled = false
                 binding.tilEmail.error = null
-                binding.btnLoginAction.isEnabled = true
-                binding.btnLoginAction.alpha = 1.0f
 
-                // 2. Proactive Check (Combined Message)
                 if (isUserLocked(email)) {
-                    val timeLeft = getRemainingLockTime(email) // Format: 05:45
-
+                    val timeLeft = getRemainingLockTime(email)
                     binding.tilEmail.isErrorEnabled = true
-                    // Naya World-class combined message
                     binding.tilEmail.error = "Account locked! Try after $timeLeft hours."
-
-                    // Button controls
-                    binding.btnLoginAction.isEnabled = false
-                    binding.btnLoginAction.alpha = 0.5f
-
-                    // Yahan se toast/bubble wala logic delete kar dein
+                    updateLoginButtonState(false) // Lock hai toh button OFF
+                } else {
+                    // Agar password bhi 8+ hai, tabhi button ON hoga
+                    updateLoginButtonState(pass.length >= 8)
                 }
             }
             override fun afterTextChanged(s: android.text.Editable?) {}
         })
 
+        // 2. Password Watcher (With Length Check)
         binding.etPassword.addTextChangedListener(object : android.text.TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                val pass = s.toString().trim()
+                val email = binding.etEmail.text.toString().trim()
+
                 binding.tilPassword.error = null
                 binding.tilPassword.isErrorEnabled = false
-            }
 
+                // Button tabhi ON hoga jab lock na ho AUR password 8+ chars ho
+                val isNotLocked = !isUserLocked(email)
+                updateLoginButtonState(isNotLocked && pass.length >= 8)
+            }
             override fun afterTextChanged(s: android.text.Editable?) {}
         })
 
-        // Mobile aur OTP watchers ke liye bhi same logic:
-        binding.etMobileLogin.addTextChangedListener(object : android.text.TextWatcher {
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                binding.tilMobile.error = null
-                binding.tilMobile.isErrorEnabled = false
-            }
-
-            override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
-            override fun afterTextChanged(p0: android.text.Editable?) {}
-        })
-
-        binding.etOtpLogin.addTextChangedListener(object : android.text.TextWatcher {
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                binding.tilOtp.error = null
-                binding.tilOtp.isErrorEnabled = false
-            }
-
-            override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
-            override fun afterTextChanged(p0: android.text.Editable?) {}
-        })
+        // Mobile & OTP (Purana logic sahi hai, bas consistency ke liye helper use karein)
+        binding.etMobileLogin.addTextChangedListener(createTextWatcher { binding.tilMobile })
+        binding.etOtpLogin.addTextChangedListener(createTextWatcher { binding.tilOtp })
     }
 
+    // --- ⭐ Helper Function: Button State Manage Karne Ke Liye ⭐ ---
+    private fun updateLoginButtonState(isEnabled: Boolean) {
+        binding.btnLoginAction.isEnabled = isEnabled
+        binding.btnLoginAction.alpha = if (isEnabled) 1.0f else 0.5f
+    }
+
+    // --- ⭐ Helper Function: Code Repeat Kam Karne Ke Liye ⭐ ---
+    private fun createTextWatcher(getLayout: () -> com.google.android.material.textfield.TextInputLayout) =
+        object : android.text.TextWatcher {
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                getLayout().error = null
+                getLayout().isErrorEnabled = false
+            }
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun afterTextChanged(s: android.text.Editable?) {}
+        }
     private fun showForgotPasswordSheet() {
         val dialog = com.google.android.material.bottomsheet.BottomSheetDialog(
             requireContext(),

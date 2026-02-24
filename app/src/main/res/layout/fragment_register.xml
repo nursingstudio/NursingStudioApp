@@ -500,6 +500,37 @@
                     android:imeOptions="actionDone"/>
             </com.google.android.material.textfield.TextInputLayout>
 
+                    <LinearLayout
+                        android:id="@+id/layoutPasswordStrength"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:layout_marginTop="4dp"
+                        android:layout_marginStart="4dp"
+                        android:layout_marginEnd="4dp"
+                        android:visibility="gone">
+
+                        <com.google.android.material.progressindicator.LinearProgressIndicator
+                            android:id="@+id/passwordStrengthProgress"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            app:trackThickness="4dp"
+                            app:trackCornerRadius="8dp"
+                            android:progress="0"
+                            app:indicatorColor="@color/saffron"
+                            app:trackColor="#E0E0E0"/>
+
+                        <TextView
+                            android:id="@+id/tvStrengthLabel"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Weak"
+                            android:textSize="11sp"
+                            android:layout_marginTop="2dp"
+                            android:textColor="@color/text_secondary"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+
             <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

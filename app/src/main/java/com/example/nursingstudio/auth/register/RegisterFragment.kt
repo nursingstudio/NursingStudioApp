@@ -62,6 +62,9 @@ class RegisterFragment : Fragment() {
     private var countDownTimer: CountDownTimer? = null
     private var lastClickTime: Long = 0
 
+    // Inki madad se hum 1 Letter, 1 Number aur 1 Special Char check karenge
+    private val passwordPattern = "^(?=.*[A-Za-z])(?=.*\\d)(?=.*[@$!%*#?&])[A-Za-z\\d@$!%*#?&]{8,}$"
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -81,6 +84,7 @@ class RegisterFragment : Fragment() {
         setupTermsLink()
         binding.etDob.setOnClickListener { showDatePicker() }
         setupDynamicVisibility()
+        setupPasswordStrengthChecker()
 
         // Resend Button Click Listener (Jo tune miss kiya tha)
         binding.btnResendOtp.setOnClickListener {
@@ -341,10 +345,14 @@ class RegisterFragment : Fragment() {
                     "Reg. Number required"
                 )
             }
-            if (etPassword.text!!.length < 6) return showError(
-                tilPassword,
-                "Password must be at least 6 chars"
-            )
+            // --- UPDATE: Strong Password Validation (8 Chars + Complexity) ---
+            val password = binding.etPassword.text.toString().trim()
+            if (password.length < 8) {
+                return showError(tilPassword, "Password must be at least 8 characters")
+            }
+            if (!password.matches(passwordPattern.toRegex())) {
+                return showError(tilPassword, "Password must contain at least 1 letter, 1 number and 1 special character (@$!%*#?&)")
+            }
             if (!cbTerms.isChecked) return showError(cbTerms, "Please accept Terms & Conditions")
         }
         return true
@@ -703,5 +711,69 @@ class RegisterFragment : Fragment() {
         toast("Mobile Verified Successfully! 🎉")
     }
     private fun toast(m: String) = Toast.makeText(requireContext(), m, Toast.LENGTH_SHORT).show()
+
+    private fun setupPasswordStrengthChecker() {
+        binding.etPassword.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                val pass = s.toString()
+                if (pass.isEmpty()) {
+                    binding.layoutPasswordStrength.visibility = View.GONE
+                } else {
+                    binding.layoutPasswordStrength.visibility = View.VISIBLE
+                    updateStrengthIndicator(pass)
+                }
+            }
+            override fun afterTextChanged(s: Editable?) {}
+        })
+    }
+
+    private fun updateStrengthIndicator(pass: String) {
+        var score = 0
+
+        // Logic: Points system for professional feedback
+        if (pass.length >= 8) score++
+        if (pass.any { it.isDigit() }) score++
+        if (pass.any { it.isLetter() }) score++
+        if (pass.any { "@$!%*#?&".contains(it) }) score++
+
+        val color: Int
+        val label: String
+        val progress: Int
+
+        when (score) {
+            1 -> {
+                color = Color.RED
+                label = "Very Weak"
+                progress = 25
+            }
+            2 -> {
+                color = Color.parseColor("#FFA500") // Orange
+                label = "Weak (Need number/special char)"
+                progress = 50
+            }
+            3 -> {
+                color = Color.parseColor("#FFD700") // Yellow/Gold
+                label = "Medium (Add more variety)"
+                progress = 75
+            }
+            4 -> {
+                color = Color.parseColor("#4CAF50") // Green
+                label = "Strong Password"
+                progress = 100
+            }
+            else -> {
+                color = Color.GRAY
+                label = "Too Short"
+                progress = 10
+            }
+        }
+
+        binding.passwordStrengthProgress.setProgress(progress, true)
+        binding.passwordStrengthProgress.setIndicatorColor(color)
+        binding.tvStrengthLabel.text = label
+        binding.tvStrengthLabel.setTextColor(color)
+    }
+
     override fun onDestroyView() { super.onDestroyView(); countDownTimer?.cancel(); _binding = null }
 }
