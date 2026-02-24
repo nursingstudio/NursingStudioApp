@@ -22,9 +22,6 @@ import com.example.nursingstudio.utils.BiometricSettingsManager
 import com.google.android.material.button.MaterialButton
 
 class LoginFragment : Fragment() {
-
-    private var loginAttempts = 0
-
     companion object {
         private const val MAX_ATTEMPTS = 3
         private const val LOCK_TIME_HOURS = 6
@@ -231,11 +228,13 @@ class LoginFragment : Fragment() {
                     binding.loadingOverlay.visibility = View.VISIBLE
                 }
                 is LoginViewModel.LoginResult.Success -> {
-                    loginAttempts = 0
+// Success hone par us specific email ke attempts reset karein
                     val email = binding.etEmail.text.toString().trim()
                     requireContext().getSharedPreferences("login_lock", Context.MODE_PRIVATE)
-                        .edit().remove("lock_timestamp_$email").apply()
-
+                        .edit()
+                        .remove("attempts_$email")
+                        .remove("lock_timestamp_$email")
+                        .apply()
                     countDownTimer?.cancel()
                     val bioManager = BiometricSettingsManager(requireContext())
                     val currentTab = binding.loginTabLayout.selectedTabPosition
@@ -258,61 +257,54 @@ class LoginFragment : Fragment() {
                 }
                 is LoginViewModel.LoginResult.Error -> {
                     binding.loadingOverlay.visibility = View.GONE
-
-                    // Fix: Email ko block se pehle define karein taaki niche 'isUserLocked' mein mil sake
                     val email = binding.etEmail.text.toString().trim()
                     val errorMessage = result.message ?: ""
 
+                    // Email Layout Logic
                     if (binding.layoutEmailLogin.visibility == View.VISIBLE) {
+                        val prefs = requireContext().getSharedPreferences("login_lock", Context.MODE_PRIVATE)
+                        var userAttempts = prefs.getInt("attempts_$email", 0)
 
-                        // World-Class Smart Converter Logic
+                        if (errorMessage.contains("invalid-credential", true) || errorMessage.contains("wrong-password", true)) {
+                            userAttempts++
+                            prefs.edit().putInt("attempts_$email", userAttempts).apply()
+                        }
+
+                        val remaining = MAX_ATTEMPTS - userAttempts
+
                         val friendlyMessage = when {
-                            errorMessage.contains("invalid-credential", true) ||
-                                    errorMessage.contains("wrong-password", true) -> "Incorrect Email or Password"
-
-                            errorMessage.contains("user-not-found", true) -> "Account not found. Please Register first."
-
-                            errorMessage.contains("network-request-failed", true) -> "No internet connection! Check your network."
-
-                            errorMessage.contains("too-many-requests", true) -> "Too many attempts! Please try again later."
-
-                            // Lock case handle karne ke liye (Agar Firebase se lock error aaye)
-                            isUserLocked(email) -> "Account locked! Try after ${getRemainingLockTime(email)} hours."
-
-                            else -> "Login Failed. Please check your details."
+                            isUserLocked(email) -> "Account locked! Try after ${getRemainingLockTime(email)}"
+                            remaining <= 0 -> {
+                                lockUser(email)
+                                updateLoginButtonState(false) // Button OFF on lock
+                                "Attempts over! Account locked for 6 hours."
+                            }
+                            errorMessage.contains("invalid-credential", true) || errorMessage.contains("wrong-password", true) ->
+                                "Incorrect Password! $remaining attempts left."
+                            errorMessage.contains("user-not-found", true) -> "Account not found. Please Register."
+                            errorMessage.contains("network-request-failed", true) -> "No internet connection!"
+                            else -> "Login Failed. Please try again."
                         }
 
                         binding.tilPassword.isErrorEnabled = true
                         binding.tilPassword.error = friendlyMessage
-                        AppSettings.triggerErrorEffect(requireContext(), binding.tilPassword)
-                    }
-
-
-                    if (binding.layoutEmailLogin.visibility == View.VISIBLE) {
-                        loginAttempts++
-                        val remaining = MAX_ATTEMPTS - loginAttempts
-
-                        binding.tilPassword.isErrorEnabled = true
-
-                        if (remaining > 0) {
-                            // Toast ki jagah TIL par error set karein
-                            binding.tilPassword.error = "Incorrect password! $remaining attempts left."
-                        } else {
-                            lockUser(email)
-                            binding.tilPassword.error = "Attempts over! Account locked for 6 hours."
-                        }
-
                         binding.tilPassword.requestFocus()
                         AppSettings.triggerErrorEffect(requireContext(), binding.tilPassword)
 
-                    } else if (binding.tilOtp.visibility == View.VISIBLE) {
+                        // Safety: Agar pehle se locked hai toh button disabled rakhein
+                        if (isUserLocked(email)) updateLoginButtonState(false)
+
+                    }
+                    // OTP Layout Logic
+                    else if (binding.tilOtp.visibility == View.VISIBLE) {
                         binding.tilOtp.isErrorEnabled = true
                         binding.tilOtp.error = "Invalid OTP! Please check again."
                         AppSettings.triggerVibration(requireContext(), 200)
                     }
+
+                    // Button Text Update
                     binding.btnLoginAction.text = if (binding.tilOtp.visibility == View.VISIBLE) "Verify & Login" else "Login"
                 }
-
                 is LoginViewModel.LoginResult.NoProfile -> {
                     countDownTimer?.cancel()
                     binding.loadingOverlay.visibility = View.GONE
@@ -792,38 +784,40 @@ class LoginFragment : Fragment() {
 
     // Updated functions with 'identifier' parameter
     private fun isUserLocked(identifier: String): Boolean {
-        if (identifier.isEmpty()) return false
-
+        if (identifier.isEmpty()) return false // Safety First!
         val prefs = requireContext().getSharedPreferences("login_lock", Context.MODE_PRIVATE)
-        val lockTime = prefs.getLong("lock_timestamp_$identifier", 0)
-        if (lockTime == 0L) return false
+        val lockUntil = prefs.getLong("lock_timestamp_$identifier", 0)
 
-        val diff = System.currentTimeMillis() - lockTime
-        val hoursPassed = diff / (1000 * 60 * 60)
+        val isLocked = System.currentTimeMillis() < lockUntil
 
-        return if (hoursPassed >= LOCK_TIME_HOURS) {
-            // Time over! Lock hata do
+        // Professional Cleanup: Agar lock ka time khatam ho chuka hai, toh key delete kar do
+        if (!isLocked && lockUntil != 0L) {
             prefs.edit().remove("lock_timestamp_$identifier").apply()
-            false
-        } else {
-            true
         }
+
+        return isLocked
     }
 
     private fun lockUser(identifier: String) {
+        // Current time + 6 hours = Unlock Time
+        val lockUntil = System.currentTimeMillis() + (LOCK_TIME_HOURS * 60 * 60 * 1000)
         requireContext().getSharedPreferences("login_lock", Context.MODE_PRIVATE)
-            .edit().putLong("lock_timestamp_$identifier", System.currentTimeMillis()).apply()
+            .edit()
+            .putLong("lock_timestamp_$identifier", lockUntil)
+            .putInt("attempts_$identifier", 0) // Lock hote hi attempts reset
+            .apply()
     }
 
     private fun getRemainingLockTime(identifier: String): String {
         val prefs = requireContext().getSharedPreferences("login_lock", Context.MODE_PRIVATE)
-        val lockTime = prefs.getLong("lock_timestamp_$identifier", 0)
-        val diff = System.currentTimeMillis() - lockTime
-        val remainingMillis = (LOCK_TIME_HOURS * 60 * 60 * 1000) - diff
+        val lockUntil = prefs.getLong("lock_timestamp_$identifier", 0)
+        val diff = lockUntil - System.currentTimeMillis()
 
-        val hours = (remainingMillis / (1000 * 60 * 60)) % 24
-        val minutes = (remainingMillis / (1000 * 60)) % 60
-        val seconds = (remainingMillis / 1000) % 60
+        if (diff <= 0) return "00:00:00"
+
+        val hours = (diff / (1000 * 60 * 60)) % 24
+        val minutes = (diff / (1000 * 60)) % 60
+        val seconds = (diff / 1000) % 60
 
         return String.format("%02d:%02d:%02d", hours, minutes, seconds)
     }
