@@ -15,7 +15,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Video Library"
+            android:text="@string/video_library"
             android:textSize="20sp"
             android:textStyle="bold"
             android:textColor="@color/text_primary"
@@ -24,7 +24,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Watch topic-wise and important nursing videos."
+            android:text="@string/watch_topic_wise_and_important_nursing_videos"
             android:textSize="14sp"
             android:textColor="@color/text_secondary"
             android:layout_marginBottom="16dp" />
@@ -53,9 +53,9 @@
                 <ImageView
                     android:layout_width="40dp"
                     android:layout_height="40dp"
+                    android:contentDescription="@string/important_videos"
                     android:src="@drawable/ic_video_24">
-                </ImageView>   <!-- same icon use kar lena -->
-                android:contentDescription="Important Videos" />
+                </ImageView>
 
                 <LinearLayout
                     android:layout_width="0dp"

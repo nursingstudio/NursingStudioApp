@@ -55,7 +55,6 @@ class RegisterFragment : Fragment() {
     private val viewModel: RegisterViewModel by viewModels()
     private var verificationId: String? = null
     private var isOtpVerified = false
-    private var resendToken: PhoneAuthProvider.ForceResendingToken? = null
     private var countDownTimer: CountDownTimer? = null
     private var lastClickTime: Long = 0
     // Naya Pattern: 8 Chars, 1 Upper, 1 Lower, 1 Number, 1 Special Char
@@ -399,7 +398,7 @@ class RegisterFragment : Fragment() {
         countDownTimer?.cancel() // Timer ko turant roko
 
         binding.etMobile.isEnabled = true
-        binding.ccp.setCcpClickable(true)
+        binding.ccp.isEnabled = true
         binding.etMobile.alpha = 1.0f
 
         binding.layoutOtpBox.visibility = View.GONE
@@ -444,7 +443,7 @@ class RegisterFragment : Fragment() {
 
         // Visual feedback: Lock fields
         binding.etMobile.isEnabled = false
-        binding.ccp.setCcpClickable(false)
+        binding.ccp.isEnabled = false
         binding.etMobile.alpha = 0.6f
 
         // --- ⭐ Master Hub Call (World-Class Security) ⭐ ---
@@ -694,7 +693,7 @@ class RegisterFragment : Fragment() {
         countDownTimer?.cancel()
         binding.tvChangeNumber.visibility = View.GONE
         binding.etMobile.isEnabled = false
-        binding.ccp.setCcpClickable(false)
+        binding.ccp.isEnabled = false
         binding.etMobile.alpha = 0.7f
 
         binding.btnSendOtp.apply {

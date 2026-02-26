@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:padding="16dp">
@@ -14,7 +15,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Stay Connected"
+            android:text="@string/stay_connected"
             android:textSize="22sp"
             android:textStyle="bold"
             android:textColor="@color/text_primary"
@@ -23,7 +24,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Follow Nursing Studio on your favourite platforms."
+            android:text="@string/follow_nursing_studio"
             android:textSize="14sp"
             android:textColor="@color/text_secondary"
             android:layout_marginBottom="16dp" />
@@ -40,20 +41,22 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:gravity="center_vertical"
                 android:orientation="horizontal"
                 android:padding="12dp"
-                android:gravity="center_vertical">
+                tools:ignore="UseCompoundDrawables">
 
                 <ImageView
                     android:layout_width="32dp"
                     android:layout_height="32dp"
+                    android:contentDescription="@string/youtube_logo"
                     android:src="@drawable/ic_youtube"
                     android:layout_marginEnd="12dp" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="YouTube Channel"
+                    android:text="@string/youtube_channel"
                     android:textSize="16sp"
                     android:textColor="@color/text_primary" />
             </LinearLayout>
@@ -73,18 +76,19 @@
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:padding="12dp"
-                android:gravity="center_vertical">
+                android:gravity="center_vertical"
+                tools:ignore="UseCompoundDrawables">
 
                 <ImageView
                     android:layout_width="32dp"
                     android:layout_height="32dp"
-                    android:src="@drawable/ic_whatsapp"
+                    android:contentDescription="@string/whatsapp_logo" android:src="@drawable/ic_whatsapp"
                     android:layout_marginEnd="12dp" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="WhatsApp Channel"
+                    android:text="@string/whatsapp_channel"
                     android:textSize="16sp"
                     android:textColor="@color/text_primary" />
             </LinearLayout>
@@ -104,18 +108,19 @@
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:padding="12dp"
-                android:gravity="center_vertical">
+                android:gravity="center_vertical"
+                tools:ignore="UseCompoundDrawables">
 
                 <ImageView
                     android:layout_width="32dp"
                     android:layout_height="32dp"
-                    android:src="@drawable/ic_telegram"
+                    android:contentDescription="@string/telegram_logo" android:src="@drawable/ic_telegram"
                     android:layout_marginEnd="12dp" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Telegram Channel"
+                    android:text="@string/telegram_channel"
                     android:textSize="16sp"
                     android:textColor="@color/text_primary" />
             </LinearLayout>
@@ -135,18 +140,19 @@
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:padding="12dp"
-                android:gravity="center_vertical">
+                android:gravity="center_vertical"
+                tools:ignore="UseCompoundDrawables">
 
                 <ImageView
                     android:layout_width="32dp"
                     android:layout_height="32dp"
-                    android:src="@drawable/ic_arattai"
+                    android:contentDescription="@string/arattai_logo" android:src="@drawable/ic_arattai"
                     android:layout_marginEnd="12dp" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Arattai Channel"
+                    android:text="@string/arattai_channel"
                     android:textSize="16sp"
                     android:textColor="@color/text_primary" />
             </LinearLayout>
@@ -166,18 +172,19 @@
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:padding="12dp"
-                android:gravity="center_vertical">
+                android:gravity="center_vertical"
+                tools:ignore="UseCompoundDrawables">
 
                 <ImageView
                     android:layout_width="32dp"
                     android:layout_height="32dp"
-                    android:src="@drawable/ic_instagram"
+                    android:contentDescription="@string/instagram_logo" android:src="@drawable/ic_instagram"
                     android:layout_marginEnd="12dp" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Instagram"
+                    android:text="@string/instagram"
                     android:textSize="16sp"
                     android:textColor="@color/text_primary" />
             </LinearLayout>
@@ -197,18 +204,19 @@
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:padding="12dp"
-                android:gravity="center_vertical">
+                android:gravity="center_vertical"
+                tools:ignore="UseCompoundDrawables">
 
                 <ImageView
                     android:layout_width="32dp"
                     android:layout_height="32dp"
-                    android:src="@drawable/ic_twitter"
+                    android:contentDescription="@string/twitter_logo" android:src="@drawable/ic_twitter"
                     android:layout_marginEnd="12dp" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Twitter"
+                    android:text="@string/twitter"
                     android:textSize="16sp"
                     android:textColor="@color/text_primary" />
             </LinearLayout>
@@ -228,18 +236,19 @@
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:padding="12dp"
-                android:gravity="center_vertical">
+                android:gravity="center_vertical"
+                tools:ignore="UseCompoundDrawables">
 
                 <ImageView
                     android:layout_width="32dp"
                     android:layout_height="32dp"
-                    android:src="@drawable/ic_facebook"
+                    android:contentDescription="@string/facebook_logo" android:src="@drawable/ic_facebook"
                     android:layout_marginEnd="12dp" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Facebook"
+                    android:text="@string/facebook"
                     android:textSize="16sp"
                     android:textColor="@color/text_primary" />
             </LinearLayout>

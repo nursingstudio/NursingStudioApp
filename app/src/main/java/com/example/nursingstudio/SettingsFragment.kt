@@ -102,8 +102,8 @@ class SettingsFragment : Fragment() {
 
         // Email user ke liye purana sheet logic...
         val dialog = BottomSheetDialog(requireContext(), R.style.BottomSheetDialogTheme)
-        val sheetView = layoutInflater.inflate(R.layout.layout_verify_for_biometric, null)
-
+        val parentView = view as? ViewGroup
+        val sheetView = layoutInflater.inflate(R.layout.layout_verify_for_biometric, parentView, false)
         val etPass = sheetView.findViewById<TextInputEditText>(R.id.etVerifyPassword)
         val btnVerify = sheetView.findViewById<MaterialButton>(R.id.btnVerifyAndSetMPIN)
 

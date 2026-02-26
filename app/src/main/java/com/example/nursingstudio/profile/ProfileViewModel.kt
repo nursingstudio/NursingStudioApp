@@ -27,10 +27,4 @@ class ProfileViewModel : ViewModel() {
         }
     }
 
-    fun updateProfile(newData: Map<String, Any>) {
-        repository.updateProfile(newData)?.addOnSuccessListener {
-            // Update hone ke baad phir se fetch karlo taaki UI refresh ho jaye
-            fetchProfile()
-        }
-    }
 }

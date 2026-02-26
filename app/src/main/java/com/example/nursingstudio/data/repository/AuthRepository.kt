@@ -14,22 +14,15 @@ class AuthRepository {
 
     // --- SHARED LOGIC ---
     fun isUserLoggedIn(): Boolean = auth.currentUser != null
-    fun getAuthInstance() = auth
 
     // --- LOGIN LOGIC ---
     fun signInWithEmail(email: String, pass: String) = auth.signInWithEmailAndPassword(email, pass)
-    fun signInWithCredential(credential: AuthCredential) = auth.signInWithCredential(credential)
     fun checkUserInFirestore(uid: String): Task<DocumentSnapshot> =
         db.collection("Users").document(uid).get()
 
-    fun sendResetPassword(email: String) = auth.sendPasswordResetEmail(email)
-
     fun signOut() {
-        com.google.firebase.auth.FirebaseAuth.getInstance().signOut()
+        FirebaseAuth.getInstance().signOut()
     }
-
-    // Ise Repository ke andar add kar lo
-    fun resetPassword(email: String): Task<Void> = auth.sendPasswordResetEmail(email)
 
     // --- REGISTER LOGIC ---
     fun createUser(email: String, pass: String): Task<AuthResult> =

@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/app_background">
@@ -10,6 +9,7 @@
         android:id="@+id/imgLogo"
         android:layout_width="150dp"
         android:layout_height="150dp"
+        android:contentDescription="@string/nursing_studio_logo"
         android:src="@drawable/ic_login_logo"
         android:scaleType="centerInside"
         app:layout_constraintTop_toTopOf="parent"
@@ -81,8 +81,12 @@
                 app:tabMode="fixed"
                 app:layout_constraintTop_toTopOf="parent">
 
-                <com.google.android.material.tabs.TabItem android:text="@string/tab_email" />
-                <com.google.android.material.tabs.TabItem android:text="@string/tab_mobile" />
+                <com.google.android.material.tabs.TabItem android:text="@string/tab_email"
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content" />
+                <com.google.android.material.tabs.TabItem android:text="@string/tab_mobile"
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content" />
             </com.google.android.material.tabs.TabLayout>
 
             <androidx.constraintlayout.widget.ConstraintLayout

@@ -171,5 +171,28 @@
     <string name="forgot_mpin">Forgot MPIN?</string>
     <string name="enter_security_mpin">Enter Security MPIN</string>
     <string name="Tag_line">Your Nursing Success Partner</string>
+    <string name="todo">TODO</string>
+    <string name="nursing_studio_logo">Nursing Studio Logo</string>
+    <string name="profile_image">Profile Image</string>
+    <string name="whatsapp_logo">WhatsApp Logo</string>
+    <string name="whatsapp_channel">WhatsApp Channel</string>
+    <string name="telegram_logo">Telegram Logo</string>
+    <string name="telegram_channel">Telegram Channel</string>
+    <string name="arattai_logo">Arattai Logo</string>
+    <string name="arattai_channel">Arattai Channel</string>
+    <string name="instagram_logo">Instagram Logo</string>
+    <string name="instagram">Instagram</string>
+    <string name="twitter_logo">Twitter Logo</string>
+    <string name="twitter">Twitter</string>
+    <string name="facebook_logo">Facebook Logo</string>
+    <string name="facebook">Facebook</string>
+    <string name="youtube_channel">YouTube Channel</string>
+    <string name="youtube_logo">Youtube Logo</string>
+    <string name="follow_nursing_studio">Follow Nursing Studio on your favourite platforms.</string>
+    <string name="stay_connected">Stay Connected</string>
+    <string name="video_library">Video Library</string>
+    <string name="watch_topic_wise_and_important_nursing_videos">Watch topic-wise and important nursing videos.</string>
+    <string name="video_icon">Video Icon</string>
+    <string name="important_videos">Important Videos</string>
 
 </resources>

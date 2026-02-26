@@ -13,7 +13,6 @@ import com.airbnb.lottie.LottieAnimationView
 import com.example.nursingstudio.AuthActivity
 import com.example.nursingstudio.MainActivity
 import com.example.nursingstudio.R
-import com.example.nursingstudio.splash.SplashViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 

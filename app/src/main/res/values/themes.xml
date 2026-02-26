@@ -1,4 +1,4 @@
-<resources xmlns:tools="http://schemas.android.com/tools">
+<resources>
 
     // main theme //
     <style name="Theme.NursingStudio" parent="Theme.Material3.Light.NoActionBar">
@@ -23,8 +23,8 @@
     <style name="Theme.NursingStudio.Splash" parent="Theme.Material3.Light.NoActionBar">
         <item name="android:windowBackground">#000000</item>
 
-        <item name="android:windowSplashScreenBackground">#000000</item>
-        <item name="android:windowSplashScreenAnimatedIcon">@android:color/transparent</item>
+        <item name="windowSplashScreenBackground">#000000</item>
+        <item name="windowSplashScreenAnimatedIcon">@android:color/transparent</item>
 
         <item name="android:windowNoTitle">true</item>
         <item name="android:windowFullscreen">true</item>
@@ -80,6 +80,13 @@
     // MaterialAlertDialog //
     <style name="MaterialAlertDialog_Rounded" parent="ThemeOverlay.MaterialComponents.MaterialAlertDialog">
         <item name="shapeAppearanceOverlay">@style/ShapeAppearanceOverlay.App.Card.Rounded</item>
+        <item name="colorPrimary">#FF9933</item>
+        <item name="buttonBarPositiveButtonStyle">@style/SaffronButtonStyle</item>
+    </style>
+
+    <style name="SaffronButtonStyle" parent="Widget.MaterialComponents.Button.TextButton">
+        <item name="android:textColor">#FF9933</item>
+        <item name="android:textStyle">bold</item>
     </style>
 
     <style name="ShapeAppearanceOverlay.App.Card.Rounded" parent="">

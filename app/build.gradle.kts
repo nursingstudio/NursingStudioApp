@@ -1,6 +1,5 @@
 plugins {
     alias(libs.plugins.android.application)
-    alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     id("com.google.gms.google-services")
 }
@@ -30,12 +29,14 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
 
-    kotlinOptions {
-        jvmTarget = "11"
+    kotlin {
+        compilerOptions {
+            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
+        }
     }
 
     // Fixed: Dono features ko ek hi block mein aur sahi format mein dala hai
@@ -54,29 +55,31 @@ dependencies {
     implementation(libs.material)
 
     // --- FIREBASE (BoM managed) ---
-    implementation(platform("com.google.firebase:firebase-bom:33.7.0"))
-    implementation("com.google.firebase:firebase-auth")
-    implementation("com.google.firebase:firebase-firestore")
-    implementation("com.google.firebase:firebase-storage")
-    implementation("com.google.firebase:firebase-appcheck-debug")
-    implementation("com.google.firebase:firebase-appcheck-ktx")
-    implementation("com.google.android.gms:play-services-safetynet:18.1.0")
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.appcheck.ktx)
+    implementation(platform(libs.firebase.bom.v3490))
+    implementation(libs.firebase.auth)
+    implementation(libs.firebase.firestore)
+    implementation(libs.firebase.storage)
+    implementation(libs.firebase.appcheck.debug)
+    implementation(libs.google.firebase.appcheck.ktx)
+    implementation(libs.play.services.safetynet)
     // Firebase App Check (Optional but recommended)
-    implementation("com.google.firebase:firebase-appcheck-playintegrity")
+    implementation(libs.firebase.appcheck.playintegrity)
     // Firebase Tasks ko Coroutines (await) ke sath chalane ke liye
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.7.3")
+    implementation(libs.kotlinx.coroutines.play.services)
     // Play Integrity API ke liye
-    implementation("com.google.android.play:integrity:1.3.0")
+    implementation(libs.integrity)
     // Biometric Authentication Library
-    implementation("androidx.biometric:biometric:1.2.0-alpha05")
+    implementation(libs.androidx.biometric)
     // Encrypted Storage ke liye
-    implementation("androidx.security:security-crypto:1.1.0-alpha06")
+    implementation(libs.androidx.security.crypto)
 
     // --- OTHER LIBRARIES ---
-    implementation("com.hbb20:ccp:2.6.0")
-    implementation("de.hdodenhof:circleimageview:3.1.0")
-    implementation("androidx.core:core-splashscreen:1.0.1")
-    implementation("com.airbnb.android:lottie:6.1.0") // Latest version use kar
+    implementation(libs.ccp)
+    implementation(libs.circleimageview)
+    implementation(libs.androidx.core.splashscreen)
+    implementation(libs.lottie)
 
     // Compose
     implementation(libs.androidx.lifecycle.runtime.ktx)
@@ -88,9 +91,9 @@ dependencies {
     implementation(libs.androidx.compose.material3)
 
     // ViewModel & LiveData
-    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.2")
-    implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.6.2")
-    implementation("androidx.fragment:fragment-ktx:1.6.1")
+    implementation(libs.androidx.lifecycle.viewmodel.ktx)
+    implementation(libs.androidx.lifecycle.livedata.ktx)
+    implementation(libs.androidx.fragment.ktx)
 
     // Testing
     testImplementation(libs.junit)

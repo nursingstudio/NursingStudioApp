@@ -123,18 +123,6 @@ class AuthActivity : AppCompatActivity() {
         PhoneAuthProvider.verifyPhoneNumber(options)
     }
 
-    // --- 🚀 AUTOMATIC LOGIN LOGIC 🚀 ---
-    private fun signInWithPhoneAuthCredential(credential: com.google.firebase.auth.PhoneAuthCredential) {
-        auth.signInWithCredential(credential)
-            .addOnSuccessListener {
-                // Agar login success hua, toh check karo user register hai ya nahi
-                checkUserInFirestore()
-            }
-            .addOnFailureListener { e ->
-                android.widget.Toast.makeText(this, "Auto-Login Failed: ${e.message}", android.widget.Toast.LENGTH_SHORT).show()
-            }
-    }
-
     private fun checkUserInFirestore() {
         val uid = auth.currentUser?.uid ?: return
 

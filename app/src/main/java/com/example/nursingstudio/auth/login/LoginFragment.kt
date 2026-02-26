@@ -43,40 +43,201 @@ class LoginFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
         setupTabSelection()
         setupClickListeners()
-        setupTextWatchers() // Naya function
+        setupTextWatchers()
         observeViewModel()
 
-        // Tagline ko thoda animation dena (Optional but Professional)
         binding.tvAppTagline.alpha = 0f
         binding.tvAppTagline.animate().alpha(0.8f).setDuration(1000).start()
-
-        // Button Effects
         AppSettings.setPushEffect(binding.btnLoginAction)
-        // Check for returning biometric user
+
         val bioManager = BiometricSettingsManager(requireContext())
         if (bioManager.isBiometricEnabled()) {
-            // Chhota delay taaki UI load ho jaye phir prompt aaye
-            binding.root.postDelayed({
-                showBiometricPrompt()
-            }, 500)
+            binding.root.postDelayed({ showBiometricPrompt() }, 500)
         }
     }
+    private fun lockUser(email: String) {
+        val lockUntil = System.currentTimeMillis() + (LOCK_TIME_HOURS * 60 * 60 * 1000)
+        requireContext().getSharedPreferences("login_lock", Context.MODE_PRIVATE)
+            .edit()
+            .putLong("lock_timestamp_$email", lockUntil)
+            .putInt("attempts_$email", 0)
+            .apply()
+    }
+    private fun isUserLocked(email: String): Boolean {
+        if (email.isEmpty()) return false
+        val prefs = requireContext().getSharedPreferences("login_lock", Context.MODE_PRIVATE)
+        val lockUntil = prefs.getLong("lock_timestamp_$email", 0)
+        return System.currentTimeMillis() < lockUntil
+    }
+    private fun getRemainingLockTime(email: String): String {
+        val prefs = requireContext().getSharedPreferences("login_lock", Context.MODE_PRIVATE)
+        val diff = prefs.getLong("lock_timestamp_$email", 0) - System.currentTimeMillis()
+        if (diff <= 0) return "00:00:00"
+        val hours = (diff / (1000 * 60 * 60)) % 24
+        val minutes = (diff / (1000 * 60)) % 60
+        val seconds = (diff / 1000) % 60
+        return String.format(java.util.Locale.ENGLISH, "%02d:%02d:%02d", hours, minutes, seconds)
+    }
+    private fun observeViewModel() {
+        viewModel.loginStatus.observe(viewLifecycleOwner) { result ->
+            binding.loadingOverlay.visibility =
+                if (result is LoginViewModel.LoginResult.Loading) View.VISIBLE else View.GONE
 
+            when (result) {
+                is LoginViewModel.LoginResult.Success -> {
+                    binding.loadingOverlay.visibility = View.GONE
+                    val emailOrMobile = if (binding.loginTabLayout.selectedTabPosition == 0)
+                        binding.etEmail.text.toString().trim()
+                    else binding.etMobileLogin.text.toString().trim()
+
+                    val password = if (binding.loginTabLayout.selectedTabPosition == 0)
+                        binding.etPassword.text.toString().trim()
+                    else "OTP_USER"
+
+                    val bioManager = BiometricSettingsManager(requireContext())
+
+                    // ⭐ Single Universal Logic: Agar security enabled nahi hai toh dialog dikhao
+                    if (!bioManager.isSecurityEnabled()) {
+                        showUniversalSecurityDialog(emailOrMobile, password)
+                    } else {
+                        proceedToHome()
+                    }
+                }
+                is LoginViewModel.LoginResult.Error -> {
+                    val email = binding.etEmail.text.toString().trim()
+                    val errorMessage = result.message ?: ""
+
+                    if (binding.layoutEmailLogin.visibility == View.VISIBLE) {
+                        val prefs = requireContext().getSharedPreferences(
+                            "login_lock",
+                            Context.MODE_PRIVATE
+                        )
+                        var attempts = prefs.getInt("attempts_$email", 0)
+
+                        if (errorMessage.contains(
+                                "invalid-credential",
+                                true
+                            ) || errorMessage.contains("wrong-password", true)
+                        ) {
+                            attempts++
+                            prefs.edit().putInt("attempts_$email", attempts).apply()
+                        }
+
+                        val remainingAttempts = MAX_ATTEMPTS - attempts
+                        val friendlyMessage = when {
+                            isUserLocked(email) -> "Account locked! Try after ${
+                                getRemainingLockTime(
+                                    email
+                                )
+                            } hrs"
+
+                            remainingAttempts <= 0 -> {
+                                lockUser(email)
+                                updateLoginButtonState(false)
+                                "Attempts over! Account locked for 6 hours."
+                            }
+
+                            errorMessage.contains(
+                                "invalid-credential",
+                                true
+                            ) -> "Incorrect Password! $remainingAttempts left."
+
+                            errorMessage.contains(
+                                "user-not-found",
+                                true
+                            ) -> "Account not found. Please Register."
+
+                            errorMessage.contains(
+                                "network-request-failed",
+                                true
+                            ) -> "No internet connection!"
+
+                            else -> "Login Failed. Please try again."
+                        }
+                        binding.tilPassword.error = friendlyMessage
+                        binding.tilPassword.isErrorEnabled = true
+                        binding.tilPassword.requestFocus()
+                        AppSettings.triggerErrorEffect(requireContext(), binding.tilPassword)
+                    } else if (binding.tilOtp.visibility == View.VISIBLE) {
+                        binding.tilOtp.error = "Invalid OTP"
+                        AppSettings.triggerVibration(requireContext(), 200)
+                    }
+                    binding.btnLoginAction.text =
+                        if (binding.tilOtp.visibility == View.VISIBLE) "Verify & Login" else "Login"
+                }
+
+                is LoginViewModel.LoginResult.NoProfile -> {
+                    countDownTimer?.cancel()
+                    binding.loadingOverlay.visibility = View.GONE
+                    toast("No profile found. Redirecting to Register...")
+                    binding.root.postDelayed({
+                        if (isAdded) (activity as? AuthActivity)?.showRegister()
+                    }, 1000)
+                }
+
+                else -> {
+                    binding.loadingOverlay.visibility = View.GONE
+                }
+            }
+        }
+    }
+    private fun showMPINSetupDialogDuringLogin(identifier: String, pass: String) {
+        val container = android.widget.FrameLayout(requireContext())
+        val params = android.widget.FrameLayout.LayoutParams(
+            ViewGroup.LayoutParams.MATCH_PARENT,
+            ViewGroup.LayoutParams.WRAP_CONTENT
+        ).apply {
+            setMargins(60, 20, 60, 10) // Proper padding for professional look
+        }
+
+        val etMpin = com.google.android.material.textfield.TextInputEditText(requireContext()).apply {
+            inputType = android.text.InputType.TYPE_CLASS_NUMBER
+            transformationMethod = android.text.method.PasswordTransformationMethod.getInstance()
+            filters = arrayOf(android.text.InputFilter.LengthFilter(4))
+            hint = "Enter 4-Digit MPIN"
+            gravity = android.view.Gravity.CENTER
+            textSize = 18f
+            setHintTextColor(android.graphics.Color.GRAY)
+            // Background color saffron tint (Optional professional touch)
+            setBackgroundResource(android.R.color.transparent)
+        }
+
+        container.addView(etMpin, params)
+
+        val dialog = com.google.android.material.dialog.MaterialAlertDialogBuilder(requireContext(), R.style.MaterialAlertDialog_Rounded)
+            .setTitle("Create Login MPIN 🔑")
+            .setMessage("Set a 4-digit secret MPIN for secure and quick access to Nursing Studio.")
+            .setView(container)
+            .setPositiveButton("Enable Security") { _, _ ->
+                val mpin = etMpin.text.toString()
+                if (mpin.length == 4) {
+                    val manager = BiometricSettingsManager(requireContext())
+                    manager.enableFullSecurity(identifier, pass, mpin)
+                    toast("Security Enabled Successfully! ✨")
+                    proceedToHome()
+                } else {
+                    toast("Error: Please enter a 4-digit MPIN")
+                    showMPINSetupDialogDuringLogin(identifier, pass) // Repeat if invalid
+                }
+            }
+            .setNegativeButton("Skip") { _, _ -> proceedToHome() }
+            .setCancelable(false)
+            .show()
+
+        // Saffron Button Styling
+        dialog.getButton(android.content.DialogInterface.BUTTON_POSITIVE).setTextColor(android.graphics.Color.parseColor("#FF9933"))
+    }
     private fun setupTabSelection() {
         binding.loginTabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
             override fun onTabSelected(tab: TabLayout.Tab?) {
                 clearAllErrors()
                 clearAllFields()
-                // Tab change hone par button reset karein
                 binding.btnLoginAction.isEnabled = true
                 binding.btnLoginAction.alpha = 1.0f
                 countDownTimer?.cancel()
 
-                // Barrier ki wajah se humein params change karne ki zarurat nahi hai
-                // Sirf visibility toggle karni hai
                 if (tab?.position == 0) {
                     binding.layoutEmailLogin.visibility = View.VISIBLE
                     binding.layoutMobileLogin.visibility = View.GONE
@@ -86,15 +247,12 @@ class LoginFragment : Fragment() {
                     binding.layoutMobileLogin.visibility = View.VISIBLE
                     unlockMobileField()
                 }
-
-                // Force layout update taaki barrier recalculate ho jaye
-                binding.root.requestLayout()
+           binding.root.requestLayout()
             }
             override fun onTabUnselected(tab: TabLayout.Tab?) {}
             override fun onTabReselected(tab: TabLayout.Tab?) {}
         })
     }
-
     private fun setupClickListeners() {
         binding.btnLoginAction.setOnClickListener {
             hideKeyboard()
@@ -103,26 +261,22 @@ class LoginFragment : Fragment() {
         }
 
         binding.tvGoRegister.setOnClickListener {
-            // Fragment transaction logic to Register
             (activity as? AuthActivity)?.showRegister()
         }
         binding.tvChangeNumber.setOnClickListener { unlockMobileField() }
         binding.btnResendOtp.setOnClickListener {
-            // Resend ke liye pehle verificationId null karo taki fresh call ho
             verificationId = null
-            binding.tilOtp.visibility = View.GONE // Reset view to send mode
+            binding.tilOtp.visibility = View.GONE
             performMobileLogin()
         }
         binding.tvForgotPassword.setOnClickListener {
             showForgotPasswordSheet()
         }
     }
-
     private fun performEmailLogin() {
         val email = binding.etEmail.text.toString().trim()
         val pass = binding.etPassword.text.toString().trim()
 
-        // 1. Sabse pehle Lock Check (Agar locked hai toh aage badhne ka sawal hi nahi)
         if (isUserLocked(email)) {
             binding.tilPassword.isErrorEnabled = true
             binding.tilPassword.error = "This account is locked. Try after ${getRemainingLockTime(email)} hrs"
@@ -132,7 +286,6 @@ class LoginFragment : Fragment() {
 
         clearAllErrors()
 
-        // 2. Email Validations
         if (email.isEmpty()) {
             binding.tilEmail.isErrorEnabled = true
             binding.tilEmail.error = "Email is required"
@@ -145,44 +298,31 @@ class LoginFragment : Fragment() {
             AppSettings.triggerErrorEffect(requireContext(), binding.tilEmail)
             return
         }
-
-        // 3. Password Validations (World-Class Update)
         if (pass.isEmpty()) {
             binding.tilPassword.isErrorEnabled = true
             binding.tilPassword.error = "Password is required"
             AppSettings.triggerErrorEffect(requireContext(), binding.tilPassword)
             return
         }
-
-        // --- ⭐ NEW: Anti-Brute Force Filter ⭐ ---
-        // Kyunki ab humne Register mein password min 8 ka kar diya hai,
-        // toh 8 se chota password hamesha galat hi hoga.
-        // Ise yahan rokne se 'loginAttempts' count nahi badhega.
         if (pass.length < 8) {
             binding.tilPassword.isErrorEnabled = true
-            binding.tilPassword.error = "Incorrect password" // Error generic rakhein security ke liye
+            binding.tilPassword.error = "Incorrect password"
             AppSettings.triggerErrorEffect(requireContext(), binding.tilPassword)
-            return // Yahan se exit! Attempt count safe rahega.
+            return
         }
-
-        // 4. Sab sahi hai tabhi server hit karein
         viewModel.loginWithEmail(email, pass)
     }
-
     private fun performMobileLogin() {
         val mobile = binding.etMobileLogin.text.toString().trim()
         val otp = binding.etOtpLogin.text.toString().trim()
 
         if (binding.tilOtp.visibility == View.GONE) {
-            // ... (Puraana mobile send logic same rahega)
             if (mobile.length != 10) {
                 binding.tilMobile.isErrorEnabled = true
-                binding.tilMobile.error = "Enter 10 digit number" // TIL use karo border ke liye
-                // Shake Mobile Field
+                binding.tilMobile.error = "Enter 10 digit number"
                 AppSettings.triggerErrorEffect(requireContext(), binding.tilMobile)
                 return
             }
-            // ... (Aapka existing sendOtp code)
             binding.loadingOverlay.visibility = View.VISIBLE
             (activity as? AuthActivity)?.sendOtp(mobile) { id ->
                 binding.loadingOverlay.visibility = View.GONE
@@ -197,155 +337,26 @@ class LoginFragment : Fragment() {
                 toast("OTP Sent Successfully! ✨")
             }
         } else {
-            // OTP Verification Logic
             if (otp.length != 6) {
-                // World-Class Red Border Error
                 binding.tilOtp.isErrorEnabled = true
                 binding.tilOtp.error = "Enter 6 digit OTP"
                 binding.tilOtp.requestFocus()
-                // Shake OTP Field
                 AppSettings.triggerErrorEffect(requireContext(), binding.tilOtp)
                 return
             }
 
-            binding.tilOtp.error = null // Error clear karo
+            binding.tilOtp.error = null
             binding.loadingOverlay.visibility = View.VISIBLE
             val credential = PhoneAuthProvider.getCredential(verificationId!!, otp)
             viewModel.loginWithPhone(credential)
         }
     }
-
-    private fun observeViewModel() {
-        viewModel.loginStatus.observe(viewLifecycleOwner) { result ->
-            if (result is LoginViewModel.LoginResult.Loading) {
-                binding.loadingOverlay.visibility = View.VISIBLE
-            } else {
-                binding.loadingOverlay.visibility = View.GONE
-            }
-
-            when (result) {
-                is LoginViewModel.LoginResult.Loading -> {
-                    binding.loadingOverlay.visibility = View.VISIBLE
-                }
-                is LoginViewModel.LoginResult.Success -> {
-// Success hone par us specific email ke attempts reset karein
-                    val email = binding.etEmail.text.toString().trim()
-                    requireContext().getSharedPreferences("login_lock", Context.MODE_PRIVATE)
-                        .edit()
-                        .remove("attempts_$email")
-                        .remove("lock_timestamp_$email")
-                        .apply()
-                    countDownTimer?.cancel()
-                    val bioManager = BiometricSettingsManager(requireContext())
-                    val currentTab = binding.loginTabLayout.selectedTabPosition
-                    // YAHAN FIX HAI: Login type save karo pehle
-                    bioManager.saveLoginType(currentTab)
-
-                    if (!bioManager.isBiometricEnabled()) {
-
-                        if (currentTab == 0) {
-                            val email = binding.etEmail.text.toString().trim()
-                            val pass = binding.etPassword.text.toString().trim()
-                            showBiometricSetupDialog(email, pass, true)
-                        } else {
-                            val mobile = binding.etMobileLogin.text.toString().trim()
-                            showBiometricSetupDialog(mobile, "OTP_USER", false)
-                        }
-                    } else {
-                        proceedToHome()
-                    }
-                }
-                is LoginViewModel.LoginResult.Error -> {
-                    binding.loadingOverlay.visibility = View.GONE
-                    val email = binding.etEmail.text.toString().trim()
-                    val errorMessage = result.message ?: ""
-
-                    // Email Layout Logic
-                    if (binding.layoutEmailLogin.visibility == View.VISIBLE) {
-                        val prefs = requireContext().getSharedPreferences("login_lock", Context.MODE_PRIVATE)
-                        var userAttempts = prefs.getInt("attempts_$email", 0)
-
-                        if (errorMessage.contains("invalid-credential", true) || errorMessage.contains("wrong-password", true)) {
-                            userAttempts++
-                            prefs.edit().putInt("attempts_$email", userAttempts).apply()
-                        }
-
-                        val remaining = MAX_ATTEMPTS - userAttempts
-
-                        val friendlyMessage = when {
-                            isUserLocked(email) -> "Account locked! Try after ${getRemainingLockTime(email)}"
-                            remaining <= 0 -> {
-                                lockUser(email)
-                                updateLoginButtonState(false) // Button OFF on lock
-                                "Attempts over! Account locked for 6 hours."
-                            }
-                            errorMessage.contains("invalid-credential", true) || errorMessage.contains("wrong-password", true) ->
-                                "Incorrect Password! $remaining attempts left."
-                            errorMessage.contains("user-not-found", true) -> "Account not found. Please Register."
-                            errorMessage.contains("network-request-failed", true) -> "No internet connection!"
-                            else -> "Login Failed. Please try again."
-                        }
-
-                        binding.tilPassword.isErrorEnabled = true
-                        binding.tilPassword.error = friendlyMessage
-                        binding.tilPassword.requestFocus()
-                        AppSettings.triggerErrorEffect(requireContext(), binding.tilPassword)
-
-                        // Safety: Agar pehle se locked hai toh button disabled rakhein
-                        if (isUserLocked(email)) updateLoginButtonState(false)
-
-                    }
-                    // OTP Layout Logic
-                    else if (binding.tilOtp.visibility == View.VISIBLE) {
-                        binding.tilOtp.isErrorEnabled = true
-                        binding.tilOtp.error = "Invalid OTP! Please check again."
-                        AppSettings.triggerVibration(requireContext(), 200)
-                    }
-
-                    // Button Text Update
-                    binding.btnLoginAction.text = if (binding.tilOtp.visibility == View.VISIBLE) "Verify & Login" else "Login"
-                }
-                is LoginViewModel.LoginResult.NoProfile -> {
-                    countDownTimer?.cancel()
-                    binding.loadingOverlay.visibility = View.GONE
-                    toast("No profile found. Redirecting to Register...")
-                    binding.root.postDelayed({
-                        if (isAdded) (activity as? AuthActivity)?.showRegister()
-                    }, 1000)
-                }
-                else -> {
-                    binding.loadingOverlay.visibility = View.GONE
-                }
-            }
-        }
-    }
-
-    private fun verifyPasswordBeforeBiometric(identifier: String, pass: String, onVerified: () -> Unit) {
-        binding.loadingOverlay.visibility = View.VISIBLE
-
-        // World-class security: Firebase se check karo ki password sahi hai ya nahi
-        val credential = com.google.firebase.auth.EmailAuthProvider.getCredential(identifier, pass)
-
-        com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.reauthenticate(credential)
-            ?.addOnCompleteListener { task ->
-                binding.loadingOverlay.visibility = View.GONE
-                if (task.isSuccessful) {
-                    onVerified() // Password sahi hai, aage badho
-                } else {
-                    AppSettings.triggerVibration(requireContext(), 200)
-                    toast("Invalid Password! Verification failed.")
-                }
-            }
-    }
-
     private fun toast(m: String) = Toast.makeText(requireContext(), m, Toast.LENGTH_SHORT).show()
-
     private fun hideKeyboard() {
         val imm =
             requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
         imm.hideSoftInputFromWindow(view?.windowToken, 0)
     }
-
     private fun proceedToHome() {
         if (isAdded && !requireActivity().isFinishing) {
             val intent = Intent(requireContext(), MainActivity::class.java)
@@ -354,7 +365,6 @@ class LoginFragment : Fragment() {
             requireActivity().finish()
         }
     }
-
     private fun startLoginTimer() {
         binding.tvTimer.visibility = View.VISIBLE
         binding.btnResendOtp.visibility = View.GONE
@@ -362,11 +372,9 @@ class LoginFragment : Fragment() {
         countDownTimer?.cancel()
         countDownTimer = object : android.os.CountDownTimer(60000, 1000) {
             override fun onTick(m: Long) {
-                // WORLD-CLASS SAFETY CHECK: Agar binding null hai ya fragment detach ho gaya hai toh kuch mat karo
                 if (_binding != null && isAdded) {
                     binding.tvTimer.text = "Resend in ${m / 1000}s"
                 } else {
-                    // Agar fragment khatam ho gaya hai toh timer ko yahin stop kar do
                     countDownTimer?.cancel()
                 }
             }
@@ -377,11 +385,10 @@ class LoginFragment : Fragment() {
             }
         }.start()
     }
-
     private fun unlockMobileField() {
         countDownTimer?.cancel()
         binding.tilMobile.isEnabled = true
-        binding.ccpLogin.setCcpClickable(true)
+        binding.ccpLogin.isEnabled = true
         binding.tilMobile.alpha = 1.0f
         binding.tilOtp.visibility = View.GONE
         binding.tvChangeNumber.visibility = View.GONE
@@ -391,46 +398,35 @@ class LoginFragment : Fragment() {
         binding.etOtpLogin.setText("")
         binding.tilMobile.requestFocus()
     }
-
     private fun clearAllErrors() {
-        // IsErrorEnabled = false karne se hi extra space khatam hoti hai
         binding.tilEmail.error = null
         binding.tilEmail.isErrorEnabled = false
-
         binding.tilPassword.error = null
         binding.tilPassword.isErrorEnabled = false
-
         binding.tilMobile.error = null
         binding.tilMobile.isErrorEnabled = false
-
         binding.tilOtp.error = null
         binding.tilOtp.isErrorEnabled = false
 
-        // World-class refinement: Layout ko force request karein gaps fix karne ke liye
         binding.btnLoginAction.post {
             val params = binding.btnLoginAction.layoutParams as androidx.constraintlayout.widget.ConstraintLayout.LayoutParams
             params.topMargin = (12 * resources.displayMetrics.density).toInt()
             binding.btnLoginAction.layoutParams = params
         }
 
-        // Mobile specific views ko GONE karein
         binding.tvTimer.visibility = View.GONE
         binding.btnResendOtp.visibility = View.GONE
         binding.tvChangeNumber.visibility = View.GONE
 
-        // Agar mobile layout me OTP field visible thi to use hide karein
         binding.tilOtp.visibility = View.GONE
     }
-
     private fun clearAllFields() {
         binding.etEmail.setText("")
         binding.etPassword.setText("")
         binding.etMobileLogin.setText("")
         binding.etOtpLogin.setText("")
     }
-
     private fun setupTextWatchers() {
-        // 1. Email Watcher (With Lock Check & Button State)
         binding.etEmail.addTextChangedListener(object : android.text.TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
@@ -444,16 +440,14 @@ class LoginFragment : Fragment() {
                     val timeLeft = getRemainingLockTime(email)
                     binding.tilEmail.isErrorEnabled = true
                     binding.tilEmail.error = "Account locked! Try after $timeLeft hours."
-                    updateLoginButtonState(false) // Lock hai toh button OFF
+                    updateLoginButtonState(false)
                 } else {
-                    // Agar password bhi 8+ hai, tabhi button ON hoga
                     updateLoginButtonState(pass.length >= 8)
                 }
             }
             override fun afterTextChanged(s: android.text.Editable?) {}
         })
 
-        // 2. Password Watcher (With Length Check)
         binding.etPassword.addTextChangedListener(object : android.text.TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
@@ -463,25 +457,19 @@ class LoginFragment : Fragment() {
                 binding.tilPassword.error = null
                 binding.tilPassword.isErrorEnabled = false
 
-                // Button tabhi ON hoga jab lock na ho AUR password 8+ chars ho
                 val isNotLocked = !isUserLocked(email)
                 updateLoginButtonState(isNotLocked && pass.length >= 8)
             }
             override fun afterTextChanged(s: android.text.Editable?) {}
         })
 
-        // Mobile & OTP (Purana logic sahi hai, bas consistency ke liye helper use karein)
         binding.etMobileLogin.addTextChangedListener(createTextWatcher { binding.tilMobile })
         binding.etOtpLogin.addTextChangedListener(createTextWatcher { binding.tilOtp })
     }
-
-    // --- ⭐ Helper Function: Button State Manage Karne Ke Liye ⭐ ---
     private fun updateLoginButtonState(isEnabled: Boolean) {
         binding.btnLoginAction.isEnabled = isEnabled
         binding.btnLoginAction.alpha = if (isEnabled) 1.0f else 0.5f
     }
-
-    // --- ⭐ Helper Function: Code Repeat Kam Karne Ke Liye ⭐ ---
     private fun createTextWatcher(getLayout: () -> com.google.android.material.textfield.TextInputLayout) =
         object : android.text.TextWatcher {
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
@@ -496,16 +484,14 @@ class LoginFragment : Fragment() {
             requireContext(),
             R.style.BottomSheetDialogTheme
         )
-        val view = layoutInflater.inflate(R.layout.layout_forgot_password, null)
-
+        val view = layoutInflater.inflate(R.layout.layout_forgot_password, binding.root as? ViewGroup, false)
         val btnReset =
-            view.findViewById<com.google.android.material.button.MaterialButton>(R.id.btnResetPassword)
+            view.findViewById<MaterialButton>(R.id.btnResetPassword)
         val etForgotEmail =
             view.findViewById<com.google.android.material.textfield.TextInputEditText>(R.id.etForgotEmail)
         val tilForgotEmail =
             view.findViewById<com.google.android.material.textfield.TextInputLayout>(R.id.tilForgotEmail)
 
-        // Type karte hi error hatane ke liye
         etForgotEmail.addTextChangedListener(object : android.text.TextWatcher {
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                 tilForgotEmail.error = null
@@ -527,19 +513,17 @@ class LoginFragment : Fragment() {
                 tilForgotEmail.error = "Invalid email format"
                 AppSettings.triggerErrorEffect(requireContext(), tilForgotEmail) // Shake it!
             } else {
-                // Success Logic: Reset Link Send
                 sendPasswordReset(email, dialog)
             }
         }
         dialog.setContentView(view)
         dialog.show()
     }
-
     private fun sendPasswordReset(
         email: String,
         dialog: com.google.android.material.bottomsheet.BottomSheetDialog
     ) {
-        binding.loadingOverlay.visibility = View.VISIBLE // Main screen par loading dikhao
+        binding.loadingOverlay.visibility = View.VISIBLE
 
         com.google.firebase.auth.FirebaseAuth.getInstance().sendPasswordResetEmail(email)
             .addOnCompleteListener { task ->
@@ -552,7 +536,6 @@ class LoginFragment : Fragment() {
                 }
             }
     }
-
     private fun showBiometricPrompt() {
         val executor = androidx.core.content.ContextCompat.getMainExecutor(requireContext())
         val biometricPrompt = androidx.biometric.BiometricPrompt(this, executor,
@@ -561,128 +544,56 @@ class LoginFragment : Fragment() {
                     super.onAuthenticationSucceeded(result)
                     val manager = BiometricSettingsManager(requireContext())
                     val type = manager.getLoginType()
-                    val identifier = manager.getSavedEmail() // This stores email or mobile
+                    val identifier = manager.getSavedEmail()
                     val pass = manager.getSavedPass()
 
-                    if (type == 0) { // Email User
+                    if (type == 0) {
                         if (identifier != null && pass != null) {
                             viewModel.loginWithEmail(identifier, pass)
                         }
-                    } else { // Mobile User
-                        // Mobile user verified via Biometric/MPIN can go straight to home
-                        // because they already authenticated via OTP once
+                    } else {
                         proceedToHome()
                     }
                 }
                 override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
                     super.onAuthenticationError(errorCode, errString)
-                    // Agar user ne "Negative Button" (MPIN) dabaya ya biometric fail hua
                     if (errorCode == androidx.biometric.BiometricPrompt.ERROR_NEGATIVE_BUTTON ||
                         errorCode == androidx.biometric.BiometricPrompt.ERROR_USER_CANCELED) {
                         showMpinBottomSheet()
                     }
                 }
             })
-
         val promptInfo = androidx.biometric.BiometricPrompt.PromptInfo.Builder()
             .setTitle("Secure Login")
             .setSubtitle("Scan fingerprint or use MPIN")
-            .setNegativeButtonText("Use MPIN") // "Use Password" ki jagah "Use MPIN"
+            .setNegativeButtonText("Use MPIN")
             .build()
-
         biometricPrompt.authenticate(promptInfo)
     }
-
-    private fun showBiometricSetupDialog(identifier: String, pass: String, isEmail: Boolean) {
-        com.google.android.material.dialog.MaterialAlertDialogBuilder(requireContext(), R.style.MaterialAlertDialog_Rounded)
-            .setTitle("Security Setup")
-            .setMessage("Enable Fingerprint & MPIN for faster login?")
-            .setPositiveButton("Setup Now") { _, _ ->
-                if (isEmail) {
-                    // Email user ke pas pass already hai aur verified hai
-                    showMPINSetupDialogDuringLogin(identifier, pass, true)
-                } else {
-                    // Mobile user se pehle password mangenge verification ke liye
-                    showPasswordVerificationForMobileUser(identifier)
-                }
-            }
-            .setNegativeButton("Maybe Later") { _, _ -> proceedToHome() }
-            .setCancelable(false)
-            .show()
-    }
-
-    // Ye naya function hai LoginFragment ke liye
-    private fun showMPINSetupDialogDuringLogin(identifier: String, pass: String, isEmail: Boolean) {
-        val etMpin = android.widget.EditText(requireContext()).apply {
-            inputType = android.text.InputType.TYPE_CLASS_NUMBER
-            transformationMethod = android.text.method.PasswordTransformationMethod.getInstance()
-            filters = arrayOf(android.text.InputFilter.LengthFilter(4))
-            hint = "Create 4-Digit MPIN"
-            textAlignment = android.view.View.TEXT_ALIGNMENT_CENTER
-        }
-
-        com.google.android.material.dialog.MaterialAlertDialogBuilder(requireContext(), R.style.MaterialAlertDialog_Rounded)
-            .setTitle("Create Login MPIN")
-            .setView(etMpin)
-            .setPositiveButton("Save & Enable") { _, _ ->
-                val mpin = etMpin.text.toString()
-                if (mpin.length == 4) {
-                    val manager = BiometricSettingsManager(requireContext())
-                    manager.setBiometricEnabled(true)
-                    manager.saveMPIN(mpin)
-
-                    if (isEmail || pass != "OTP_USER") {
-                        manager.saveCredentials(identifier, pass)
-                    } else {
-                        // Ye tab hoga agar koi mobile user bina password verify kiye yahan tak aaya
-                        toast("Verification Required")
-                        return@setPositiveButton
-                    }
-                    Toast.makeText(requireContext(), "Biometric & MPIN Enabled! 🔒", Toast.LENGTH_SHORT).show()
-                    proceedToHome()
-                } else {
-                    Toast.makeText(requireContext(), "Invalid MPIN", Toast.LENGTH_SHORT).show()
-                    showMPINSetupDialogDuringLogin(identifier, pass, isEmail) // Retry
-                }
-            }
-            .show()
-    }
-
     private fun showMpinBottomSheet() {
-        // 1. Dialog initialization with Glass Theme
         val dialog = com.google.android.material.bottomsheet.BottomSheetDialog(requireContext(), R.style.GlassBottomSheetDialogTheme)
-        val view = layoutInflater.inflate(R.layout.layout_mpin_keypad, null)
-
+        val view = layoutInflater.inflate(R.layout.layout_mpin_keypad, binding.root as? ViewGroup, false)
         var enteredMpin = ""
         val bioManager = BiometricSettingsManager(requireContext())
         val correctMpin = bioManager.getMPIN()
-
-        // 2. APPLY GLASS EFFECT (World-Class Step)
         dialog.window?.let { window ->
-            // Android 12 (API 31) aur upar ke liye background blur trigger karein
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
                 window.attributes.blurBehindRadius = 30
                 window.addFlags(android.view.WindowManager.LayoutParams.FLAG_BLUR_BEHIND)
             }
         }
-
-        // --- Baki logic same rahega (Keypad functionality) ---
         val handleKeyClick: (String) -> Unit = { key ->
             if (enteredMpin.length < 4) {
                 enteredMpin += key
                 updateMpinDots(view, enteredMpin.length)
-
                 if (enteredMpin.length == 4) {
                     if (enteredMpin == correctMpin) {
                         dialog.dismiss()
-                        val type = bioManager.getLoginType()
+                        bioManager.getLoginType()
                         val savedEmailOrMobile = bioManager.getSavedEmail()
                         val savedPass = bioManager.getSavedPass()
 
-                        // Professional check: Agar password 'OTP_USER' nahi hai, toh credentials se login karo
                         if (savedPass != "OTP_USER" && savedEmailOrMobile != null) {
-                            // Hum mobile user ke case mein bhi Email se login karwa sakte hain
-                            // kyunki humne password verify karwa ke save kiya hai.
                             val currentUserEmail = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.email ?: savedEmailOrMobile
                             viewModel.loginWithEmail(currentUserEmail, savedPass)
                         } else {
@@ -698,30 +609,25 @@ class LoginFragment : Fragment() {
                 }
             }
         }
-
         val numberButtons = listOf(
             R.id.btnKey1 to "1", R.id.btnKey2 to "2", R.id.btnKey3 to "3",
             R.id.btnKey4 to "4", R.id.btnKey5 to "5", R.id.btnKey6 to "6",
             R.id.btnKey7 to "7", R.id.btnKey8 to "8", R.id.btnKey9 to "9",
             R.id.btnKey0 to "0"
         )
-
         numberButtons.forEach { (id, value) ->
             view.findViewById<MaterialButton>(id).setOnClickListener { handleKeyClick(value) }
         }
-
         view.findViewById<MaterialButton>(R.id.btnKeyBio).setOnClickListener {
-            dialog.dismiss() // Important: Biometric khulne se pehle sheet hide karein
+            dialog.dismiss()
             showBiometricPrompt()
         }
-
         view.findViewById<MaterialButton>(R.id.btnKeyDel).setOnClickListener {
             if (enteredMpin.isNotEmpty()) {
                 enteredMpin = enteredMpin.dropLast(1)
                 updateMpinDots(view, enteredMpin.length)
             }
         }
-
         dialog.setContentView(view)
         dialog.show()
     }
@@ -736,97 +642,36 @@ class LoginFragment : Fragment() {
             }
         }
     }
+    private fun showUniversalSecurityDialog(identifier: String, pass: String) {
+        // Saffron Color Constant
+        val saffronColor = android.graphics.Color.parseColor("#FF9933")
 
-    private fun showPasswordVerificationForMobileUser(mobile: String) {
-        val dialog = com.google.android.material.bottomsheet.BottomSheetDialog(requireContext(), R.style.BottomSheetDialogTheme)
-        val sheetView = layoutInflater.inflate(R.layout.layout_verify_for_biometric, null)
-
-        // Glass Effect logic
-        dialog.window?.let { window ->
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
-                window.attributes.blurBehindRadius = 30
-                window.addFlags(android.view.WindowManager.LayoutParams.FLAG_BLUR_BEHIND)
+        val dialog = com.google.android.material.dialog.MaterialAlertDialogBuilder(requireContext(), R.style.MaterialAlertDialog_Rounded)
+            .setTitle("Security Recommendation 🔒")
+            .setMessage("Boost your account security! Enable Fingerprint & MPIN for a faster, professional login experience.")
+            .setPositiveButton("Setup Secure Login") { _, _ ->
+                showMPINSetupDialogDuringLogin(identifier, pass)
             }
+            .setNegativeButton("Continue to Study") { _, _ ->
+                proceedToHome()
+            }
+            .setCancelable(false)
+            .show()
+
+        // ⭐ Professional Touch: Positive Button ko Saffron aur Bold karna
+        dialog.getButton(android.content.DialogInterface.BUTTON_POSITIVE).apply {
+            setTextColor(saffronColor)
+            setTypeface(null, android.graphics.Typeface.BOLD)
         }
 
-        val etPass = sheetView.findViewById<com.google.android.material.textfield.TextInputEditText>(R.id.etVerifyPassword)
-        val btnVerify = sheetView.findViewById<com.google.android.material.button.MaterialButton>(R.id.btnVerifyAndSetMPIN)
-
-        btnVerify.setOnClickListener {
-            val inputPass = etPass.text.toString().trim()
-
-            // 1. Basic Check
-            if (inputPass.isEmpty()) {
-                etPass.error = "Password is required for security"
-                AppSettings.triggerErrorEffect(requireContext(), etPass) // Shake Effect
-                return@setOnClickListener
-            }
-
-            // 2. Firebase Verification (The "Bestever" Security)
-            // Hum current user ki email nikaal kar re-authenticate karenge
-            val userEmail = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.email
-
-            if (userEmail != null) {
-                verifyPasswordBeforeBiometric(userEmail, inputPass) {
-                    // Ye block tabhi chalega jab password 100% sahi hoga
-                    dialog.dismiss()
-                    toast("Identity Verified! ✨")
-                    showMPINSetupDialogDuringLogin(mobile, inputPass, false)
-                }
-            } else {
-                // Fallback: Agar email nahi mil rahi (Rare case)
-                toast("Security Error: Please login again with Email.")
-            }
+        // Negative Button ko thoda light rakhte hain professional look ke liye
+        dialog.getButton(android.content.DialogInterface.BUTTON_NEGATIVE).apply {
+            setTextColor(android.graphics.Color.GRAY)
         }
-        dialog.setContentView(sheetView)
-        dialog.show()
     }
-
-    // Updated functions with 'identifier' parameter
-    private fun isUserLocked(identifier: String): Boolean {
-        if (identifier.isEmpty()) return false // Safety First!
-        val prefs = requireContext().getSharedPreferences("login_lock", Context.MODE_PRIVATE)
-        val lockUntil = prefs.getLong("lock_timestamp_$identifier", 0)
-
-        val isLocked = System.currentTimeMillis() < lockUntil
-
-        // Professional Cleanup: Agar lock ka time khatam ho chuka hai, toh key delete kar do
-        if (!isLocked && lockUntil != 0L) {
-            prefs.edit().remove("lock_timestamp_$identifier").apply()
-        }
-
-        return isLocked
-    }
-
-    private fun lockUser(identifier: String) {
-        // Current time + 6 hours = Unlock Time
-        val lockUntil = System.currentTimeMillis() + (LOCK_TIME_HOURS * 60 * 60 * 1000)
-        requireContext().getSharedPreferences("login_lock", Context.MODE_PRIVATE)
-            .edit()
-            .putLong("lock_timestamp_$identifier", lockUntil)
-            .putInt("attempts_$identifier", 0) // Lock hote hi attempts reset
-            .apply()
-    }
-
-    private fun getRemainingLockTime(identifier: String): String {
-        val prefs = requireContext().getSharedPreferences("login_lock", Context.MODE_PRIVATE)
-        val lockUntil = prefs.getLong("lock_timestamp_$identifier", 0)
-        val diff = lockUntil - System.currentTimeMillis()
-
-        if (diff <= 0) return "00:00:00"
-
-        val hours = (diff / (1000 * 60 * 60)) % 24
-        val minutes = (diff / (1000 * 60)) % 60
-        val seconds = (diff / 1000) % 60
-
-        return String.format("%02d:%02d:%02d", hours, minutes, seconds)
-    }
-
     override fun onDestroyView() {
-        // Fragment band hote hi timer ko turant cancel karein
         countDownTimer?.cancel()
         countDownTimer = null
-
         super.onDestroyView()
         _binding = null
     }

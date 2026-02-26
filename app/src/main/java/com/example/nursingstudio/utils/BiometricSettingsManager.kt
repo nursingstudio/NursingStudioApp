@@ -22,11 +22,6 @@ class BiometricSettingsManager(context: Context) {
         EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
     )
 
-    // Login Type Logic (Email vs Mobile handle karne ke liye)
-    fun saveLoginType(type: Int) {
-        sharedPreferences.edit().putInt(KEY_LOGIN_TYPE, type).apply()
-    }
-
     fun getLoginType(): Int = sharedPreferences.getInt(KEY_LOGIN_TYPE, 0)
 
     // Biometric Preferences
@@ -36,23 +31,10 @@ class BiometricSettingsManager(context: Context) {
         sharedPreferences.edit().putBoolean("biometric_enabled", isEnabled).apply()
     }
 
-    // Secure Credentials Storage
-    fun saveCredentials(email: String, pass: String) {
-        sharedPreferences.edit()
-            .putString("saved_email", email)
-            .putString("saved_pass", pass)
-            .apply()
-    }
-
     fun getSavedEmail(): String? = sharedPreferences.getString("saved_email", null)
 
     fun getSavedPass(): String = sharedPreferences.getString("saved_pass", "OTP_USER") ?: "OTP_USER"
 
-    // Line-by-line Addition
-    fun isActualPasswordSaved(): Boolean {
-        val pass = getSavedPass()
-        return pass.isNotEmpty() && pass != "OTP_USER"
-    }
     // MPIN Logic
     fun saveMPIN(mpin: String) {
         sharedPreferences.edit().putString("user_mpin", mpin).apply()
@@ -62,7 +44,20 @@ class BiometricSettingsManager(context: Context) {
 
     fun isMPINSet(): Boolean = sharedPreferences.contains("user_mpin")
 
-    fun clearAllSecureData() {
-        sharedPreferences.edit().clear().apply()
+    // 1. Biometric Preferences ko MPIN ke sath link karein
+    fun isSecurityEnabled(): Boolean {
+        // Agar MPIN set hai aur biometric enabled hai
+        return sharedPreferences.getBoolean("biometric_enabled", false) && isMPINSet()
+    }
+
+    // 2. Setup logic ko clean karein
+    fun enableFullSecurity(emailOrMobile: String, pass: String, mpin: String) {
+        sharedPreferences.edit().apply {
+            putBoolean("biometric_enabled", true)
+            putString("user_mpin", mpin)
+            putString("saved_email", emailOrMobile)
+            putString("saved_pass", pass)
+            apply()
+        }
     }
 }

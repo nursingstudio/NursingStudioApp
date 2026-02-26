@@ -122,8 +122,14 @@ class MainActivity : AppCompatActivity() {
         }
 
         if (savedInstanceState == null) {
-            loadFragment(HomeFragment())
-            bottomNavigation.selectedItemId = R.id.nav_home
+            val destination = intent.getStringExtra("OPEN_FRAGMENT")
+
+            if (destination == "SETTINGS") {
+                loadFragment(SettingsFragment())
+            } else {
+                loadFragment(HomeFragment())
+                bottomNavigation.selectedItemId = R.id.nav_home
+            }
         }
     }
 
@@ -174,11 +180,12 @@ class MainActivity : AppCompatActivity() {
             imgHeaderProfile.setImageResource(R.mipmap.ic_launcher_round)
         }
     }
-
-    private fun loadFragment(fragment: Fragment) {
+    private fun loadFragment(fragment: Fragment): Boolean {
         supportFragmentManager.beginTransaction()
+            .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out) // Smooth transition
             .replace(R.id.fragment_container, fragment)
             .commit()
+        return true
     }
 
     private fun openUrl(url: String, packageName: String? = null) {
