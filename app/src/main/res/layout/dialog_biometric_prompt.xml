@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:paddingLeft="24dp"
+    android:paddingRight="24dp"
+    android:paddingTop="32dp"
+    android:paddingBottom="24dp"
+    android:gravity="center">
+
+    <ImageView
+        android:layout_width="56dp"
+        android:layout_height="56dp"
+        android:contentDescription="@string/fingerprint_icon"
+        android:src="@drawable/ic_fingerprint"
+        app:tint="?attr/colorPrimary"
+        tools:ignore="ImageContrastCheck" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/unlock_with_biometrics"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:layout_marginTop="16dp"
+        android:textColor="?attr/colorOnSurface"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/Enable_biometric_for_security"
+        android:gravity="center"
+        android:layout_marginTop="8dp"
+        android:textColor="#666666"
+        android:lineSpacingExtra="2dp"/>
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnSetupNow"
+        style="@style/Widget.Material3.Button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:layout_marginBottom="0dp"
+        android:text="@string/setup_secure_login"
+        android:textAllCaps="false"
+        android:textSize="16sp"
+        app:cornerRadius="12dp"
+        tools:ignore="TextContrastCheck" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnLater"
+        style="@style/Widget.Material3.Button.TextButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="0dp"
+        android:text="@string/maybe_later"
+        android:textAllCaps="false"
+        android:textColor="#E67E22"
+        tools:ignore="TextContrastCheck" />
+
+    <TextView
+        android:id="@+id/btnNever"
+        android:layout_width="wrap_content"
+        android:layout_height="48dp"
+        android:text="@string/don_t_ask_again"
+        android:textSize="13sp"
+        android:layout_marginTop="0dp"
+        android:textColor="#666666"
+        android:padding="8dp"
+        android:clickable="true"
+        android:focusable="true"/>
+
+</LinearLayout>

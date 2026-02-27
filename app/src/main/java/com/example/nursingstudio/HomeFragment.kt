@@ -12,8 +12,9 @@ import com.google.android.material.card.MaterialCardView
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
-
+import androidx.core.content.edit
 class HomeFragment : Fragment() {
+    private var biometricDialog: androidx.appcompat.app.AlertDialog? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -54,16 +55,13 @@ class HomeFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // Welcome text
         val tvWelcome = view.findViewById<TextView>(R.id.tvWelcome)
 
         val session = requireActivity().getSharedPreferences("session", Context.MODE_PRIVATE)
-        val name = session.getString("reg_name", "User") // reg_name wahi hai jo MainActivity ne save kiya
-
-// R.string.welcome_user check karna "Welcome, %s" format mein ho
+        val name = session.getString("reg_name", "User")
         tvWelcome.text = getString(R.string.welcome_user, name)
 
-        // Daily motivation
+        checkAndShowBiometricPrompt()
         setupDailyMotivation(view)
     }
 
@@ -91,17 +89,62 @@ class HomeFragment : Fragment() {
             val newQuote = quotes.random()
             tvMotivation.text = newQuote
 
-            sp.edit()
-                .putString("date", today)
-                .putString("quote", newQuote)
-                .apply()
+            sp.edit(commit = false) {
+                putString("date", today)
+                putString("quote", newQuote)
+            }
         }
     }
 
+    private fun checkAndShowBiometricPrompt() {
+        val prefs = requireContext().getSharedPreferences("app_settings", Context.MODE_PRIVATE)
+        val isBiometricEnabled = prefs.getBoolean("biometric_enabled", false)
+        val shouldShowPrompt = prefs.getBoolean("show_biometric_prompt", true)
+
+        // Agar enabled nahi hai aur user ne 'Never' nahi bola, tabhi dikhao
+        if (!isBiometricEnabled && shouldShowPrompt) {
+            showProfessionalBiometricDialog()
+        }
+    }
+
+    private fun showProfessionalBiometricDialog() {
+        val dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_biometric_prompt, null)
+
+        biometricDialog = com.google.android.material.dialog.MaterialAlertDialogBuilder(requireContext(), R.style.MaterialAlertDialog_Rounded)
+            .setView(dialogView)
+            .setCancelable(false)
+            .create()
+
+        dialogView.findViewById<View>(R.id.btnSetupNow).setOnClickListener {
+            biometricDialog?.dismiss()
+            if (isAdded && activity != null) {
+                openFragment(SettingsFragment())
+            }
+        }
+
+        dialogView.findViewById<View>(R.id.btnLater).setOnClickListener {
+            biometricDialog?.dismiss()
+        }
+
+        dialogView.findViewById<View>(R.id.btnNever).setOnClickListener {
+            biometricDialog?.dismiss()
+            requireContext().getSharedPreferences("app_settings", Context.MODE_PRIVATE).edit {
+                putBoolean("show_biometric_prompt", false)
+            }
+        }
+
+        biometricDialog?.show()
+    }
     private fun openFragment(fragment: Fragment) {
-        requireActivity().supportFragmentManager.beginTransaction()
-            .replace(R.id.fragment_container, fragment)
-            .addToBackStack(null)
-            .commit()
+        if (!isAdded) return
+        activity?.supportFragmentManager?.beginTransaction()
+            ?.setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
+            ?.replace(R.id.fragment_container, fragment)
+            ?.addToBackStack(null)
+            ?.commit()
+    }
+    override fun onDestroyView() {
+        super.onDestroyView()
+        biometricDialog?.dismiss()
     }
 }

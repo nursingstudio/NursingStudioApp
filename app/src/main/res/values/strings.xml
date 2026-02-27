@@ -194,5 +194,11 @@
     <string name="watch_topic_wise_and_important_nursing_videos">Watch topic-wise and important nursing videos.</string>
     <string name="video_icon">Video Icon</string>
     <string name="important_videos">Important Videos</string>
+    <string name="unlock_with_biometrics">Unlock with Biometrics</string>
+    <string name="Enable_biometric_for_security">Secure your Nursing Studio account with your fingerprint or face lock for faster access.</string>
+    <string name="setup_secure_login">Setup Secure Login</string>
+    <string name="maybe_later">Maybe Later</string>
+    <string name="don_t_ask_again">Don\'t ask again</string>
+    <string name="fingerprint_icon">Fingerprint Icon</string>
 
 </resources>

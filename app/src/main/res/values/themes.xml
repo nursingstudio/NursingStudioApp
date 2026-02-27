@@ -82,6 +82,9 @@
         <item name="shapeAppearanceOverlay">@style/ShapeAppearanceOverlay.App.Card.Rounded</item>
         <item name="colorPrimary">#FF9933</item>
         <item name="buttonBarPositiveButtonStyle">@style/SaffronButtonStyle</item>
+        <item name="android:backgroundDimEnabled">true</item>
+        <item name="android:backgroundDimAmount">0.7</item>
+        <item name="colorSurface">@color/white</item>
     </style>
 
     <style name="SaffronButtonStyle" parent="Widget.MaterialComponents.Button.TextButton">
