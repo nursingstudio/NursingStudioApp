@@ -1,4 +1,4 @@
-package com.example.nursingstudio.profile
+package com.example.nursingstudio.data.repository
 
 import com.google.android.gms.tasks.Task
 import com.google.firebase.auth.FirebaseAuth

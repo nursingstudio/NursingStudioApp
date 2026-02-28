@@ -1,4 +1,4 @@
-package com.example.nursingstudio.auth.login
+package com.example.nursingstudio.ui.auth.login
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData

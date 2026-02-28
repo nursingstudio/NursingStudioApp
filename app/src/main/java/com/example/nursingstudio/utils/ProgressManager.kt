@@ -1,4 +1,4 @@
-package com.example.nursingstudio
+package com.example.nursingstudio.utils
 
 import android.content.Context
 

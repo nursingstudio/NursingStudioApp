@@ -1,4 +1,4 @@
-package com.example.nursingstudio
+package com.example.nursingstudio.ui.features.quiz
 
 import android.content.Context
 import android.media.MediaPlayer
@@ -6,9 +6,10 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.fragment.app.Fragment
-import com.google.android.material.card.MaterialCardView
 import android.widget.Toast
+import androidx.fragment.app.Fragment
+import com.example.nursingstudio.R
+import com.google.android.material.card.MaterialCardView
 
 class QuizFragment : Fragment() {
 

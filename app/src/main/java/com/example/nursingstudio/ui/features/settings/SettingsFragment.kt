@@ -1,16 +1,22 @@
-package com.example.nursingstudio
+package com.example.nursingstudio.ui.features.settings
 
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.text.InputFilter
+import android.text.InputType
+import android.text.method.PasswordTransformationMethod
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.widget.SwitchCompat
 import androidx.fragment.app.Fragment
+import com.example.nursingstudio.R
+import com.example.nursingstudio.ui.features.staticpage.StaticPageFragment
 import com.example.nursingstudio.utils.AppSettings
 import com.example.nursingstudio.utils.BiometricSettingsManager
 import com.google.android.material.bottomsheet.BottomSheetDialog
@@ -126,10 +132,10 @@ class SettingsFragment : Fragment() {
 
     private fun showMPINSetupDialogFromSettings() {
         // Banking UI ke liye hum custom layout use karenge
-        val etMpin = android.widget.EditText(requireContext()).apply {
-            inputType = android.text.InputType.TYPE_CLASS_NUMBER
-            transformationMethod = android.text.method.PasswordTransformationMethod.getInstance()
-            filters = arrayOf(android.text.InputFilter.LengthFilter(4))
+        val etMpin = EditText(requireContext()).apply {
+            inputType = InputType.TYPE_CLASS_NUMBER
+            transformationMethod = PasswordTransformationMethod.getInstance()
+            filters = arrayOf(InputFilter.LengthFilter(4))
             hint = "Enter 4-Digit MPIN"
             textAlignment = View.TEXT_ALIGNMENT_CENTER
         }
@@ -165,7 +171,7 @@ class SettingsFragment : Fragment() {
     }
 
     private fun openStaticPage(type: String) {
-        val fragment = StaticPageFragment.newInstance(type)
+        val fragment = StaticPageFragment.Companion.newInstance(type)
         requireActivity().supportFragmentManager.beginTransaction()
             .replace(R.id.fragment_container, fragment).addToBackStack(null).commit()
     }

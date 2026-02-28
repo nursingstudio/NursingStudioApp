@@ -1,14 +1,31 @@
-package com.example.nursingstudio.auth.login
+package com.example.nursingstudio.ui.auth.login
 
 import android.content.Context
+import android.content.DialogInterface
 import android.content.Intent
+import android.graphics.Color
+import android.graphics.Typeface
+import android.os.Build
 import android.os.Bundle
+import android.os.CountDownTimer
+import android.text.Editable
+import android.text.InputFilter
+import android.text.InputType
+import android.text.TextWatcher
+import android.text.method.PasswordTransformationMethod
+import android.util.Patterns
+import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.WindowManager
 import android.view.inputmethod.InputMethodManager
+import android.widget.FrameLayout
 import android.widget.LinearLayout
 import android.widget.Toast
+import androidx.biometric.BiometricPrompt
+import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import com.example.nursingstudio.MainActivity
@@ -19,7 +36,13 @@ import com.google.firebase.auth.PhoneAuthProvider
 import com.example.nursingstudio.AuthActivity
 import com.example.nursingstudio.utils.AppSettings
 import com.example.nursingstudio.utils.BiometricSettingsManager
+import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.button.MaterialButton
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.textfield.TextInputEditText
+import com.google.android.material.textfield.TextInputLayout
+import com.google.firebase.auth.FirebaseAuth
+import java.util.Locale
 
 class LoginFragment : Fragment() {
     companion object {
@@ -30,7 +53,7 @@ class LoginFragment : Fragment() {
     private val binding get() = _binding!!
     private val viewModel: LoginViewModel by viewModels()
     private var verificationId: String? = null
-    private var countDownTimer: android.os.CountDownTimer? = null
+    private var countDownTimer: CountDownTimer? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -78,7 +101,7 @@ class LoginFragment : Fragment() {
         val hours = (diff / (1000 * 60 * 60)) % 24
         val minutes = (diff / (1000 * 60)) % 60
         val seconds = (diff / 1000) % 60
-        return String.format(java.util.Locale.ENGLISH, "%02d:%02d:%02d", hours, minutes, seconds)
+        return String.format(Locale.ENGLISH, "%02d:%02d:%02d", hours, minutes, seconds)
     }
     private fun observeViewModel() {
         viewModel.loginStatus.observe(viewLifecycleOwner) { result ->
@@ -184,29 +207,29 @@ class LoginFragment : Fragment() {
         }
     }
     private fun showMPINSetupDialogDuringLogin(identifier: String, pass: String) {
-        val container = android.widget.FrameLayout(requireContext())
-        val params = android.widget.FrameLayout.LayoutParams(
+        val container = FrameLayout(requireContext())
+        val params = FrameLayout.LayoutParams(
             ViewGroup.LayoutParams.MATCH_PARENT,
             ViewGroup.LayoutParams.WRAP_CONTENT
         ).apply {
             setMargins(60, 20, 60, 10) // Proper padding for professional look
         }
 
-        val etMpin = com.google.android.material.textfield.TextInputEditText(requireContext()).apply {
-            inputType = android.text.InputType.TYPE_CLASS_NUMBER
-            transformationMethod = android.text.method.PasswordTransformationMethod.getInstance()
-            filters = arrayOf(android.text.InputFilter.LengthFilter(4))
+        val etMpin = TextInputEditText(requireContext()).apply {
+            inputType = InputType.TYPE_CLASS_NUMBER
+            transformationMethod = PasswordTransformationMethod.getInstance()
+            filters = arrayOf(InputFilter.LengthFilter(4))
             hint = "Enter 4-Digit MPIN"
-            gravity = android.view.Gravity.CENTER
+            gravity = Gravity.CENTER
             textSize = 18f
-            setHintTextColor(android.graphics.Color.GRAY)
+            setHintTextColor(Color.GRAY)
             // Background color saffron tint (Optional professional touch)
             setBackgroundResource(android.R.color.transparent)
         }
 
         container.addView(etMpin, params)
 
-        val dialog = com.google.android.material.dialog.MaterialAlertDialogBuilder(requireContext(), R.style.MaterialAlertDialog_Rounded)
+        val dialog = MaterialAlertDialogBuilder(requireContext(), R.style.MaterialAlertDialog_Rounded)
             .setTitle("Create Login MPIN 🔑")
             .setMessage("Set a 4-digit secret MPIN for secure and quick access to Nursing Studio.")
             .setView(container)
@@ -227,7 +250,7 @@ class LoginFragment : Fragment() {
             .show()
 
         // Saffron Button Styling
-        dialog.getButton(android.content.DialogInterface.BUTTON_POSITIVE).setTextColor(android.graphics.Color.parseColor("#FF9933"))
+        dialog.getButton(DialogInterface.BUTTON_POSITIVE).setTextColor(Color.parseColor("#FF9933"))
     }
     private fun setupTabSelection() {
         binding.loginTabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
@@ -292,7 +315,7 @@ class LoginFragment : Fragment() {
             AppSettings.triggerErrorEffect(requireContext(), binding.tilEmail)
             return
         }
-        if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+        if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
             binding.tilEmail.isErrorEnabled = true
             binding.tilEmail.error = "Invalid Email format"
             AppSettings.triggerErrorEffect(requireContext(), binding.tilEmail)
@@ -370,7 +393,7 @@ class LoginFragment : Fragment() {
         binding.btnResendOtp.visibility = View.GONE
 
         countDownTimer?.cancel()
-        countDownTimer = object : android.os.CountDownTimer(60000, 1000) {
+        countDownTimer = object : CountDownTimer(60000, 1000) {
             override fun onTick(m: Long) {
                 if (_binding != null && isAdded) {
                     binding.tvTimer.text = "Resend in ${m / 1000}s"
@@ -409,7 +432,7 @@ class LoginFragment : Fragment() {
         binding.tilOtp.isErrorEnabled = false
 
         binding.btnLoginAction.post {
-            val params = binding.btnLoginAction.layoutParams as androidx.constraintlayout.widget.ConstraintLayout.LayoutParams
+            val params = binding.btnLoginAction.layoutParams as ConstraintLayout.LayoutParams
             params.topMargin = (12 * resources.displayMetrics.density).toInt()
             binding.btnLoginAction.layoutParams = params
         }
@@ -427,7 +450,7 @@ class LoginFragment : Fragment() {
         binding.etOtpLogin.setText("")
     }
     private fun setupTextWatchers() {
-        binding.etEmail.addTextChangedListener(object : android.text.TextWatcher {
+        binding.etEmail.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                 val email = s.toString().trim()
@@ -445,10 +468,10 @@ class LoginFragment : Fragment() {
                     updateLoginButtonState(pass.length >= 8)
                 }
             }
-            override fun afterTextChanged(s: android.text.Editable?) {}
+            override fun afterTextChanged(s: Editable?) {}
         })
 
-        binding.etPassword.addTextChangedListener(object : android.text.TextWatcher {
+        binding.etPassword.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                 val pass = s.toString().trim()
@@ -460,7 +483,7 @@ class LoginFragment : Fragment() {
                 val isNotLocked = !isUserLocked(email)
                 updateLoginButtonState(isNotLocked && pass.length >= 8)
             }
-            override fun afterTextChanged(s: android.text.Editable?) {}
+            override fun afterTextChanged(s: Editable?) {}
         })
 
         binding.etMobileLogin.addTextChangedListener(createTextWatcher { binding.tilMobile })
@@ -470,17 +493,17 @@ class LoginFragment : Fragment() {
         binding.btnLoginAction.isEnabled = isEnabled
         binding.btnLoginAction.alpha = if (isEnabled) 1.0f else 0.5f
     }
-    private fun createTextWatcher(getLayout: () -> com.google.android.material.textfield.TextInputLayout) =
-        object : android.text.TextWatcher {
+    private fun createTextWatcher(getLayout: () -> TextInputLayout) =
+        object : TextWatcher {
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                 getLayout().error = null
                 getLayout().isErrorEnabled = false
             }
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-            override fun afterTextChanged(s: android.text.Editable?) {}
+            override fun afterTextChanged(s: Editable?) {}
         }
     private fun showForgotPasswordSheet() {
-        val dialog = com.google.android.material.bottomsheet.BottomSheetDialog(
+        val dialog = BottomSheetDialog(
             requireContext(),
             R.style.BottomSheetDialogTheme
         )
@@ -488,18 +511,18 @@ class LoginFragment : Fragment() {
         val btnReset =
             view.findViewById<MaterialButton>(R.id.btnResetPassword)
         val etForgotEmail =
-            view.findViewById<com.google.android.material.textfield.TextInputEditText>(R.id.etForgotEmail)
+            view.findViewById<TextInputEditText>(R.id.etForgotEmail)
         val tilForgotEmail =
-            view.findViewById<com.google.android.material.textfield.TextInputLayout>(R.id.tilForgotEmail)
+            view.findViewById<TextInputLayout>(R.id.tilForgotEmail)
 
-        etForgotEmail.addTextChangedListener(object : android.text.TextWatcher {
+        etForgotEmail.addTextChangedListener(object : TextWatcher {
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                 tilForgotEmail.error = null
                 tilForgotEmail.isErrorEnabled = false
             }
 
             override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
-            override fun afterTextChanged(p0: android.text.Editable?) {}
+            override fun afterTextChanged(p0: Editable?) {}
         })
 
         btnReset.setOnClickListener {
@@ -508,7 +531,7 @@ class LoginFragment : Fragment() {
                 tilForgotEmail.isErrorEnabled = true
                 tilForgotEmail.error = "Please enter your registered email"
                 AppSettings.triggerErrorEffect(requireContext(), tilForgotEmail) // Shake it!
-            } else if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+            } else if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
                 tilForgotEmail.isErrorEnabled = true
                 tilForgotEmail.error = "Invalid email format"
                 AppSettings.triggerErrorEffect(requireContext(), tilForgotEmail) // Shake it!
@@ -521,11 +544,11 @@ class LoginFragment : Fragment() {
     }
     private fun sendPasswordReset(
         email: String,
-        dialog: com.google.android.material.bottomsheet.BottomSheetDialog
+        dialog: BottomSheetDialog
     ) {
         binding.loadingOverlay.visibility = View.VISIBLE
 
-        com.google.firebase.auth.FirebaseAuth.getInstance().sendPasswordResetEmail(email)
+        FirebaseAuth.getInstance().sendPasswordResetEmail(email)
             .addOnCompleteListener { task ->
                 binding.loadingOverlay.visibility = View.GONE
                 if (task.isSuccessful) {
@@ -537,10 +560,10 @@ class LoginFragment : Fragment() {
             }
     }
     private fun showBiometricPrompt() {
-        val executor = androidx.core.content.ContextCompat.getMainExecutor(requireContext())
-        val biometricPrompt = androidx.biometric.BiometricPrompt(this, executor,
-            object : androidx.biometric.BiometricPrompt.AuthenticationCallback() {
-                override fun onAuthenticationSucceeded(result: androidx.biometric.BiometricPrompt.AuthenticationResult) {
+        val executor = ContextCompat.getMainExecutor(requireContext())
+        val biometricPrompt = BiometricPrompt(this, executor,
+            object : BiometricPrompt.AuthenticationCallback() {
+                override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
                     super.onAuthenticationSucceeded(result)
                     val manager = BiometricSettingsManager(requireContext())
                     val type = manager.getLoginType()
@@ -557,13 +580,13 @@ class LoginFragment : Fragment() {
                 }
                 override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
                     super.onAuthenticationError(errorCode, errString)
-                    if (errorCode == androidx.biometric.BiometricPrompt.ERROR_NEGATIVE_BUTTON ||
-                        errorCode == androidx.biometric.BiometricPrompt.ERROR_USER_CANCELED) {
+                    if (errorCode == BiometricPrompt.ERROR_NEGATIVE_BUTTON ||
+                        errorCode == BiometricPrompt.ERROR_USER_CANCELED) {
                         showMpinBottomSheet()
                     }
                 }
             })
-        val promptInfo = androidx.biometric.BiometricPrompt.PromptInfo.Builder()
+        val promptInfo = BiometricPrompt.PromptInfo.Builder()
             .setTitle("Secure Login")
             .setSubtitle("Scan fingerprint or use MPIN")
             .setNegativeButtonText("Use MPIN")
@@ -571,15 +594,15 @@ class LoginFragment : Fragment() {
         biometricPrompt.authenticate(promptInfo)
     }
     private fun showMpinBottomSheet() {
-        val dialog = com.google.android.material.bottomsheet.BottomSheetDialog(requireContext(), R.style.GlassBottomSheetDialogTheme)
+        val dialog = BottomSheetDialog(requireContext(), R.style.GlassBottomSheetDialogTheme)
         val view = layoutInflater.inflate(R.layout.layout_mpin_keypad, binding.root as? ViewGroup, false)
         var enteredMpin = ""
         val bioManager = BiometricSettingsManager(requireContext())
         val correctMpin = bioManager.getMPIN()
         dialog.window?.let { window ->
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                 window.attributes.blurBehindRadius = 30
-                window.addFlags(android.view.WindowManager.LayoutParams.FLAG_BLUR_BEHIND)
+                window.addFlags(WindowManager.LayoutParams.FLAG_BLUR_BEHIND)
             }
         }
         val handleKeyClick: (String) -> Unit = { key ->
@@ -594,7 +617,7 @@ class LoginFragment : Fragment() {
                         val savedPass = bioManager.getSavedPass()
 
                         if (savedPass != "OTP_USER" && savedEmailOrMobile != null) {
-                            val currentUserEmail = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.email ?: savedEmailOrMobile
+                            val currentUserEmail = FirebaseAuth.getInstance().currentUser?.email ?: savedEmailOrMobile
                             viewModel.loginWithEmail(currentUserEmail, savedPass)
                         } else {
                             proceedToHome()
@@ -644,9 +667,9 @@ class LoginFragment : Fragment() {
     }
     private fun showUniversalSecurityDialog(identifier: String, pass: String) {
         // Saffron Color Constant
-        val saffronColor = android.graphics.Color.parseColor("#FF9933")
+        val saffronColor = Color.parseColor("#FF9933")
 
-        val dialog = com.google.android.material.dialog.MaterialAlertDialogBuilder(requireContext(), R.style.MaterialAlertDialog_Rounded)
+        val dialog = MaterialAlertDialogBuilder(requireContext(), R.style.MaterialAlertDialog_Rounded)
             .setTitle("Security Recommendation 🔒")
             .setMessage("Boost your account security! Enable Fingerprint & MPIN for a faster, professional login experience.")
             .setPositiveButton("Setup Secure Login") { _, _ ->
@@ -659,14 +682,14 @@ class LoginFragment : Fragment() {
             .show()
 
         // ⭐ Professional Touch: Positive Button ko Saffron aur Bold karna
-        dialog.getButton(android.content.DialogInterface.BUTTON_POSITIVE).apply {
+        dialog.getButton(DialogInterface.BUTTON_POSITIVE).apply {
             setTextColor(saffronColor)
-            setTypeface(null, android.graphics.Typeface.BOLD)
+            setTypeface(null, Typeface.BOLD)
         }
 
         // Negative Button ko thoda light rakhte hain professional look ke liye
-        dialog.getButton(android.content.DialogInterface.BUTTON_NEGATIVE).apply {
-            setTextColor(android.graphics.Color.GRAY)
+        dialog.getButton(DialogInterface.BUTTON_NEGATIVE).apply {
+            setTextColor(Color.GRAY)
         }
     }
     override fun onDestroyView() {

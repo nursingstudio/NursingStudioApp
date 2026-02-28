@@ -1,7 +1,8 @@
-package com.example.nursingstudio.auth.register
+package com.example.nursingstudio.ui.auth.register
 
 import android.content.Context
 import android.content.Intent
+import android.content.res.ColorStateList
 import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
@@ -22,7 +23,9 @@ import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
+import android.widget.CheckBox
 import android.widget.ScrollView
+import android.widget.Spinner
 import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.core.widget.NestedScrollView
@@ -363,16 +366,16 @@ class RegisterFragment : Fragment() {
 
         // 3. UI logic for different views
         when (view) {
-            is android.widget.Spinner -> {
+            is Spinner -> {
                 view.background = ContextCompat.getDrawable(requireContext(), R.drawable.spinner_error_bg)
             }
             is TextInputLayout -> {
                 view.isErrorEnabled = true
                 view.error = message
             }
-            is android.widget.CheckBox -> {
+            is CheckBox -> {
                 // Checkbox ke liye optional red tint de sakte hain
-                view.buttonTintList = android.content.res.ColorStateList.valueOf(Color.RED)
+                view.buttonTintList = ColorStateList.valueOf(Color.RED)
             }
         }
         view.requestFocus()

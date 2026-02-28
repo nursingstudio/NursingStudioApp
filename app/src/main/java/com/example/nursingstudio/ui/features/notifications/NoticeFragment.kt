@@ -1,10 +1,11 @@
-package com.example.nursingstudio
+package com.example.nursingstudio.ui.features.notifications
 
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import com.example.nursingstudio.R
 
 class NoticeFragment : Fragment() {
 

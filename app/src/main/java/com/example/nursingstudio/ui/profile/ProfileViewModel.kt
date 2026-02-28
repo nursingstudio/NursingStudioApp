@@ -1,8 +1,9 @@
-package com.example.nursingstudio.profile
+package com.example.nursingstudio.ui.profile
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.example.nursingstudio.data.repository.ProfileRepository
 
 class ProfileViewModel : ViewModel() {
     private val repository = ProfileRepository()

@@ -1,4 +1,4 @@
-package com.example.nursingstudio.profile
+package com.example.nursingstudio.ui.profile
 
 import android.os.Bundle
 import android.view.LayoutInflater

@@ -1,4 +1,4 @@
-package com.example.nursingstudio
+package com.example.nursingstudio.ui.features.home
 
 import android.content.Context
 import android.os.Bundle
@@ -6,15 +6,24 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.appcompat.app.AlertDialog
+import androidx.core.content.edit
 import androidx.fragment.app.Fragment
-import com.example.nursingstudio.profile.ProfileFragment
+import com.example.nursingstudio.ui.features.media.PdfFragment
+import com.example.nursingstudio.utils.ProgressManager
+import com.example.nursingstudio.ui.features.quiz.QuizFragment
+import com.example.nursingstudio.R
+import com.example.nursingstudio.ui.features.settings.SettingsFragment
+import com.example.nursingstudio.ui.features.media.VideoFragment
+import com.example.nursingstudio.ui.profile.ProfileFragment
 import com.google.android.material.card.MaterialCardView
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
-import androidx.core.content.edit
+
 class HomeFragment : Fragment() {
-    private var biometricDialog: androidx.appcompat.app.AlertDialog? = null
+    private var biometricDialog: AlertDialog? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -110,7 +119,10 @@ class HomeFragment : Fragment() {
     private fun showProfessionalBiometricDialog() {
         val dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_biometric_prompt, null)
 
-        biometricDialog = com.google.android.material.dialog.MaterialAlertDialogBuilder(requireContext(), R.style.MaterialAlertDialog_Rounded)
+        biometricDialog = MaterialAlertDialogBuilder(
+            requireContext(),
+            R.style.MaterialAlertDialog_Rounded
+        )
             .setView(dialogView)
             .setCancelable(false)
             .create()

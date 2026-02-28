@@ -12,7 +12,17 @@ import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.Fragment
-import com.example.nursingstudio.profile.ProfileFragment
+import com.example.nursingstudio.ui.profile.ProfileFragment
+import com.example.nursingstudio.ui.features.home.HomeFragment
+import com.example.nursingstudio.ui.features.notifications.NoticeFragment
+import com.example.nursingstudio.ui.features.media.PdfFragment
+import com.example.nursingstudio.ui.features.media.VideoFragment
+import com.example.nursingstudio.ui.features.quiz.QuizFragment
+import com.example.nursingstudio.ui.features.social.SocialAdapter
+import com.example.nursingstudio.ui.features.social.SocialHandlesFragment
+import com.example.nursingstudio.data.model.SocialItem
+import com.example.nursingstudio.ui.features.settings.SettingsFragment
+import com.example.nursingstudio.ui.features.subscriptions.SubscriptionFragment
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -200,13 +210,13 @@ class MainActivity : AppCompatActivity() {
 
     private fun showSocialDialog() {
         val socialItems = listOf(
-            SocialItem("YouTube Channel",   R.drawable.ic_youtube),
-            SocialItem("WhatsApp Channel",  R.drawable.ic_whatsapp),
-            SocialItem("Telegram Channel",  R.drawable.ic_telegram),
-            SocialItem("Arattai Channel",   R.drawable.ic_arattai),
-            SocialItem("Instagram",         R.drawable.ic_instagram),
-            SocialItem("Twitter",           R.drawable.ic_twitter),
-            SocialItem("Facebook",          R.drawable.ic_facebook)
+            SocialItem("YouTube Channel", R.drawable.ic_youtube),
+            SocialItem("WhatsApp Channel", R.drawable.ic_whatsapp),
+            SocialItem("Telegram Channel", R.drawable.ic_telegram),
+            SocialItem("Arattai Channel", R.drawable.ic_arattai),
+            SocialItem("Instagram", R.drawable.ic_instagram),
+            SocialItem("Twitter", R.drawable.ic_twitter),
+            SocialItem("Facebook", R.drawable.ic_facebook)
         )
 
         val adapter = SocialAdapter(this, socialItems)

@@ -1,4 +1,4 @@
-package com.example.nursingstudio
+package com.example.nursingstudio.ui.features.social
 
 import android.content.Context
 import android.view.LayoutInflater
@@ -7,6 +7,8 @@ import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.ImageView
 import android.widget.TextView
+import com.example.nursingstudio.R
+import com.example.nursingstudio.data.model.SocialItem
 
 class SocialAdapter(context: Context, private val items: List<SocialItem>) :
     ArrayAdapter<SocialItem>(context, 0, items) {

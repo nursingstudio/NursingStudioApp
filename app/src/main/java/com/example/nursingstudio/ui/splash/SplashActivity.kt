@@ -1,4 +1,4 @@
-package com.example.nursingstudio.splash
+package com.example.nursingstudio.ui.splash
 
 import android.content.Intent
 import android.os.Build

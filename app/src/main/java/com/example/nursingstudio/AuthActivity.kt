@@ -4,8 +4,8 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
-import com.example.nursingstudio.auth.login.LoginFragment
-import com.example.nursingstudio.auth.register.RegisterFragment
+import com.example.nursingstudio.ui.auth.login.LoginFragment
+import com.example.nursingstudio.ui.auth.register.RegisterFragment
 import com.google.firebase.FirebaseApp
 import com.google.firebase.appcheck.FirebaseAppCheck
 import com.google.firebase.appcheck.debug.DebugAppCheckProviderFactory

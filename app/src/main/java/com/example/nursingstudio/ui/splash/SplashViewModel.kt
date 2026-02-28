@@ -1,4 +1,4 @@
-package com.example.nursingstudio.splash
+package com.example.nursingstudio.ui.splash
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
