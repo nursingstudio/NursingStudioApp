@@ -35,6 +35,7 @@ import com.google.firebase.auth.FirebaseAuth
 import java.util.Locale
 import androidx.core.content.edit
 import androidx.core.view.isGone
+import androidx.core.view.isVisible
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import kotlinx.coroutines.launch
@@ -170,31 +171,54 @@ class LoginFragment : Fragment() {
                     val email = binding.etEmail.text.toString().trim()
                     val msg = result.message
 
-                    // Check if error is for OTP or Password
-                    if (msg.contains("OTP", true) || msg.contains("verification", true) || msg.contains("code", true)) {
-                        // ⭐ GOLD STANDARD: OTP Box error feedback
-                        binding.tilOtp.isErrorEnabled = true
-                        binding.tilOtp.error = "Invalid OTP! Please check again."
+                    // ⭐ GOLD STANDARD: User-Friendly Message Mapping
+                    val userFriendlyMsg = when {
+                        // Network Errors
+                        msg.contains("network", true) || msg.contains("timeout", true) || msg.contains("unreachable", true) ->
+                            "No Internet! Please check your connection. 🌐"
 
-                        // Shake and Vibrate specifically on OTP Box
-                        AppSettings.triggerErrorEffect(requireContext(), binding.tilOtp)
+                        // OTP Errors
+                        msg.contains("OTP", true) || msg.contains("verification", true) || msg.contains("code", true) ->
+                            "Invalid OTP! Please check and try again. 🔢"
+
+                        // Credential Errors
+                        msg.contains("password", true) || msg.contains("credential", true) ->
+                            "Incorrect Password! Please try again. 🔑"
+
+                        // Too many requests
+                        msg.contains("too-many-requests", true) ->
+                            "Too many attempts! Please try after some time. ⏳"
+
+                        else -> msg // Fallback for unknown errors
                     }
-                    else if (msg.contains("password", true) || msg.contains("credential", true)) {
-                        if (email.isNotEmpty()) recordFailedAttempt(email)
 
-                        val prefs = requireContext().getSharedPreferences("login_lock", Context.MODE_PRIVATE)
-                        val currentAttempts = prefs.getInt("attempts_$email", 0)
-                        val remaining = MAX_ATTEMPTS - currentAttempts
+                    when {
+                        // 1. Agar OTP wala field dikh raha hai aur error OTP ka hai
+                        !binding.tilOtp.isGone && (msg.contains("OTP", true) || msg.contains("verification", true)) -> {
+                            binding.tilOtp.isErrorEnabled = true
+                            binding.tilOtp.error = userFriendlyMsg
+                            AppSettings.triggerErrorEffect(requireContext(), binding.tilOtp)
+                        }
 
-                        binding.tilPassword.isErrorEnabled = true
-                        binding.tilPassword.error = "Incorrect Password! $remaining attempts left."
+                        // 2. Agar Password wala field dikh raha hai aur error password ka hai
+                        binding.layoutEmailLogin.isVisible && (msg.contains("password", true) || msg.contains("credential", true)) -> {
+                            if (email.isNotEmpty()) recordFailedAttempt(email)
 
-                        // Shake and Vibrate specifically on Password Box
-                        AppSettings.triggerErrorEffect(requireContext(), binding.tilPassword)
-                    } else {
-                        // General errors (like internet) keep using toast
-                        toast(msg)
-                        AppSettings.triggerErrorEffect(requireContext(), binding.btnLoginAction)
+                            val prefs = requireContext().getSharedPreferences("login_lock", Context.MODE_PRIVATE)
+                            val currentAttempts = prefs.getInt("attempts_$email", 0)
+                            val remaining = MAX_ATTEMPTS - currentAttempts
+
+                            binding.tilPassword.isErrorEnabled = true
+                            binding.tilPassword.error = "$userFriendlyMsg ($remaining attempts left)"
+                            AppSettings.triggerErrorEffect(requireContext(), binding.tilPassword)
+                        }
+
+                        // 3. Network Error ya baki errors ke liye professional SnackBar ya Toast
+                        else -> {
+                            toast(userFriendlyMsg)
+                            // Button ko shake karein taaki user ko feedback mile
+                            AppSettings.triggerErrorEffect(requireContext(), binding.btnLoginAction)
+                        }
                     }
                 }
             }
@@ -203,36 +227,21 @@ class LoginFragment : Fragment() {
 // --- ⌨️ TEXT WATCHERS (Restored Exactly) ---
     private fun setupTextWatchers() {
     binding.etEmail.addTextChangedListener(object : TextWatcher {
-        override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
         override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-            val email = s.toString().trim()
-            val pass = binding.etPassword.text.toString().trim()
-
             binding.tilEmail.isErrorEnabled = false
             binding.tilEmail.error = null
-
-            // ⭐ EXACT INTEGRATION: Check lock status as user types
-            val isLocked = checkAndHandleLock(email)
-
-            if (!isLocked) {
-                // Agar user locked nahi hai tabhi button enable/disable check karo
-                updateLoginButtonState(pass.length >= 8 && Patterns.EMAIL_ADDRESS.matcher(email).matches())
-            }
+            checkAndHandleLock(s.toString().trim())
         }
+        override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
         override fun afterTextChanged(s: Editable?) {}
     })
 
     binding.etPassword.addTextChangedListener(object : TextWatcher {
-        override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
         override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-            val email = binding.etEmail.text.toString().trim()
             binding.tilPassword.error = null
-
-            val isNotLocked = !isUserLocked(email)
-            val isPasswordValid = (s?.length ?: 0) >= 8
-
-            updateLoginButtonState(isNotLocked && isPasswordValid)
+            binding.tilPassword.isErrorEnabled = false
         }
+        override fun beforeTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
         override fun afterTextChanged(s: Editable?) {}
     })
 
@@ -245,7 +254,6 @@ class LoginFragment : Fragment() {
                 clearAllErrors()
                 clearAllFields()
                 binding.btnLoginAction.isEnabled = true
-                binding.btnLoginAction.alpha = 1.0f
                 countDownTimer?.cancel()
 
                 if (tab?.position == 0) {
@@ -287,6 +295,13 @@ class LoginFragment : Fragment() {
         val email = binding.etEmail.text.toString().trim()
         val pass = binding.etPassword.text.toString().trim()
 
+        // 1. Connectivity Check (World-Class Security)
+        if (!isNetworkAvailable()) {
+            toast("No Internet Connection! Please check your Data/WiFi. 🌐")
+            AppSettings.triggerErrorEffect(requireContext(), binding.btnLoginAction)
+            return
+        }
+
         if (isUserLocked(email)) {
             binding.tilPassword.isErrorEnabled = true
             binding.tilPassword.error = "This account is locked. Try after ${getRemainingLockTime(email)} hrs"
@@ -296,27 +311,14 @@ class LoginFragment : Fragment() {
 
         clearAllErrors()
 
-        if (email.isEmpty()) {
-            binding.tilEmail.isErrorEnabled = true
-            binding.tilEmail.error = "Email is required"
+        if (email.isEmpty() || !Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+            binding.tilEmail.error = "Please enter a valid email address"
             AppSettings.triggerErrorEffect(requireContext(), binding.tilEmail)
             return
         }
-        if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-            binding.tilEmail.isErrorEnabled = true
-            binding.tilEmail.error = "Invalid Email format"
-            AppSettings.triggerErrorEffect(requireContext(), binding.tilEmail)
-            return
-        }
-        if (pass.isEmpty()) {
-            binding.tilPassword.isErrorEnabled = true
-            binding.tilPassword.error = "Password is required"
-            AppSettings.triggerErrorEffect(requireContext(), binding.tilPassword)
-            return
-        }
+
         if (pass.length < 8) {
-            binding.tilPassword.isErrorEnabled = true
-            binding.tilPassword.error = "Incorrect password"
+            binding.tilPassword.error = "Password must be at least 8 characters"
             AppSettings.triggerErrorEffect(requireContext(), binding.tilPassword)
             return
         }
@@ -326,6 +328,11 @@ class LoginFragment : Fragment() {
         val mobile = binding.etMobileLogin.text.toString().trim()
         val otp = binding.etOtpLogin.text.toString().trim()
 
+        if (!isNetworkAvailable()) {
+            toast("No Internet Connection! 🌐")
+            AppSettings.triggerErrorEffect(requireContext(), binding.btnLoginAction)
+            return
+        }
         // ⭐ GOLD STANDARD: KTX Extension Property use karein
         if (binding.tilOtp.isGone) {
             if (mobile.length != 10) {
@@ -446,8 +453,8 @@ class LoginFragment : Fragment() {
     }
 
     private fun updateLoginButtonState(isEnabled: Boolean) {
-        binding.btnLoginAction.isEnabled = isEnabled
-        binding.btnLoginAction.alpha = if (isEnabled) 1.0f else 0.5f
+        binding.btnLoginAction.isEnabled = true
+        binding.btnLoginAction.alpha = 1.0f
     }
     private fun createTextWatcher(getLayout: () -> TextInputLayout) =
         object : TextWatcher {
@@ -644,6 +651,12 @@ class LoginFragment : Fragment() {
                 dot.scaleY = 1.0f
             }
         }
+    }
+    private fun isNetworkAvailable(): Boolean {
+        val connectivityManager = requireContext().getSystemService(Context.CONNECTIVITY_SERVICE) as android.net.ConnectivityManager
+        val network = connectivityManager.activeNetwork ?: return false
+        val capabilities = connectivityManager.getNetworkCapabilities(network) ?: return false
+        return capabilities.hasCapability(android.net.NetworkCapabilities.NET_CAPABILITY_INTERNET)
     }
 
     override fun onDestroyView() {
