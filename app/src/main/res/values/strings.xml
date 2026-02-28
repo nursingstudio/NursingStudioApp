@@ -200,5 +200,8 @@
     <string name="maybe_later">Maybe Later</string>
     <string name="don_t_ask_again">Don\'t ask again</string>
     <string name="fingerprint_icon">Fingerprint Icon</string>
+    <string name="login">Login</string>
+    <string name="resend_in_s">Resend in %1$ds</string>
+    <string name="verify_login"><![CDATA[Verify & Login]]></string>
 
 </resources>

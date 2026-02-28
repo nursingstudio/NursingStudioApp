@@ -16,7 +16,14 @@ class AuthRepository {
     fun isUserLoggedIn(): Boolean = auth.currentUser != null
 
     // --- LOGIN LOGIC ---
-    fun signInWithEmail(email: String, pass: String) = auth.signInWithEmailAndPassword(email, pass)
+    suspend fun signInWithEmail(email: String, pass: String): Result<AuthResult> {
+        return try {
+            val result = auth.signInWithEmailAndPassword(email, pass).await()
+            Result.success(result)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
     fun checkUserInFirestore(uid: String): Task<DocumentSnapshot> =
         db.collection("Users").document(uid).get()
 
@@ -35,7 +42,6 @@ class AuthRepository {
         db.collection("Users").document(uid).set(userData)
 
     // --- OTP VERIFICATION (Ab ye class ke andar hai!) ---
-// AuthRepository.kt (Update this function)
     suspend fun verifyOtp(credential: AuthCredential): Result<Pair<AuthResult, Boolean>> {
         return try {
             val result = auth.signInWithCredential(credential).await()

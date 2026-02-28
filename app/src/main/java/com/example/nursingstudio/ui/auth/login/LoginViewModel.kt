@@ -15,12 +15,15 @@ class LoginViewModel : ViewModel() {
     val loginStatus: LiveData<LoginResult> get() = _loginStatus
 
     fun loginWithEmail(email: String, pass: String) {
-        _loginStatus.value = LoginResult.Loading
-        repository.signInWithEmail(email, pass).addOnSuccessListener { res ->
-            // Email login ke liye abhi bhi purana verifyUser kaam karega
-            verifyUser(res.user?.uid)
-        }.addOnFailureListener { e ->
-            _loginStatus.value = LoginResult.Error(e.localizedMessage ?: "Login Failed")
+        viewModelScope.launch {
+            _loginStatus.value = LoginResult.Loading
+            val result = repository.signInWithEmail(email, pass)
+
+            result.onSuccess { authResult ->
+                verifyUser(authResult.user?.uid)
+            }.onFailure { e ->
+                _loginStatus.value = LoginResult.Error(e.localizedMessage ?: "Login Failed")
+            }
         }
     }
 
