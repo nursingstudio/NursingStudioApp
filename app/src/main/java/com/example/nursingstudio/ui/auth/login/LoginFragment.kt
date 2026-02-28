@@ -170,7 +170,16 @@ class LoginFragment : Fragment() {
                     val email = binding.etEmail.text.toString().trim()
                     val msg = result.message
 
-                    if (msg.contains("password", true) || msg.contains("credential", true)) {
+                    // Check if error is for OTP or Password
+                    if (msg.contains("OTP", true) || msg.contains("verification", true) || msg.contains("code", true)) {
+                        // ⭐ GOLD STANDARD: OTP Box error feedback
+                        binding.tilOtp.isErrorEnabled = true
+                        binding.tilOtp.error = "Invalid OTP! Please check again."
+
+                        // Shake and Vibrate specifically on OTP Box
+                        AppSettings.triggerErrorEffect(requireContext(), binding.tilOtp)
+                    }
+                    else if (msg.contains("password", true) || msg.contains("credential", true)) {
                         if (email.isNotEmpty()) recordFailedAttempt(email)
 
                         val prefs = requireContext().getSharedPreferences("login_lock", Context.MODE_PRIVATE)
@@ -179,11 +188,14 @@ class LoginFragment : Fragment() {
 
                         binding.tilPassword.isErrorEnabled = true
                         binding.tilPassword.error = "Incorrect Password! $remaining attempts left."
-                        AppSettings.triggerVibration(requireContext(), 100)
+
+                        // Shake and Vibrate specifically on Password Box
+                        AppSettings.triggerErrorEffect(requireContext(), binding.tilPassword)
                     } else {
+                        // General errors (like internet) keep using toast
                         toast(msg)
+                        AppSettings.triggerErrorEffect(requireContext(), binding.btnLoginAction)
                     }
-                    AppSettings.triggerErrorEffect(requireContext(), binding.btnLoginAction)
                 }
             }
         }
@@ -345,6 +357,7 @@ class LoginFragment : Fragment() {
             }
 
             binding.tilOtp.error = null
+            binding.tilOtp.isErrorEnabled = false
             binding.loadingOverlay.visibility = View.VISIBLE
             val credential = PhoneAuthProvider.getCredential(verificationId!!, otp)
             viewModel.loginWithPhone(credential)
