@@ -30,11 +30,15 @@ import com.example.nursingstudio.AuthActivity
 import com.example.nursingstudio.utils.AppSettings
 import com.example.nursingstudio.utils.BiometricSettingsManager
 import com.google.android.material.bottomsheet.BottomSheetDialog
-import com.google.android.material.button.MaterialButton
-import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import com.google.firebase.auth.FirebaseAuth
 import java.util.Locale
+import androidx.core.content.edit
+import androidx.core.view.isGone
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.repeatOnLifecycle
+import kotlinx.coroutines.launch
+import androidx.lifecycle.withResumed
 
 class LoginFragment : Fragment() {
     companion object {
@@ -90,34 +94,58 @@ class LoginFragment : Fragment() {
     }
     private fun recordFailedAttempt(email: String) {
         val prefs = requireContext().getSharedPreferences("login_lock", Context.MODE_PRIVATE)
-        var attempts = prefs.getInt("attempts_$email", 0) + 1
+        val attempts = prefs.getInt("attempts_$email", 0) + 1
 
         if (attempts >= MAX_ATTEMPTS) {
             val lockUntil = System.currentTimeMillis() + (LOCK_TIME_HOURS * 60 * 60 * 1000)
-            prefs.edit().putLong("lock_timestamp_$email", lockUntil).putInt("attempts_$email", 0).apply()
+
+            // ⭐ GOLD STANDARD: SharedPreferences KTX Extension
+            prefs.edit(action = {
+                putLong("lock_timestamp_$email", lockUntil)
+                putInt("attempts_$email", 0)
+            })
         } else {
-            prefs.edit().putInt("attempts_$email", attempts).apply()
+            prefs.edit {
+                putInt("attempts_$email", attempts)
+            }
         }
     }
     // ⭐ PROFESSIONAL LOCK HANDLER
     private fun checkAndHandleLock(email: String): Boolean {
-        if (isUserLocked(email)) {
+        val isLocked = isUserLocked(email)
+
+        if (isLocked) {
+            // 1. Pehle UI ko turant update karein
             val timeLeft = getRemainingLockTime(email)
             binding.tilEmail.isErrorEnabled = true
             binding.tilEmail.error = "Account locked! Try after $timeLeft"
             updateLoginButtonState(false)
 
-            // Auto-refresh timer logic (Har second update hoga)
-            viewLifecycleOwner.lifecycleScope.launchWhenResumed {
-                kotlinx.coroutines.delay(1000)
-                if (isAdded) checkAndHandleLock(email)
+            // 2. ⭐ MODERN COROUTINE: Har second UI update karne ke liye
+            // repeatOnLifecycle ensure karta hai ki app background mein jate hi timer ruk jaye (Battery bachegi!)
+            viewLifecycleOwner.lifecycleScope.launch {
+                viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
+                    while (isUserLocked(email)) {
+                        val currentTimeLeft = getRemainingLockTime(email)
+                        binding.tilEmail.error = "Account locked! Try after $currentTimeLeft"
+
+                        kotlinx.coroutines.delay(1000) // 1 second wait karein
+                    }
+
+                    // 3. Jaise hi lock khule, UI reset karein
+                    binding.tilEmail.isErrorEnabled = false
+                    binding.tilEmail.error = null
+                    val pass = binding.etPassword.text.toString().trim()
+                    updateLoginButtonState(pass.length >= 8 && Patterns.EMAIL_ADDRESS.matcher(email).matches())
+                }
             }
-            return true
         } else {
+            // Agar user locked nahi hai
             binding.tilEmail.isErrorEnabled = false
             binding.tilEmail.error = null
-            return false
         }
+
+        return isLocked
     }
     // --- 📊 VIEWMODEL OBSERVATION (Fixed Progress Bar) ---
     private fun observeViewModel() {
@@ -125,6 +153,9 @@ class LoginFragment : Fragment() {
             binding.loadingOverlay.visibility = if (result is LoginViewModel.LoginResult.Loading) View.VISIBLE else View.GONE
 
             when (result) {
+                is LoginViewModel.LoginResult.Loading -> {
+                }
+
                 is LoginViewModel.LoginResult.Success -> proceedToHome()
 
                 is LoginViewModel.LoginResult.NoProfile -> {
@@ -137,18 +168,23 @@ class LoginFragment : Fragment() {
 
                 is LoginViewModel.LoginResult.Error -> {
                     val email = binding.etEmail.text.toString().trim()
-                    val msg = result.message ?: ""
+                    val msg = result.message
 
                     if (msg.contains("password", true) || msg.contains("credential", true)) {
-                        recordFailedAttempt(email)
-                        val remaining = MAX_ATTEMPTS - requireContext().getSharedPreferences("login_lock", Context.MODE_PRIVATE).getInt("attempts_$email", 0)
+                        if (email.isNotEmpty()) recordFailedAttempt(email)
+
+                        val prefs = requireContext().getSharedPreferences("login_lock", Context.MODE_PRIVATE)
+                        val currentAttempts = prefs.getInt("attempts_$email", 0)
+                        val remaining = MAX_ATTEMPTS - currentAttempts
+
+                        binding.tilPassword.isErrorEnabled = true
                         binding.tilPassword.error = "Incorrect Password! $remaining attempts left."
+                        AppSettings.triggerVibration(requireContext(), 100)
                     } else {
                         toast(msg)
                     }
                     AppSettings.triggerErrorEffect(requireContext(), binding.btnLoginAction)
                 }
-                else -> {}
             }
         }
     }
@@ -174,15 +210,19 @@ class LoginFragment : Fragment() {
         override fun afterTextChanged(s: Editable?) {}
     })
 
-        binding.etPassword.addTextChangedListener(object : TextWatcher {
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                val email = binding.etEmail.text.toString().trim()
-                binding.tilPassword.error = null
-                updateLoginButtonState(!isUserLocked(email) && s?.length ?: 0 >= 8)
-            }
-            override fun afterTextChanged(s: Editable?) {}
-        })
+    binding.etPassword.addTextChangedListener(object : TextWatcher {
+        override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+        override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+            val email = binding.etEmail.text.toString().trim()
+            binding.tilPassword.error = null
+
+            val isNotLocked = !isUserLocked(email)
+            val isPasswordValid = (s?.length ?: 0) >= 8
+
+            updateLoginButtonState(isNotLocked && isPasswordValid)
+        }
+        override fun afterTextChanged(s: Editable?) {}
+    })
 
         binding.etMobileLogin.addTextChangedListener(createTextWatcher { binding.tilMobile })
         binding.etOtpLogin.addTextChangedListener(createTextWatcher { binding.tilOtp })
@@ -199,7 +239,7 @@ class LoginFragment : Fragment() {
                 if (tab?.position == 0) {
                     binding.layoutEmailLogin.visibility = View.VISIBLE
                     binding.layoutMobileLogin.visibility = View.GONE
-                    binding.btnLoginAction.text = "Login"
+                    binding.btnLoginAction.text = getString(R.string.login)
                 } else {
                     binding.layoutEmailLogin.visibility = View.GONE
                     binding.layoutMobileLogin.visibility = View.VISIBLE
@@ -274,7 +314,8 @@ class LoginFragment : Fragment() {
         val mobile = binding.etMobileLogin.text.toString().trim()
         val otp = binding.etOtpLogin.text.toString().trim()
 
-        if (binding.tilOtp.visibility == View.GONE) {
+        // ⭐ GOLD STANDARD: KTX Extension Property use karein
+        if (binding.tilOtp.isGone) {
             if (mobile.length != 10) {
                 binding.tilMobile.isErrorEnabled = true
                 binding.tilMobile.error = "Enter 10 digit number"
@@ -310,12 +351,16 @@ class LoginFragment : Fragment() {
         }
     }
     private fun proceedToHome() {
-        viewLifecycleOwner.lifecycleScope.launchWhenResumed {
-            if (isAdded && activity != null) {
-                val intent = Intent(requireContext(), MainActivity::class.java)
-                intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-                startActivity(intent)
-                activity?.finish()
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.withResumed {
+                if (isAdded && activity != null) {
+                    val intent = Intent(requireContext(), MainActivity::class.java).apply {
+                        flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                    }
+                    startActivity(intent)
+
+                    activity?.finish()
+                }
             }
         }
     }
@@ -454,16 +499,21 @@ class LoginFragment : Fragment() {
                 override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
                     super.onAuthenticationSucceeded(result)
                     val manager = BiometricSettingsManager(requireContext())
-                    val type = manager.getLoginType()
-                    val identifier = manager.getSavedEmail()
-                    val pass = manager.getSavedPass()
 
-                    if (type == 0) {
-                        if (identifier != null && pass != null) {
-                            viewModel.loginWithEmail(identifier, pass)
+                    when (manager.getLoginType()) {
+                        0 -> {
+                            val email = manager.getSavedEmail()
+                            val password = manager.getSavedPass()
+
+                            if (email != null) {
+                                viewModel.loginWithEmail(email, password)
+                            } else {
+                                proceedToHome()
+                            }
                         }
-                    } else {
-                        proceedToHome()
+                        else -> {
+                            proceedToHome()
+                        }
                     }
                 }
                 override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
@@ -485,10 +535,11 @@ class LoginFragment : Fragment() {
         val dialog = BottomSheetDialog(requireContext(), R.style.GlassBottomSheetDialogTheme)
         val mpinBinding = binding.layoutMpinKeypadInclude
 
+        // Safety check: Remove from parent before setting to dialog
         (mpinBinding.root.parent as? ViewGroup)?.removeView(mpinBinding.root)
         dialog.setContentView(mpinBinding.root)
 
-        // Window Blur for Premium Feel
+        // Premium Blur Effect (API 31+)
         dialog.window?.let { window ->
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                 window.attributes.blurBehindRadius = 30
@@ -500,6 +551,7 @@ class LoginFragment : Fragment() {
         val bioManager = BiometricSettingsManager(requireContext())
         val correctMpin = bioManager.getMPIN()
 
+        // Keypad Logic with Animation
         val handleKeyClick: (String) -> Unit = { key ->
             if (enteredMpin.length < 4) {
                 enteredMpin += key
@@ -525,7 +577,7 @@ class LoginFragment : Fragment() {
             }
         }
 
-        // Mapping Buttons using Binding
+        // Bind number buttons (0-9)
         val buttons = listOf(
             mpinBinding.btnKey1 to "1", mpinBinding.btnKey2 to "2", mpinBinding.btnKey3 to "3",
             mpinBinding.btnKey4 to "4", mpinBinding.btnKey5 to "5", mpinBinding.btnKey6 to "6",
@@ -534,11 +586,23 @@ class LoginFragment : Fragment() {
         )
         buttons.forEach { (btn, value) -> btn.setOnClickListener { handleKeyClick(value) } }
 
+        // ⭐ GOLD STANDARD: Delete Button with Long Press
         mpinBinding.btnKeyDel.setOnClickListener {
             if (enteredMpin.isNotEmpty()) {
                 enteredMpin = enteredMpin.dropLast(1)
                 updateMpinDots(mpinBinding.layoutMpinDots, enteredMpin.length)
             }
+        }
+
+        // Long press to clear everything instantly
+        mpinBinding.btnKeyDel.setOnLongClickListener {
+            if (enteredMpin.isNotEmpty()) {
+                enteredMpin = ""
+                updateMpinDots(mpinBinding.layoutMpinDots, 0)
+                AppSettings.triggerVibration(requireContext(), 150) // Stronger feedback
+                toast("Cleared")
+            }
+            true // Consumption of event
         }
 
         mpinBinding.btnKeyBio.setOnClickListener {
@@ -553,12 +617,18 @@ class LoginFragment : Fragment() {
             val dot = dotsLayout.getChildAt(i)
             if (i < length) {
                 dot.setBackgroundResource(R.drawable.mpin_dot_filled)
-                // ⭐ World-Class: Add a tiny pop animation
-                dot.animate().scaleX(1.2f).scaleY(1.2f).setDuration(100).withEndAction {
-                    dot.animate().scaleX(1.0f).scaleY(1.0f).setDuration(100).start()
-                }.start()
+
+                dot.animate()
+                    .scaleX(1.3f)
+                    .scaleY(1.3f)
+                    .setDuration(100)
+                    .withEndAction {
+                        dot.animate().scaleX(1.0f).scaleY(1.0f).setDuration(100).start()
+                    }.start()
             } else {
                 dot.setBackgroundResource(R.drawable.mpin_dot_empty)
+                dot.scaleX = 1.0f
+                dot.scaleY = 1.0f
             }
         }
     }
