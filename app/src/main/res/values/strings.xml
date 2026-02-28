@@ -203,5 +203,19 @@
     <string name="login">Login</string>
     <string name="resend_in_s">Resend in %1$ds</string>
     <string name="verify_login"><![CDATA[Verify & Login]]></string>
+    <string name="enter_email_for_password_reset">Enter your email to receive a password reset link.</string>
+    <string name="forgot_password">Forgot Password?</string>
+    <string name="email_address">Email Address</string>
+    <string name="send_reset_link">Send Reset Link</string>
+    <string name="_1">1</string>
+    <string name="_2">2</string>
+    <string name="_3">3</string>
+    <string name="_4">4</string>
+    <string name="_5">5</string>
+    <string name="_6">6</string>
+    <string name="_7">7</string>
+    <string name="_8">8</string>
+    <string name="_9">9</string>
+    <string name="_0">0</string>
 
 </resources>

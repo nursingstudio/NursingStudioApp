@@ -401,43 +401,33 @@ class LoginFragment : Fragment() {
             override fun afterTextChanged(s: Editable?) {}
         }
     private fun showForgotPasswordSheet() {
-        val dialog = BottomSheetDialog(
-            requireContext(),
-            R.style.BottomSheetDialogTheme
-        )
-        val view = layoutInflater.inflate(R.layout.layout_forgot_password, binding.root as? ViewGroup, false)
-        val btnReset =
-            view.findViewById<MaterialButton>(R.id.btnResetPassword)
-        val etForgotEmail =
-            view.findViewById<TextInputEditText>(R.id.etForgotEmail)
-        val tilForgotEmail =
-            view.findViewById<TextInputLayout>(R.id.tilForgotEmail)
+        val dialog = BottomSheetDialog(requireContext(), R.style.BottomSheetDialogTheme)
 
-        etForgotEmail.addTextChangedListener(object : TextWatcher {
+        // ⭐ GOLD STANDARD: Accessing views via <include> binding
+        val sheetBinding = binding.layoutForgotPassInclude
+
+        (sheetBinding.root.parent as? ViewGroup)?.removeView(sheetBinding.root)
+        dialog.setContentView(sheetBinding.root)
+
+        sheetBinding.etForgotEmail.addTextChangedListener(object : TextWatcher {
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                tilForgotEmail.error = null
-                tilForgotEmail.isErrorEnabled = false
+                sheetBinding.tilForgotEmail.error = null
+                sheetBinding.tilForgotEmail.isErrorEnabled = false
             }
-
             override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
             override fun afterTextChanged(p0: Editable?) {}
         })
 
-        btnReset.setOnClickListener {
-            val email = etForgotEmail.text.toString().trim()
-            if (email.isEmpty()) {
-                tilForgotEmail.isErrorEnabled = true
-                tilForgotEmail.error = "Please enter your registered email"
-                AppSettings.triggerErrorEffect(requireContext(), tilForgotEmail) // Shake it!
-            } else if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-                tilForgotEmail.isErrorEnabled = true
-                tilForgotEmail.error = "Invalid email format"
-                AppSettings.triggerErrorEffect(requireContext(), tilForgotEmail) // Shake it!
+        sheetBinding.btnResetPassword.setOnClickListener {
+            val email = sheetBinding.etForgotEmail.text.toString().trim()
+            if (email.isEmpty() || !Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+                sheetBinding.tilForgotEmail.isErrorEnabled = true
+                sheetBinding.tilForgotEmail.error = "Enter a valid registered email"
+                AppSettings.triggerErrorEffect(requireContext(), sheetBinding.tilForgotEmail)
             } else {
                 sendPasswordReset(email, dialog)
             }
         }
-        dialog.setContentView(view)
         dialog.show()
     }
     private fun sendPasswordReset(
@@ -493,71 +483,80 @@ class LoginFragment : Fragment() {
     }
     private fun showMpinBottomSheet() {
         val dialog = BottomSheetDialog(requireContext(), R.style.GlassBottomSheetDialogTheme)
-        val view = layoutInflater.inflate(R.layout.layout_mpin_keypad, binding.root as? ViewGroup, false)
-        var enteredMpin = ""
-        val bioManager = BiometricSettingsManager(requireContext())
-        val correctMpin = bioManager.getMPIN()
+        val mpinBinding = binding.layoutMpinKeypadInclude
+
+        (mpinBinding.root.parent as? ViewGroup)?.removeView(mpinBinding.root)
+        dialog.setContentView(mpinBinding.root)
+
+        // Window Blur for Premium Feel
         dialog.window?.let { window ->
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                 window.attributes.blurBehindRadius = 30
                 window.addFlags(WindowManager.LayoutParams.FLAG_BLUR_BEHIND)
             }
         }
+
+        var enteredMpin = ""
+        val bioManager = BiometricSettingsManager(requireContext())
+        val correctMpin = bioManager.getMPIN()
+
         val handleKeyClick: (String) -> Unit = { key ->
             if (enteredMpin.length < 4) {
                 enteredMpin += key
-                updateMpinDots(view, enteredMpin.length)
+                updateMpinDots(mpinBinding.layoutMpinDots, enteredMpin.length)
+
                 if (enteredMpin.length == 4) {
                     if (enteredMpin == correctMpin) {
                         dialog.dismiss()
-                        bioManager.getLoginType()
-                        val savedEmailOrMobile = bioManager.getSavedEmail()
+                        val savedEmail = bioManager.getSavedEmail()
                         val savedPass = bioManager.getSavedPass()
-
-                        if (savedPass != "OTP_USER" && savedEmailOrMobile != null) {
-                            val currentUserEmail = FirebaseAuth.getInstance().currentUser?.email ?: savedEmailOrMobile
-                            viewModel.loginWithEmail(currentUserEmail, savedPass)
+                        if (savedPass != "OTP_USER" && savedEmail != null) {
+                            viewModel.loginWithEmail(savedEmail, savedPass)
                         } else {
                             proceedToHome()
                         }
-                    }
-                    else {
+                    } else {
                         AppSettings.triggerVibration(requireContext(), 200)
-                        toast("Incorrect MPIN! Please try again.")
+                        toast("Incorrect MPIN!")
                         enteredMpin = ""
-                        updateMpinDots(view, 0)
+                        updateMpinDots(mpinBinding.layoutMpinDots, 0)
                     }
                 }
             }
         }
-        val numberButtons = listOf(
-            R.id.btnKey1 to "1", R.id.btnKey2 to "2", R.id.btnKey3 to "3",
-            R.id.btnKey4 to "4", R.id.btnKey5 to "5", R.id.btnKey6 to "6",
-            R.id.btnKey7 to "7", R.id.btnKey8 to "8", R.id.btnKey9 to "9",
-            R.id.btnKey0 to "0"
+
+        // Mapping Buttons using Binding
+        val buttons = listOf(
+            mpinBinding.btnKey1 to "1", mpinBinding.btnKey2 to "2", mpinBinding.btnKey3 to "3",
+            mpinBinding.btnKey4 to "4", mpinBinding.btnKey5 to "5", mpinBinding.btnKey6 to "6",
+            mpinBinding.btnKey7 to "7", mpinBinding.btnKey8 to "8", mpinBinding.btnKey9 to "9",
+            mpinBinding.btnKey0 to "0"
         )
-        numberButtons.forEach { (id, value) ->
-            view.findViewById<MaterialButton>(id).setOnClickListener { handleKeyClick(value) }
+        buttons.forEach { (btn, value) -> btn.setOnClickListener { handleKeyClick(value) } }
+
+        mpinBinding.btnKeyDel.setOnClickListener {
+            if (enteredMpin.isNotEmpty()) {
+                enteredMpin = enteredMpin.dropLast(1)
+                updateMpinDots(mpinBinding.layoutMpinDots, enteredMpin.length)
+            }
         }
-        view.findViewById<MaterialButton>(R.id.btnKeyBio).setOnClickListener {
+
+        mpinBinding.btnKeyBio.setOnClickListener {
             dialog.dismiss()
             showBiometricPrompt()
         }
-        view.findViewById<MaterialButton>(R.id.btnKeyDel).setOnClickListener {
-            if (enteredMpin.isNotEmpty()) {
-                enteredMpin = enteredMpin.dropLast(1)
-                updateMpinDots(view, enteredMpin.length)
-            }
-        }
-        dialog.setContentView(view)
+
         dialog.show()
     }
-    private fun updateMpinDots(view: View, length: Int) {
-        val dotsLayout = view.findViewById<LinearLayout>(R.id.layoutMpinDots)
+    private fun updateMpinDots(dotsLayout: LinearLayout, length: Int) {
         for (i in 0 until dotsLayout.childCount) {
             val dot = dotsLayout.getChildAt(i)
             if (i < length) {
                 dot.setBackgroundResource(R.drawable.mpin_dot_filled)
+                // ⭐ World-Class: Add a tiny pop animation
+                dot.animate().scaleX(1.2f).scaleY(1.2f).setDuration(100).withEndAction {
+                    dot.animate().scaleX(1.0f).scaleY(1.0f).setDuration(100).start()
+                }.start()
             } else {
                 dot.setBackgroundResource(R.drawable.mpin_dot_empty)
             }
