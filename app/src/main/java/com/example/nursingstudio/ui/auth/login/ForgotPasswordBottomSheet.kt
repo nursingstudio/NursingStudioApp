@@ -35,21 +35,34 @@ class ForgotPasswordBottomSheet : BottomSheetDialogFragment() {
 
     override fun onStart() {
         super.onStart()
-
-        dialog?.let { dialog ->
-            val bottomSheet = dialog.findViewById<View>(com.google.android.material.R.id.design_bottom_sheet)
+        dialog?.let { d ->
+            val bottomSheet = d.findViewById<View>(com.google.android.material.R.id.design_bottom_sheet)
             bottomSheet.layoutParams.height = ViewGroup.LayoutParams.WRAP_CONTENT
 
             val behavior = com.google.android.material.bottomsheet.BottomSheetBehavior.from(bottomSheet)
-
             behavior.state = com.google.android.material.bottomsheet.BottomSheetBehavior.STATE_EXPANDED
+            behavior.skipCollapsed = true
 
-            bottomSheet.requestLayout()
+            androidx.core.view.ViewCompat.setOnApplyWindowInsetsListener(bottomSheet) { v, insets ->
+                val imeInsets = insets.getInsets(androidx.core.view.WindowInsetsCompat.Type.ime())
+                v.setPadding(0, 0, 0, imeInsets.bottom)
+                insets
+            }
         }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        binding.etForgotEmail.addTextChangedListener(object : android.text.TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+
+                binding.tilForgotEmail.error = null
+                binding.tilForgotEmail.isErrorEnabled = false
+            }
+            override fun afterTextChanged(s: android.text.Editable?) {}
+        })
 
         binding.btnResetPassword.setOnClickListener {
             val email = binding.etForgotEmail.text.toString().trim()
@@ -58,6 +71,9 @@ class ForgotPasswordBottomSheet : BottomSheetDialogFragment() {
     }
 
     private fun handlePasswordResetFlow(email: String) {
+        val imm = requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as android.view.inputmethod.InputMethodManager
+        imm.hideSoftInputFromWindow(binding.etForgotEmail.windowToken, 0)
+
         // 1. Connectivity Check
         if (!isNetworkAvailable()) {
             showError(getString(R.string.no_internet))
