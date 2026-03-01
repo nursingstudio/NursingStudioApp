@@ -36,22 +36,25 @@ class ForgotPasswordBottomSheet : BottomSheetDialogFragment() {
     override fun onStart() {
         super.onStart()
         dialog?.let { d ->
+            // Get the internal Material BottomSheet container
             val bottomSheet = d.findViewById<View>(com.google.android.material.R.id.design_bottom_sheet)
+            val behavior = com.google.android.material.bottomsheet.BottomSheetBehavior.from(bottomSheet)
 
+            // 1. Keep it professional: Height should be WRAP_CONTENT
             bottomSheet.layoutParams.height = ViewGroup.LayoutParams.WRAP_CONTENT
 
-            val behavior = com.google.android.material.bottomsheet.BottomSheetBehavior.from(bottomSheet)
-            behavior.state = com.google.android.material.bottomsheet.BottomSheetBehavior.STATE_EXPANDED
+            // 2. Behavior Settings
             behavior.skipCollapsed = true
+            behavior.state = com.google.android.material.bottomsheet.BottomSheetBehavior.STATE_EXPANDED
 
-            d.window?.let { window ->
-                androidx.core.view.WindowCompat.setDecorFitsSystemWindows(window, false)
-            }
-
+            // 3. TOP-TIER KEYBOARD HANDLING:
+            // This adds padding to the BOTTOM of the sheet equal to the Keyboard height.
             androidx.core.view.ViewCompat.setOnApplyWindowInsetsListener(bottomSheet) { view, insets ->
                 val imeInsets = insets.getInsets(androidx.core.view.WindowInsetsCompat.Type.ime())
                 val systemBars = insets.getInsets(androidx.core.view.WindowInsetsCompat.Type.systemBars())
 
+                // We apply the keyboard height as padding so the "Send Link" button
+                // is pushed exactly above the keyboard.
                 view.setPadding(0, 0, 0, imeInsets.bottom + systemBars.bottom)
                 insets
             }
@@ -60,6 +63,15 @@ class ForgotPasswordBottomSheet : BottomSheetDialogFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        // Ensure the view scrolls to show the button when keyboard pops up
+        binding.etForgotEmail.setOnFocusChangeListener { _, hasFocus ->
+            if (hasFocus) {
+                binding.root.postDelayed({
+                    binding.root.smoothScrollTo(0, binding.btnResetPassword.bottom)
+                }, 200)
+            }
+        }
 
         binding.etForgotEmail.addTextChangedListener(object : android.text.TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
