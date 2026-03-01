@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/app_background">
@@ -9,13 +10,14 @@
         android:id="@+id/imgLogo"
         android:layout_width="150dp"
         android:layout_height="150dp"
-        android:contentDescription="@string/nursing_studio_logo"
-        android:src="@drawable/ic_login_logo"
-        android:scaleType="centerInside"
-        app:layout_constraintTop_toTopOf="parent"
         android:layout_marginTop="80dp"
+        android:contentDescription="@string/nursing_studio_logo"
+        android:scaleType="centerInside"
+        android:src="@drawable/ic_login_logo"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        tools:ignore="ImageContrastCheck" />
 
     <TextView
         android:id="@+id/tvAppTitle"
@@ -111,7 +113,8 @@
                         android:id="@+id/etEmail"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:inputType="textEmailAddress" />
+                        android:inputType="textEmailAddress"
+                        tools:ignore="TextContrastCheck" />
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <com.google.android.material.textfield.TextInputLayout
@@ -290,22 +293,6 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
-
-    <include
-        android:id="@+id/layoutForgotPassInclude"
-        layout="@layout/layout_forgot_password"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="parent" />
-
-    <include
-        android:id="@+id/layoutMpinKeypadInclude"
-        layout="@layout/layout_mpin_keypad"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="parent" />
 
     <RelativeLayout
         android:id="@+id/loadingOverlay"

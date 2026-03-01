@@ -217,5 +217,11 @@
     <string name="_8">8</string>
     <string name="_9">9</string>
     <string name="_0">0</string>
+    <string name="backspace">backspace</string>
+    <string name="password_reset_page">Password Reset Page</string>
+    <string name="no_internet">No Internet Connection! Please check your mobile Data/Wi-Fi. 🌐</string>
+    <string name="checking">Checking…</string>
+    <string name="reset_link_sent">Password Reset link sent! Please check your email inbox/spam folder.</string>
+    <string name="reset_hint">Note: If this email is registered, you will receive a reset link. If you don\'t receive it within a few minutes, please check your spam folder or register for a new account.</string>
 
 </resources>

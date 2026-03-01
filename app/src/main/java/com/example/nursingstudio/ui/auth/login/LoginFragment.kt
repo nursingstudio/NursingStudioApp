@@ -2,7 +2,6 @@ package com.example.nursingstudio.ui.auth.login
 
 import android.content.Context
 import android.content.Intent
-import android.os.Build
 import android.os.Bundle
 import android.os.CountDownTimer
 import android.text.Editable
@@ -11,9 +10,7 @@ import android.util.Patterns
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.WindowManager
 import android.view.inputmethod.InputMethodManager
-import android.widget.LinearLayout
 import android.widget.Toast
 import androidx.biometric.BiometricPrompt
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -29,9 +26,7 @@ import com.google.firebase.auth.PhoneAuthProvider
 import com.example.nursingstudio.AuthActivity
 import com.example.nursingstudio.utils.AppSettings
 import com.example.nursingstudio.utils.BiometricSettingsManager
-import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.textfield.TextInputLayout
-import com.google.firebase.auth.FirebaseAuth
 import java.util.Locale
 import androidx.core.content.edit
 import androidx.core.view.isGone
@@ -120,7 +115,7 @@ class LoginFragment : Fragment() {
             val timeLeft = getRemainingLockTime(email)
             binding.tilEmail.isErrorEnabled = true
             binding.tilEmail.error = "Account locked! Try after $timeLeft"
-            updateLoginButtonState(false)
+            updateLoginButtonState()
 
             // 2. ⭐ MODERN COROUTINE: Har second UI update karne ke liye
             // repeatOnLifecycle ensure karta hai ki app background mein jate hi timer ruk jaye (Battery bachegi!)
@@ -136,8 +131,7 @@ class LoginFragment : Fragment() {
                     // 3. Jaise hi lock khule, UI reset karein
                     binding.tilEmail.isErrorEnabled = false
                     binding.tilEmail.error = null
-                    val pass = binding.etPassword.text.toString().trim()
-                    updateLoginButtonState(pass.length >= 8 && Patterns.EMAIL_ADDRESS.matcher(email).matches())
+                    updateLoginButtonState()
                 }
             }
         } else {
@@ -175,7 +169,7 @@ class LoginFragment : Fragment() {
                     val userFriendlyMsg = when {
                         // Network Errors
                         msg.contains("network", true) || msg.contains("timeout", true) || msg.contains("unreachable", true) ->
-                            "No Internet! Please check your connection. 🌐"
+                            getString(R.string.no_internet)
 
                         // OTP Errors
                         msg.contains("OTP", true) || msg.contains("verification", true) || msg.contains("code", true) ->
@@ -254,6 +248,7 @@ class LoginFragment : Fragment() {
                 clearAllErrors()
                 clearAllFields()
                 binding.btnLoginAction.isEnabled = true
+                updateLoginButtonState()
                 countDownTimer?.cancel()
 
                 if (tab?.position == 0) {
@@ -297,7 +292,7 @@ class LoginFragment : Fragment() {
 
         // 1. Connectivity Check (World-Class Security)
         if (!isNetworkAvailable()) {
-            toast("No Internet Connection! Please check your Data/WiFi. 🌐")
+            toast(getString(R.string.no_internet))
             AppSettings.triggerErrorEffect(requireContext(), binding.btnLoginAction)
             return
         }
@@ -329,7 +324,7 @@ class LoginFragment : Fragment() {
         val otp = binding.etOtpLogin.text.toString().trim()
 
         if (!isNetworkAvailable()) {
-            toast("No Internet Connection! 🌐")
+            toast(getString(R.string.no_internet))
             AppSettings.triggerErrorEffect(requireContext(), binding.btnLoginAction)
             return
         }
@@ -452,7 +447,7 @@ class LoginFragment : Fragment() {
         binding.etOtpLogin.setText("")
     }
 
-    private fun updateLoginButtonState(isEnabled: Boolean) {
+    private fun updateLoginButtonState() {
         binding.btnLoginAction.isEnabled = true
         binding.btnLoginAction.alpha = 1.0f
     }
@@ -466,52 +461,10 @@ class LoginFragment : Fragment() {
             override fun afterTextChanged(s: Editable?) {}
         }
     private fun showForgotPasswordSheet() {
-        val dialog = BottomSheetDialog(requireContext(), R.style.BottomSheetDialogTheme)
-
-        // ⭐ GOLD STANDARD: Accessing views via <include> binding
-        val sheetBinding = binding.layoutForgotPassInclude
-
-        (sheetBinding.root.parent as? ViewGroup)?.removeView(sheetBinding.root)
-        dialog.setContentView(sheetBinding.root)
-
-        sheetBinding.etForgotEmail.addTextChangedListener(object : TextWatcher {
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                sheetBinding.tilForgotEmail.error = null
-                sheetBinding.tilForgotEmail.isErrorEnabled = false
-            }
-            override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
-            override fun afterTextChanged(p0: Editable?) {}
-        })
-
-        sheetBinding.btnResetPassword.setOnClickListener {
-            val email = sheetBinding.etForgotEmail.text.toString().trim()
-            if (email.isEmpty() || !Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-                sheetBinding.tilForgotEmail.isErrorEnabled = true
-                sheetBinding.tilForgotEmail.error = "Enter a valid registered email"
-                AppSettings.triggerErrorEffect(requireContext(), sheetBinding.tilForgotEmail)
-            } else {
-                sendPasswordReset(email, dialog)
-            }
-        }
-        dialog.show()
+        val bottomSheet = ForgotPasswordBottomSheet()
+        bottomSheet.show(childFragmentManager, "ForgotPasswordSheet")
     }
-    private fun sendPasswordReset(
-        email: String,
-        dialog: BottomSheetDialog
-    ) {
-        binding.loadingOverlay.visibility = View.VISIBLE
 
-        FirebaseAuth.getInstance().sendPasswordResetEmail(email)
-            .addOnCompleteListener { task ->
-                binding.loadingOverlay.visibility = View.GONE
-                if (task.isSuccessful) {
-                    dialog.dismiss()
-                    toast("Reset link sent! Please check your email inbox. 📧")
-                } else {
-                    toast("Error: ${task.exception?.message}")
-                }
-            }
-    }
     private fun showBiometricPrompt() {
         val executor = ContextCompat.getMainExecutor(requireContext())
         val biometricPrompt = BiometricPrompt(this, executor,
@@ -552,105 +505,21 @@ class LoginFragment : Fragment() {
         biometricPrompt.authenticate(promptInfo)
     }
     private fun showMpinBottomSheet() {
-        val dialog = BottomSheetDialog(requireContext(), R.style.GlassBottomSheetDialogTheme)
-        val mpinBinding = binding.layoutMpinKeypadInclude
-
-        // Safety check: Remove from parent before setting to dialog
-        (mpinBinding.root.parent as? ViewGroup)?.removeView(mpinBinding.root)
-        dialog.setContentView(mpinBinding.root)
-
-        // Premium Blur Effect (API 31+)
-        dialog.window?.let { window ->
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                window.attributes.blurBehindRadius = 30
-                window.addFlags(WindowManager.LayoutParams.FLAG_BLUR_BEHIND)
-            }
-        }
-
-        var enteredMpin = ""
-        val bioManager = BiometricSettingsManager(requireContext())
-        val correctMpin = bioManager.getMPIN()
-
-        // Keypad Logic with Animation
-        val handleKeyClick: (String) -> Unit = { key ->
-            if (enteredMpin.length < 4) {
-                enteredMpin += key
-                updateMpinDots(mpinBinding.layoutMpinDots, enteredMpin.length)
-
-                if (enteredMpin.length == 4) {
-                    if (enteredMpin == correctMpin) {
-                        dialog.dismiss()
-                        val savedEmail = bioManager.getSavedEmail()
-                        val savedPass = bioManager.getSavedPass()
-                        if (savedPass != "OTP_USER" && savedEmail != null) {
-                            viewModel.loginWithEmail(savedEmail, savedPass)
-                        } else {
-                            proceedToHome()
-                        }
-                    } else {
-                        AppSettings.triggerVibration(requireContext(), 200)
-                        toast("Incorrect MPIN!")
-                        enteredMpin = ""
-                        updateMpinDots(mpinBinding.layoutMpinDots, 0)
-                    }
+        val mpinSheet = MpinBottomSheet(
+            onMpinSuccess = { email, pass ->
+                // Jab MPIN sahi ho jaye
+                if (email != null && pass != null && pass != "OTP_USER") {
+                    viewModel.loginWithEmail(email, pass)
+                } else {
+                    proceedToHome()
                 }
+            },
+            onBiometricRequest = {
+                // Jab user fingerprint button dabaye
+                showBiometricPrompt()
             }
-        }
-
-        // Bind number buttons (0-9)
-        val buttons = listOf(
-            mpinBinding.btnKey1 to "1", mpinBinding.btnKey2 to "2", mpinBinding.btnKey3 to "3",
-            mpinBinding.btnKey4 to "4", mpinBinding.btnKey5 to "5", mpinBinding.btnKey6 to "6",
-            mpinBinding.btnKey7 to "7", mpinBinding.btnKey8 to "8", mpinBinding.btnKey9 to "9",
-            mpinBinding.btnKey0 to "0"
         )
-        buttons.forEach { (btn, value) -> btn.setOnClickListener { handleKeyClick(value) } }
-
-        // ⭐ GOLD STANDARD: Delete Button with Long Press
-        mpinBinding.btnKeyDel.setOnClickListener {
-            if (enteredMpin.isNotEmpty()) {
-                enteredMpin = enteredMpin.dropLast(1)
-                updateMpinDots(mpinBinding.layoutMpinDots, enteredMpin.length)
-            }
-        }
-
-        // Long press to clear everything instantly
-        mpinBinding.btnKeyDel.setOnLongClickListener {
-            if (enteredMpin.isNotEmpty()) {
-                enteredMpin = ""
-                updateMpinDots(mpinBinding.layoutMpinDots, 0)
-                AppSettings.triggerVibration(requireContext(), 150) // Stronger feedback
-                toast("Cleared")
-            }
-            true // Consumption of event
-        }
-
-        mpinBinding.btnKeyBio.setOnClickListener {
-            dialog.dismiss()
-            showBiometricPrompt()
-        }
-
-        dialog.show()
-    }
-    private fun updateMpinDots(dotsLayout: LinearLayout, length: Int) {
-        for (i in 0 until dotsLayout.childCount) {
-            val dot = dotsLayout.getChildAt(i)
-            if (i < length) {
-                dot.setBackgroundResource(R.drawable.mpin_dot_filled)
-
-                dot.animate()
-                    .scaleX(1.3f)
-                    .scaleY(1.3f)
-                    .setDuration(100)
-                    .withEndAction {
-                        dot.animate().scaleX(1.0f).scaleY(1.0f).setDuration(100).start()
-                    }.start()
-            } else {
-                dot.setBackgroundResource(R.drawable.mpin_dot_empty)
-                dot.scaleX = 1.0f
-                dot.scaleY = 1.0f
-            }
-        }
+        mpinSheet.show(childFragmentManager, "MpinSheet")
     }
     private fun isNetworkAvailable(): Boolean {
         val connectivityManager = requireContext().getSystemService(Context.CONNECTIVITY_SERVICE) as android.net.ConnectivityManager
