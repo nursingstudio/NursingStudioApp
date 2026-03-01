@@ -25,11 +25,27 @@ class ForgotPasswordBottomSheet : BottomSheetDialogFragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setStyle(STYLE_NORMAL, R.style.BottomSheetDialogTheme)
+
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = LayoutForgotPasswordBinding.inflate(inflater, container, false)
         return binding.root
+    }
+
+    override fun onStart() {
+        super.onStart()
+
+        dialog?.let { dialog ->
+            val bottomSheet = dialog.findViewById<View>(com.google.android.material.R.id.design_bottom_sheet)
+            bottomSheet.layoutParams.height = ViewGroup.LayoutParams.WRAP_CONTENT
+
+            val behavior = com.google.android.material.bottomsheet.BottomSheetBehavior.from(bottomSheet)
+
+            behavior.state = com.google.android.material.bottomsheet.BottomSheetBehavior.STATE_EXPANDED
+
+            bottomSheet.requestLayout()
+        }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -61,15 +77,16 @@ class ForgotPasswordBottomSheet : BottomSheetDialogFragment() {
             return
         }
 
-        // 3. Modern 2026 Logic: Direct send with Error Handling
+        // 3. Modern 2026 Logic & modern progress handling
         binding.btnResetPassword.isEnabled = false
-        binding.btnResetPassword.text = getString(R.string.checking)
-
+        binding.btnResetPassword.text = ""
+        binding.progressLoading.visibility = View.VISIBLE
         sendResetEmail(email)
     }
 
     private fun sendResetEmail(email: String) {
         auth.sendPasswordResetEmail(email).addOnCompleteListener { task ->
+            binding.progressLoading.visibility = View.GONE
             binding.btnResetPassword.isEnabled = true
             binding.btnResetPassword.text = getString(R.string.send_reset_link)
 
@@ -89,9 +106,11 @@ class ForgotPasswordBottomSheet : BottomSheetDialogFragment() {
                     Toast.makeText(context, "Redirecting to Register...", Toast.LENGTH_SHORT).show()
 
                     binding.root.postDelayed({
-                        dismiss()
-                        (activity as? AuthActivity)?.showRegister()
-                    }, 2000)
+                        if (isAdded) {
+                            dismiss()
+                            (activity as? AuthActivity)?.showRegister()
+                        }
+                    }, 3500)
                 } else {
                     // Other errors (like bad format, network, etc)
                     showError("Error: ${exception?.localizedMessage}")
