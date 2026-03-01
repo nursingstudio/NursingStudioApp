@@ -4,7 +4,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.res.ColorStateList
 import android.graphics.Color
-import android.os.Build
 import android.os.Bundle
 import android.os.CountDownTimer
 import android.os.SystemClock
@@ -50,6 +49,7 @@ import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 import java.util.TimeZone
+import androidx.core.graphics.toColorInt
 
 class RegisterFragment : Fragment() {
     private var _binding: FragmentRegisterBinding? = null
@@ -84,7 +84,6 @@ class RegisterFragment : Fragment() {
         setupDynamicVisibility()
         setupPasswordStrengthChecker()
 
-        // Resend Button Click Listener (Jo tune miss kiya tha)
         binding.btnResendOtp.setOnClickListener {
             sendOtp()
         }
@@ -92,7 +91,7 @@ class RegisterFragment : Fragment() {
         binding.btnSendOtp.setOnClickListener {
             if (SystemClock.elapsedRealtime() - lastClickTime < 2000) return@setOnClickListener
             lastClickTime = SystemClock.elapsedRealtime()
-            hideKeyboard() //Keyboard hide krne ke liye
+            hideKeyboard()
             sendOtp()
         }
 
@@ -105,7 +104,6 @@ class RegisterFragment : Fragment() {
             unlockMobileField()
         }
 
-        // Corrected Observer name
         viewModel.regStatus.observe(viewLifecycleOwner) { result ->
             when (result) {
                 is RegResult.Loading -> {
@@ -124,7 +122,27 @@ class RegisterFragment : Fragment() {
                 is RegResult.Error -> {
                     binding.progressBar.visibility = View.GONE
                     binding.btnRegister.isEnabled = true
-                    toast("Error: ${result.message}")
+
+                    val msg = result.message
+
+                    // 2026 Gold Standard: Professional Mapping
+                    val friendlyMsg = when {
+                        msg.contains("network", true) || msg.contains("timeout", true) -> getString(R.string.no_internet)
+                        msg.contains("email-already-in-use", true) -> "This email is already registered. Please Login."
+                        msg.contains("invalid-email", true) -> "Invalid email, Please try again."
+                        msg.contains("too-many-requests", true) -> "Server busy! Please try again after some time. ⏳"
+                        else -> msg
+                    }
+
+                    // Specific field par error dikhana
+                    if (msg.contains("email", true)) {
+                        binding.tilEmail.isErrorEnabled = true
+                        binding.tilEmail.error = friendlyMsg
+                        AppSettings.triggerErrorEffect(requireContext(), binding.tilEmail)
+                    } else {
+                        toast(friendlyMsg)
+                        AppSettings.triggerErrorEffect(requireContext(), binding.btnRegister)
+                    }
                 }
             }
         }
@@ -141,8 +159,18 @@ class RegisterFragment : Fragment() {
 
                 is OtpResult.Error -> {
                     binding.progressBar.visibility = View.GONE
-                    binding.tilOtp.error = result.message
-                    AppSettings.triggerVibration(requireContext(), 100)
+                    val msg = result.message
+
+                    val friendlyOtpMsg = when {
+                        msg.contains("invalid-verification-code", true) -> "Incorrect OTP! Please check again. 🔢"
+                        msg.contains("session-expired", true) -> "OTP Expired! Please resend. ⏳"
+                        msg.contains("network", true) -> getString(R.string.no_internet)
+                        else -> msg
+                    }
+
+                    binding.tilOtp.isErrorEnabled = true
+                    binding.tilOtp.error = friendlyOtpMsg
+                    AppSettings.triggerErrorEffect(requireContext(), binding.tilOtp)
                 }
             }
         }
@@ -157,12 +185,8 @@ class RegisterFragment : Fragment() {
 
             }
         }
-// Buttons push effect
-        // --- 1. CALL YAHAN HONI CHAHIYE ---
         setupButtonEffects()
-    } // onViewCreated ka bracket
-
-    // --- 2. FUNCTION YAHAN HONA CHAHIYE (BAHAR) ---
+    }
     private fun setupButtonEffects() {
         with(binding) {
             AppSettings.setPushEffect(btnSendOtp)
@@ -171,8 +195,6 @@ class RegisterFragment : Fragment() {
             AppSettings.setPushEffect(btnResendOtp)
         }
     }
-
-
     private fun setupUniversalErrorCleaner() {
         val inputMap = mapOf(
             binding.etName to binding.tilName,
@@ -188,7 +210,7 @@ class RegisterFragment : Fragment() {
             binding.etOccupationOther to binding.tilOccupationOther,
             binding.etCountryOther to binding.tilCountryOther,
             binding.etStateOther to binding.tilStateOther,
-            binding.etOtp to binding.tilOtp // <--- Ye line add kar di hai
+            binding.etOtp to binding.tilOtp
         )
 
         inputMap.forEach { (editText, layout) ->
@@ -196,7 +218,7 @@ class RegisterFragment : Fragment() {
                 override fun afterTextChanged(s: Editable?) {
                     if (!s.isNullOrEmpty()) {
                         layout.error = null
-                        layout.isErrorEnabled = false // Gap turant khatam!
+                        layout.isErrorEnabled = false
                     }
                 }
 
@@ -212,7 +234,6 @@ class RegisterFragment : Fragment() {
             })
         }
 
-        // Mobile Field ke liye special cleaner (Kyunki ye TextInputLayout nahi hai)
         binding.etMobile.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(s: Editable?) {
                 if (!s.isNullOrEmpty()) {
@@ -240,7 +261,7 @@ class RegisterFragment : Fragment() {
 
         // 4. Default Selection: Aaj se 17 saal piche (Nursing Rule)
         val defaultCalendar = Calendar.getInstance(timeZoneUTC)
-        defaultCalendar.add(Calendar.YEAR, -17) // 17 saal minus kar diye
+        defaultCalendar.add(Calendar.YEAR, -17)
         val defaultSelection = defaultCalendar.timeInMillis
 
         // 5. Constraints banana
@@ -256,7 +277,7 @@ class RegisterFragment : Fragment() {
             .setTheme(R.style.CustomMaterialCalendar)
             .setTitleText("Select Date of Birth")
             .setCalendarConstraints(constraints)
-            .setSelection(defaultSelection) // Gola (Selection) 17 saal piche wali date par hoga
+            .setSelection(defaultSelection)
             .build()
 
         datePicker.show(childFragmentManager, "DATE_PICKER")
@@ -306,7 +327,6 @@ class RegisterFragment : Fragment() {
                 spStateIndia,
                 "Select State"
             )
-            // Country Other Condition
             if (spCountry.selectedItem == "Other") {
                 if (etCountryOther.text.isNullOrEmpty()) return showError(
                     tilCountryOther,
@@ -346,7 +366,6 @@ class RegisterFragment : Fragment() {
             // --- UPDATE: Strong Password Validation (8 Chars + Complexity) ---
             val password = binding.etPassword.text.toString().trim()
             if (!password.matches(passwordPattern.toRegex())) {
-                // Professional Tip: User ko exact requirement batao taki wo irritate na ho
                 return showError(tilPassword, "Password needs: 8+ chars, 1 Upper, 1 Lower, 1 Number & 1 Special Char")
             }
 
@@ -355,16 +374,10 @@ class RegisterFragment : Fragment() {
         return true
     }
 
-    // showError Fix (Redirecting to top fix)
-    //Exact Redirect/Scroll Fix (Auto-Start Redirect Problem Solve)
     private fun showError(view: View, message: String): Boolean {
-        // 1. Toast message dikhao
         toast(message)
-
-        // 2. CENTRAL AC: Shake + Vibrate Effect (One line for everything!)
         AppSettings.triggerErrorEffect(requireContext(), view)
 
-        // 3. UI logic for different views
         when (view) {
             is Spinner -> {
                 view.background = ContextCompat.getDrawable(requireContext(), R.drawable.spinner_error_bg)
@@ -374,18 +387,19 @@ class RegisterFragment : Fragment() {
                 view.error = message
             }
             is CheckBox -> {
-                // Checkbox ke liye optional red tint de sakte hain
                 view.buttonTintList = ColorStateList.valueOf(Color.RED)
             }
         }
         view.requestFocus()
 
-        // 4. Smooth Scroll Logic (Top-Level UX)
         binding.registrationScrollView.postDelayed({
-            val vTop = view.top
-            val parent = view.parent as? View
-            val finalTop = if (parent != null && parent !is ScrollView) vTop + parent.top else vTop
-            binding.registrationScrollView.smoothScrollTo(0, finalTop - 150)
+            if (isAdded && _binding != null) {
+                val vTop = view.top
+                val parent = view.parent as? View
+                val finalTop =
+                    if (parent != null && parent !is ScrollView) vTop + parent.top else vTop
+                binding.registrationScrollView.smoothScrollTo(0, finalTop - 150)
+            }
         }, 100)
 
         return false
@@ -398,7 +412,7 @@ class RegisterFragment : Fragment() {
     }
 
     private fun unlockMobileField() {
-        countDownTimer?.cancel() // Timer ko turant roko
+        countDownTimer?.cancel()
 
         binding.etMobile.isEnabled = true
         binding.ccp.isEnabled = true
@@ -408,10 +422,10 @@ class RegisterFragment : Fragment() {
         binding.tvChangeNumber.visibility = View.GONE
         binding.tvTimer.visibility = View.GONE
         binding.btnSendOtp.visibility = View.VISIBLE
-        binding.btnSendOtp.text = "Send OTP"
+        binding.btnSendOtp.text = getString(R.string.send_otp)
 
-        binding.etOtp.setText("") // Purana OTP saaf kardo
-        binding.etMobile.requestFocus() // Cursor wahan pahuncha do
+        binding.etOtp.setText("")
+        binding.etMobile.requestFocus()
     }
 
     private fun verifyOtpManual() {
@@ -423,7 +437,6 @@ class RegisterFragment : Fragment() {
 
         if (verificationId != null) {
             val credential = PhoneAuthProvider.getCredential(verificationId!!, code)
-            // AB FIREBASE NAHI, VIEWMODEL KO CALL KAREIN
             viewModel.verifyOtp(credential)
         } else {
             toast("Verification ID missing, try resending")
@@ -436,7 +449,6 @@ class RegisterFragment : Fragment() {
         if (mobile.length != 10) {
             toast("Enter 10 digit mobile number")
             binding.etMobile.requestFocus()
-// Centralized effect call
             AppSettings.triggerErrorEffect(requireContext(), binding.etMobile)
             return
         }
@@ -444,17 +456,14 @@ class RegisterFragment : Fragment() {
         hideKeyboard()
         binding.loadingOverlay.visibility = View.VISIBLE
 
-        // Visual feedback: Lock fields
         binding.etMobile.isEnabled = false
         binding.ccp.isEnabled = false
         binding.etMobile.alpha = 0.6f
 
-        // --- ⭐ Master Hub Call (World-Class Security) ⭐ ---
         (activity as? AuthActivity)?.sendOtp(mobile) { id ->
             binding.loadingOverlay.visibility = View.GONE
             verificationId = id
 
-            // Tumhari purani UI Logic (Safe and Secure)
             binding.layoutOtpBox.visibility = View.VISIBLE
             binding.btnSendOtp.visibility = View.GONE
             binding.tvChangeNumber.visibility = View.VISIBLE
@@ -466,16 +475,13 @@ class RegisterFragment : Fragment() {
 
     private fun startTimer() {
         binding.tvTimer.visibility = View.VISIBLE
-        // Professional: Timer sirf text dikhayega, click nahi hoga
-        binding.tvTimer.text = "Resend in 60s"
-
-        // YAHAN SE setOnClickListener HATA DIYA HAI
-
+        binding.tvTimer.text = getString(R.string.resend_in_seconds, 60)
         binding.btnResendOtp.visibility = View.GONE
         countDownTimer?.cancel()
         countDownTimer = object : CountDownTimer(60000, 1000) {
             override fun onTick(m: Long) {
-                binding.tvTimer.text = "Resend in ${m/1000}s"
+                val secondsRemaining = (m / 1000).toInt()
+                binding.tvTimer.text = getString(R.string.resend_in_seconds, secondsRemaining)
             }
             override fun onFinish() {
                 binding.tvTimer.visibility = View.GONE
@@ -492,17 +498,14 @@ class RegisterFragment : Fragment() {
         sheetBinding.tvPolicyTitle.text = title
         sheetBinding.tvPolicyContent.text = content
 
-        // Scroll Logic: Bottom tak pahunchne par button enable hoga
         sheetBinding.scrollContainer.setOnScrollChangeListener(NestedScrollView.OnScrollChangeListener { v, _, scrollY, _, _ ->
             val child = v.getChildAt(0)
-            // Check if user reached bottom (diff <= 0)
             val diff = (child.bottom - (v.height + scrollY))
 
             if (diff <= 0 && !sheetBinding.btnAccept.isEnabled) {
                 sheetBinding.btnAccept.isEnabled = true
-                // Smoothly alpha change karke Saffron highlight kar do
                 sheetBinding.btnAccept.animate().alpha(1f).setDuration(500).start()
-                AppSettings.triggerVibration(requireContext(), 50) // User ko feedback milega
+                AppSettings.triggerVibration(requireContext(), 50)
             }
         })
 
@@ -518,44 +521,34 @@ class RegisterFragment : Fragment() {
         val spannable = SpannableString(fullText)
         val saffron = ContextCompat.getColor(requireContext(), R.color.saffron_dark)
 
-        // 1. Terms & Conditions ka block
+        // 1. Terms & Conditions Block
         val tcClick = object : ClickableSpan() {
             override fun onClick(v: View) {
-                // Strings.xml se text uthaya aur HTML format (Bold tags) enable kiya
-                val tncHtml = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                    Html.fromHtml(getString(R.string.tnc_content), Html.FROM_HTML_MODE_COMPACT)
-                } else {
-                    Html.fromHtml(getString(R.string.tnc_content))
-                }
+                val tncHtml = Html.fromHtml(getString(R.string.tnc_content), Html.FROM_HTML_MODE_COMPACT)
                 showPolicyBottomSheet("Terms & Conditions", tncHtml)
             }
-
             override fun updateDrawState(ds: TextPaint) {
-                ds.color = saffron // Saffron color wahi rahega
+                ds.color = saffron
                 ds.isUnderlineText = false
                 ds.isFakeBoldText = true
             }
         }
 
-// 2. Privacy Policy ka block (Isko bhi aise hi replace kar do)
+        // 2. Privacy Policy Block
         val ppClick = object : ClickableSpan() {
             override fun onClick(v: View) {
-                // Strings.xml se Privacy wala text uthaya
-                val privacyHtml = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                    Html.fromHtml(getString(R.string.privacy_content), Html.FROM_HTML_MODE_COMPACT)
-                } else {
-                    Html.fromHtml(getString(R.string.privacy_content))
-                }
+                // Modern 2026 Standard Way
+                val privacyHtml = Html.fromHtml(getString(R.string.privacy_content), Html.FROM_HTML_MODE_COMPACT)
                 showPolicyBottomSheet("Privacy Policy", privacyHtml)
             }
-
             override fun updateDrawState(ds: TextPaint) {
-                ds.color = saffron // Saffron color wahi rahega
+                ds.color = saffron
                 ds.isUnderlineText = false
                 ds.isFakeBoldText = true
             }
         }
 
+        // ... index calculation ...
         val tcStart = fullText.indexOf("Terms & Conditions")
         val ppStart = fullText.indexOf("Privacy Policy")
 
@@ -570,12 +563,10 @@ class RegisterFragment : Fragment() {
     }
 
     private fun setupDynamicVisibility() {
-        // Education Spinner: tilEducationOther pass kiya
         binding.spEducation.onItemSelectedListener = simpleListener(binding.tilEducationOther) {
             binding.tilEducationOther.visibility = if (it == "Other") View.VISIBLE else View.GONE
         }
 
-        // Occupation Spinner: tilOccupationOther pass kiya
         binding.spOccupation.onItemSelectedListener = simpleListener(binding.tilOccupationOther) {
             binding.tilOccupationOther.visibility = if (it == "Other") View.VISIBLE else View.GONE
         }
@@ -613,11 +604,9 @@ class RegisterFragment : Fragment() {
             )
             spins[i].adapter = adapter
 
-            // --- WORLD CLASS FIX: UNIVERSAL RESET ---
             spins[i].onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
                 override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
                     if (position > 0) {
-                        // Reset background to normal when valid item is selected
                         parent?.background = ContextCompat.getDrawable(requireContext(), R.drawable.spinner_bg)
                     }
                 }
@@ -625,19 +614,21 @@ class RegisterFragment : Fragment() {
             }
         }
     }
-
-
     private fun performRegistration() {
+        if (!isNetworkAvailable()) {
+            toast(getString(R.string.no_internet))
+            AppSettings.triggerErrorEffect(requireContext(), binding.btnRegister)
+            return
+        }
+
         val userData = prepareUserData()
         val currentOtp = binding.etOtp.text.toString().trim()
 
         if (isOtpVerified) {
-            // !! lagane se nullable error khatam ho jayega
             val phoneCred = if (verificationId != null) {
                 PhoneAuthProvider.getCredential(verificationId!!, currentOtp)
             } else null
 
-            // phoneCred!! ensure karta hai ki compiler ko valid credential mile
             viewModel.startRegistration(
                 binding.etEmail.text.toString().trim(),
                 binding.etPassword.text.toString().trim(),
@@ -678,7 +669,6 @@ class RegisterFragment : Fragment() {
             override fun onItemSelected(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
                 val selected = p0?.getItemAtPosition(p2).toString()
 
-                // Professional Fix: Reset border to normal when item is selected
                 if (p2 > 0) {
                     p0?.background = ContextCompat.getDrawable(requireContext(), R.drawable.spinner_bg)
                     layout?.error = null
@@ -701,7 +691,7 @@ class RegisterFragment : Fragment() {
 
         binding.btnSendOtp.apply {
             visibility = View.VISIBLE
-            text = "Verified ✅"
+            text = context.getString(R.string.verified)
             isEnabled = false
             setTextColor(ContextCompat.getColor(requireContext(), android.R.color.white))
         }
@@ -747,12 +737,12 @@ class RegisterFragment : Fragment() {
                 progress = 25
             }
             score <= 4 -> {
-                color = Color.parseColor("#FFA500") // Orange
+                color = "#FFA500".toColorInt() // Orange
                 label = "Medium: Need ${missingCriteria.joinToString(", ")}"
                 progress = 60
             }
             score == 5 -> {
-                color = Color.parseColor("#4CAF50") // Green
+                color = "#4CAF50".toColorInt() // Green
                 label = "Strong Password"
                 progress = 100
             }
@@ -767,6 +757,13 @@ class RegisterFragment : Fragment() {
         binding.passwordStrengthProgress.setIndicatorColor(color)
         binding.tvStrengthLabel.text = label
         binding.tvStrengthLabel.setTextColor(color)
+    }
+
+    private fun isNetworkAvailable(): Boolean {
+        val connectivityManager = requireContext().getSystemService(Context.CONNECTIVITY_SERVICE) as android.net.ConnectivityManager
+        val network = connectivityManager.activeNetwork ?: return false
+        val capabilities = connectivityManager.getNetworkCapabilities(network) ?: return false
+        return capabilities.hasCapability(android.net.NetworkCapabilities.NET_CAPABILITY_INTERNET)
     }
 
     override fun onDestroyView() { super.onDestroyView(); countDownTimer?.cancel(); _binding = null }
