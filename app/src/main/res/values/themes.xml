@@ -17,7 +17,14 @@
 
         <item name="android:windowDisablePreview">true</item>
 
+        <item name="colorError">@color/error_saffron</item>
+        <item name="helperTextTextAppearance">@style/TextAppearance.App.Error</item>
+        <item name="errorTextAppearance">@style/TextAppearance.App.Error</item>
     </style>
+
+    <style name="TextAppearance.App.Error" parent="TextAppearance.MaterialComponents.Caption">
+        <item name="android:textColor">@color/error_saffron</item>
+        <item name="android:textStyle">bold</item> </style>
 
 // splash screen theme //
     <style name="Theme.NursingStudio.Splash" parent="Theme.Material3.Light.NoActionBar">
