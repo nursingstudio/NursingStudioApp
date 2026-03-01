@@ -37,15 +37,22 @@ class ForgotPasswordBottomSheet : BottomSheetDialogFragment() {
         super.onStart()
         dialog?.let { d ->
             val bottomSheet = d.findViewById<View>(com.google.android.material.R.id.design_bottom_sheet)
+
             bottomSheet.layoutParams.height = ViewGroup.LayoutParams.WRAP_CONTENT
 
             val behavior = com.google.android.material.bottomsheet.BottomSheetBehavior.from(bottomSheet)
             behavior.state = com.google.android.material.bottomsheet.BottomSheetBehavior.STATE_EXPANDED
             behavior.skipCollapsed = true
 
-            androidx.core.view.ViewCompat.setOnApplyWindowInsetsListener(bottomSheet) { v, insets ->
+            d.window?.let { window ->
+                androidx.core.view.WindowCompat.setDecorFitsSystemWindows(window, false)
+            }
+
+            androidx.core.view.ViewCompat.setOnApplyWindowInsetsListener(bottomSheet) { view, insets ->
                 val imeInsets = insets.getInsets(androidx.core.view.WindowInsetsCompat.Type.ime())
-                v.setPadding(0, 0, 0, imeInsets.bottom)
+                val systemBars = insets.getInsets(androidx.core.view.WindowInsetsCompat.Type.systemBars())
+
+                view.setPadding(0, 0, 0, imeInsets.bottom + systemBars.bottom)
                 insets
             }
         }
@@ -71,8 +78,8 @@ class ForgotPasswordBottomSheet : BottomSheetDialogFragment() {
     }
 
     private fun handlePasswordResetFlow(email: String) {
-        val imm = requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as android.view.inputmethod.InputMethodManager
-        imm.hideSoftInputFromWindow(binding.etForgotEmail.windowToken, 0)
+        val controller = androidx.core.view.WindowCompat.getInsetsController(requireDialog().window!!, binding.root)
+        controller.hide(androidx.core.view.WindowInsetsCompat.Type.ime())
 
         // 1. Connectivity Check
         if (!isNetworkAvailable()) {
