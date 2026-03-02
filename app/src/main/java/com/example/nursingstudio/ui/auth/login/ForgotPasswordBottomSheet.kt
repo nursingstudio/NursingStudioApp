@@ -36,28 +36,21 @@ class ForgotPasswordBottomSheet : BottomSheetDialogFragment() {
     override fun onStart() {
         super.onStart()
         dialog?.let { d ->
-            // Get the internal Material BottomSheet container
             val bottomSheet = d.findViewById<View>(com.google.android.material.R.id.design_bottom_sheet)
             val behavior = com.google.android.material.bottomsheet.BottomSheetBehavior.from(bottomSheet)
 
-            // 1. WORLD-CLASS DYNAMIC HEIGHT LOGIC (2026 Standard)
-            val windowMetrics = requireActivity().windowManager.currentWindowMetrics
-            val screenHeight = windowMetrics.bounds.height()
-            // 1. Keep it professional: Height should be WRAP_CONTENT
-            bottomSheet.layoutParams.height = ViewGroup.LayoutParams.WRAP_CONTENT
-            behavior.maxHeight = (screenHeight * 0.9).toInt()
+            // 1. IMPORTANT: Window ko resize karne ke liye set karein
+            d.window?.setSoftInputMode(android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE)
 
-            // 2. Behavior Settings
+            // 2. Height setup
+            bottomSheet.layoutParams.height = ViewGroup.LayoutParams.WRAP_CONTENT
             behavior.skipCollapsed = true
             behavior.state = com.google.android.material.bottomsheet.BottomSheetBehavior.STATE_EXPANDED
 
-            // 3. TOP-TIER KEYBOARD HANDLING:
             androidx.core.view.ViewCompat.setOnApplyWindowInsetsListener(bottomSheet) { view, insets ->
-                val imeInsets = insets.getInsets(androidx.core.view.WindowInsetsCompat.Type.ime())
-                val systemBars = insets.getInsets(androidx.core.view.WindowInsetsCompat.Type.systemBars())
-                val extraSpacing = (20 * resources.displayMetrics.density).toInt()
+                val imeHeight = insets.getInsets(androidx.core.view.WindowInsetsCompat.Type.ime()).bottom
 
-                view.setPadding(0, 0, 0, imeInsets.bottom + systemBars.bottom + extraSpacing)
+                view.setPadding(0, 0, 0, imeHeight)
                 insets
             }
         }
@@ -69,9 +62,12 @@ class ForgotPasswordBottomSheet : BottomSheetDialogFragment() {
         // Ensure the view scrolls to show the button when keyboard pops up
         binding.etForgotEmail.setOnFocusChangeListener { _, hasFocus ->
             if (hasFocus) {
+                // 2026 Standard: Smooth scroll with a slight delay to wait for keyboard
                 binding.root.postDelayed({
-                    binding.root.smoothScrollTo(0, binding.btnResetPassword.bottom)
-                }, 200)
+                    // Scroll to the very bottom so button is visible
+                    val lastChild = binding.root.getChildAt(0)
+                    binding.root.smoothScrollTo(0, lastChild?.bottom ?: 0)
+                }, 300)
             }
         }
 
