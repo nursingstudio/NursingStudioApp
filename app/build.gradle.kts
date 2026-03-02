@@ -10,7 +10,7 @@ android {
 
     defaultConfig {
         applicationId = "com.example.nursingstudio"
-        minSdk = 29
+        minSdk = 31
         targetSdk = 36
         versionCode = 1
         versionName = "1.0"
@@ -20,7 +20,10 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            // Abhi ke liye ise false kar rahe hain taki aap testing kar sake
+            isMinifyEnabled = false  // App size chhota karega (R8 compiler) jab true krenge
+            isShrinkResources = false // Faltu images/resources hata dega, jab true krenge
+
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -80,6 +83,13 @@ dependencies {
     implementation(libs.circleimageview)
     implementation(libs.androidx.core.splashscreen)
     implementation(libs.lottie)
+
+    // Navigation & Lifecycle
+    implementation(libs.androidx.navigation.fragment.ktx)
+    implementation(libs.androidx.navigation.ui.ktx)
+
+    // Performance: Coil (Better than Glide/Picasso for 2026)
+    implementation(libs.coil)
 
     // Compose
     implementation(libs.androidx.lifecycle.runtime.ktx)

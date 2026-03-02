@@ -40,22 +40,24 @@ class ForgotPasswordBottomSheet : BottomSheetDialogFragment() {
             val bottomSheet = d.findViewById<View>(com.google.android.material.R.id.design_bottom_sheet)
             val behavior = com.google.android.material.bottomsheet.BottomSheetBehavior.from(bottomSheet)
 
+            // 1. WORLD-CLASS DYNAMIC HEIGHT LOGIC (2026 Standard)
+            val windowMetrics = requireActivity().windowManager.currentWindowMetrics
+            val screenHeight = windowMetrics.bounds.height()
             // 1. Keep it professional: Height should be WRAP_CONTENT
             bottomSheet.layoutParams.height = ViewGroup.LayoutParams.WRAP_CONTENT
+            behavior.maxHeight = (screenHeight * 0.9).toInt()
 
             // 2. Behavior Settings
             behavior.skipCollapsed = true
             behavior.state = com.google.android.material.bottomsheet.BottomSheetBehavior.STATE_EXPANDED
 
             // 3. TOP-TIER KEYBOARD HANDLING:
-            // This adds padding to the BOTTOM of the sheet equal to the Keyboard height.
             androidx.core.view.ViewCompat.setOnApplyWindowInsetsListener(bottomSheet) { view, insets ->
                 val imeInsets = insets.getInsets(androidx.core.view.WindowInsetsCompat.Type.ime())
                 val systemBars = insets.getInsets(androidx.core.view.WindowInsetsCompat.Type.systemBars())
+                val extraSpacing = (20 * resources.displayMetrics.density).toInt()
 
-                // We apply the keyboard height as padding so the "Send Link" button
-                // is pushed exactly above the keyboard.
-                view.setPadding(0, 0, 0, imeInsets.bottom + systemBars.bottom)
+                view.setPadding(0, 0, 0, imeInsets.bottom + systemBars.bottom + extraSpacing)
                 insets
             }
         }
