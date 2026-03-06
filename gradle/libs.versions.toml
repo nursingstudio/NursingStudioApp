@@ -26,6 +26,8 @@ firebaseBom = "33.9.0"
 activityCompose = "1.12.4"
 composeBom = "2026.02.00"
 navigationUiKtx = "2.9.7"
+playServicesAuth = "21.5.1"
+playServicesAuthApiPhone = "18.3.0"
 playServicesSafetynet = "18.1.0"
 securityCrypto = "1.1.0"
 [libraries]
@@ -70,6 +72,8 @@ androidx-compose-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-te
 androidx-compose-material3 = { group = "androidx.compose.material3", name = "material3" }
 firebase-appcheck-ktx = { group = "com.google.firebase", name = "firebase-appcheck-ktx", version.ref = "firebaseAppCheck" }
 firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebaseBom" }
+play-services-auth = { module = "com.google.android.gms:play-services-auth", version.ref = "playServicesAuth" }
+play-services-auth-api-phone = { module = "com.google.android.gms:play-services-auth-api-phone", version.ref = "playServicesAuthApiPhone" }
 play-services-safetynet = { module = "com.google.android.gms:play-services-safetynet", version.ref = "playServicesSafetynet" }
 
 [plugins]

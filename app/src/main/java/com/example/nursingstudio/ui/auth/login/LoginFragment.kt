@@ -47,6 +47,61 @@ class LoginFragment : Fragment() {
     private var verificationId: String? = null
     private var countDownTimer: CountDownTimer? = null
 
+    private val smsReceiver = object : android.content.BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            if (com.google.android.gms.auth.api.phone.SmsRetriever.SMS_RETRIEVED_ACTION == intent?.action) {
+                val extras = intent.extras ?: return
+
+                // ⭐ 2026 Type-Safe Retrieval (Fixes Deprecation)
+                val status = androidx.core.os.BundleCompat.getParcelable(
+                    extras,
+                    com.google.android.gms.auth.api.phone.SmsRetriever.EXTRA_STATUS,
+                    com.google.android.gms.common.api.Status::class.java
+                )
+
+                when (status?.statusCode) {
+                    com.google.android.gms.common.api.CommonStatusCodes.SUCCESS -> {
+                        // Fixes deprecated extras.get() for String
+                        val message = extras.getString(com.google.android.gms.auth.api.phone.SmsRetriever.EXTRA_SMS_MESSAGE) ?: ""
+
+                        val otpCode = "\\d{6}".toRegex().find(message)?.value
+                        otpCode?.let {
+                            binding.etOtpLogin.setText(it)
+                            performMobileLogin()
+                        }
+                    }
+                    com.google.android.gms.common.api.CommonStatusCodes.TIMEOUT -> {
+                        // Optional: Handle timeout (usually 5 minutes)
+                    }
+                }
+            }
+        }
+    }
+
+    override fun onStart() {
+        super.onStart()
+        val intentFilter = android.content.IntentFilter(com.google.android.gms.auth.api.phone.SmsRetriever.SMS_RETRIEVED_ACTION)
+
+        // ⭐ WORLD-CLASS FIX: Using ContextCompat to handle flags across ALL versions without warnings
+        ContextCompat.registerReceiver(
+            requireActivity(),
+            smsReceiver,
+            intentFilter,
+            com.google.android.gms.auth.api.phone.SmsRetriever.SEND_PERMISSION,
+            null,
+            ContextCompat.RECEIVER_EXPORTED
+        )
+
+        com.google.android.gms.auth.api.phone.SmsRetriever.getClient(requireContext()).startSmsRetriever()
+    }
+
+    override fun onStop() {
+        super.onStop()
+        try {
+            requireActivity().unregisterReceiver(smsReceiver)
+        } catch (_: Exception) { /* Receiver not registered */ }
+    }
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = FragmentLoginBinding.inflate(inflater, container, false)
         return binding.root
@@ -60,8 +115,8 @@ class LoginFragment : Fragment() {
         setupClickListeners()
         setupTextWatchers()
         observeViewModel()
+        startSmsListener()
 
-        // ⭐ World-Class: Check if Biometric is already enabled by user
         val bioManager = BiometricSettingsManager(requireContext())
         if (bioManager.isBiometricEnabled()) {
             binding.root.postDelayed({ showBiometricPrompt() }, 500)
@@ -559,13 +614,29 @@ class LoginFragment : Fragment() {
         )
         mpinSheet.show(childFragmentManager, "MpinSheet")
     }
+    private fun startSmsListener() {
+        val client = com.google.android.gms.auth.api.phone.SmsRetriever.getClient(requireContext())
+        val task = client.startSmsRetriever()
+        task.addOnSuccessListener {
+            // SMS listener successfully started
+        }
+        task.addOnFailureListener {
+            // Failed to start listener
+        }
+    }
     private fun isNetworkAvailable(): Boolean {
         val connectivityManager = requireContext().getSystemService(Context.CONNECTIVITY_SERVICE) as android.net.ConnectivityManager
         val network = connectivityManager.activeNetwork ?: return false
         val capabilities = connectivityManager.getNetworkCapabilities(network) ?: return false
         return capabilities.hasCapability(android.net.NetworkCapabilities.NET_CAPABILITY_INTERNET)
     }
-
+    // ⭐ 2026 GOLD STANDARD: Public Bridge for Instant Verification
+    fun triggerAutoLogin(credential: com.google.firebase.auth.AuthCredential) {
+        if (isAdded) {
+            // Direct ViewModel ko call karein, user ko OTP screen bhi nahi dikhegi!
+            viewModel.loginWithPhone(credential)
+        }
+    }
     override fun onDestroyView() {
         countDownTimer?.cancel()
         countDownTimer = null

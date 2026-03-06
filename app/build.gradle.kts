@@ -105,6 +105,10 @@ dependencies {
     implementation(libs.androidx.lifecycle.livedata.ktx)
     implementation(libs.androidx.fragment.ktx)
 
+    // for retrieve otp automatically from sms
+    implementation(libs.play.services.auth)
+    implementation(libs.play.services.auth.api.phone)
+
     // Testing
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

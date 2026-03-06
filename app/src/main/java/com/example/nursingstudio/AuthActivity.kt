@@ -1,6 +1,5 @@
 package com.example.nursingstudio
 
-import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
@@ -96,7 +95,7 @@ class AuthActivity : AppCompatActivity() {
 
         // Professional Approach: Try Integrity, Fallback to SMS
         integrityManager.requestIntegrityToken(integrityTokenRequest)
-            .addOnCompleteListener { task ->
+            .addOnCompleteListener { _ ->
                 // Success ho ya fail, hum OTP bhejne ki koshish karenge
                 proceedToVerify(mobile, onCodeSent)
             }
@@ -111,36 +110,30 @@ class AuthActivity : AppCompatActivity() {
                 override fun onCodeSent(id: String, token: PhoneAuthProvider.ForceResendingToken) {
                     onCodeSent(id)
                 }
+
                 override fun onVerificationFailed(e: FirebaseException) {
-                    android.widget.Toast.makeText(this@AuthActivity, "Error: ${e.message}", android.widget.Toast.LENGTH_LONG).show()
+                    // Professional Error Mapping
+                    val errorMsg = when(e.message) {
+                        null -> "Security Check Failed"
+                        else -> if(e.message!!.contains("quota")) "Too many attempts. Try tomorrow." else e.message
+                    }
+                    android.widget.Toast.makeText(this@AuthActivity, errorMsg, android.widget.Toast.LENGTH_LONG).show()
                 }
+
                 override fun onVerificationCompleted(credential: PhoneAuthCredential) {
-                    // Isko khali chhod do! Kyunki humara LoginFragment ka ViewModel
-                    // pehle se hi OTP manual/auto handle karne ke liye ready hai.
-                    // Dono jagah se login trigger hone se crash hota hai.
+                    // 1. Check karein ki abhi screen par LoginFragment hi hai
+                    val navHostFragment = supportFragmentManager.findFragmentById(R.id.auth_container)
+
+                    if (navHostFragment is LoginFragment) {
+                        // 2. Instant Auto-Login trigger karein
+                        navHostFragment.triggerAutoLogin(credential)
+
+                        // 3. User Experience: Chota sa message dikhayein
+                        android.widget.Toast.makeText(this@AuthActivity, "Instant Verification Successful! ⚡", android.widget.Toast.LENGTH_SHORT).show()
+                    }
                 }
             }).build()
         PhoneAuthProvider.verifyPhoneNumber(options)
     }
 
-    private fun checkUserInFirestore() {
-        val uid = auth.currentUser?.uid ?: return
-
-        // Agar activity khatam ho rahi hai toh aage mat badho (Crash Stop)
-        if (isFinishing) return
-
-        val db = com.google.firebase.firestore.FirebaseFirestore.getInstance()
-        db.collection("Users").document(uid).get().addOnSuccessListener { doc ->
-            if (isFinishing) return@addOnSuccessListener // Re-check before navigation
-
-            if (doc.exists()) {
-                startActivity(Intent(this, MainActivity::class.java))
-                finish()
-            } else {
-                showRegister()
-            }
-        }.addOnFailureListener {
-            // Safe error handling
-        }
-    }
 }
