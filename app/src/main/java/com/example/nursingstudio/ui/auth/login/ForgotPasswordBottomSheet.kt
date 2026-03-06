@@ -99,13 +99,13 @@ class ForgotPasswordBottomSheet : BottomSheetDialogFragment() {
 
         // 2. Validation Check
         if (email.isEmpty()) {
-            binding.tilForgotEmail.error = getString(R.string.enter_registered_email)
+            binding.tilForgotEmail.error = getString(R.string.error_email_empty)
             AppSettings.triggerErrorEffect(requireContext(), binding.tilForgotEmail)
             return
         }
 
         if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-            binding.tilForgotEmail.error = getString(R.string.invalid_email_format)
+            binding.tilForgotEmail.error = getString(R.string.error_email_invalid)
             AppSettings.triggerErrorEffect(requireContext(), binding.tilForgotEmail)
             return
         }

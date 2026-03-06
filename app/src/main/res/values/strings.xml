@@ -227,8 +227,14 @@
     <string name="verified">Verified ✅</string>
     <string name="resend_in_60s">Resend in 60s</string>
     <string name="resend_in_seconds">Resend in %1$ds</string>
-    <string name="enter_registered_email">Please enter your registered email address to proceed.</string>
-    <string name="invalid_email_format">The email address entered is invalid. Please verify and try again.</string>
+    <string name="error_email_empty">Please enter your registered email address to proceed.</string>
+    <string name="error_email_invalid">The email address entered is invalid. Please verify and try again.</string>
+    <string name="error_password_empty">Security check: Please enter your password to continue.</string>
+    <string name="error_password_length">For your security, password must be at least 8 characters long.</string>
+    <string name="error_mobile_empty">Mobile number is required for verification.</string>
+    <string name="error_mobile_invalid">Please enter a valid 10-digit mobile number.</string>
+    <string name="error_otp_empty">Verification required: Please enter the 6-digit security code sent to your device.</string>
+    <string name="error_otp_invalid">Invalid code: The security code must be exactly 6 digits long. Please check and try again.</string>
     <string name="email_not_linked">This email is not linked to any account. Please Register first.</string>
     <string name="redirecting">Redirecting to Register…</string>
 

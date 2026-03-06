@@ -218,7 +218,6 @@ class LoginFragment : Fragment() {
             }
         }
     }
-// --- ⌨️ TEXT WATCHERS (Restored Exactly) ---
     private fun setupTextWatchers() {
     binding.etEmail.addTextChangedListener(object : TextWatcher {
         override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
@@ -240,7 +239,20 @@ class LoginFragment : Fragment() {
     })
 
         binding.etMobileLogin.addTextChangedListener(createTextWatcher { binding.tilMobile })
-        binding.etOtpLogin.addTextChangedListener(createTextWatcher { binding.tilOtp })
+        binding.etOtpLogin.addTextChangedListener(object : TextWatcher {
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                binding.tilOtp.error = null
+                binding.tilOtp.isErrorEnabled = false
+
+                // ⭐ Professional Touch: Auto-perform action when 6 digits are reached
+                if (s?.length == 6) {
+                    hideKeyboard()
+                    // Optional: You can even trigger the login button automatically here
+                }
+            }
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun afterTextChanged(s: Editable?) {}
+        })
     }
     private fun setupTabSelection() {
         binding.loginTabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
@@ -306,16 +318,30 @@ class LoginFragment : Fragment() {
 
         clearAllErrors()
 
-        if (email.isEmpty() || !Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-            binding.tilEmail.error = "Please enter a valid email address"
-            AppSettings.triggerErrorEffect(requireContext(), binding.tilEmail)
-            return
+        when {
+            email.isEmpty() -> {
+                binding.tilEmail.error = getString(R.string.error_email_empty)
+                AppSettings.triggerErrorEffect(requireContext(), binding.tilEmail)
+                return
+            }
+            !Patterns.EMAIL_ADDRESS.matcher(email).matches() -> {
+                binding.tilEmail.error = getString(R.string.error_email_invalid)
+                AppSettings.triggerErrorEffect(requireContext(), binding.tilEmail)
+                return
+            }
         }
 
-        if (pass.length < 8) {
-            binding.tilPassword.error = "Password must be at least 8 characters"
-            AppSettings.triggerErrorEffect(requireContext(), binding.tilPassword)
-            return
+        when {
+            pass.isEmpty() -> {
+                binding.tilPassword.error = getString(R.string.error_password_empty)
+                AppSettings.triggerErrorEffect(requireContext(), binding.tilPassword)
+                return
+            }
+            pass.length < 8 -> {
+                binding.tilPassword.error = getString(R.string.error_password_length)
+                AppSettings.triggerErrorEffect(requireContext(), binding.tilPassword)
+                return
+            }
         }
         viewModel.loginWithEmail(email, pass)
     }
@@ -328,13 +354,18 @@ class LoginFragment : Fragment() {
             AppSettings.triggerErrorEffect(requireContext(), binding.btnLoginAction)
             return
         }
-        // ⭐ GOLD STANDARD: KTX Extension Property use karein
         if (binding.tilOtp.isGone) {
-            if (mobile.length != 10) {
-                binding.tilMobile.isErrorEnabled = true
-                binding.tilMobile.error = "Enter 10 digit number"
-                AppSettings.triggerErrorEffect(requireContext(), binding.tilMobile)
-                return
+            when {
+                mobile.isEmpty() -> {
+                    binding.tilMobile.error = getString(R.string.error_mobile_empty)
+                    AppSettings.triggerErrorEffect(requireContext(), binding.tilMobile)
+                    return
+                }
+                mobile.length != 10 -> {
+                    binding.tilMobile.error = getString(R.string.error_mobile_invalid)
+                    AppSettings.triggerErrorEffect(requireContext(), binding.tilMobile)
+                    return
+                }
             }
             binding.loadingOverlay.visibility = View.VISIBLE
             (activity as? AuthActivity)?.sendOtp(mobile) { id ->
@@ -350,12 +381,19 @@ class LoginFragment : Fragment() {
                 toast("OTP Sent Successfully! ✨")
             }
         } else {
-            if (otp.length != 6) {
-                binding.tilOtp.isErrorEnabled = true
-                binding.tilOtp.error = "Enter 6 digit OTP"
-                binding.tilOtp.requestFocus()
-                AppSettings.triggerErrorEffect(requireContext(), binding.tilOtp)
-                return
+            when {
+                otp.isEmpty() -> {
+                    binding.tilOtp.error = getString(R.string.error_otp_empty)
+                    binding.tilOtp.requestFocus()
+                    AppSettings.triggerErrorEffect(requireContext(), binding.tilOtp)
+                    return
+                }
+                otp.length != 6 -> {
+                    binding.tilOtp.error = getString(R.string.error_otp_invalid)
+                    binding.tilOtp.requestFocus()
+                    AppSettings.triggerErrorEffect(requireContext(), binding.tilOtp)
+                    return
+                }
             }
 
             binding.tilOtp.error = null
