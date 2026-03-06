@@ -227,5 +227,11 @@
     <string name="verified">Verified ✅</string>
     <string name="resend_in_60s">Resend in 60s</string>
     <string name="resend_in_seconds">Resend in %1$ds</string>
+    <string name="enter_registered_email">Please enter your registered email address to proceed.</string>
+    <string name="invalid_email_format">The email address entered is invalid. Please verify and try again.</string>
+    <string name="email_not_linked">This email is not linked to any account. Please Register first.</string>
+    <string name="redirecting">Redirecting to Register…</string>
+
+
 
 </resources>

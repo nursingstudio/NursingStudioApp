@@ -99,13 +99,13 @@ class ForgotPasswordBottomSheet : BottomSheetDialogFragment() {
 
         // 2. Validation Check
         if (email.isEmpty()) {
-            binding.tilForgotEmail.error = "Email cannot be empty"
+            binding.tilForgotEmail.error = getString(R.string.enter_registered_email)
             AppSettings.triggerErrorEffect(requireContext(), binding.tilForgotEmail)
             return
         }
 
         if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-            binding.tilForgotEmail.error = "Please enter a valid email format"
+            binding.tilForgotEmail.error = getString(R.string.invalid_email_format)
             AppSettings.triggerErrorEffect(requireContext(), binding.tilForgotEmail)
             return
         }
@@ -133,10 +133,10 @@ class ForgotPasswordBottomSheet : BottomSheetDialogFragment() {
                 if (exception is com.google.firebase.auth.FirebaseAuthInvalidUserException) {
                     // 🚨 User NOT Registered (ERROR_USER_NOT_FOUND)
                     binding.tilForgotEmail.isErrorEnabled = true
-                    binding.tilForgotEmail.error = "This email is not linked to any account. Please Register first."
+                    binding.tilForgotEmail.error = getString(R.string.email_not_linked)
                     AppSettings.triggerErrorEffect(requireContext(), binding.tilForgotEmail)
 
-                    Toast.makeText(context, "Redirecting to Register...", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, getString(R.string.redirecting), Toast.LENGTH_SHORT).show()
 
                     binding.root.postDelayed({
                         if (isAdded) {
