@@ -1,11 +1,14 @@
 [versions]
 agp = "9.0.1"
+appUpdate = "2.1.0"
 biometric = "1.2.0-alpha05"
 ccp = "2.7.3"
 circleimageview = "3.1.0"
 coil = "2.7.0"
 coreSplashscreen = "1.2.0"
+firebaseAnalytics = "23.0.0"
 firebaseBomVersion = "34.9.0"
+firebaseCrashlytics = "20.0.4"
 fragmentKtx = "1.8.9"
 integrity = "1.6.0"
 kotlin = "2.3.10"
@@ -40,13 +43,17 @@ androidx-lifecycle-viewmodel-ktx = { module = "androidx.lifecycle:lifecycle-view
 androidx-navigation-fragment-ktx = { module = "androidx.navigation:navigation-fragment-ktx", version.ref = "navigationUiKtx" }
 androidx-navigation-ui-ktx = { module = "androidx.navigation:navigation-ui-ktx", version.ref = "navigationUiKtx" }
 androidx-security-crypto = { module = "androidx.security:security-crypto", version.ref = "securityCrypto" }
+app-update = { module = "com.google.android.play:app-update", version.ref = "appUpdate" }
+app-update-ktx = { module = "com.google.android.play:app-update-ktx", version.ref = "appUpdate" }
 ccp = { module = "com.hbb20:ccp", version.ref = "ccp" }
 circleimageview = { module = "de.hdodenhof:circleimageview", version.ref = "circleimageview" }
 coil = { module = "io.coil-kt:coil", version.ref = "coil" }
+firebase-analytics = { module = "com.google.firebase:firebase-analytics", version.ref = "firebaseAnalytics" }
 firebase-appcheck-debug = { module = "com.google.firebase:firebase-appcheck-debug" }
 firebase-appcheck-playintegrity = { module = "com.google.firebase:firebase-appcheck-playintegrity" }
 firebase-auth = { module = "com.google.firebase:firebase-auth" }
 firebase-bom-v3490 = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBomVersion" }
+firebase-crashlytics = { module = "com.google.firebase:firebase-crashlytics", version.ref = "firebaseCrashlytics" }
 firebase-firestore = { module = "com.google.firebase:firebase-firestore" }
 firebase-storage = { module = "com.google.firebase:firebase-storage" }
 google-firebase-appcheck-ktx = { module = "com.google.firebase:firebase-appcheck-ktx" }

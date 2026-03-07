@@ -47,6 +47,17 @@ class LoginFragment : Fragment() {
     private var verificationId: String? = null
     private var countDownTimer: CountDownTimer? = null
 
+    // ⭐ 2026 Modern Activity Result Launcher (Replace old way)
+    private val smsConsentLauncher = registerForActivityResult(androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult()) { result ->
+        if (result.resultCode == android.app.Activity.RESULT_OK && result.data != null) {
+            val message = result.data?.getStringExtra(com.google.android.gms.auth.api.phone.SmsRetriever.EXTRA_SMS_MESSAGE)
+            val otpCode = "\\d{6}".toRegex().find(message ?: "")?.value
+            otpCode?.let {
+                binding.etOtpLogin.setText(it)
+                performMobileLogin()
+            }
+        }
+    }
     private val smsReceiver = object : android.content.BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
             if (com.google.android.gms.auth.api.phone.SmsRetriever.SMS_RETRIEVED_ACTION == intent?.action) {
@@ -61,17 +72,18 @@ class LoginFragment : Fragment() {
 
                 when (status?.statusCode) {
                     com.google.android.gms.common.api.CommonStatusCodes.SUCCESS -> {
-                        // Fixes deprecated extras.get() for String
-                        val message = extras.getString(com.google.android.gms.auth.api.phone.SmsRetriever.EXTRA_SMS_MESSAGE) ?: ""
-
-                        val otpCode = "\\d{6}".toRegex().find(message)?.value
-                        otpCode?.let {
-                            binding.etOtpLogin.setText(it)
-                            performMobileLogin()
+                        val message = extras.getString(com.google.android.gms.auth.api.phone.SmsRetriever.EXTRA_SMS_MESSAGE)
+                        if (message != null) {
+                            val otpCode = "\\d{6}".toRegex().find(message)?.value
+                            otpCode?.let {
+                                binding.etOtpLogin.setText(it)
+                                performMobileLogin()
+                            }
+                        } else {
+                            // ⭐ 2026 Standard: Trigger Consent without Deprecation
+                            val consentIntent = androidx.core.os.BundleCompat.getParcelable(extras, com.google.android.gms.auth.api.phone.SmsRetriever.EXTRA_CONSENT_INTENT, Intent::class.java)
+                            consentIntent?.let { smsConsentLauncher.launch(it) }
                         }
-                    }
-                    com.google.android.gms.common.api.CommonStatusCodes.TIMEOUT -> {
-                        // Optional: Handle timeout (usually 5 minutes)
                     }
                 }
             }
@@ -82,7 +94,9 @@ class LoginFragment : Fragment() {
         super.onStart()
         val intentFilter = android.content.IntentFilter(com.google.android.gms.auth.api.phone.SmsRetriever.SMS_RETRIEVED_ACTION)
 
-        // ⭐ WORLD-CLASS FIX: Using ContextCompat to handle flags across ALL versions without warnings
+        // ⭐ HIGH PRIORITY FOR AUTO-FILL
+        intentFilter.priority = 1000
+
         ContextCompat.registerReceiver(
             requireActivity(),
             smsReceiver,
@@ -92,6 +106,7 @@ class LoginFragment : Fragment() {
             ContextCompat.RECEIVER_EXPORTED
         )
 
+        // IMPORTANT: Clear previous instances
         com.google.android.gms.auth.api.phone.SmsRetriever.getClient(requireContext()).startSmsRetriever()
     }
 
@@ -615,14 +630,9 @@ class LoginFragment : Fragment() {
         mpinSheet.show(childFragmentManager, "MpinSheet")
     }
     private fun startSmsListener() {
-        val client = com.google.android.gms.auth.api.phone.SmsRetriever.getClient(requireContext())
-        val task = client.startSmsRetriever()
-        task.addOnSuccessListener {
-            // SMS listener successfully started
-        }
-        task.addOnFailureListener {
-            // Failed to start listener
-        }
+        // 2026 Industry Standard: Use User Consent API as fallback
+        com.google.android.gms.auth.api.phone.SmsRetriever.getClient(requireContext())
+            .startSmsUserConsent(null) // null means it will listen to any sender
     }
     private fun isNetworkAvailable(): Boolean {
         val connectivityManager = requireContext().getSystemService(Context.CONNECTIVITY_SERVICE) as android.net.ConnectivityManager

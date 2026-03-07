@@ -5,18 +5,18 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import com.example.nursingstudio.ui.auth.login.LoginFragment
 import com.example.nursingstudio.ui.auth.register.RegisterFragment
+import com.google.android.play.core.integrity.IntegrityManagerFactory
+import com.google.android.play.core.integrity.IntegrityTokenRequest
 import com.google.firebase.FirebaseApp
+import com.google.firebase.FirebaseException
 import com.google.firebase.appcheck.FirebaseAppCheck
 import com.google.firebase.appcheck.debug.DebugAppCheckProviderFactory
 import com.google.firebase.appcheck.playintegrity.PlayIntegrityAppCheckProviderFactory
-import com.google.firebase.FirebaseException
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.PhoneAuthCredential
 import com.google.firebase.auth.PhoneAuthOptions
 import com.google.firebase.auth.PhoneAuthProvider
 import java.util.concurrent.TimeUnit
-import com.google.android.play.core.integrity.IntegrityManagerFactory
-import com.google.android.play.core.integrity.IntegrityTokenRequest
-import com.google.firebase.auth.PhoneAuthCredential
 
 class AuthActivity : AppCompatActivity() {
 
@@ -46,6 +46,26 @@ class AuthActivity : AppCompatActivity() {
             // Hum direct LoginFragment load kar rahe hain, Splash ne session pehle hi check kar liya hai
             showLogin()
         }
+
+        // ⭐ 2026 WORLD-CLASS SECURITY: Environment Integrity Check
+// Hum direct string "development_settings_enabled" use karenge jo 100% reliable hai
+        val isDevOptionsEnabled = android.provider.Settings.Global.getInt(
+            contentResolver,
+            "development_settings_enabled", 0
+        ) != 0
+
+        if (isDevOptionsEnabled) {
+            // Premium User Experience: Alert then Exit
+            android.widget.Toast.makeText(
+                this,
+                "Security Alert: Developer Options detected. Please disable them for a secure experience.",
+                android.widget.Toast.LENGTH_LONG
+            ).show()
+
+            // Sabse secure way app close karne ka
+            finishAffinity()
+        }
+        checkForUpdates()
     }
 
     // --- ⭐ ULTRA PRO NAVIGATION LOGIC ⭐ ---
@@ -112,10 +132,16 @@ class AuthActivity : AppCompatActivity() {
                 }
 
                 override fun onVerificationFailed(e: FirebaseException) {
-                    // Professional Error Mapping
-                    val errorMsg = when(e.message) {
-                        null -> "Security Check Failed"
-                        else -> if(e.message!!.contains("quota")) "Too many attempts. Try tomorrow." else e.message
+                    // ⭐ WORLD-CLASS LOGGING: Sends the error to your Firebase Console
+                    com.google.firebase.crashlytics.FirebaseCrashlytics.getInstance().apply {
+                        log("OTP Failed for number: $mobile")
+                        recordException(e)
+                    }
+                    // 2026 Professional Error Mapping (User Friendly)
+                    val errorMsg = when {
+                        e.message?.contains("not authorized") == true -> "Security error: Please verify SHA-256 in Firebase Console."
+                        e.message?.contains("quota") == true -> "SMS limit reached. Try again in 24 hours."
+                        else -> e.localizedMessage ?: "Verification Failed"
                     }
                     android.widget.Toast.makeText(this@AuthActivity, errorMsg, android.widget.Toast.LENGTH_LONG).show()
                 }
@@ -134,6 +160,27 @@ class AuthActivity : AppCompatActivity() {
                 }
             }).build()
         PhoneAuthProvider.verifyPhoneNumber(options)
+    }
+    private fun checkForUpdates() {
+        val appUpdateManager = com.google.android.play.core.appupdate.AppUpdateManagerFactory.create(this)
+        val appUpdateInfoTask = appUpdateManager.appUpdateInfo
+
+        appUpdateInfoTask.addOnSuccessListener { appUpdateInfo ->
+            if (appUpdateInfo.updateAvailability() == com.google.android.play.core.install.model.UpdateAvailability.UPDATE_AVAILABLE
+                && appUpdateInfo.isUpdateTypeAllowed(com.google.android.play.core.install.model.AppUpdateType.IMMEDIATE)
+            ) {
+                // ⭐ 2026 GOLD STANDARD: Activity Result Launcher for Updates
+                val updateOptions = com.google.android.play.core.appupdate.AppUpdateOptions.newBuilder(com.google.android.play.core.install.model.AppUpdateType.IMMEDIATE)
+                    .setAllowAssetPackDeletion(true)
+                    .build()
+
+                appUpdateManager.startUpdateFlow(
+                    appUpdateInfo,
+                    this, // AuthActivity as the context
+                    updateOptions
+                )
+            }
+        }
     }
 
 }

@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
     id("com.google.gms.google-services")
+    id("com.google.firebase.crashlytics")
 }
 
 android {
@@ -19,11 +20,18 @@ android {
     }
 
     buildTypes {
-        release {
-            // Abhi ke liye ise false kar rahe hain taki aap testing kar sake
-            isMinifyEnabled = false  // App size chhota karega (R8 compiler) jab true krenge
-            isShrinkResources = false // Faltu images/resources hata dega, jab true krenge
+        // ⭐ 2026 STANDARD: Separate Debug Block for Development
+        getByName("debug") {
+            // Isse Crashlytics ko Build ID mil jayegi bina app ko slow kiye
+            configure<com.google.firebase.crashlytics.buildtools.gradle.CrashlyticsExtension> {
+                mappingFileUploadEnabled = false
+            }
+        }
 
+        release {
+            // Aapka existing code yahan safe hai
+            isMinifyEnabled = false
+            isShrinkResources = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -104,6 +112,14 @@ dependencies {
     implementation(libs.androidx.lifecycle.viewmodel.ktx)
     implementation(libs.androidx.lifecycle.livedata.ktx)
     implementation(libs.androidx.fragment.ktx)
+
+    // for In-App updates
+    implementation(libs.app.update)
+    implementation(libs.app.update.ktx)
+
+    // Add Firebase Crashlytics SDK
+    implementation(libs.firebase.crashlytics)
+    implementation(libs.firebase.analytics)
 
     // for retrieve otp automatically from sms
     implementation(libs.play.services.auth)
