@@ -4,6 +4,7 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
+import com.example.nursingstudio.databinding.LayoutSecurityAlertBinding
 import com.example.nursingstudio.ui.auth.login.LoginFragment
 import com.example.nursingstudio.ui.auth.register.RegisterFragment
 import com.google.android.play.core.integrity.IntegrityManagerFactory
@@ -22,6 +23,8 @@ import java.util.concurrent.TimeUnit
 class AuthActivity : AppCompatActivity() {
 
     private val auth = FirebaseAuth.getInstance()
+
+    private var securitySheet: com.google.android.material.bottomsheet.BottomSheetDialog? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         // 1. Firebase aur App Check Initialize (Pehle logic set karein)
@@ -49,6 +52,18 @@ class AuthActivity : AppCompatActivity() {
 
         // ⭐ Security Check Call
         checkEnvironmentIntegrity()
+
+        // ⭐ 2026 INTEL-LOGIC: Auto-dismiss alert when USB is unplugged
+        val usbReceiver = object : android.content.BroadcastReceiver() {
+            override fun onReceive(context: android.content.Context?, intent: Intent?) {
+                val connected = intent?.extras?.getBoolean("connected") ?: false
+                if (!connected && securitySheet?.isShowing == true) {
+                    // Agar alert USB wala tha, toh band kar do
+                    securitySheet?.dismiss()
+                }
+            }
+        }
+        registerReceiver(usbReceiver, android.content.IntentFilter("android.hardware.usb.action.USB_STATE"))
 
         if (savedInstanceState == null) {
             showLogin()
@@ -191,28 +206,66 @@ class AuthActivity : AppCompatActivity() {
     }
     // ⭐ 2026 WORLD-CLASS SECURITY: Environment Integrity Check
     private fun checkEnvironmentIntegrity() {
-        // Debug mode mein testing ko bypass karne ke liye
-        if (BuildConfig.DEBUG) {
-            android.util.Log.d("Security", "Debug mode: Security Check Skipped")
-            return
+        if (BuildConfig.DEBUG) return
+
+        val isDevOptions = android.provider.Settings.Global.getInt(contentResolver, "development_settings_enabled", 0) != 0
+        val isUsbDebugging = android.provider.Settings.Global.getInt(contentResolver, "adb_enabled", 0) != 0
+
+        // USB Cable check logic
+        val intent = registerReceiver(null, android.content.IntentFilter("android.hardware.usb.action.USB_STATE"))
+        val isUsbConnected = intent?.extras?.getBoolean("connected") ?: false
+
+        when {
+            isDevOptions -> showSecurityAlert(SecurityType.DEVELOPER_OPTIONS)
+            isUsbDebugging -> showSecurityAlert(SecurityType.USB_DEBUGGING)
+            isUsbConnected -> showSecurityAlert(SecurityType.ACTIVE_USB)
         }
+    }
+    // ⭐ 2026 Professional Security Enum
+    enum class SecurityType {
+        DEVELOPER_OPTIONS, USB_DEBUGGING, ACTIVE_USB
+    }
 
-        try {
-            val isDevOptionsEnabled = android.provider.Settings.Global.getInt(
-                contentResolver,
-                "development_settings_enabled", 0
-            ) != 0
+    private fun showSecurityAlert(type: SecurityType) {
+        // 1. Agar pehle se dikh raha hai toh wapas mat dikhao
+        if (securitySheet?.isShowing == true) return
 
-            if (isDevOptionsEnabled) {
-                android.widget.Toast.makeText(
-                    this,
-                    "Security Alert: Please disable Developer Options to continue.",
-                    android.widget.Toast.LENGTH_LONG
-                ).show()
-                finishAffinity()
+        securitySheet = com.google.android.material.bottomsheet.BottomSheetDialog(this, R.style.BottomSheetDialogTheme)
+        val binding = LayoutSecurityAlertBinding.inflate(layoutInflater)
+        securitySheet?.setContentView(binding.root)
+        securitySheet?.setCancelable(false)
+
+        when(type) {
+            SecurityType.DEVELOPER_OPTIONS -> {
+                binding.tvAlertTitle.text = "DEVELOPER OPTIONS"
+                binding.tvAlertDesc.text = "Nursing Studio security protocol: Please disable Developer Options to continue."
+                binding.tvWarningStar.text = "System integrity check: FAILED"
+                binding.btnSettings.setOnClickListener {
+                    startActivity(Intent(android.provider.Settings.ACTION_APPLICATION_DEVELOPMENT_SETTINGS))
+                }
             }
-        } catch (_: Exception) {
-            // Fallback safety
+            SecurityType.USB_DEBUGGING -> {
+                binding.tvAlertTitle.text = "USB DEBUGGING"
+                binding.tvAlertDesc.text = "Data protection active. Please turn off USB Debugging from your device settings."
+                binding.tvWarningStar.text = "Encryption risk detected"
+                binding.btnSettings.setOnClickListener {
+                    startActivity(Intent(android.provider.Settings.ACTION_APPLICATION_DEVELOPMENT_SETTINGS))
+                }
+            }
+            SecurityType.ACTIVE_USB -> {
+                binding.tvAlertTitle.text = "USB CONNECTION"
+                binding.tvAlertDesc.text = "Nursing Studio restricts USB connections to prevent unauthorized mirroring. Unplug to unlock."
+                binding.tvWarningStar.text = "Waiting for cable removal..."
+                binding.btnSettings.visibility = android.view.View.GONE
+                // Isse button poori width le lega
+                val params = binding.btnExit.layoutParams as android.widget.LinearLayout.LayoutParams
+                params.weight = 2f
+                params.marginEnd = 0
+                binding.btnExit.layoutParams = params
+            }
         }
+
+        binding.btnExit.setOnClickListener { finishAffinity() }
+        securitySheet?.show()
     }
 }

@@ -1,6 +1,7 @@
 package com.example.nursingstudio.ui.auth.login
 
 import android.content.Context
+import android.content.Context.RECEIVER_EXPORTED
 import android.content.Intent
 import android.os.Bundle
 import android.os.CountDownTimer
@@ -111,7 +112,7 @@ class LoginFragment : Fragment() {
             intentFilter,
             com.google.android.gms.auth.api.phone.SmsRetriever.SEND_PERMISSION,
             null,
-            Context.RECEIVER_EXPORTED
+            RECEIVER_EXPORTED
         )
 
         // Auto-fill trigger

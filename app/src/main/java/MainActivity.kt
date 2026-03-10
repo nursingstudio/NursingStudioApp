@@ -29,6 +29,8 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.navigation.NavigationView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import androidx.core.content.edit
+import androidx.core.net.toUri
 
 
 class MainActivity : AppCompatActivity() {
@@ -200,11 +202,11 @@ class MainActivity : AppCompatActivity() {
 
     private fun openUrl(url: String, packageName: String? = null) {
         try {
-            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+            val intent = Intent(Intent.ACTION_VIEW, url.toUri())
             packageName?.let { intent.setPackage(it) }
             startActivity(intent)
         } catch (e: Exception) {
-            startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
+            startActivity(Intent(Intent.ACTION_VIEW, url.toUri()))
         }
     }
 
@@ -242,7 +244,7 @@ class MainActivity : AppCompatActivity() {
     private fun trackSocialClick(channel: String) {
         val sp = getSharedPreferences("analytics", MODE_PRIVATE)
         val key = "social_click_${channel.lowercase().replace(" ", "_")}"
-        sp.edit().putInt(key, sp.getInt(key, 0) + 1).apply()
+        sp.edit { putInt(key, sp.getInt(key, 0) + 1) }
     }
 
     private fun shareApp() {
