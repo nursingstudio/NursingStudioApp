@@ -1,5 +1,6 @@
 package com.example.nursingstudio
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
@@ -23,49 +24,38 @@ class AuthActivity : AppCompatActivity() {
     private val auth = FirebaseAuth.getInstance()
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        // Sabse pehle initialize karo super se bhi pehle
+        // 1. Firebase aur App Check Initialize (Pehle logic set karein)
         FirebaseApp.initializeApp(this)
-        val firebaseAppCheck = FirebaseAppCheck.getInstance()
 
-        // Professional Way to Install Provider
-        if (BuildConfig.DEBUG) {
-            firebaseAppCheck.installAppCheckProviderFactory(
-                DebugAppCheckProviderFactory.getInstance()
-            )
-        } else {
-            firebaseAppCheck.installAppCheckProviderFactory(
-                PlayIntegrityAppCheckProviderFactory.getInstance()
-            )
+        try {
+            val firebaseAppCheck = FirebaseAppCheck.getInstance()
+            // 2026 Professional Logic: Debug check with safe fallback
+            if (BuildConfig.DEBUG) {
+                firebaseAppCheck.installAppCheckProviderFactory(
+                    DebugAppCheckProviderFactory.getInstance()
+                )
+            } else {
+                firebaseAppCheck.installAppCheckProviderFactory(
+                    PlayIntegrityAppCheckProviderFactory.getInstance()
+                )
+            }
+        } catch (e: Exception) {
+            // Agar App Check fail ho toh app crash na ho, bas log karein
+            com.google.firebase.crashlytics.FirebaseCrashlytics.getInstance().recordException(e)
         }
 
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_auth)
 
-        // 2. Fragment Loading Logic (Cleaned)
+        // ⭐ Security Check Call
+        checkEnvironmentIntegrity()
+
         if (savedInstanceState == null) {
-            // Hum direct LoginFragment load kar rahe hain, Splash ne session pehle hi check kar liya hai
             showLogin()
         }
 
-        // ⭐ 2026 WORLD-CLASS SECURITY: Environment Integrity Check
-// Hum direct string "development_settings_enabled" use karenge jo 100% reliable hai
-        val isDevOptionsEnabled = android.provider.Settings.Global.getInt(
-            contentResolver,
-            "development_settings_enabled", 0
-        ) != 0
-
-        if (isDevOptionsEnabled) {
-            // Premium User Experience: Alert then Exit
-            android.widget.Toast.makeText(
-                this,
-                "Security Alert: Developer Options detected. Please disable them for a secure experience.",
-                android.widget.Toast.LENGTH_LONG
-            ).show()
-
-            // Sabse secure way app close karne ka
-            finishAffinity()
-        }
-        checkForUpdates()
+        // Delay updates for better UX
+        window.decorView.postDelayed({ checkForUpdates() }, 2000)
     }
 
     // --- ⭐ ULTRA PRO NAVIGATION LOGIC ⭐ ---
@@ -106,19 +96,22 @@ class AuthActivity : AppCompatActivity() {
 // AuthActivity.kt (Optimized Master Hub)
     fun sendOtp(mobile: String, onCodeSent: (String) -> Unit) {
         val integrityManager = IntegrityManagerFactory.create(applicationContext)
-        val nonce = "nursing_studio_${System.currentTimeMillis()}"
+
+        // ⭐ 2026 Standard: Base64 Nonce
+        val nonceRaw = "nursing_studio_${System.currentTimeMillis()}"
+        val nonce = android.util.Base64.encodeToString(
+            nonceRaw.toByteArray(),
+            android.util.Base64.URL_SAFE or android.util.Base64.NO_WRAP or android.util.Base64.NO_PADDING
+        )
 
         val integrityTokenRequest = IntegrityTokenRequest.builder()
             .setNonce(nonce)
             .setCloudProjectNumber(1009948838228L)
             .build()
 
-        // Professional Approach: Try Integrity, Fallback to SMS
+        // Baaki code same rahega...
         integrityManager.requestIntegrityToken(integrityTokenRequest)
-            .addOnCompleteListener { _ ->
-                // Success ho ya fail, hum OTP bhejne ki koshish karenge
-                proceedToVerify(mobile, onCodeSent)
-            }
+            .addOnCompleteListener { _ -> proceedToVerify(mobile, onCodeSent) }
     }
 
     private fun proceedToVerify(mobile: String, onCodeSent: (String) -> Unit) {
@@ -147,15 +140,29 @@ class AuthActivity : AppCompatActivity() {
                 }
 
                 override fun onVerificationCompleted(credential: PhoneAuthCredential) {
-                    // 1. Check karein ki abhi screen par LoginFragment hi hai
-                    val navHostFragment = supportFragmentManager.findFragmentById(R.id.auth_container)
+                    // ⭐ 2026 PRO LOGIC: Background safe auto-login
+                    val currentFragment = supportFragmentManager.findFragmentById(R.id.auth_container)
 
-                    if (navHostFragment is LoginFragment) {
-                        // 2. Instant Auto-Login trigger karein
-                        navHostFragment.triggerAutoLogin(credential)
+                    // 1. Agar OTP code mil gaya hai toh UI update karein
+                    credential.smsCode?.let { code ->
+                        if (currentFragment is LoginFragment) {
+                            currentFragment.binding.etOtpLogin.setText(code)
+                        }
+                    }
 
-                        // 3. User Experience: Chota sa message dikhayein
-                        android.widget.Toast.makeText(this@AuthActivity, "Instant Verification Successful! ⚡", android.widget.Toast.LENGTH_SHORT).show()
+                    // 2. Direct sign-in (Faster & Crash-proof)
+                    auth.signInWithCredential(credential).addOnCompleteListener { task ->
+                        if (task.isSuccessful) {
+                            if (currentFragment is LoginFragment) {
+                                currentFragment.proceedToHome()
+                            } else {
+                                // Fallback: Direct transition
+                                val intent = Intent(this@AuthActivity, MainActivity::class.java)
+                                intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                                startActivity(intent)
+                                finish()
+                            }
+                        }
                     }
                 }
             }).build()
@@ -176,11 +183,36 @@ class AuthActivity : AppCompatActivity() {
 
                 appUpdateManager.startUpdateFlow(
                     appUpdateInfo,
-                    this, // AuthActivity as the context
+                    this@AuthActivity, // Explicitly use Activity context
                     updateOptions
                 )
             }
         }
     }
+    // ⭐ 2026 WORLD-CLASS SECURITY: Environment Integrity Check
+    private fun checkEnvironmentIntegrity() {
+        // Debug mode mein testing ko bypass karne ke liye
+        if (BuildConfig.DEBUG) {
+            android.util.Log.d("Security", "Debug mode: Security Check Skipped")
+            return
+        }
 
+        try {
+            val isDevOptionsEnabled = android.provider.Settings.Global.getInt(
+                contentResolver,
+                "development_settings_enabled", 0
+            ) != 0
+
+            if (isDevOptionsEnabled) {
+                android.widget.Toast.makeText(
+                    this,
+                    "Security Alert: Please disable Developer Options to continue.",
+                    android.widget.Toast.LENGTH_LONG
+                ).show()
+                finishAffinity()
+            }
+        } catch (_: Exception) {
+            // Fallback safety
+        }
+    }
 }

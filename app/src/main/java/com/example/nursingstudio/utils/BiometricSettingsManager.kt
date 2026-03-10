@@ -1,63 +1,54 @@
 package com.example.nursingstudio.utils
 
 import android.content.Context
+import android.content.SharedPreferences
 import androidx.security.crypto.EncryptedSharedPreferences
-import androidx.security.crypto.MasterKeys
+import androidx.security.crypto.MasterKey
+import androidx.core.content.edit
 
-class BiometricSettingsManager(context: Context) {
+class BiometricSettingsManager(private val context: Context) {
 
-    // World-class constants setup using Companion Object
     companion object {
-        private const val KEY_LOGIN_TYPE = "login_type" // 0 for Email, 1 for Mobile
         private const val SECURE_PREFS_NAME = "nursing_studio_secure_prefs"
+        private const val KEY_LOGIN_TYPE = "login_type"
     }
 
-    private val masterKeyAlias = MasterKeys.getOrCreate(MasterKeys.AES256_GCM_SPEC)
-
-    private val sharedPreferences = EncryptedSharedPreferences.create(
-        SECURE_PREFS_NAME,
-        masterKeyAlias,
-        context,
-        EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
-        EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
-    )
-
-    fun getLoginType(): Int = sharedPreferences.getInt(KEY_LOGIN_TYPE, 0)
-
-    // Biometric Preferences
-    fun isBiometricEnabled(): Boolean = sharedPreferences.getBoolean("biometric_enabled", false)
-
-    fun setBiometricEnabled(isEnabled: Boolean) {
-        sharedPreferences.edit().putBoolean("biometric_enabled", isEnabled).apply()
-    }
-
-    fun getSavedEmail(): String? = sharedPreferences.getString("saved_email", null)
-
-    fun getSavedPass(): String = sharedPreferences.getString("saved_pass", "OTP_USER") ?: "OTP_USER"
-
-    // MPIN Logic
-    fun saveMPIN(mpin: String) {
-        sharedPreferences.edit().putString("user_mpin", mpin).apply()
-    }
-
-    fun getMPIN(): String? = sharedPreferences.getString("user_mpin", null)
-
-    fun isMPINSet(): Boolean = sharedPreferences.contains("user_mpin")
-
-    // 1. Biometric Preferences ko MPIN ke sath link karein
-    fun isSecurityEnabled(): Boolean {
-        // Agar MPIN set hai aur biometric enabled hai
-        return sharedPreferences.getBoolean("biometric_enabled", false) && isMPINSet()
-    }
-
-    // 2. Setup logic ko clean karein
-    fun enableFullSecurity(emailOrMobile: String, pass: String, mpin: String) {
-        sharedPreferences.edit().apply {
-            putBoolean("biometric_enabled", true)
-            putString("user_mpin", mpin)
-            putString("saved_email", emailOrMobile)
-            putString("saved_pass", pass)
-            apply()
+    // ⭐ 2026 Professional Self-Healing Prefs
+    private val sharedPreferences: SharedPreferences by lazy {
+        try {
+            createSafePrefs()
+        } catch (_: Exception) {
+            // Agar Keystore corrupt hai, toh purana file delete karke naya banao
+            context.getSharedPreferences(SECURE_PREFS_NAME, Context.MODE_PRIVATE).edit { clear() }
+            createSafePrefs()
         }
     }
+
+    private fun createSafePrefs(): SharedPreferences {
+        val masterKey = MasterKey.Builder(context)
+            .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
+            .build()
+
+        return EncryptedSharedPreferences.create(
+            context,
+            SECURE_PREFS_NAME,
+            masterKey,
+            EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+            EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+        )
+    }
+
+    fun getLoginType() = sharedPreferences.getInt(KEY_LOGIN_TYPE, 0)
+    fun isBiometricEnabled() = sharedPreferences.getBoolean("biometric_enabled", false)
+    fun setBiometricEnabled(enabled: Boolean) = sharedPreferences.edit {
+        putBoolean(
+            "biometric_enabled",
+            enabled
+        )
+    }
+    fun getSavedEmail() = sharedPreferences.getString("saved_email", null)
+    fun getSavedPass() = sharedPreferences.getString("saved_pass", "OTP_USER") ?: "OTP_USER"
+    fun saveMPIN(mpin: String) = sharedPreferences.edit { putString("user_mpin", mpin) }
+    fun getMPIN() = sharedPreferences.getString("user_mpin", null)
+    fun isMPINSet() = sharedPreferences.contains("user_mpin")
 }

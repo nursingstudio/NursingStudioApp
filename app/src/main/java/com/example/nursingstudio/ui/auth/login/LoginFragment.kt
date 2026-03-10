@@ -42,79 +42,99 @@ class LoginFragment : Fragment() {
         private const val LOCK_TIME_HOURS = 6
     }
     private var _binding: FragmentLoginBinding? = null
-    private val binding get() = _binding!!
+    // ⭐ 2026 Pro Tip: Change 'private' to 'internal' for Activity-Fragment sync
+    internal val binding get() = _binding!!
     private val viewModel: LoginViewModel by viewModels()
     private var verificationId: String? = null
     private var countDownTimer: CountDownTimer? = null
 
-    // ⭐ 2026 Modern Activity Result Launcher (Replace old way)
-    private val smsConsentLauncher = registerForActivityResult(androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult()) { result ->
+    // ⭐ 2026 Modern Permission Launcher
+    private val requestNotificationPermissionLauncher = registerForActivityResult(
+        androidx.activity.result.contract.ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted) {
+            // Notification permission granted!
+        } else {
+            toast("Please enable notifications for alerts 🔔")
+        }
+    }
+
+    // ⭐ 2026 Modern Activity Result Launcher (SMS Consent)
+    private val smsConsentLauncher = registerForActivityResult(
+        androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult()
+    ) { result ->
         if (result.resultCode == android.app.Activity.RESULT_OK && result.data != null) {
+            // Safe retrieval from data intent
             val message = result.data?.getStringExtra(com.google.android.gms.auth.api.phone.SmsRetriever.EXTRA_SMS_MESSAGE)
             val otpCode = "\\d{6}".toRegex().find(message ?: "")?.value
             otpCode?.let {
                 binding.etOtpLogin.setText(it)
+                hideKeyboard()
                 performMobileLogin()
             }
         }
     }
-    private val smsReceiver = object : android.content.BroadcastReceiver() {
+    // ⭐ 2026 Conflict-Free Consent Receiver
+    private val smsConsentReceiver = object : android.content.BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
             if (com.google.android.gms.auth.api.phone.SmsRetriever.SMS_RETRIEVED_ACTION == intent?.action) {
                 val extras = intent.extras ?: return
-
-                // ⭐ 2026 Type-Safe Retrieval (Fixes Deprecation)
                 val status = androidx.core.os.BundleCompat.getParcelable(
-                    extras,
-                    com.google.android.gms.auth.api.phone.SmsRetriever.EXTRA_STATUS,
+                    extras, com.google.android.gms.auth.api.phone.SmsRetriever.EXTRA_STATUS,
                     com.google.android.gms.common.api.Status::class.java
                 )
 
-                when (status?.statusCode) {
-                    com.google.android.gms.common.api.CommonStatusCodes.SUCCESS -> {
-                        val message = extras.getString(com.google.android.gms.auth.api.phone.SmsRetriever.EXTRA_SMS_MESSAGE)
-                        if (message != null) {
-                            val otpCode = "\\d{6}".toRegex().find(message)?.value
-                            otpCode?.let {
-                                binding.etOtpLogin.setText(it)
-                                performMobileLogin()
-                            }
-                        } else {
-                            // ⭐ 2026 Standard: Trigger Consent without Deprecation
-                            val consentIntent = androidx.core.os.BundleCompat.getParcelable(extras, com.google.android.gms.auth.api.phone.SmsRetriever.EXTRA_CONSENT_INTENT, Intent::class.java)
-                            consentIntent?.let { smsConsentLauncher.launch(it) }
-                        }
+                if (status?.statusCode == com.google.android.gms.common.api.CommonStatusCodes.SUCCESS) {
+                    // Yahan hum Consent Intent nikalte hain
+                    val consentIntent = androidx.core.os.BundleCompat.getParcelable(
+                        extras, com.google.android.gms.auth.api.phone.SmsRetriever.EXTRA_CONSENT_INTENT,
+                        Intent::class.java
+                    )
+                    try {
+                        // Ab 'smsConsentLauncher' use hoga!
+                        consentIntent?.let { smsConsentLauncher.launch(it) }
+                    } catch (e: Exception) {
+                        com.google.firebase.crashlytics.FirebaseCrashlytics.getInstance().recordException(e)
                     }
                 }
             }
         }
     }
 
+
     override fun onStart() {
         super.onStart()
+        // Register for User Consent events
         val intentFilter = android.content.IntentFilter(com.google.android.gms.auth.api.phone.SmsRetriever.SMS_RETRIEVED_ACTION)
-
-        // ⭐ HIGH PRIORITY FOR AUTO-FILL
-        intentFilter.priority = 1000
-
-        ContextCompat.registerReceiver(
-            requireActivity(),
-            smsReceiver,
+        requireActivity().registerReceiver(
+            smsConsentReceiver,
             intentFilter,
             com.google.android.gms.auth.api.phone.SmsRetriever.SEND_PERMISSION,
             null,
-            ContextCompat.RECEIVER_EXPORTED
+            Context.RECEIVER_EXPORTED
         )
 
-        // IMPORTANT: Clear previous instances
+        // Auto-fill trigger
         com.google.android.gms.auth.api.phone.SmsRetriever.getClient(requireContext()).startSmsRetriever()
     }
 
     override fun onStop() {
         super.onStop()
+        // ⭐ ALWAYS unregister to prevent memory leaks in 2026
         try {
-            requireActivity().unregisterReceiver(smsReceiver)
-        } catch (_: Exception) { /* Receiver not registered */ }
+            requireActivity().unregisterReceiver(smsConsentReceiver)
+        } catch (_: Exception) {}
+    }
+
+    override fun onResume() {
+        super.onResume()
+        // ⭐ 2026 UX: Clear focus and wait for SMS
+        viewLifecycleOwner.lifecycleScope.launch {
+            kotlinx.coroutines.delay(300)
+            binding.etOtpLogin.clearFocus()
+            binding.etMobileLogin.clearFocus()
+            hideKeyboard()
+        }
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
@@ -134,7 +154,12 @@ class LoginFragment : Fragment() {
 
         val bioManager = BiometricSettingsManager(requireContext())
         if (bioManager.isBiometricEnabled()) {
-            binding.root.postDelayed({ showBiometricPrompt() }, 500)
+            //binding.root.postDelayed({ showBiometricPrompt() }, 500)
+        }
+        // ⭐ 2026 World-Class Notification Check
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+            // Note: Manifest.permission.POST_NOTIFICATIONS use karein
+            requestNotificationPermissionLauncher.launch(android.Manifest.permission.POST_NOTIFICATIONS)
         }
     }
     private fun setupInitialUI() {
@@ -473,7 +498,7 @@ class LoginFragment : Fragment() {
             viewModel.loginWithPhone(credential)
         }
     }
-    private fun proceedToHome() {
+    internal fun proceedToHome() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.withResumed {
                 if (isAdded && activity != null) {
@@ -629,10 +654,11 @@ class LoginFragment : Fragment() {
         )
         mpinSheet.show(childFragmentManager, "MpinSheet")
     }
+    // ⭐ 2026 Modern SMS User Consent (Non-Conflicting)
     private fun startSmsListener() {
-        // 2026 Industry Standard: Use User Consent API as fallback
-        com.google.android.gms.auth.api.phone.SmsRetriever.getClient(requireContext())
-            .startSmsUserConsent(null) // null means it will listen to any sender
+        val client = com.google.android.gms.auth.api.phone.SmsRetriever.getClient(requireContext())
+        // Isse Google Play Services ek subtle 'Allow' popup dikhayega agar auto-read fail hua
+        client.startSmsUserConsent(null)
     }
     private fun isNetworkAvailable(): Boolean {
         val connectivityManager = requireContext().getSystemService(Context.CONNECTIVITY_SERVICE) as android.net.ConnectivityManager
@@ -640,13 +666,7 @@ class LoginFragment : Fragment() {
         val capabilities = connectivityManager.getNetworkCapabilities(network) ?: return false
         return capabilities.hasCapability(android.net.NetworkCapabilities.NET_CAPABILITY_INTERNET)
     }
-    // ⭐ 2026 GOLD STANDARD: Public Bridge for Instant Verification
-    fun triggerAutoLogin(credential: com.google.firebase.auth.AuthCredential) {
-        if (isAdded) {
-            // Direct ViewModel ko call karein, user ko OTP screen bhi nahi dikhegi!
-            viewModel.loginWithPhone(credential)
-        }
-    }
+
     override fun onDestroyView() {
         countDownTimer?.cancel()
         countDownTimer = null
