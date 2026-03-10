@@ -18,26 +18,27 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
-
-    buildTypes {
-        // ⭐ 2026 STANDARD: Separate Debug Block for Development
-        getByName("debug") {
-            // Isse Crashlytics ko Build ID mil jayegi bina app ko slow kiye
-            configure<com.google.firebase.crashlytics.buildtools.gradle.CrashlyticsExtension> {
-                mappingFileUploadEnabled = false
+        // 1. Pehle ye block add karein (Line by line copy karein)
+        signingConfigs {
+            create("releaseTest") {
+                // Hum debug key ko hi use karenge testing ke liye
+                storeFile = file(System.getProperty("user.home") + "/.android/debug.keystore")
+                storePassword = "android"
+                keyAlias = "androiddebugkey"
+                keyPassword = "android"
             }
         }
 
-        release {
-            // Aapka existing code yahan safe hai
-            isMinifyEnabled = false
-            isShrinkResources = false
-            proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
-            )
+        buildTypes {
+            getByName("release") {
+                // 2. Exact Location: Is line ko yahan replace/add karein
+                signingConfig = signingConfigs.getByName("releaseTest")
+
+                isMinifyEnabled = false
+                isShrinkResources = false
+                proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            }
         }
-    }
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17

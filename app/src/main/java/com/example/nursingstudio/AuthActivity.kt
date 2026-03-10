@@ -2,6 +2,7 @@ package com.example.nursingstudio
 
 import android.content.Intent
 import android.os.Bundle
+import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import com.example.nursingstudio.databinding.LayoutSecurityAlertBinding
@@ -208,6 +209,7 @@ class AuthActivity : AppCompatActivity() {
     private fun checkEnvironmentIntegrity() {
         if (BuildConfig.DEBUG) return
 
+        val isRooted = checkRootMethod()
         val isDevOptions = android.provider.Settings.Global.getInt(contentResolver, "development_settings_enabled", 0) != 0
         val isUsbDebugging = android.provider.Settings.Global.getInt(contentResolver, "adb_enabled", 0) != 0
 
@@ -216,6 +218,7 @@ class AuthActivity : AppCompatActivity() {
         val isUsbConnected = intent?.extras?.getBoolean("connected") ?: false
 
         when {
+            isRooted -> showSecurityAlert(SecurityType.ROOTED_DEVICE)
             isDevOptions -> showSecurityAlert(SecurityType.DEVELOPER_OPTIONS)
             isUsbDebugging -> showSecurityAlert(SecurityType.USB_DEBUGGING)
             isUsbConnected -> showSecurityAlert(SecurityType.ACTIVE_USB)
@@ -223,7 +226,7 @@ class AuthActivity : AppCompatActivity() {
     }
     // ⭐ 2026 Professional Security Enum
     enum class SecurityType {
-        DEVELOPER_OPTIONS, USB_DEBUGGING, ACTIVE_USB
+        DEVELOPER_OPTIONS, USB_DEBUGGING, ACTIVE_USB, ROOTED_DEVICE
     }
 
     private fun showSecurityAlert(type: SecurityType) {
@@ -256,16 +259,34 @@ class AuthActivity : AppCompatActivity() {
                 binding.tvAlertTitle.text = "USB CONNECTION"
                 binding.tvAlertDesc.text = "Nursing Studio restricts USB connections to prevent unauthorized mirroring. Unplug to unlock."
                 binding.tvWarningStar.text = "Waiting for cable removal..."
-                binding.btnSettings.visibility = android.view.View.GONE
+                binding.btnSettings.visibility = View.GONE
                 // Isse button poori width le lega
                 val params = binding.btnExit.layoutParams as android.widget.LinearLayout.LayoutParams
                 params.weight = 2f
                 params.marginEnd = 0
                 binding.btnExit.layoutParams = params
             }
+            SecurityType.ROOTED_DEVICE -> {
+                binding.tvAlertTitle.text = "DEVICE COMPROMISED"
+                binding.tvAlertDesc.text = "Nursing Studio detected root access. For your data safety, this app cannot run on rooted devices."
+                binding.tvWarningStar.text = "Security Level: CRITICAL"
+                binding.btnSettings.visibility = View.GONE
+            }
         }
 
         binding.btnExit.setOnClickListener { finishAffinity() }
         securitySheet?.show()
+    }
+    // ⭐ Root detection logic (World-Class Utility)
+    private fun checkRootMethod(): Boolean {
+        val paths = arrayOf(
+            "/system/app/Superuser.apk", "/sbin/su", "/system/bin/su", "/system/xbin/su",
+            "/data/local/xbin/su", "/data/local/bin/su", "/system/sd/xbin/su",
+            "/system/bin/failsafe/su", "/data/local/su"
+        )
+        for (path in paths) {
+            if (java.io.File(path).exists()) return true
+        }
+        return false
     }
 }
