@@ -79,10 +79,12 @@
     <style name="BottomSheetDialogTheme" parent="Theme.Design.Light.BottomSheetDialog">
         <item name="bottomSheetStyle">@style/CustomBottomSheetStyle</item>
         <item name="android:windowIsFloating">false</item>
+        <item name="colorSecondaryContainer">@color/saffron_dark</item>
     </style>
 
     <style name="CustomBottomSheetStyle" parent="Widget.Design.BottomSheet.Modal">
         <item name="android:background">@android:color/transparent</item>
+        <item name="enableEdgeToEdge">true</item>
     </style>
 
     // MaterialAlertDialog //
