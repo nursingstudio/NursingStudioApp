@@ -18,7 +18,7 @@
         android:id="@+id/tvAlertTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="DEVELOPER OPTIONS"
+        android:text="@string/developer_options"
         android:textColor="@color/white"
         android:textSize="18sp"
         android:textStyle="bold"
@@ -34,7 +34,7 @@
         android:layout_marginHorizontal="24dp"
         android:layout_marginTop="20dp"
         android:lineSpacingExtra="4dp"
-        android:text="For security reasons, Nursing Studio does not allow the use of Developer Options. Please disable it to continue."
+        android:text="@string/security_description_text"
         android:textColor="#444444"
         android:textSize="15sp"
         app:layout_constraintEnd_toEndOf="parent"
@@ -58,6 +58,7 @@
         <ImageView
             android:layout_width="20dp"
             android:layout_height="20dp"
+            android:contentDescription="@string/star_mark"
             android:src="@drawable/ic_star"
             app:tint="@color/saffron_dark" />
 
@@ -66,7 +67,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="10dp"
-            android:text="Mandatory security check for 2026 standards"
+            android:text="@string/warning_star_text_as_advice"
             android:textColor="@color/saffron_dark"
             android:textSize="13sp"
             android:textStyle="bold" />
@@ -88,7 +89,7 @@
             android:layout_height="50dp"
             android:layout_marginEnd="8dp"
             android:layout_weight="1"
-            android:text="EXIT"
+            android:text="@string/close_app"
             android:textColor="@color/saffron"
             app:strokeColor="@color/saffron"
             app:strokeWidth="1.5dp"
@@ -100,7 +101,7 @@
             android:layout_height="50dp"
             android:layout_marginStart="8dp"
             android:layout_weight="1"
-            android:text="SETTINGS"
+            android:text="@string/go_to_settings"
             android:textStyle="bold"
             app:backgroundTint="@color/saffron"
             app:cornerRadius="12dp" />

@@ -237,7 +237,24 @@
     <string name="error_otp_invalid">Invalid code: The security code must be exactly 6 digits long. Please check and try again.</string>
     <string name="email_not_linked">This email is not linked to any account. Please Register first.</string>
     <string name="redirecting">Redirecting to Register…</string>
-
+    <string name="usb_debugging_enabled">USB Debugging Enabled</string>
+    <string name="usb_debugging_description">Nursing Studio app detected "USB Debugging" is ON. For security reasons, it is recommended to change USB debugging setting to \"Off\" while using this app.</string>
+    <string name="usb_debugging_star_text">Disable usb debugging under developer option for enhanced security.</string>
+    <string name="go_to_settings">Go to Settings</string>
+    <string name="close_app">Close App</string>
+    <string name="warning_star_text_as_advice">Warning Star Text as Advice.</string>
+    <string name="security_description_text">For security reasons, Nursing Studio does not allow the use of Developer Options. Please disable it to continue.</string>
+    <string name="developer_options">DEVELOPER OPTIONS</string>
+    <string name="star_mark">Star Mark</string>
+    <string name="developer_mode_enabled">Developer Mode Enabled</string>
+    <string name="developer_mode_description">Nursing Studio app detected \"Developer Mode\" is enabled. For security reasons, it is recommended to change Developer Mode setting to \"Off\" while using this app.</string>
+    <string name="developer_options_star_text">It is advised not to enable developer option to prevent security risks.</string>
+    <string name="active_usb_connection_detected">Active USB Connection Detected</string>
+    <string name="active_usb_description">Nursing Studio app detected your mobile is actively connected through USB. For security reasons, disconnect the USB connection and continue to use the app.</string>
+    <string name="active_usb_star_text">Refrain from using active USB connection to mitigate security vulnerabilities.</string>
+    <string name="device_compromised">DEVICE COMPROMISED</string>
+    <string name="root_access_description">Nursing Studio detected root access. For your data safety, this app cannot run on rooted devices.</string>
+    <string name="root_access_star_text">Remove root access or use a different device.</string>
 
 
 </resources>

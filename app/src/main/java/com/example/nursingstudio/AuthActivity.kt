@@ -240,25 +240,25 @@ class AuthActivity : AppCompatActivity() {
 
         when(type) {
             SecurityType.DEVELOPER_OPTIONS -> {
-                binding.tvAlertTitle.text = "DEVELOPER OPTIONS"
-                binding.tvAlertDesc.text = "Nursing Studio security protocol: Please disable Developer Options to continue."
-                binding.tvWarningStar.text = "System integrity check: FAILED"
+                binding.tvAlertTitle.text = getString(R.string.developer_mode_enabled)
+                binding.tvAlertDesc.text = getString(R.string.developer_mode_description)
+                binding.tvWarningStar.text = getString(R.string.developer_options_star_text)
                 binding.btnSettings.setOnClickListener {
                     startActivity(Intent(android.provider.Settings.ACTION_APPLICATION_DEVELOPMENT_SETTINGS))
                 }
             }
             SecurityType.USB_DEBUGGING -> {
-                binding.tvAlertTitle.text = "USB DEBUGGING"
-                binding.tvAlertDesc.text = "Data protection active. Please turn off USB Debugging from your device settings."
-                binding.tvWarningStar.text = "Encryption risk detected"
+                binding.tvAlertTitle.text = getString(R.string.usb_debugging_enabled)
+                binding.tvAlertDesc.text = getString(R.string.usb_debugging_description)
+                binding.tvWarningStar.text = getString(R.string.usb_debugging_star_text)
                 binding.btnSettings.setOnClickListener {
                     startActivity(Intent(android.provider.Settings.ACTION_APPLICATION_DEVELOPMENT_SETTINGS))
                 }
             }
             SecurityType.ACTIVE_USB -> {
-                binding.tvAlertTitle.text = "USB CONNECTION"
-                binding.tvAlertDesc.text = "Nursing Studio restricts USB connections to prevent unauthorized mirroring. Unplug to unlock."
-                binding.tvWarningStar.text = "Waiting for cable removal..."
+                binding.tvAlertTitle.text = getString(R.string.active_usb_connection_detected)
+                binding.tvAlertDesc.text = getString(R.string.active_usb_description)
+                binding.tvWarningStar.text = getString(R.string.active_usb_star_text)
                 binding.btnSettings.visibility = View.GONE
                 // Isse button poori width le lega
                 val params = binding.btnExit.layoutParams as android.widget.LinearLayout.LayoutParams
@@ -267,9 +267,9 @@ class AuthActivity : AppCompatActivity() {
                 binding.btnExit.layoutParams = params
             }
             SecurityType.ROOTED_DEVICE -> {
-                binding.tvAlertTitle.text = "DEVICE COMPROMISED"
-                binding.tvAlertDesc.text = "Nursing Studio detected root access. For your data safety, this app cannot run on rooted devices."
-                binding.tvWarningStar.text = "Security Level: CRITICAL"
+                binding.tvAlertTitle.text = getString(R.string.device_compromised)
+                binding.tvAlertDesc.text = getString(R.string.root_access_description)
+                binding.tvWarningStar.text = getString(R.string.root_access_star_text)
                 binding.btnSettings.visibility = View.GONE
             }
         }
