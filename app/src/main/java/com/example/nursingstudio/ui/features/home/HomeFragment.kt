@@ -66,9 +66,11 @@ class HomeFragment : Fragment() {
 
         val tvWelcome = view.findViewById<TextView>(R.id.tvWelcome)
 
-        val session = requireActivity().getSharedPreferences("session", Context.MODE_PRIVATE)
-        val name = session.getString("reg_name", "User")
-        tvWelcome.text = getString(R.string.welcome_user, name)
+        // 1. Initial State: Professional Placeholder (Jab tak data load ho raha hai)
+        tvWelcome.text = getString(R.string.hello_future_nursing_offiecr)
+
+        // 2. Immediate Real-time Fetch from Firebase
+        fetchUserRealtime(tvWelcome)
 
         checkAndShowBiometricPrompt()
         setupDailyMotivation(view)
@@ -104,7 +106,34 @@ class HomeFragment : Fragment() {
             }
         }
     }
+    private fun fetchUserRealtime(tvWelcome: TextView) {
+        val user = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser
+        val userId = user?.uid ?: return
 
+        // ⭐ 2026 GOLD STANDARD: Firestore Snapshot Listener (Ultra-Fast)
+        val db = com.google.firebase.firestore.FirebaseFirestore.getInstance()
+
+        db.collection("Users").document(userId).addSnapshotListener { snapshot, e ->
+            if (e != null) {
+                // Fallback to local
+                val session = requireActivity().getSharedPreferences("session", Context.MODE_PRIVATE)
+                val localName = session.getString("reg_name", "Scholar")
+                tvWelcome.text = getString(R.string.welcome_user, localName)
+                return@addSnapshotListener
+            }
+
+            if (snapshot != null && snapshot.exists()) {
+                val name = snapshot.getString("name") ?: "Scholar"
+
+                // 1. UI update
+                tvWelcome.text = getString(R.string.welcome_user, name)
+
+                // 2. Sync for offline
+                val session = requireActivity().getSharedPreferences("session", Context.MODE_PRIVATE)
+                session.edit { putString("reg_name", name) }
+            }
+        }
+    }
     private fun checkAndShowBiometricPrompt() {
         val prefs = requireContext().getSharedPreferences("app_settings", Context.MODE_PRIVATE)
         val isBiometricEnabled = prefs.getBoolean("biometric_enabled", false)

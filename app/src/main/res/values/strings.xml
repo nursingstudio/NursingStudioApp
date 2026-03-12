@@ -255,6 +255,8 @@
     <string name="device_compromised">DEVICE COMPROMISED</string>
     <string name="root_access_description">Nursing Studio detected root access. For your data safety, this app cannot run on rooted devices.</string>
     <string name="root_access_star_text">Remove root access or use a different device.</string>
+    <string name="hello_future_nursing_offiecr">Hello, Future Nursing Offiecr</string>
+    <string name="welcome">Welcome, ...</string>
 
 
 </resources>

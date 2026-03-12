@@ -1,5 +1,7 @@
 package com.example.nursingstudio.data.repository
 
+import android.content.Context
+import com.example.nursingstudio.utils.AppSettings
 import com.google.android.gms.tasks.Task
 import com.google.firebase.auth.AuthCredential
 import com.google.firebase.auth.AuthResult
@@ -27,8 +29,13 @@ class AuthRepository {
     fun checkUserInFirestore(uid: String): Task<DocumentSnapshot> =
         db.collection("Users").document(uid).get()
 
-    fun signOut() {
+    fun signOut(context: Context) {
+        // 1. Firebase se Logout
         FirebaseAuth.getInstance().signOut()
+
+        // 2. ⭐ GOLD STANDARD: Local session ko bhi turant saaf karein
+        // Iske liye humne AppSettings mein function banaya tha
+        AppSettings.startNewUserSession(context)
     }
 
     // --- REGISTER LOGIC ---

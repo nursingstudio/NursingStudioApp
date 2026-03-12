@@ -1,13 +1,10 @@
 package com.example.nursingstudio.utils
 
 import android.content.Context
-import android.os.Build
-import android.os.VibrationEffect
-import android.os.Vibrator
-import android.os.VibratorManager
 import android.view.MotionEvent
 import android.view.View
 import android.view.animation.AnimationUtils
+import androidx.core.content.edit
 import com.example.nursingstudio.R
 
 object AppSettings {
@@ -21,30 +18,21 @@ object AppSettings {
 
     fun setVibration(context: Context, isEnabled: Boolean) {
         val sp = context.getSharedPreferences(PREF_SETTINGS, Context.MODE_PRIVATE)
-        sp.edit().putBoolean(KEY_VIBRATION, isEnabled).apply()
+        sp.edit { putBoolean(KEY_VIBRATION, isEnabled) }
     }
 
     fun triggerVibration(context: Context, ms: Long) {
         if (!isVibrationEnabled(context)) return
 
-        val vibrator = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            val manager = context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
-            manager.defaultVibrator
-        } else {
-            @Suppress("DEPRECATION")
-            context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
-        }
+        // 1. Android 12+ (API 31) direct VibratorManager usage
+        val vibratorManager = context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as android.os.VibratorManager
+        val vibrator = vibratorManager.defaultVibrator
 
+        // 2. Simple, modern vibration execution
         if (vibrator.hasVibrator()) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                vibrator.vibrate(VibrationEffect.createOneShot(ms, VibrationEffect.DEFAULT_AMPLITUDE))
-            } else {
-                @Suppress("DEPRECATION")
-                vibrator.vibrate(ms)
-            }
+            vibrator.vibrate(android.os.VibrationEffect.createOneShot(ms, android.os.VibrationEffect.DEFAULT_AMPLITUDE))
         }
     }
-
     /**
      * CENTRAL AC: Shake + Vibrate Error Animation
      * Kisi bhi view par error aane par ise call karein
@@ -77,5 +65,14 @@ object AppSettings {
             }
             true
         }
+    }
+    fun startNewUserSession(context: Context) {
+        // 1. Purana shared preferences poori tarah saaf (Suresh vs Alok issue fix)
+        val session = context.getSharedPreferences("session", Context.MODE_PRIVATE)
+        session.edit { clear() }
+
+        // 2. Clear other temporary caches if needed
+        val motivationPref = context.getSharedPreferences("daily_motivation", Context.MODE_PRIVATE)
+        motivationPref.edit { clear() }
     }
 }

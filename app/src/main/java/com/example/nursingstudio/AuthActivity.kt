@@ -28,27 +28,25 @@ class AuthActivity : AppCompatActivity() {
     private var securitySheet: com.google.android.material.bottomsheet.BottomSheetDialog? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        // 1. Firebase aur App Check Initialize (Pehle logic set karein)
+        super.onCreate(savedInstanceState)
         FirebaseApp.initializeApp(this)
 
-        try {
-            val firebaseAppCheck = FirebaseAppCheck.getInstance()
-            // 2026 Professional Logic: Debug check with safe fallback
-            if (BuildConfig.DEBUG) {
-                firebaseAppCheck.installAppCheckProviderFactory(
-                    DebugAppCheckProviderFactory.getInstance()
-                )
-            } else {
-                firebaseAppCheck.installAppCheckProviderFactory(
-                    PlayIntegrityAppCheckProviderFactory.getInstance()
-                )
-            }
-        } catch (e: Exception) {
-            // Agar App Check fail ho toh app crash na ho, bas log karein
-            com.google.firebase.crashlytics.FirebaseCrashlytics.getInstance().recordException(e)
+        // ⭐ 2026 GOLD STANDARD: Smart App Check Initialization
+        val firebaseAppCheck = FirebaseAppCheck.getInstance()
+
+        if (BuildConfig.DEBUG) {
+            // Debug mode: For Testing (Emulators/Physical devices)
+            firebaseAppCheck.installAppCheckProviderFactory(
+                DebugAppCheckProviderFactory.getInstance()
+            )
+        } else {
+            // Release mode: For Play Store (World-Class Security)
+            firebaseAppCheck.installAppCheckProviderFactory(
+                PlayIntegrityAppCheckProviderFactory.getInstance()
+            )
+
         }
 
-        super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_auth)
 
         // ⭐ Security Check Call

@@ -247,7 +247,11 @@ class LoginFragment : Fragment() {
                 is LoginViewModel.LoginResult.Loading -> {
                 }
 
-                is LoginViewModel.LoginResult.Success -> proceedToHome()
+                is LoginViewModel.LoginResult.Success -> {
+                    // ⬇️ EXACT LOCATION: Navigation se thik pehle call karein
+                    AppSettings.startNewUserSession(requireContext())
+                    proceedToHome()
+                }
 
                 is LoginViewModel.LoginResult.NoProfile -> {
                     countDownTimer?.cancel()

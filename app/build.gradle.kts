@@ -18,6 +18,16 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
+
+    packaging {
+        resources {
+            excludes += "/META-INF/{AL2.0,LGPL2.1}"
+            pickFirsts += "lib/x86/libc++_shared.so"
+            pickFirsts += "lib/x86_64/libc++_shared.so"
+            pickFirsts += "lib/armeabi-v7a/libc++_shared.so"
+            pickFirsts += "lib/arm64-v8a/libc++_shared.so"
+        }
+    }
         // 1. Pehle ye block add karein (Line by line copy karein)
         signingConfigs {
             create("releaseTest") {
@@ -59,79 +69,57 @@ android {
 }
 
 dependencies {
-    // Standard Android Libraries
+    // 1. Android & UI Core
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
     implementation(libs.material)
-
-    // --- FIREBASE (BoM managed) ---
-    implementation(platform(libs.firebase.bom))
-    implementation(libs.firebase.appcheck.ktx)
-    implementation(platform(libs.firebase.bom.v3490))
-    implementation(libs.firebase.auth)
-    implementation(libs.firebase.firestore)
-    implementation(libs.firebase.storage)
-    implementation(libs.firebase.appcheck.debug)
-    implementation(libs.google.firebase.appcheck.ktx)
-    implementation(libs.play.services.safetynet)
-    // Firebase App Check (Optional but recommended)
-    implementation(libs.firebase.appcheck.playintegrity)
-    // Firebase Tasks ko Coroutines (await) ke sath chalane ke liye
-    implementation(libs.kotlinx.coroutines.play.services)
-    // Play Integrity API ke liye
-    implementation(libs.integrity)
-    // Biometric Authentication Library
-    implementation(libs.androidx.biometric)
-    // Encrypted Storage ke liye
-    implementation(libs.androidx.security.crypto)
-
-    // --- OTHER LIBRARIES ---
-    implementation(libs.ccp)
-    implementation(libs.circleimageview)
     implementation(libs.androidx.core.splashscreen)
     implementation(libs.lottie)
+    implementation(libs.coil) // 2026 Best for Image Loading
 
-    // Navigation & Lifecycle
+    // 2. ⭐ THE GOLD STANDARD: Single Firebase BoM Control
+    implementation(platform(libs.firebase.bom))
+
+    // Sabhi Firebase Services (Bina version ke)
+    implementation(libs.firebase.auth)
+    implementation(libs.firebase.firestore)
+    implementation(libs.firebase.database) // KTX ki zaroorat nahi, automatic hai
+    implementation(libs.firebase.storage)
+    implementation(libs.firebase.analytics)
+    implementation(libs.firebase.crashlytics)
+    implementation(libs.firebase.appcheck.playintegrity)
+    implementation(libs.firebase.appcheck.debug)
+
+    // 3. Authentication & Security
+    implementation(libs.androidx.biometric)
+    implementation(libs.androidx.security.crypto)
+    implementation(libs.play.services.auth)
+    implementation(libs.play.services.auth.api.phone)
+    implementation(libs.integrity)
+
+    // 4. Lifecycle & Navigation
+    implementation(libs.androidx.lifecycle.viewmodel.ktx)
+    implementation(libs.androidx.lifecycle.livedata.ktx)
     implementation(libs.androidx.navigation.fragment.ktx)
     implementation(libs.androidx.navigation.ui.ktx)
+    implementation(libs.kotlinx.coroutines.play.services)
 
-    // Performance: Coil (Better than Glide/Picasso for 2026)
-    implementation(libs.coil)
+    // 5. App Utilities
+    implementation(libs.app.update)
+    implementation(libs.app.update.ktx)
+    implementation(libs.ccp)
+    implementation(libs.circleimageview)
 
-    // Compose
-    implementation(libs.androidx.lifecycle.runtime.ktx)
-    implementation(libs.androidx.activity.compose)
+    // 6. COMPOSE CORE (Iske bina Color.kt nahi chalega)
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.compose.ui)
     implementation(libs.androidx.compose.ui.graphics)
-    implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
 
-    // ViewModel & LiveData
-    implementation(libs.androidx.lifecycle.viewmodel.ktx)
-    implementation(libs.androidx.lifecycle.livedata.ktx)
-    implementation(libs.androidx.fragment.ktx)
-
-    // for In-App updates
-    implementation(libs.app.update)
-    implementation(libs.app.update.ktx)
-
-    // Add Firebase Crashlytics SDK
-    implementation(libs.firebase.crashlytics)
-    implementation(libs.firebase.analytics)
-
-    // for retrieve otp automatically from sms
-    implementation(libs.play.services.auth)
-    implementation(libs.play.services.auth.api.phone)
-
-    // Testing
+    // 7. Testing
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
-    androidTestImplementation(platform(libs.androidx.compose.bom))
-    androidTestImplementation(libs.androidx.compose.ui.test.junit4)
-    debugImplementation(libs.androidx.compose.ui.tooling)
-    debugImplementation(libs.androidx.compose.ui.test.manifest)
 }

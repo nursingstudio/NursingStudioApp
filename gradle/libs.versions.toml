@@ -1,5 +1,5 @@
 [versions]
-agp = "9.0.1"
+agp = "9.1.0"
 appUpdate = "2.1.0"
 biometric = "1.2.0-alpha05"
 ccp = "2.7.3"
@@ -7,7 +7,6 @@ circleimageview = "3.1.0"
 coil = "2.7.0"
 coreSplashscreen = "1.2.0"
 firebaseAnalytics = "23.0.0"
-firebaseBomVersion = "34.9.0"
 firebaseCrashlytics = "20.0.4"
 fragmentKtx = "1.8.9"
 integrity = "1.6.0"
@@ -25,9 +24,9 @@ activity = "1.12.4"
 constraintlayout = "2.2.1"
 lifecycleRuntimeKtx = "2.10.0"
 firebaseAppCheck = "18.0.0"
-firebaseBom = "33.9.0"
+firebaseBom = "34.10.0"
 activityCompose = "1.12.4"
-composeBom = "2026.02.00"
+composeBom = "2026.02.01"
 navigationUiKtx = "2.9.7"
 playServicesAuth = "21.5.1"
 playServicesAuthApiPhone = "18.3.0"
@@ -52,8 +51,8 @@ firebase-analytics = { module = "com.google.firebase:firebase-analytics", versio
 firebase-appcheck-debug = { module = "com.google.firebase:firebase-appcheck-debug" }
 firebase-appcheck-playintegrity = { module = "com.google.firebase:firebase-appcheck-playintegrity" }
 firebase-auth = { module = "com.google.firebase:firebase-auth" }
-firebase-bom-v3490 = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBomVersion" }
 firebase-crashlytics = { module = "com.google.firebase:firebase-crashlytics", version.ref = "firebaseCrashlytics" }
+firebase-database = { module = "com.google.firebase:firebase-database" }
 firebase-firestore = { module = "com.google.firebase:firebase-firestore" }
 firebase-storage = { module = "com.google.firebase:firebase-storage" }
 google-firebase-appcheck-ktx = { module = "com.google.firebase:firebase-appcheck-ktx" }

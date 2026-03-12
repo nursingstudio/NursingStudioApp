@@ -113,6 +113,7 @@ class RegisterFragment : Fragment() {
 
                 is RegResult.Success -> {
                     binding.progressBar.visibility = View.GONE
+                    AppSettings.startNewUserSession(requireContext())
                     AppSettings.triggerVibration(requireContext(), 200)
                     toast("Registration Successful! ✨")
                     startActivity(Intent(requireContext(), MainActivity::class.java))

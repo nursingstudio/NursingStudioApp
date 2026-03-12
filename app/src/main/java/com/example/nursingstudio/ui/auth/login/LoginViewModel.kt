@@ -2,13 +2,13 @@ package com.example.nursingstudio.ui.auth.login
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.nursingstudio.data.repository.AuthRepository
 import com.google.firebase.auth.AuthCredential
-import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
 
-class LoginViewModel : ViewModel() {
+
+class LoginViewModel(application: android.app.Application) : androidx.lifecycle.AndroidViewModel(application) {
     private val repository = AuthRepository()
 
     private val _loginStatus = MutableLiveData<LoginResult>()
@@ -38,7 +38,7 @@ class LoginViewModel : ViewModel() {
                     _loginStatus.value = LoginResult.Success
                 } else {
                     // Profile nahi hai toh login session turant khatam karo
-                    repository.signOut()
+                    repository.signOut(getApplication()) // application context pass kiya
                     _loginStatus.value = LoginResult.NoProfile
                 }
             }.onFailure { e ->
@@ -56,7 +56,7 @@ class LoginViewModel : ViewModel() {
             if (doc.exists()) {
                 _loginStatus.value = LoginResult.Success
             } else {
-                repository.signOut() // Profile nahi hai toh Firebase session clear karo
+                repository.signOut(getApplication()) // Profile nahi hai toh Firebase session clear karo
                 _loginStatus.value = LoginResult.NoProfile
             }
         }

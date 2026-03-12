@@ -18,7 +18,9 @@
             android:layout_height="wrap_content"
             android:textSize="22sp"
             android:textStyle="bold"
-            android:textColor="@color/text_primary" />
+            android:textColor="@color/text_primary"
+            android:hint="@string/welcome"
+            android:textColorHint="@color/text_secondary" />
 
         <TextView
             android:layout_width="wrap_content"
