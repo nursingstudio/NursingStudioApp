@@ -2,7 +2,6 @@ package com.example.nursingstudio.ui.features.settings
 
 import android.content.Context
 import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
 import android.text.InputFilter
 import android.text.InputType
@@ -14,9 +13,10 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.widget.SwitchCompat
+import androidx.core.content.edit
+import androidx.core.net.toUri
 import androidx.fragment.app.Fragment
 import com.example.nursingstudio.R
-import com.example.nursingstudio.ui.features.staticpage.StaticPageFragment
 import com.example.nursingstudio.utils.AppSettings
 import com.example.nursingstudio.utils.BiometricSettingsManager
 import com.google.android.material.bottomsheet.BottomSheetDialog
@@ -24,6 +24,7 @@ import com.google.android.material.button.MaterialButton
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.switchmaterial.SwitchMaterial
 import com.google.android.material.textfield.TextInputEditText
+import androidx.navigation.fragment.findNavController
 
 class SettingsFragment : Fragment() {
 
@@ -66,9 +67,24 @@ class SettingsFragment : Fragment() {
         switchBiometric?.isChecked = bioManager.isBiometricEnabled()
 
         // Listeners
-        switchNotifications.setOnCheckedChangeListener { _, isChecked -> sp.edit().putBoolean(KEY_NOTIFICATIONS, isChecked).apply() }
-        switchQuizSound.setOnCheckedChangeListener { _, isChecked -> sp.edit().putBoolean(KEY_QUIZ_SOUND, isChecked).apply() }
-        switchMotivation.setOnCheckedChangeListener { _, isChecked -> sp.edit().putBoolean(KEY_MOTIVATION, isChecked).apply() }
+        switchNotifications.setOnCheckedChangeListener { _, isChecked -> sp.edit {
+            putBoolean(
+                KEY_NOTIFICATIONS,
+                isChecked
+            )
+        } }
+        switchQuizSound.setOnCheckedChangeListener { _, isChecked -> sp.edit {
+            putBoolean(
+                KEY_QUIZ_SOUND,
+                isChecked
+            )
+        } }
+        switchMotivation.setOnCheckedChangeListener { _, isChecked -> sp.edit {
+            putBoolean(
+                KEY_MOTIVATION,
+                isChecked
+            )
+        } }
 
         switchVibration.setOnCheckedChangeListener { _, isChecked ->
             AppSettings.setVibration(requireContext(), isChecked)
@@ -161,18 +177,29 @@ class SettingsFragment : Fragment() {
     }
 
     private fun openUrl(url: String) {
-        try { startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url))) }
-        catch (e: Exception) { Toast.makeText(requireContext(), "Unable to open link", Toast.LENGTH_SHORT).show() }
+        try { startActivity(Intent(Intent.ACTION_VIEW, url.toUri())) }
+        catch (_: Exception) { Toast.makeText(requireContext(), "Unable to open link", Toast.LENGTH_SHORT).show() }
     }
 
     private fun openWhatsappSupport() {
-        try { startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(URL_WHATSAPP_SUPPORT))) }
-        catch (e: Exception) { Toast.makeText(requireContext(), "WhatsApp not available", Toast.LENGTH_SHORT).show() }
+        try { startActivity(Intent(Intent.ACTION_VIEW, URL_WHATSAPP_SUPPORT.toUri())) }
+        catch (_: Exception) { Toast.makeText(requireContext(), "WhatsApp not available", Toast.LENGTH_SHORT).show() }
     }
 
     private fun openStaticPage(type: String) {
-        val fragment = StaticPageFragment.Companion.newInstance(type)
-        requireActivity().supportFragmentManager.beginTransaction()
-            .replace(R.id.fragment_container, fragment).addToBackStack(null).commit()
+        if (!isAdded) return
+        try {
+            val bundle = Bundle().apply {
+                putString("page_type", type)
+            }
+
+            findNavController().navigate(
+                R.id.nav_static_page,
+                bundle
+            )
+        } catch (e: Exception) {
+            // Professional debugging: e.printStackTrace() ki jagah Toast ya Log bhi de sakte hain
+            Toast.makeText(requireContext(), "Navigation Error: ${e.message}", Toast.LENGTH_SHORT).show()
+        }
     }
 }

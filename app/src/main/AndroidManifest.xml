@@ -38,7 +38,8 @@
             android:name=".AuthActivity"
             android:exported="false"
             android:theme="@style/Theme.NursingStudio"
-            android:windowSoftInputMode="adjustResize" />
+            android:windowSoftInputMode="adjustResize"
+            android:configChanges="orientation|screenSize|keyboardHidden" />
 
         <activity
             android:name=".MainActivity"

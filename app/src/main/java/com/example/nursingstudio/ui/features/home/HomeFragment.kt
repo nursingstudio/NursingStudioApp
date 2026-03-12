@@ -9,18 +9,14 @@ import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.edit
 import androidx.fragment.app.Fragment
-import com.example.nursingstudio.ui.features.media.PdfFragment
-import com.example.nursingstudio.utils.ProgressManager
-import com.example.nursingstudio.ui.features.quiz.QuizFragment
 import com.example.nursingstudio.R
-import com.example.nursingstudio.ui.features.settings.SettingsFragment
-import com.example.nursingstudio.ui.features.media.VideoFragment
-import com.example.nursingstudio.ui.profile.ProfileFragment
+import com.example.nursingstudio.utils.ProgressManager
 import com.google.android.material.card.MaterialCardView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import androidx.navigation.fragment.findNavController
 
 class HomeFragment : Fragment() {
     private var biometricDialog: AlertDialog? = null
@@ -41,21 +37,21 @@ class HomeFragment : Fragment() {
 
         cardTest.setOnClickListener {
             ProgressManager.increment(requireContext(), "test_attempted")
-            openFragment(QuizFragment())
+            navigateToFragment(R.id.nav_quiz)
         }
 
         cardPdf.setOnClickListener {
             ProgressManager.increment(requireContext(), "pdf_opened")
-            openFragment(PdfFragment())
+            navigateToFragment(R.id.nav_pdf)
         }
 
         cardVideo.setOnClickListener {
             ProgressManager.increment(requireContext(), "video_watched")
-            openFragment(VideoFragment())
+            navigateToFragment(R.id.nav_video)
         }
 
         cardProgress.setOnClickListener {
-            openFragment(ProfileFragment())
+            navigateToFragment(R.id.nav_profile)
         }
 
         return view
@@ -110,12 +106,13 @@ class HomeFragment : Fragment() {
         val user = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser
         val userId = user?.uid ?: return
 
-        // ⭐ 2026 GOLD STANDARD: Firestore Snapshot Listener (Ultra-Fast)
         val db = com.google.firebase.firestore.FirebaseFirestore.getInstance()
 
         db.collection("Users").document(userId).addSnapshotListener { snapshot, e ->
+            // ⭐ GOLD STANDARD 2026: Safety check first
+            if (!isAdded || context == null) return@addSnapshotListener
+
             if (e != null) {
-                // Fallback to local
                 val session = requireActivity().getSharedPreferences("session", Context.MODE_PRIVATE)
                 val localName = session.getString("reg_name", "Scholar")
                 tvWelcome.text = getString(R.string.welcome_user, localName)
@@ -123,14 +120,13 @@ class HomeFragment : Fragment() {
             }
 
             if (snapshot != null && snapshot.exists()) {
-                val name = snapshot.getString("name") ?: "Scholar"
-
-                // 1. UI update
+                val name = snapshot.getString("fullName") ?: "Scholar"
                 tvWelcome.text = getString(R.string.welcome_user, name)
 
-                // 2. Sync for offline
-                val session = requireActivity().getSharedPreferences("session", Context.MODE_PRIVATE)
-                session.edit { putString("reg_name", name) }
+                // Context use karne se pehle safety check
+                activity?.getSharedPreferences("session", Context.MODE_PRIVATE)?.edit {
+                    putString("reg_name", name)
+                }
             }
         }
     }
@@ -159,7 +155,7 @@ class HomeFragment : Fragment() {
         dialogView.findViewById<View>(R.id.btnSetupNow).setOnClickListener {
             biometricDialog?.dismiss()
             if (isAdded && activity != null) {
-                openFragment(SettingsFragment())
+                navigateToFragment(R.id.nav_settings)
             }
         }
 
@@ -176,13 +172,14 @@ class HomeFragment : Fragment() {
 
         biometricDialog?.show()
     }
-    private fun openFragment(fragment: Fragment) {
+    private fun navigateToFragment(destinationId: Int) {
         if (!isAdded) return
-        activity?.supportFragmentManager?.beginTransaction()
-            ?.setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
-            ?.replace(R.id.fragment_container, fragment)
-            ?.addToBackStack(null)
-            ?.commit()
+        try {
+            // Direct call without full package name
+            findNavController().navigate(destinationId)
+        } catch (e: Exception) {
+            e.printStackTrace() // Debugging ke liye zaruri hai
+        }
     }
     override fun onDestroyView() {
         super.onDestroyView()

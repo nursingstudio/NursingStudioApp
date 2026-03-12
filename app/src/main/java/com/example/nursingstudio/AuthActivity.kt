@@ -56,6 +56,9 @@ class AuthActivity : AppCompatActivity() {
         val usbReceiver = object : android.content.BroadcastReceiver() {
             override fun onReceive(context: android.content.Context?, intent: Intent?) {
                 val connected = intent?.extras?.getBoolean("connected") ?: false
+                if (!isFinishing && !isDestroyed && securitySheet?.isShowing == true) {
+                    securitySheet!!.dismiss()
+                }
                 if (!connected && securitySheet?.isShowing == true) {
                     // Agar alert USB wala tha, toh band kar do
                     securitySheet?.dismiss()

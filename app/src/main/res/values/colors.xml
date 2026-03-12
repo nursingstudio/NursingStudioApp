@@ -9,10 +9,7 @@
     <color name="text_secondary">#555555</color>
     <color name="white">#FFFFFFFF</color>
 
-    <color name="splash_bg">#FF9933</color>
-    <color name="error_red">#D32F2F</color>
     <color name="error_saffron">#E67E22</color>
-    <color name="success_green">#388E3C</color>
 
     <color name="greyish_blue">#546E7A</color>
 

@@ -2,36 +2,29 @@ package com.example.nursingstudio
 
 import android.content.Intent
 import android.graphics.BitmapFactory
-import android.net.Uri
 import android.os.Bundle
 import android.util.Base64
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
+import androidx.core.content.edit
+import androidx.core.net.toUri
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
-import androidx.fragment.app.Fragment
-import com.example.nursingstudio.ui.profile.ProfileFragment
-import com.example.nursingstudio.ui.features.home.HomeFragment
-import com.example.nursingstudio.ui.features.notifications.NoticeFragment
-import com.example.nursingstudio.ui.features.media.PdfFragment
-import com.example.nursingstudio.ui.features.media.VideoFragment
-import com.example.nursingstudio.ui.features.quiz.QuizFragment
-import com.example.nursingstudio.ui.features.social.SocialAdapter
-import com.example.nursingstudio.ui.features.social.SocialHandlesFragment
+import androidx.navigation.NavController
+import androidx.navigation.fragment.NavHostFragment
+import androidx.navigation.ui.AppBarConfiguration
+import androidx.navigation.ui.setupWithNavController
+import androidx.navigation.ui.setupActionBarWithNavController
 import com.example.nursingstudio.data.model.SocialItem
-import com.example.nursingstudio.ui.features.settings.SettingsFragment
-import com.example.nursingstudio.ui.features.subscriptions.SubscriptionFragment
+import com.example.nursingstudio.ui.features.social.SocialAdapter
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.navigation.NavigationView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
-import androidx.core.content.edit
-import androidx.core.net.toUri
-
 
 class MainActivity : AppCompatActivity() {
 
@@ -39,6 +32,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var navigationView: NavigationView
     private lateinit var bottomNavigation: BottomNavigationView
     private lateinit var topAppBar: MaterialToolbar
+    private lateinit var navController: NavController
 
     // Drawer header views
     private lateinit var imgHeaderProfile: ImageView
@@ -46,7 +40,6 @@ class MainActivity : AppCompatActivity() {
     private lateinit var tvHeaderMobile: TextView
     private lateinit var tvDrawerSubscription: TextView
 
-    // Firebase instance
     private val auth = FirebaseAuth.getInstance()
     private val db = FirebaseFirestore.getInstance()
 
@@ -64,102 +57,91 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-
-        // onCreate के अंदर super.onCreate(savedInstanceState) से पहले इसे डालें
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
-
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-
-        // Session Check: Agar user logged out hai toh AuthActivity pe bhej do
         if (auth.currentUser == null) {
             startActivity(Intent(this, AuthActivity::class.java))
             finish()
             return
         }
 
-        // Views Mapping
+        setupViews()
+        setupNavigation()
+        fetchUserDataFromFirestore()
+        updateDrawerHeader()
+    }
+    private fun setupViews() {
         drawerLayout = findViewById(R.id.drawerLayout)
         navigationView = findViewById(R.id.navigationView)
         bottomNavigation = findViewById(R.id.bottomNavigation)
         topAppBar = findViewById(R.id.topAppBar)
 
         setSupportActionBar(topAppBar)
-        topAppBar.setNavigationOnClickListener { drawerLayout.openDrawer(GravityCompat.START) }
 
-        // Drawer HEADER Mapping
         val headerView = navigationView.getHeaderView(0)
         imgHeaderProfile = headerView.findViewById(R.id.imgHeaderProfile)
         tvHeaderName = headerView.findViewById(R.id.tvHeaderName)
         tvHeaderMobile = headerView.findViewById(R.id.tvHeaderMobile)
         tvDrawerSubscription = headerView.findViewById(R.id.tvDrawerSubscription)
 
-        // 🔹 Naya Kaam: Firestore se data fetch karke SP mein save karna
-        fetchUserDataFromFirestore()
-
-        // Initial UI Update (From Local SP)
-        updateDrawerHeader()
-
         headerView.setOnClickListener {
-            loadFragment(ProfileFragment())
+            navController.navigate(R.id.nav_profile)
             drawerLayout.closeDrawer(GravityCompat.START)
         }
+    }
+    private fun setupNavigation() {
+        val navHostFragment = supportFragmentManager
+            .findFragmentById(R.id.nav_host_fragment) as NavHostFragment
+        navController = navHostFragment.navController
 
-        // Drawer menu clicks (Same as yours)
+        // Navigation UI ko setup karein
+        bottomNavigation.setupWithNavController(navController)
+        navigationView.setupWithNavController(navController)
+
+        // Hamburger icon aur Title management
+        val appBarConfiguration = AppBarConfiguration(
+            setOf(R.id.nav_home, R.id.nav_quiz, R.id.nav_pdf, R.id.nav_video, R.id.nav_profile),
+            drawerLayout
+        )
+        setupActionBarWithNavController(navController, appBarConfiguration)
+        navController.addOnDestinationChangedListener { _, _, _ ->
+            supportActionBar?.title = getString(R.string.nursing_studio)
+        }
+
+        // ⭐ SPECIAL HANDLING: Un items ke liye jo Fragment nahi hain
         navigationView.setNavigationItemSelectedListener { menuItem ->
             when (menuItem.itemId) {
-                R.id.nav_subscription -> loadFragment(SubscriptionFragment())
-                R.id.nav_notice -> loadFragment(NoticeFragment())
-                R.id.nav_social_dialog -> showSocialDialog() // Chhota pop-up
-                R.id.nav_social_fragment -> loadFragment(SocialHandlesFragment()) // Pura sundar page
                 R.id.nav_share -> shareApp()
-                R.id.nav_settings -> loadFragment(SettingsFragment())
+                R.id.nav_social_dialog -> showSocialDialog()
+                else -> {
+                    // Baki saare items (Settings, Notice etc.) automatic handle honge agar ID match hai
+                    val handled = androidx.navigation.ui.NavigationUI.onNavDestinationSelected(menuItem, navController)
+                    if (handled) drawerLayout.closeDrawer(GravityCompat.START)
+                    return@setNavigationItemSelectedListener handled
+                }
             }
             drawerLayout.closeDrawer(GravityCompat.START)
             true
-        }
-
-        // Bottom navigation clicks (Same as yours)
-        bottomNavigation.setOnItemSelectedListener { item ->
-            when (item.itemId) {
-                R.id.nav_home -> loadFragment(HomeFragment())
-                R.id.nav_quiz -> loadFragment(QuizFragment())
-                R.id.nav_pdf -> loadFragment(PdfFragment())
-                R.id.nav_video -> loadFragment(VideoFragment())
-                R.id.nav_profile -> loadFragment(ProfileFragment())
-                else -> false
-            }
-            true
-        }
-
-        if (savedInstanceState == null) {
-            val destination = intent.getStringExtra("OPEN_FRAGMENT")
-
-            if (destination == "SETTINGS") {
-                loadFragment(SettingsFragment())
-            } else {
-                loadFragment(HomeFragment())
-                bottomNavigation.selectedItemId = R.id.nav_home
-            }
         }
     }
 
-    // 🔹 Firestore se live data lekar SharedPreferences update karega
+    // Hamburger Menu ke click ko handle karne ke liye mandatory override
+    override fun onSupportNavigateUp(): Boolean {
+        val appBarConfiguration = AppBarConfiguration(navController.graph, drawerLayout)
+        return androidx.navigation.ui.NavigationUI.navigateUp(navController, appBarConfiguration) || super.onSupportNavigateUp()
+    }
     private fun fetchUserDataFromFirestore() {
         val uid = auth.currentUser?.uid ?: return
         db.collection("Users").document(uid).get().addOnSuccessListener { doc ->
             if (doc.exists()) {
                 val name = doc.getString("fullName") ?: ""
                 val mobile = doc.getString("mobile") ?: ""
-
-                // Saving in SharedPreferences for offline speed
-                getSharedPreferences("session", MODE_PRIVATE).edit().apply {
+                getSharedPreferences("session", MODE_PRIVATE).edit {
                     putString("reg_name", name)
                     putString("reg_mobile", mobile)
-                    apply()
                 }
-                // Refreshing UI
                 updateDrawerHeader()
             }
         }
@@ -167,45 +149,28 @@ class MainActivity : AppCompatActivity() {
 
     fun updateDrawerHeader() {
         val session = getSharedPreferences("session", MODE_PRIVATE)
-        val name = session.getString("reg_name", "Your Name")
-        val mobile = session.getString("reg_mobile", "9999999999")
-        val subType = session.getString("subscription_type", "Free")
+        tvHeaderName.text = session.getString("reg_name", "User")
+        tvHeaderMobile.text = session.getString("reg_mobile", "")
+        session.getString("subscription_type", "Free")
 
-        tvHeaderName.text = name
-        tvHeaderMobile.text = mobile
-        tvDrawerSubscription.text = if (subType == "Premium") "Premium Version" else "Free Version"
-
-        // Profile image logic (ProfileFragment se synchronized)
         val profileSp = getSharedPreferences(PROFILE_PREF, MODE_PRIVATE)
-        val encoded = profileSp.getString(KEY_PROFILE_IMAGE, null)
-
-        if (encoded != null) {
+        profileSp.getString(KEY_PROFILE_IMAGE, null)?.let { encoded ->
             try {
                 val bytes = Base64.decode(encoded, Base64.DEFAULT)
-                val bmp = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
-                imgHeaderProfile.setImageBitmap(bmp)
-            } catch (e: Exception) {
+                imgHeaderProfile.setImageBitmap(BitmapFactory.decodeByteArray(bytes, 0, bytes.size))
+            } catch (_: Exception) {
                 imgHeaderProfile.setImageResource(R.drawable.ic_person)
             }
-        } else {
-            // Default Logo if no image uploaded
+        } ?: run {
             imgHeaderProfile.setImageResource(R.mipmap.ic_launcher_round)
         }
     }
-    private fun loadFragment(fragment: Fragment): Boolean {
-        supportFragmentManager.beginTransaction()
-            .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out) // Smooth transition
-            .replace(R.id.fragment_container, fragment)
-            .commit()
-        return true
-    }
-
     private fun openUrl(url: String, packageName: String? = null) {
         try {
             val intent = Intent(Intent.ACTION_VIEW, url.toUri())
             packageName?.let { intent.setPackage(it) }
             startActivity(intent)
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             startActivity(Intent(Intent.ACTION_VIEW, url.toUri()))
         }
     }
@@ -253,6 +218,6 @@ class MainActivity : AppCompatActivity() {
             type = "text/plain"
             putExtra(Intent.EXTRA_TEXT, shareText)
         }
-        startActivity(Intent.createChooser(shareIntent, "Share app via"))
+        startActivity(Intent.createChooser(shareIntent, "Share App"))
     }
 }

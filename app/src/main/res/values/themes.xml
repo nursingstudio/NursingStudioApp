@@ -61,12 +61,9 @@
     </style>
 
     // date picker //
-    <style name="CustomDatePicker" parent="android:Widget.Material.Light.DatePicker">
-        <item name="android:headerBackground">@color/saffron</item>
-        <item name="android:dayOfWeekBackground">@color/saffron_dark</item>
-    </style>
 
     // calendar //
+
     <style name="CustomMaterialCalendar" parent="ThemeOverlay.Material3.MaterialCalendar">
         <item name="colorPrimary">@color/saffron</item>
         <item name="colorOnPrimary">@color/white</item>

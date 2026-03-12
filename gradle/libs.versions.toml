@@ -30,7 +30,6 @@ composeBom = "2026.02.01"
 navigationUiKtx = "2.9.7"
 playServicesAuth = "21.5.1"
 playServicesAuthApiPhone = "18.3.0"
-playServicesSafetynet = "18.1.0"
 securityCrypto = "1.1.0"
 [libraries]
 androidx-biometric = { module = "androidx.biometric:biometric", version.ref = "biometric" }
@@ -80,7 +79,6 @@ firebase-appcheck-ktx = { group = "com.google.firebase", name = "firebase-appche
 firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebaseBom" }
 play-services-auth = { module = "com.google.android.gms:play-services-auth", version.ref = "playServicesAuth" }
 play-services-auth-api-phone = { module = "com.google.android.gms:play-services-auth-api-phone", version.ref = "playServicesAuthApiPhone" }
-play-services-safetynet = { module = "com.google.android.gms:play-services-safetynet", version.ref = "playServicesSafetynet" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/nav_home">
+
+    <fragment
+        android:id="@+id/nav_home"
+        android:name="com.example.nursingstudio.ui.features.home.HomeFragment"
+        android:label="Home"
+        tools:layout="@layout/fragment_home" />
+
+    <fragment
+        android:id="@+id/nav_quiz"
+        android:name="com.example.nursingstudio.ui.features.quiz.QuizFragment"
+        android:label="Quiz" />
+
+    <fragment
+        android:id="@+id/nav_pdf"
+        android:name="com.example.nursingstudio.ui.features.media.PdfFragment"
+        android:label="Study Material" />
+
+    <fragment
+        android:id="@+id/nav_video"
+        android:name="com.example.nursingstudio.ui.features.media.VideoFragment"
+        android:label="Video Lectures" />
+
+    <fragment
+        android:id="@+id/nav_profile"
+        android:name="com.example.nursingstudio.ui.profile.ProfileFragment"
+        android:label="My Profile" />
+
+    <fragment
+        android:id="@+id/nav_subscription"
+        android:name="com.example.nursingstudio.ui.features.subscriptions.SubscriptionFragment"
+        android:label="Subscriptions" />
+
+    <fragment
+        android:id="@+id/nav_notice"
+        android:name="com.example.nursingstudio.ui.features.notifications.NoticeFragment"
+        android:label="Notifications" />
+
+    <fragment
+        android:id="@+id/nav_social_fragment"
+        android:name="com.example.nursingstudio.ui.features.social.SocialHandlesFragment"
+        android:label="Social Media" />
+
+    <fragment
+        android:id="@+id/nav_settings"
+        android:name="com.example.nursingstudio.ui.features.settings.SettingsFragment"
+        android:label="Settings" />
+
+    <fragment
+        android:id="@+id/nav_static_page"
+        android:name="com.example.nursingstudio.ui.features.staticpage.StaticPageFragment"
+        android:label="Static Page" />
+
+</navigation>

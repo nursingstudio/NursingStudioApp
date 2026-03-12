@@ -19,7 +19,7 @@
             android:layout_height="?attr/actionBarSize"
             android:background="@color/saffron"
             android:elevation="4dp"
-            android:title="Nursing Studio"
+            android:title="@string/nursing_studio"
             android:titleTextColor="@android:color/white"
             app:titleCentered="false"
             app:titleTextAppearance="@style/ToolbarTitleBold"
@@ -27,11 +27,14 @@
             app:navigationIconTint="@android:color/white" />
 
         <!-- Content Frame (Fragments yahan load honge) -->
-        <FrameLayout
-            android:id="@+id/fragment_container"
+        <androidx.fragment.app.FragmentContainerView
+            android:id="@+id/nav_host_fragment"
+            android:name="androidx.navigation.fragment.NavHostFragment"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="1" />
+            android:layout_weight="1"
+            app:defaultNavHost="true"
+            app:navGraph="@navigation/nav_graph" />
 
         <!-- Bottom Navigation -->
         <com.google.android.material.bottomnavigation.BottomNavigationView

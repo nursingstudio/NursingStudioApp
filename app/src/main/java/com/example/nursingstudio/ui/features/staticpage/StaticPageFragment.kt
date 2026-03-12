@@ -26,7 +26,7 @@ class StaticPageFragment : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        pageType = arguments?.getString(ARG_PAGE_TYPE)
+        pageType = arguments?.getString("page_type")
     }
 
     override fun onCreateView(
