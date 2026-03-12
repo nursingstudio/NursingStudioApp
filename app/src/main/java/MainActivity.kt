@@ -106,6 +106,22 @@ class MainActivity : AppCompatActivity() {
             drawerLayout
         )
         setupActionBarWithNavController(navController, appBarConfiguration)
+
+// ⭐ FIX: Hamburger menu behavior ko force karne ke liye
+        topAppBar.setNavigationOnClickListener {
+            // Agar Drawer layout hai, toh check karo ki back jana hai ya drawer kholna hai
+            val isTopLevelDestination = appBarConfiguration.topLevelDestinations.contains(navController.currentDestination?.id)
+
+            if (isTopLevelDestination) {
+                drawerLayout.openDrawer(GravityCompat.START)
+            } else {
+                // Agar aap chahte hain ki har screen se Hamburger Drawer hi khole (Industry Standard for Drawers)
+                // Toh niche wali line use karein:
+                drawerLayout.openDrawer(GravityCompat.START)
+
+                // Agar aap chahte hain ki sub-screens par 'Back' arrow dikhe, toh 'navController.navigateUp()' use karein
+            }
+        }
         navController.addOnDestinationChangedListener { _, _, _ ->
             supportActionBar?.title = getString(R.string.nursing_studio)
         }
