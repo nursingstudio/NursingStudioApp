@@ -8,8 +8,12 @@ import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
-import com.example.nursingstudio.ui.main.MainActivity
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import com.example.nursingstudio.R
+import com.example.nursingstudio.data.local.DataStoreManager
+import kotlinx.coroutines.launch
 
 class SubscriptionFragment : Fragment() {
 
@@ -24,35 +28,37 @@ class SubscriptionFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        val dataStoreManager = DataStoreManager(requireContext())
         val tvCurrentPlan = view.findViewById<TextView>(R.id.tvCurrentPlan)
         val btnSelectFree = view.findViewById<Button>(R.id.btnSelectFree)
         val btnSelectPremium = view.findViewById<Button>(R.id.btnSelectPremium)
 
-        val sp = requireContext().getSharedPreferences("session", 0)
-        val currentType = sp.getString("subscription_type", "Free")
-
-        tvCurrentPlan.text = "Current plan: $currentType"
-
-        // Optional: yahan ek baar sync kara diya header ko
-        (activity as? MainActivity)?.updateDrawerHeader()
-
-        btnSelectFree.setOnClickListener {
-            sp.edit().putString("subscription_type", "Free").apply()
-            tvCurrentPlan.text = "Current plan: Free"
-            Toast.makeText(requireContext(), "Free plan selected", Toast.LENGTH_SHORT).show()
-
-            // 🔹 NAYA: Drawer header turant refresh
-            (activity as? MainActivity)?.updateDrawerHeader()
+        // 1. Point-to-Point: Current Plan ko observe karna (Gold Standard 2026)
+        // Jaise hi DataStore mein badlav hoga, ye text apne aap change ho jayega
+        lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                dataStoreManager.subscriptionType.collect { type ->
+                    tvCurrentPlan.text = "Current plan: $type"
+                }
+            }
         }
 
-        btnSelectPremium.setOnClickListener {
-            // Abhi demo: sirf local flag change kar rahe hain
-            sp.edit().putString("subscription_type", "Premium").apply()
-            tvCurrentPlan.text = "Current plan: Premium"
-            Toast.makeText(requireContext(), "Premium plan selected (demo)", Toast.LENGTH_SHORT).show()
+        // 2. Select Free Plan Logic
+        btnSelectFree.setOnClickListener {
+            lifecycleScope.launch {
+                dataStoreManager.saveSubscription("Free")
+                Toast.makeText(requireContext(), "Free plan selected", Toast.LENGTH_SHORT).show()
+                // Note: Ab humein activity.updateDrawerHeader() ki zarurat nahi hai,
+                // kyunki MainActivity DataStore ko observe kar rahi hai.
+            }
+        }
 
-            // 🔹 NAYA: Drawer header turant refresh
-            (activity as? MainActivity)?.updateDrawerHeader()
+        // 3. Select Premium Plan Logic
+        btnSelectPremium.setOnClickListener {
+            lifecycleScope.launch {
+                dataStoreManager.saveSubscription("Premium")
+                Toast.makeText(requireContext(), "Premium plan selected! 🌟", Toast.LENGTH_SHORT).show()
+            }
         }
     }
 }

@@ -13,7 +13,7 @@ class DataStoreManager(private val context: Context) {
     companion object {
         val USER_NAME = stringPreferencesKey("user_name")
         val USER_MOBILE = stringPreferencesKey("user_mobile")
-        val IS_PREMIUM = booleanPreferencesKey("is_premium")
+        val SUBSCRIPTION_TYPE = stringPreferencesKey("subscription_type")
     }
 
     suspend fun saveUser(name: String, mobile: String) {
@@ -22,7 +22,13 @@ class DataStoreManager(private val context: Context) {
             prefs[USER_MOBILE] = mobile
         }
     }
+    suspend fun saveSubscription(type: String) {
+        context.dataStore.edit { prefs ->
+            prefs[SUBSCRIPTION_TYPE] = type
+        }
+    }
 
     val userName: Flow<String?> = context.dataStore.data.map { it[USER_NAME] }
     val userMobile: Flow<String?> = context.dataStore.data.map { it[USER_MOBILE] }
+    val subscriptionType: Flow<String> = context.dataStore.data.map { it[SUBSCRIPTION_TYPE] ?: "Free" }
 }

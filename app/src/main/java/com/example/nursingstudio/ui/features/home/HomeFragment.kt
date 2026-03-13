@@ -9,6 +9,9 @@ import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.edit
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import com.example.nursingstudio.R
 import com.example.nursingstudio.utils.ProgressManager
 import com.google.android.material.card.MaterialCardView
@@ -17,9 +20,13 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import androidx.navigation.fragment.findNavController
+import com.example.nursingstudio.data.local.DataStoreManager
+import kotlinx.coroutines.launch
 
 class HomeFragment : Fragment() {
     private var biometricDialog: AlertDialog? = null
+    // 1. Variable define karein top par
+    private lateinit var dataStoreManager: DataStoreManager
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -59,14 +66,17 @@ class HomeFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        dataStoreManager = DataStoreManager(requireContext())
 
         val tvWelcome = view.findViewById<TextView>(R.id.tvWelcome)
 
-        // 1. Initial State: Professional Placeholder (Jab tak data load ho raha hai)
-        tvWelcome.text = getString(R.string.hello_future_nursing_offiecr)
-
-        // 2. Immediate Real-time Fetch from Firebase
-        fetchUserRealtime(tvWelcome)
+        lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                dataStoreManager.userName.collect { name ->
+                    tvWelcome.text = getString(R.string.welcome_user, name ?: "Scholar")
+                }
+            }
+        }
 
         checkAndShowBiometricPrompt()
         setupDailyMotivation(view)
@@ -99,34 +109,6 @@ class HomeFragment : Fragment() {
             sp.edit(commit = false) {
                 putString("date", today)
                 putString("quote", newQuote)
-            }
-        }
-    }
-    private fun fetchUserRealtime(tvWelcome: TextView) {
-        val user = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser
-        val userId = user?.uid ?: return
-
-        val db = com.google.firebase.firestore.FirebaseFirestore.getInstance()
-
-        db.collection("Users").document(userId).addSnapshotListener { snapshot, e ->
-            // ⭐ GOLD STANDARD 2026: Safety check first
-            if (!isAdded || context == null) return@addSnapshotListener
-
-            if (e != null) {
-                val session = requireActivity().getSharedPreferences("session", Context.MODE_PRIVATE)
-                val localName = session.getString("reg_name", "Scholar")
-                tvWelcome.text = getString(R.string.welcome_user, localName)
-                return@addSnapshotListener
-            }
-
-            if (snapshot != null && snapshot.exists()) {
-                val name = snapshot.getString("fullName") ?: "Scholar"
-                tvWelcome.text = getString(R.string.welcome_user, name)
-
-                // Context use karne se pehle safety check
-                activity?.getSharedPreferences("session", Context.MODE_PRIVATE)?.edit {
-                    putString("reg_name", name)
-                }
             }
         }
     }

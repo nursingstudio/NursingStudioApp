@@ -1,9 +1,7 @@
 package com.example.nursingstudio.ui.main
 
 import android.content.Intent
-import android.graphics.BitmapFactory
 import android.os.Bundle
-import android.util.Base64
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
@@ -12,6 +10,9 @@ import androidx.core.content.edit
 import androidx.core.net.toUri
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.AppBarConfiguration
@@ -19,6 +20,7 @@ import androidx.navigation.ui.NavigationUI
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import com.example.nursingstudio.R
+import com.example.nursingstudio.data.local.DataStoreManager
 import com.example.nursingstudio.data.model.SocialItem
 import com.example.nursingstudio.ui.auth.AuthActivity
 import com.example.nursingstudio.ui.features.social.SocialAdapter
@@ -28,6 +30,7 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.navigation.NavigationView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
 
@@ -43,12 +46,13 @@ class MainActivity : AppCompatActivity() {
     private lateinit var tvHeaderMobile: TextView
     private lateinit var tvDrawerSubscription: TextView
 
+    // In variables ko add karein
+    private lateinit var viewModel: MainViewModel
+    private lateinit var dataStoreManager: DataStoreManager
+
     private val auth = FirebaseAuth.getInstance()
-    private val db = FirebaseFirestore.getInstance()
 
     companion object {
-        private const val PROFILE_PREF = "profile_prefs"
-        private const val KEY_PROFILE_IMAGE = "profile_image_base64"
         private const val URL_YOUTUBE  = "https://youtube.com/@NursingStudio2026"
         private const val URL_WHATSAPP = "https://whatsapp.com/channel/0029Vb6Sjdq6BIEapKtNUE2L"
         private const val URL_TELEGRAM = "https://telegram.me/NursingStudio"
@@ -64,16 +68,22 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        if (auth.currentUser == null) {
+        // 1. Auth Check (Priority 1)
+        val currentUser = auth.currentUser
+        if (currentUser == null) {
             startActivity(Intent(this, AuthActivity::class.java))
             finish()
             return
         }
-
+        // 2. Initialize Core Components
+        dataStoreManager = DataStoreManager(this)
+        viewModel = MainViewModel(FirebaseFirestore.getInstance(), dataStoreManager)
+        // 3. Setup UI & Navigation
         setupViews()
         setupNavigation()
-        fetchUserDataFromFirestore()
-        updateDrawerHeader()
+        // 4. Data Sync & Observation (Modern Approach)
+        viewModel.syncUserData(currentUser.uid)
+        observeUserData()
     }
     private fun setupViews() {
         drawerLayout = findViewById(R.id.drawerLayout)
@@ -135,7 +145,7 @@ class MainActivity : AppCompatActivity() {
                 R.id.nav_share -> shareApp()
                 R.id.nav_social_dialog -> showSocialDialog()
                 else -> {
-                    // Baki saare items (Settings, Notice etc.) automatic handle honge agar ID match hai
+                    // Baki sare items (Settings, Notice etc.) automatic handle honge agar ID match hai
                     val handled = NavigationUI.onNavDestinationSelected(menuItem, navController)
                     if (handled) drawerLayout.closeDrawer(GravityCompat.START)
                     return@setNavigationItemSelectedListener handled
@@ -150,39 +160,6 @@ class MainActivity : AppCompatActivity() {
     override fun onSupportNavigateUp(): Boolean {
         val appBarConfiguration = AppBarConfiguration(navController.graph, drawerLayout)
         return NavigationUI.navigateUp(navController, appBarConfiguration) || super.onSupportNavigateUp()
-    }
-    private fun fetchUserDataFromFirestore() {
-        val uid = auth.currentUser?.uid ?: return
-        db.collection("Users").document(uid).get().addOnSuccessListener { doc ->
-            if (doc.exists()) {
-                val name = doc.getString("fullName") ?: ""
-                val mobile = doc.getString("mobile") ?: ""
-                getSharedPreferences("session", MODE_PRIVATE).edit {
-                    putString("reg_name", name)
-                    putString("reg_mobile", mobile)
-                }
-                updateDrawerHeader()
-            }
-        }
-    }
-
-    fun updateDrawerHeader() {
-        val session = getSharedPreferences("session", MODE_PRIVATE)
-        tvHeaderName.text = session.getString("reg_name", "User")
-        tvHeaderMobile.text = session.getString("reg_mobile", "")
-        session.getString("subscription_type", "Free")
-
-        val profileSp = getSharedPreferences(PROFILE_PREF, MODE_PRIVATE)
-        profileSp.getString(KEY_PROFILE_IMAGE, null)?.let { encoded ->
-            try {
-                val bytes = Base64.decode(encoded, Base64.DEFAULT)
-                imgHeaderProfile.setImageBitmap(BitmapFactory.decodeByteArray(bytes, 0, bytes.size))
-            } catch (_: Exception) {
-                imgHeaderProfile.setImageResource(R.drawable.ic_person)
-            }
-        } ?: run {
-            imgHeaderProfile.setImageResource(R.mipmap.ic_launcher_round)
-        }
     }
     private fun openUrl(url: String, packageName: String? = null) {
         try {
@@ -230,7 +207,40 @@ class MainActivity : AppCompatActivity() {
         val key = "social_click_${channel.lowercase().replace(" ", "_")}"
         sp.edit { putInt(key, sp.getInt(key, 0) + 1) }
     }
+    private fun observeUserData() {
+        // 2026 Gold Standard: Collecting Flows from DataStore safely
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                dataStoreManager.userName.collect { name ->
+                    tvHeaderName.text = name ?: "Scholar"
+                }
+            }
+        }
 
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                dataStoreManager.userMobile.collect { mobile ->
+                    tvHeaderMobile.text = mobile ?: ""
+                }
+            }
+        }
+        // NAYA: Subscription type ko observe karein
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                dataStoreManager.subscriptionType.collect { type ->
+                    // tvDrawerSubscription aapka Drawer Header ka TextView hai
+                    tvDrawerSubscription.text = "Plan: $type"
+
+                    // Professional Touch: Agar Premium hai toh color badal dein
+                    if (type == "Premium") {
+                        tvDrawerSubscription.setTextColor(getColor(R.color.saffron))
+                    } else {
+                        tvDrawerSubscription.setTextColor(getColor(android.R.color.white))
+                    }
+                }
+            }
+        }
+    }
     private fun shareApp() {
         val shareText = "Start smart preparation for nursing competitive exams with Nursing Studio.\n\nDownload: $URL_PLAYSTORE"
         val shareIntent = Intent(Intent.ACTION_SEND).apply {
