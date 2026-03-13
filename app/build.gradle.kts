@@ -44,8 +44,8 @@ android {
                 // 2. Exact Location: Is line ko yahan replace/add karein
                 signingConfig = signingConfigs.getByName("releaseTest")
 
-                isMinifyEnabled = false
-                isShrinkResources = false
+                isMinifyEnabled = true
+                isShrinkResources = true
                 proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
             }
         }

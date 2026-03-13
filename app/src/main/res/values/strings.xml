@@ -239,6 +239,8 @@
     <string name="hello_future_nursing_offiecr">Hello, Future Nursing Officer</string>
     <string name="welcome">Welcome, …</string>
     <string name="nursing_studio">Nursing Studio</string>
+    <string name="your_name">Your Name</string>
+    <string name="_9999999999">9999999999</string>
 
 
 </resources>

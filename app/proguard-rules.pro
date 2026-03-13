@@ -50,7 +50,7 @@
 
 # Model classes (Jo data Firestore se aata hai use protect karein)
 # Replace 'your.package.name' with com.example.nursingstudio
--keepclassmembers class com.example.nursingstudio.models.** {
+-keepclassmembers class com.example.nursingstudio.data.model.** {
     <fields>;
     <methods>;
 }
