@@ -1,15 +1,30 @@
-package com.example.nursingstudio
+package com.example.nursingstudio.ui.auth
 
+import android.content.BroadcastReceiver
+import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.os.Bundle
+import android.provider.Settings
+import android.util.Base64
 import android.view.View
+import android.widget.LinearLayout
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
+import com.example.nursingstudio.R
 import com.example.nursingstudio.databinding.LayoutSecurityAlertBinding
 import com.example.nursingstudio.ui.auth.login.LoginFragment
 import com.example.nursingstudio.ui.auth.register.RegisterFragment
+import com.example.nursingstudio.ui.main.MainActivity
+import com.google.android.material.bottomsheet.BottomSheetDialog
+import com.google.android.play.core.appupdate.AppUpdateManagerFactory
+import com.google.android.play.core.appupdate.AppUpdateOptions
+import com.google.android.play.core.install.model.AppUpdateType
+import com.google.android.play.core.install.model.UpdateAvailability
 import com.google.android.play.core.integrity.IntegrityManagerFactory
 import com.google.android.play.core.integrity.IntegrityTokenRequest
+import com.google.firebase.BuildConfig
 import com.google.firebase.FirebaseApp
 import com.google.firebase.FirebaseException
 import com.google.firebase.appcheck.FirebaseAppCheck
@@ -19,13 +34,15 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.PhoneAuthCredential
 import com.google.firebase.auth.PhoneAuthOptions
 import com.google.firebase.auth.PhoneAuthProvider
+import com.google.firebase.crashlytics.FirebaseCrashlytics
+import java.io.File
 import java.util.concurrent.TimeUnit
 
 class AuthActivity : AppCompatActivity() {
 
     private val auth = FirebaseAuth.getInstance()
 
-    private var securitySheet: com.google.android.material.bottomsheet.BottomSheetDialog? = null
+    private var securitySheet: BottomSheetDialog? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -53,8 +70,8 @@ class AuthActivity : AppCompatActivity() {
         checkEnvironmentIntegrity()
 
         // ⭐ 2026 INTEL-LOGIC: Auto-dismiss alert when USB is unplugged
-        val usbReceiver = object : android.content.BroadcastReceiver() {
-            override fun onReceive(context: android.content.Context?, intent: Intent?) {
+        val usbReceiver = object : BroadcastReceiver() {
+            override fun onReceive(context: Context?, intent: Intent?) {
                 val connected = intent?.extras?.getBoolean("connected") ?: false
                 if (!isFinishing && !isDestroyed && securitySheet?.isShowing == true) {
                     securitySheet!!.dismiss()
@@ -65,7 +82,7 @@ class AuthActivity : AppCompatActivity() {
                 }
             }
         }
-        registerReceiver(usbReceiver, android.content.IntentFilter("android.hardware.usb.action.USB_STATE"))
+        registerReceiver(usbReceiver, IntentFilter("android.hardware.usb.action.USB_STATE"))
 
         if (savedInstanceState == null) {
             showLogin()
@@ -116,9 +133,9 @@ class AuthActivity : AppCompatActivity() {
 
         // ⭐ 2026 Standard: Base64 Nonce
         val nonceRaw = "nursing_studio_${System.currentTimeMillis()}"
-        val nonce = android.util.Base64.encodeToString(
+        val nonce = Base64.encodeToString(
             nonceRaw.toByteArray(),
-            android.util.Base64.URL_SAFE or android.util.Base64.NO_WRAP or android.util.Base64.NO_PADDING
+            Base64.URL_SAFE or Base64.NO_WRAP or Base64.NO_PADDING
         )
 
         val integrityTokenRequest = IntegrityTokenRequest.builder()
@@ -143,7 +160,7 @@ class AuthActivity : AppCompatActivity() {
 
                 override fun onVerificationFailed(e: FirebaseException) {
                     // ⭐ WORLD-CLASS LOGGING: Sends the error to your Firebase Console
-                    com.google.firebase.crashlytics.FirebaseCrashlytics.getInstance().apply {
+                    FirebaseCrashlytics.getInstance().apply {
                         log("OTP Failed for number: $mobile")
                         recordException(e)
                     }
@@ -153,7 +170,7 @@ class AuthActivity : AppCompatActivity() {
                         e.message?.contains("quota") == true -> "SMS limit reached. Try again in 24 hours."
                         else -> e.localizedMessage ?: "Verification Failed"
                     }
-                    android.widget.Toast.makeText(this@AuthActivity, errorMsg, android.widget.Toast.LENGTH_LONG).show()
+                    Toast.makeText(this@AuthActivity, errorMsg, Toast.LENGTH_LONG).show()
                 }
 
                 override fun onVerificationCompleted(credential: PhoneAuthCredential) {
@@ -186,15 +203,15 @@ class AuthActivity : AppCompatActivity() {
         PhoneAuthProvider.verifyPhoneNumber(options)
     }
     private fun checkForUpdates() {
-        val appUpdateManager = com.google.android.play.core.appupdate.AppUpdateManagerFactory.create(this)
+        val appUpdateManager = AppUpdateManagerFactory.create(this)
         val appUpdateInfoTask = appUpdateManager.appUpdateInfo
 
         appUpdateInfoTask.addOnSuccessListener { appUpdateInfo ->
-            if (appUpdateInfo.updateAvailability() == com.google.android.play.core.install.model.UpdateAvailability.UPDATE_AVAILABLE
-                && appUpdateInfo.isUpdateTypeAllowed(com.google.android.play.core.install.model.AppUpdateType.IMMEDIATE)
+            if (appUpdateInfo.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE
+                && appUpdateInfo.isUpdateTypeAllowed(AppUpdateType.IMMEDIATE)
             ) {
                 // ⭐ 2026 GOLD STANDARD: Activity Result Launcher for Updates
-                val updateOptions = com.google.android.play.core.appupdate.AppUpdateOptions.newBuilder(com.google.android.play.core.install.model.AppUpdateType.IMMEDIATE)
+                val updateOptions = AppUpdateOptions.newBuilder(AppUpdateType.IMMEDIATE)
                     .setAllowAssetPackDeletion(true)
                     .build()
 
@@ -211,11 +228,11 @@ class AuthActivity : AppCompatActivity() {
         if (BuildConfig.DEBUG) return
 
         val isRooted = checkRootMethod()
-        val isDevOptions = android.provider.Settings.Global.getInt(contentResolver, "development_settings_enabled", 0) != 0
-        val isUsbDebugging = android.provider.Settings.Global.getInt(contentResolver, "adb_enabled", 0) != 0
+        val isDevOptions = Settings.Global.getInt(contentResolver, "development_settings_enabled", 0) != 0
+        val isUsbDebugging = Settings.Global.getInt(contentResolver, "adb_enabled", 0) != 0
 
         // USB Cable check logic
-        val intent = registerReceiver(null, android.content.IntentFilter("android.hardware.usb.action.USB_STATE"))
+        val intent = registerReceiver(null, IntentFilter("android.hardware.usb.action.USB_STATE"))
         val isUsbConnected = intent?.extras?.getBoolean("connected") ?: false
 
         when {
@@ -234,7 +251,7 @@ class AuthActivity : AppCompatActivity() {
         // 1. Agar pehle se dikh raha hai toh wapas mat dikhao
         if (securitySheet?.isShowing == true) return
 
-        securitySheet = com.google.android.material.bottomsheet.BottomSheetDialog(this, R.style.BottomSheetDialogTheme)
+        securitySheet = BottomSheetDialog(this, R.style.BottomSheetDialogTheme)
         val binding = LayoutSecurityAlertBinding.inflate(layoutInflater)
         securitySheet?.setContentView(binding.root)
         securitySheet?.setCancelable(false)
@@ -245,7 +262,7 @@ class AuthActivity : AppCompatActivity() {
                 binding.tvAlertDesc.text = getString(R.string.developer_mode_description)
                 binding.tvWarningStar.text = getString(R.string.developer_options_star_text)
                 binding.btnSettings.setOnClickListener {
-                    startActivity(Intent(android.provider.Settings.ACTION_APPLICATION_DEVELOPMENT_SETTINGS))
+                    startActivity(Intent(Settings.ACTION_APPLICATION_DEVELOPMENT_SETTINGS))
                 }
             }
             SecurityType.USB_DEBUGGING -> {
@@ -253,7 +270,7 @@ class AuthActivity : AppCompatActivity() {
                 binding.tvAlertDesc.text = getString(R.string.usb_debugging_description)
                 binding.tvWarningStar.text = getString(R.string.usb_debugging_star_text)
                 binding.btnSettings.setOnClickListener {
-                    startActivity(Intent(android.provider.Settings.ACTION_APPLICATION_DEVELOPMENT_SETTINGS))
+                    startActivity(Intent(Settings.ACTION_APPLICATION_DEVELOPMENT_SETTINGS))
                 }
             }
             SecurityType.ACTIVE_USB -> {
@@ -262,7 +279,7 @@ class AuthActivity : AppCompatActivity() {
                 binding.tvWarningStar.text = getString(R.string.active_usb_star_text)
                 binding.btnSettings.visibility = View.GONE
                 // Isse button poori width le lega
-                val params = binding.btnExit.layoutParams as android.widget.LinearLayout.LayoutParams
+                val params = binding.btnExit.layoutParams as LinearLayout.LayoutParams
                 params.weight = 2f
                 params.marginEnd = 0
                 binding.btnExit.layoutParams = params
@@ -286,7 +303,7 @@ class AuthActivity : AppCompatActivity() {
             "/system/bin/failsafe/su", "/data/local/su"
         )
         for (path in paths) {
-            if (java.io.File(path).exists()) return true
+            if (File(path).exists()) return true
         }
         return false
     }

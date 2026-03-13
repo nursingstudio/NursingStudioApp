@@ -112,11 +112,14 @@ dependencies {
     implementation(libs.ccp)
     implementation(libs.circleimageview)
 
-    // 6. COMPOSE CORE (Iske bina Color.kt nahi chalega)
+    // 6. COMPOSE CORE
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.compose.ui)
     implementation(libs.androidx.compose.ui.graphics)
     implementation(libs.androidx.compose.material3)
+
+    // Jetpack DataStore (SharedPreferences ka replacement)
+    implementation(libs.androidx.datastore.preferences)
 
     // Others
     implementation(libs.androidx.fragment.ktx)
@@ -126,7 +129,7 @@ dependencies {
     implementation(libs.firebase.appcheck.ktx)
     implementation(libs.google.firebase.appcheck.ktx)
 
-    // Debug tools (Inhe sirf debugImplementation mein rakhein)
+    // Debug tools
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
 

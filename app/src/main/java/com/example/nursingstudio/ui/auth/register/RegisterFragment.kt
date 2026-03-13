@@ -31,8 +31,8 @@ import androidx.core.widget.NestedScrollView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import com.example.nursingstudio.utils.AppSettings
-import com.example.nursingstudio.AuthActivity
-import com.example.nursingstudio.MainActivity
+import com.example.nursingstudio.ui.auth.AuthActivity
+import com.example.nursingstudio.ui.main.MainActivity
 import com.example.nursingstudio.R
 import com.example.nursingstudio.databinding.FragmentRegisterBinding
 import com.example.nursingstudio.databinding.LayoutPolicyBottomSheetBinding

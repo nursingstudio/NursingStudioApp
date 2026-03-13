@@ -19,12 +19,12 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
-import com.example.nursingstudio.MainActivity
+import com.example.nursingstudio.ui.main.MainActivity
 import com.example.nursingstudio.R
 import com.example.nursingstudio.databinding.FragmentLoginBinding
 import com.google.android.material.tabs.TabLayout
 import com.google.firebase.auth.PhoneAuthProvider
-import com.example.nursingstudio.AuthActivity
+import com.example.nursingstudio.ui.auth.AuthActivity
 import com.example.nursingstudio.utils.AppSettings
 import com.example.nursingstudio.utils.BiometricSettingsManager
 import com.google.android.material.textfield.TextInputLayout

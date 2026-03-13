@@ -1,4 +1,4 @@
-package com.example.nursingstudio
+package com.example.nursingstudio.ui.main
 
 import android.content.Intent
 import android.graphics.BitmapFactory
@@ -15,9 +15,12 @@ import androidx.drawerlayout.widget.DrawerLayout
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.AppBarConfiguration
-import androidx.navigation.ui.setupWithNavController
+import androidx.navigation.ui.NavigationUI
 import androidx.navigation.ui.setupActionBarWithNavController
+import androidx.navigation.ui.setupWithNavController
+import com.example.nursingstudio.R
 import com.example.nursingstudio.data.model.SocialItem
+import com.example.nursingstudio.ui.auth.AuthActivity
 import com.example.nursingstudio.ui.features.social.SocialAdapter
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.bottomnavigation.BottomNavigationView
@@ -133,7 +136,7 @@ class MainActivity : AppCompatActivity() {
                 R.id.nav_social_dialog -> showSocialDialog()
                 else -> {
                     // Baki saare items (Settings, Notice etc.) automatic handle honge agar ID match hai
-                    val handled = androidx.navigation.ui.NavigationUI.onNavDestinationSelected(menuItem, navController)
+                    val handled = NavigationUI.onNavDestinationSelected(menuItem, navController)
                     if (handled) drawerLayout.closeDrawer(GravityCompat.START)
                     return@setNavigationItemSelectedListener handled
                 }
@@ -146,7 +149,7 @@ class MainActivity : AppCompatActivity() {
     // Hamburger Menu ke click ko handle karne ke liye mandatory override
     override fun onSupportNavigateUp(): Boolean {
         val appBarConfiguration = AppBarConfiguration(navController.graph, drawerLayout)
-        return androidx.navigation.ui.NavigationUI.navigateUp(navController, appBarConfiguration) || super.onSupportNavigateUp()
+        return NavigationUI.navigateUp(navController, appBarConfiguration) || super.onSupportNavigateUp()
     }
     private fun fetchUserDataFromFirestore() {
         val uid = auth.currentUser?.uid ?: return

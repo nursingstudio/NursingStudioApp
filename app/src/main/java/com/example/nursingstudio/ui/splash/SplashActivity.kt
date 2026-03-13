@@ -10,8 +10,8 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.airbnb.lottie.LottieAnimationView
-import com.example.nursingstudio.AuthActivity
-import com.example.nursingstudio.MainActivity
+import com.example.nursingstudio.ui.auth.AuthActivity
+import com.example.nursingstudio.ui.main.MainActivity
 import com.example.nursingstudio.R
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch

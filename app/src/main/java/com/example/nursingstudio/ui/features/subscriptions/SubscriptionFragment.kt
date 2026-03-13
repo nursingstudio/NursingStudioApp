@@ -8,7 +8,7 @@ import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
-import com.example.nursingstudio.MainActivity
+import com.example.nursingstudio.ui.main.MainActivity
 import com.example.nursingstudio.R
 
 class SubscriptionFragment : Fragment() {
