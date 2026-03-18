@@ -28,16 +28,14 @@ android {
             pickFirsts += "lib/arm64-v8a/libc++_shared.so"
         }
     }
-        // 1. Pehle ye block add karein (Line by line copy karein)
-        signingConfigs {
-            create("releaseTest") {
-                // Hum debug key ko hi use karenge testing ke liye
-                storeFile = file(System.getProperty("user.home") + "/.android/debug.keystore")
-                storePassword = "android"
-                keyAlias = "androiddebugkey"
-                keyPassword = "android"
-            }
+    signingConfigs {
+        create("releaseTest") {
+            storeFile = file("D:\\Keys\\nursing_studio.jks")
+            storePassword = "Rakshit@3294"
+            keyAlias = "nursing_key"
+            keyPassword = "Rakshit@3294"
         }
+    }
 
         buildTypes {
             getByName("release") {

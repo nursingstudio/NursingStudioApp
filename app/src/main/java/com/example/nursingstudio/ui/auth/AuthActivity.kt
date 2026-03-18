@@ -43,6 +43,7 @@ class AuthActivity : AppCompatActivity() {
     private val auth = FirebaseAuth.getInstance()
 
     private var securitySheet: BottomSheetDialog? = null
+    private lateinit var usbReceiver: BroadcastReceiver
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -67,10 +68,10 @@ class AuthActivity : AppCompatActivity() {
         setContentView(R.layout.activity_auth)
 
         // ⭐ Security Check Call
-        checkEnvironmentIntegrity()
+        window.decorView.postDelayed({ checkEnvironmentIntegrity() }, 500)
 
         // ⭐ 2026 INTEL-LOGIC: Auto-dismiss alert when USB is unplugged
-        val usbReceiver = object : BroadcastReceiver() {
+         usbReceiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context?, intent: Intent?) {
                 val connected = intent?.extras?.getBoolean("connected") ?: false
                 if (!isFinishing && !isDestroyed && securitySheet?.isShowing == true) {
@@ -91,9 +92,11 @@ class AuthActivity : AppCompatActivity() {
         // Delay updates for better UX
         window.decorView.postDelayed({ checkForUpdates() }, 2000)
     }
-
-    // --- ⭐ ULTRA PRO NAVIGATION LOGIC ⭐ ---
-
+    override fun onResume() {
+        super.onResume()
+        // 500ms delay taaki system settings fresh read ho sake
+        window.decorView.postDelayed({ checkEnvironmentIntegrity() }, 500)
+    }
     // Login Fragment dikhane ke liye
     fun showLogin() {
         replaceFragment(LoginFragment(), false)
@@ -225,22 +228,55 @@ class AuthActivity : AppCompatActivity() {
     }
     // ⭐ 2026 WORLD-CLASS SECURITY: Environment Integrity Check
     private fun checkEnvironmentIntegrity() {
-        if (BuildConfig.DEBUG) return
-
+        // 1. Fetch current states
+        val isDevOptions = try { Settings.Global.getInt(contentResolver, Settings.Global.DEVELOPMENT_SETTINGS_ENABLED, 0) != 0 } catch (_: Exception) { false }
+        val isUsbDebugging = try { Settings.Global.getInt(contentResolver, Settings.Global.ADB_ENABLED, 0) != 0 } catch (_: Exception) { false }
+        val batteryStatus: Intent? = registerReceiver(null, IntentFilter(Intent.ACTION_BATTERY_CHANGED))
+        val isUsbConnected = (batteryStatus?.getIntExtra(android.os.BatteryManager.EXTRA_PLUGGED, -1) ?: -1) == android.os.BatteryManager.BATTERY_PLUGGED_USB
         val isRooted = checkRootMethod()
-        val isDevOptions = Settings.Global.getInt(contentResolver, "development_settings_enabled", 0) != 0
-        val isUsbDebugging = Settings.Global.getInt(contentResolver, "adb_enabled", 0) != 0
 
-        // USB Cable check logic
-        val intent = registerReceiver(null, IntentFilter("android.hardware.usb.action.USB_STATE"))
-        val isUsbConnected = intent?.extras?.getBoolean("connected") ?: false
+        // ⭐ 2026 WORLD-CLASS LOGIC: Single Entry, Single Exit (No Dead Code Warnings)
+        var activeThreat: SecurityType? = null
 
         when {
-            isRooted -> showSecurityAlert(SecurityType.ROOTED_DEVICE)
-            isDevOptions -> showSecurityAlert(SecurityType.DEVELOPER_OPTIONS)
-            isUsbDebugging -> showSecurityAlert(SecurityType.USB_DEBUGGING)
-            isUsbConnected -> showSecurityAlert(SecurityType.ACTIVE_USB)
+            isRooted -> activeThreat = SecurityType.ROOTED_DEVICE
+            isUsbDebugging -> activeThreat = SecurityType.USB_DEBUGGING
+            isDevOptions -> activeThreat = SecurityType.DEVELOPER_OPTIONS
+            isUsbConnected -> activeThreat = SecurityType.ACTIVE_USB
         }
+
+        // 2. Action based on threat state
+        if (activeThreat != null) {
+            showSecurityAlert(activeThreat)
+        } else {
+            // Agar koi threat nahi hai, toh purana alert hata do (Warning-Free Dismissal)
+            securitySheet?.takeIf { it.isShowing }?.dismiss()
+        }
+
+        // 3. PLAY INTEGRITY (Keep as it is, but only for Release)
+        // Ye check karega ki app Play Store se hai ya MOD APK hai
+        /*
+        if (!BuildConfig.DEBUG) {
+            val integrityManager = IntegrityManagerFactory.create(applicationContext)
+            val nonce = Base64.encodeToString("nursing_studio_verify".toByteArray(), Base64.URL_SAFE)
+
+            val integrityTokenRequest = IntegrityTokenRequest.builder()
+                .setNonce(nonce)
+                .setCloudProjectNumber(1009948838228L) // Aapka Project Number
+                .build()
+
+            integrityManager.requestIntegrityToken(integrityTokenRequest)
+                .addOnSuccessListener { _ ->
+                    // App is Genuine
+                }
+                .addOnFailureListener { _ ->
+                    // Agar Integrity fail ho jaye (Matlab MOD APK ya Tampered App hai)
+                    Toast.makeText(this, "Security Breach: Official App Required", Toast.LENGTH_LONG).show()
+                    finishAffinity()
+                }
+        }
+
+         */
     }
     // ⭐ 2026 Professional Security Enum
     enum class SecurityType {
@@ -248,8 +284,11 @@ class AuthActivity : AppCompatActivity() {
     }
 
     private fun showSecurityAlert(type: SecurityType) {
-        // 1. Agar pehle se dikh raha hai toh wapas mat dikhao
-        if (securitySheet?.isShowing == true) return
+        // Purani line: if (securitySheet?.isShowing == true) return
+        if (securitySheet?.isShowing == true) {
+            // Agar alert badal gaya hai (e.g., USB se Dev Mode), toh purana dismiss karo
+            securitySheet?.dismiss()
+        }
 
         securitySheet = BottomSheetDialog(this, R.style.BottomSheetDialogTheme)
         val binding = LayoutSecurityAlertBinding.inflate(layoutInflater)
@@ -306,5 +345,13 @@ class AuthActivity : AppCompatActivity() {
             if (File(path).exists()) return true
         }
         return false
+    }
+    override fun onDestroy() {
+        super.onDestroy()
+        try {
+            unregisterReceiver(usbReceiver)
+        } catch (_: Exception) {
+            // Receiver already unregistered
+        }
     }
 }
