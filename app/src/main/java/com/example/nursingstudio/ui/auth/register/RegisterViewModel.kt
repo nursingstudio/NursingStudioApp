@@ -6,11 +6,14 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.nursingstudio.data.repository.AuthRepository
 import com.google.firebase.auth.AuthCredential
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.tasks.await
+import javax.inject.Inject
 
-class RegisterViewModel : ViewModel() {
-    private val repository = AuthRepository()
+@HiltViewModel // ✅ 2026 Gold Standard Annotation
+class RegisterViewModel @Inject constructor(
+    private val repository: AuthRepository // ✅ Injecting Repository via Hilt
+) : ViewModel() {
 
     private val _regStatus = MutableLiveData<RegResult>()
     val regStatus: LiveData<RegResult> get() = _regStatus
@@ -18,39 +21,39 @@ class RegisterViewModel : ViewModel() {
     private val _otpStatus = MutableLiveData<OtpResult>()
     val otpStatus: LiveData<OtpResult> get() = _otpStatus
 
-    fun startRegistration(email: String, pass: String, phoneCred: AuthCredential, userData: MutableMap<String, Any>) {
+    fun startRegistration(email: String, pass: String, userData: MutableMap<String, Any>) {
         viewModelScope.launch {
             _regStatus.value = RegResult.Loading
-            try {
-                val authResult = repository.createUser(email, pass).await()
-                val user = authResult.user ?: throw Exception("User creation failed")
 
-                repository.linkPhone(phoneCred)?.await() ?: throw Exception("Linking failed")
+            // Using the Result pattern from Repository
+            repository.createUser(email, pass).onSuccess { authResult ->
+                val uid = authResult.user?.uid ?: ""
+                userData["uid"] = uid
 
-                userData["uid"] = user.uid
-                repository.saveUserData(user.uid, userData).await()
-
-                _regStatus.value = RegResult.Success
-            } catch (e: Exception) {
-                _regStatus.value = RegResult.Error(e.localizedMessage ?: "Something went wrong")
+                repository.saveUserData(uid, userData).onSuccess {
+                    _regStatus.value = RegResult.Success
+                }.onFailure { e ->
+                    _regStatus.value = RegResult.Error(e.localizedMessage ?: "Firestore Save Failed")
+                }
+            }.onFailure { e ->
+                _regStatus.value = RegResult.Error(e.localizedMessage ?: "Auth Failed")
             }
         }
     }
 
-    // --- YE WALA FUNCTION MISSING THA YA GALAT THA ---
     fun verifyOtp(credential: AuthCredential) {
         viewModelScope.launch {
             _otpStatus.value = OtpResult.Loading
-            val result = repository.verifyOtp(credential) // AuthRepository wala call
-            if (result.isSuccess) {
+            repository.verifyOtp(credential).onSuccess {
                 _otpStatus.value = OtpResult.Success
-            } else {
-                _otpStatus.value = OtpResult.Error(result.exceptionOrNull()?.message ?: "Invalid OTP")
+            }.onFailure { e ->
+                _otpStatus.value = OtpResult.Error(e.localizedMessage ?: "Invalid OTP")
             }
         }
     }
 }
 
+// Sealed classes for UI State (Keep them as you have)
 sealed class RegResult {
     object Loading : RegResult()
     object Success : RegResult()

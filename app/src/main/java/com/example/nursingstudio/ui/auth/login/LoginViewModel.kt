@@ -1,71 +1,74 @@
 package com.example.nursingstudio.ui.auth.login
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel // ✅ Changed from AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.nursingstudio.data.repository.AuthRepository
 import com.google.firebase.auth.AuthCredential
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow // ✅ New Import
+import kotlinx.coroutines.flow.StateFlow        // ✅ New Import
+import kotlinx.coroutines.flow.asStateFlow     // ✅ New Import
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
+@HiltViewModel
+class LoginViewModel @Inject constructor(
+    private val repository: AuthRepository // ✅ Application context removed from constructor
+) : ViewModel() {
 
-class LoginViewModel(application: android.app.Application) : androidx.lifecycle.AndroidViewModel(application) {
-    private val repository = AuthRepository()
+    // 1. MutableStateFlow: Private for internal updates (Gold Standard 2026)
+    private val _loginState = MutableStateFlow<LoginState>(LoginState.Idle)
 
-    private val _loginStatus = MutableLiveData<LoginResult>()
-    val loginStatus: LiveData<LoginResult> get() = _loginStatus
+    // 2. StateFlow: Public for UI to collect (Read-only)
+    val loginState: StateFlow<LoginState> = _loginState.asStateFlow()
 
     fun loginWithEmail(email: String, pass: String) {
         viewModelScope.launch {
-            _loginStatus.value = LoginResult.Loading
-            val result = repository.signInWithEmail(email, pass)
+            _loginState.value = LoginState.Loading
+            repository.signInWithEmail(email, pass).onSuccess { authResult ->
+                val uid = authResult.user?.uid ?: ""
+                val exists = repository.checkUserById(uid)
 
-            result.onSuccess { authResult ->
-                verifyUser(authResult.user?.uid)
+                if (exists) {
+                    _loginState.value = LoginState.Success
+                } else {
+                    // ✅ SignOut logic now handled inside repository to keep ViewModel clean
+                    repository.signOut()
+                    _loginState.value = LoginState.NoProfile
+                }
             }.onFailure { e ->
-                _loginStatus.value = LoginResult.Error(e.localizedMessage ?: "Login Failed")
+                _loginState.value = LoginState.Error(e.localizedMessage ?: "Login Failed")
             }
         }
     }
 
     fun loginWithPhone(credential: AuthCredential) {
         viewModelScope.launch {
-            _loginStatus.value = LoginResult.Loading
-            val result = repository.verifyOtp(credential)
-
-            result.onSuccess { pair ->
-                val isProfileComplete = pair.second
-                if (isProfileComplete) {
-                    _loginStatus.value = LoginResult.Success
+            _loginState.value = LoginState.Loading
+            repository.verifyAndSyncUser(credential).onSuccess { (_, isRegistered) ->
+                if (isRegistered) {
+                    _loginState.value = LoginState.Success
                 } else {
-                    // Profile nahi hai toh login session turant khatam karo
-                    repository.signOut(getApplication()) // application context pass kiya
-                    _loginStatus.value = LoginResult.NoProfile
+                    repository.signOut()
+                    _loginState.value = LoginState.NoProfile
                 }
             }.onFailure { e ->
-                // Ye block missing tha, ise add karna zaroori hai crash rokne ke liye
-                _loginStatus.value = LoginResult.Error(e.localizedMessage ?: "Verification Failed")
+                _loginState.value = LoginState.Error(e.localizedMessage ?: "OTP Failed")
             }
         }
     }
 
-    private fun verifyUser(uid: String?) {
-        if (uid == null) {
-            _loginStatus.value = LoginResult.Error("User ID not found"); return
-        }
-        repository.checkUserInFirestore(uid).addOnSuccessListener { doc ->
-            if (doc.exists()) {
-                _loginStatus.value = LoginResult.Success
-            } else {
-                repository.signOut(getApplication()) // Profile nahi hai toh Firebase session clear karo
-                _loginStatus.value = LoginResult.NoProfile
-            }
-        }
+    // 3. Reset State: Helpful for 2026 complex UI flows
+    fun resetState() {
+        _loginState.value = LoginState.Idle
     }
 
-    sealed class LoginResult {
-        object Loading : LoginResult()
-        object Success : LoginResult()
-        object NoProfile : LoginResult()
-        data class Error(val message: String) : LoginResult()
+    // Modern Sealed Interface for state management
+    sealed interface LoginState {
+        object Idle : LoginState
+        object Loading : LoginState
+        object Success : LoginState
+        object NoProfile : LoginState
+        data class Error(val message: String) : LoginState
     }
 }

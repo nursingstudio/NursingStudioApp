@@ -7,6 +7,7 @@ plugins {
 
 // Add the dependency for the Google services Gradle plugin
     id("com.google.gms.google-services") version "4.4.4" apply false
-
     id("com.google.firebase.crashlytics") version "3.0.6" apply false
+    id("com.google.dagger.hilt.android") version "2.59.2" apply false
+    id("com.google.devtools.ksp") version "1.9.22-1.0.17" apply false
 }

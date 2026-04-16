@@ -35,9 +35,11 @@ import com.google.firebase.auth.PhoneAuthCredential
 import com.google.firebase.auth.PhoneAuthOptions
 import com.google.firebase.auth.PhoneAuthProvider
 import com.google.firebase.crashlytics.FirebaseCrashlytics
+import dagger.hilt.android.AndroidEntryPoint
 import java.io.File
 import java.util.concurrent.TimeUnit
 
+@AndroidEntryPoint // ✅ 2026 Gold Standard: This allows Hilt to inject into Fragments
 class AuthActivity : AppCompatActivity() {
 
     private val auth = FirebaseAuth.getInstance()

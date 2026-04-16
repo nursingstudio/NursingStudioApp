@@ -10,6 +10,8 @@ datastorePreferences = "1.2.1"
 firebaseAnalytics = "23.0.0"
 firebaseCrashlytics = "20.0.4"
 fragmentKtx = "1.8.9"
+hiltAndroid = "2.59.2"
+hiltAndroidCompiler = "2.59.2"
 integrity = "1.6.0"
 kotlin = "2.3.10"
 coreKtx = "1.17.0"
@@ -57,6 +59,8 @@ firebase-database = { module = "com.google.firebase:firebase-database" }
 firebase-firestore = { module = "com.google.firebase:firebase-firestore" }
 firebase-storage = { module = "com.google.firebase:firebase-storage" }
 google-firebase-appcheck-ktx = { module = "com.google.firebase:firebase-appcheck-ktx" }
+hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hiltAndroid" }
+hilt-android-compiler = { module = "com.google.dagger:hilt-android-compiler", version.ref = "hiltAndroidCompiler" }
 integrity = { module = "com.google.android.play:integrity", version.ref = "integrity" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }

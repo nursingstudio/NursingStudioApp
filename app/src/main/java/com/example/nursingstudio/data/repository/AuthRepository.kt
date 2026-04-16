@@ -2,22 +2,88 @@ package com.example.nursingstudio.data.repository
 
 import android.content.Context
 import com.example.nursingstudio.utils.AppSettings
-import com.google.android.gms.tasks.Task
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.AuthCredential
 import com.google.firebase.auth.AuthResult
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
+import dagger.hilt.android.qualifiers.ApplicationContext // ✅ New Import
 import kotlinx.coroutines.tasks.await
+import javax.inject.Inject
+import javax.inject.Singleton
 
-class AuthRepository {
-    private val auth = FirebaseAuth.getInstance()
-    private val db = FirebaseFirestore.getInstance()
 
-    // --- SHARED LOGIC ---
-    fun isUserLoggedIn(): Boolean = auth.currentUser != null
+@Singleton
+class AuthRepository @Inject constructor(
+    @ApplicationContext private val context: Context,
+    private val auth: FirebaseAuth, // ✅ Hilt will provide this from AuthModule
+    private val db: FirebaseFirestore // ✅ Hilt will provide this from AuthModule
+) {
+    // 2026 Standard: Use Result wrapper for better error handling
+    suspend fun createUser(email: String, pass: String): Result<AuthResult> = try {
+        val result = auth.createUserWithEmailAndPassword(email, pass).await()
+        Result.success(result)
+    } catch (e: Exception) {
+        Result.failure(e)
+    }
 
-    // --- LOGIN LOGIC ---
+    suspend fun saveUserData(uid: String, data: Map<String, Any>): Result<Void?> = try {
+        val result = db.collection("users").document(uid).set(data).await()
+        Result.success(result)
+    } catch (e: Exception) {
+        Result.failure(e)
+    }
+
+    suspend fun verifyOtp(credential: AuthCredential): Result<AuthResult> = try {
+        val result = auth.signInWithCredential(credential).await()
+        Result.success(result)
+    } catch (e: Exception) {
+        Result.failure(e)
+    }
+    // 1. ⭐ CHECK USER STATUS (For Smart Redirect)
+    // Ye function check karega ki number database mein hai ya nahi
+    suspend fun checkUserByPhone(phone: String): Boolean {
+        return try {
+            val query = db.collection("Users")
+                .whereEqualTo("phone", "+91$phone")
+                .get()
+                .await()
+            !query.isEmpty
+        } catch (_: Exception) {
+            false
+        }
+    }
+
+    // 2. ⭐ UNIFIED OTP VERIFICATION & DATA SYNC
+    // User login kare ya register, ye function dono handle karega
+    suspend fun verifyAndSyncUser(credential: AuthCredential): Result<Pair<AuthResult, Boolean>> {
+        return try {
+            val result = auth.signInWithCredential(credential).await()
+            val user = result.user
+
+            var isRegistered = false
+            user?.let {
+                val doc = db.collection("Users").document(it.uid).get().await()
+                isRegistered = doc.exists()
+            }
+
+            Result.success(Pair(result, isRegistered))
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    // 3. ⭐ WORLD-CLASS REGISTER: Full Data Save
+    // Jab OTP verify ho jaye, tab ye function sara metadata save karega
+    suspend fun finalizeRegistration(uid: String, userData: Map<String, Any>): Result<Unit> {
+        return try {
+            db.collection("Users").document(uid).set(userData).await()
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    // 4. ⭐ EMAIL LOGIN (With Firestore Verification)
     suspend fun signInWithEmail(email: String, pass: String): Result<AuthResult> {
         return try {
             val result = auth.signInWithEmailAndPassword(email, pass).await()
@@ -26,45 +92,22 @@ class AuthRepository {
             Result.failure(e)
         }
     }
-    fun checkUserInFirestore(uid: String): Task<DocumentSnapshot> =
-        db.collection("Users").document(uid).get()
 
-    fun signOut(context: Context) {
-        // 1. Firebase se Logout
-        FirebaseAuth.getInstance().signOut()
-
-        // 2. ⭐ GOLD STANDARD: Local session ko bhi turant saaf karein
-        // Iske liye humne AppSettings mein function banaya tha
-        AppSettings.startNewUserSession(context)
+    suspend fun checkUserById(uid: String): Boolean {
+        return try {
+            val doc = db.collection("Users").document(uid).get().await()
+            doc.exists()
+        } catch (_: Exception) {
+            false
+        }
     }
 
-    // --- REGISTER LOGIC ---
-    fun createUser(email: String, pass: String): Task<AuthResult> =
-        auth.createUserWithEmailAndPassword(email, pass)
+    fun isUserLoggedIn(): Boolean = auth.currentUser != null
+    fun getCurrentUid(): String? = auth.currentUser?.uid
 
-    fun linkPhone(credential: AuthCredential): Task<AuthResult>? =
-        auth.currentUser?.linkWithCredential(credential)
-
-    fun saveUserData(uid: String, userData: Map<String, Any>): Task<Void> =
-        db.collection("Users").document(uid).set(userData)
-
-    // --- OTP VERIFICATION (Ab ye class ke andar hai!) ---
-    suspend fun verifyOtp(credential: AuthCredential): Result<Pair<AuthResult, Boolean>> {
-        return try {
-            val result = auth.signInWithCredential(credential).await()
-            val user = result.user
-
-            // World-Class Addition: Check if user document exists
-            var isProfileComplete = false
-            if (user != null) {
-                val doc = db.collection("Users").document(user.uid).get().await()
-                isProfileComplete = doc.exists()
-            }
-
-            // Result ke saath profile status bhi bhej rahe hain
-            Result.success(Pair(result, isProfileComplete))
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
+    fun signOut() { // ✅ Argument removed
+        auth.signOut()
+        // Ab hum context yahan direct use kar sakte hain
+        AppSettings.startNewUserSession(context)
     }
 }

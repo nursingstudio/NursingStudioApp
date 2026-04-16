@@ -1,18 +1,26 @@
 package com.example.nursingstudio.ui.splash
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.nursingstudio.data.repository.AuthRepository
+import dagger.hilt.android.lifecycle.HiltViewModel // ✅ Added
+import kotlinx.coroutines.flow.MutableStateFlow // ✅ Added
+import kotlinx.coroutines.flow.asStateFlow // ✅ Added
+import kotlinx.coroutines.launch
+import javax.inject.Inject // ✅ Added
 
-class SplashViewModel : ViewModel() {
-    private val repository = AuthRepository()
+@HiltViewModel // ✅ 2026 Gold Standard
+class SplashViewModel @Inject constructor(
+    private val repository: AuthRepository // ✅ Injected perfectly by Hilt
+) : ViewModel() {
 
-    private val _navigateToNext = MutableLiveData<Boolean>()
-    val navigateToNext: LiveData<Boolean> get() = _navigateToNext
+    private val _isLoggedIn = MutableStateFlow<Boolean?>(null)
+    val isLoggedIn = _isLoggedIn.asStateFlow()
 
     fun checkUserSession() {
-        // Hum logic yahan rakhenge
-        _navigateToNext.value = repository.isUserLoggedIn()
+        viewModelScope.launch {
+            // Hum direct repo call karenge, Context ki chinta Hilt ne kar li hai
+            _isLoggedIn.value = repository.isUserLoggedIn()
+        }
     }
 }

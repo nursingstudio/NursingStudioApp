@@ -8,14 +8,18 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import com.airbnb.lottie.LottieAnimationView
+import com.example.nursingstudio.R
 import com.example.nursingstudio.ui.auth.AuthActivity
 import com.example.nursingstudio.ui.main.MainActivity
-import com.example.nursingstudio.R
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
+@AndroidEntryPoint // ✅ 1. Mandatory for Hilt to work
 class SplashActivity : AppCompatActivity() {
 
     // Modern way to initialize ViewModel
@@ -23,9 +27,7 @@ class SplashActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         // 1. Android 12+ SplashScreen Fix
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            splashScreen.setOnExitAnimationListener { it.remove() }
-        }
+        splashScreen.setOnExitAnimationListener { it.remove() }
 
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_splash)
@@ -68,8 +70,17 @@ class SplashActivity : AppCompatActivity() {
         }
 
         // 4. Observer: MVVM ka asli magic
-        viewModel.navigateToNext.observe(this) { isLoggedIn ->
-            navigateToNextScreen(isLoggedIn)
+        // ⬇️ Replace your old observer (Point 4) with this:
+        observeViewModel()
+    }
+    private fun observeViewModel() {
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                // ✅ 2026 Gold Standard: Collecting StateFlow
+                viewModel.isLoggedIn.collect { status ->
+                    status?.let { navigateToNextScreen(it) }
+                }
+            }
         }
     }
 

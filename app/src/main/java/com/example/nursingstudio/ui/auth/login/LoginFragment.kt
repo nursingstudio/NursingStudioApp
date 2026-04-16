@@ -3,6 +3,7 @@ package com.example.nursingstudio.ui.auth.login
 import android.content.Context
 import android.content.Context.RECEIVER_EXPORTED
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.os.CountDownTimer
 import android.text.Editable
@@ -16,27 +17,29 @@ import android.widget.Toast
 import androidx.biometric.BiometricPrompt
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
-import androidx.fragment.app.Fragment
-import androidx.fragment.app.viewModels
-import androidx.lifecycle.lifecycleScope
-import com.example.nursingstudio.ui.main.MainActivity
-import com.example.nursingstudio.R
-import com.example.nursingstudio.databinding.FragmentLoginBinding
-import com.google.android.material.tabs.TabLayout
-import com.google.firebase.auth.PhoneAuthProvider
-import com.example.nursingstudio.ui.auth.AuthActivity
-import com.example.nursingstudio.utils.AppSettings
-import com.example.nursingstudio.utils.BiometricSettingsManager
-import com.google.android.material.textfield.TextInputLayout
-import java.util.Locale
 import androidx.core.content.edit
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import kotlinx.coroutines.launch
 import androidx.lifecycle.withResumed
+import com.example.nursingstudio.R
+import com.example.nursingstudio.databinding.FragmentLoginBinding
+import com.example.nursingstudio.ui.auth.AuthActivity
+import com.example.nursingstudio.ui.main.MainActivity
+import com.example.nursingstudio.utils.AppSettings
+import com.example.nursingstudio.utils.BiometricSettingsManager
+import com.google.android.material.tabs.TabLayout
+import com.google.android.material.textfield.TextInputLayout
+import com.google.firebase.auth.PhoneAuthProvider
+import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
+import java.util.Locale
 
+@AndroidEntryPoint
 class LoginFragment : Fragment() {
     companion object {
         private const val MAX_ATTEMPTS = 3
@@ -71,7 +74,8 @@ class LoginFragment : Fragment() {
             otpCode?.let {
                 binding.etOtpLogin.setText(it)
                 hideKeyboard()
-                performMobileLogin()
+                // ⭐ 2026 UX: Auto-click the button
+                binding.btnLoginAction.performClick()
             }
         }
     }
@@ -107,13 +111,15 @@ class LoginFragment : Fragment() {
         super.onStart()
         // Register for User Consent events
         val intentFilter = android.content.IntentFilter(com.google.android.gms.auth.api.phone.SmsRetriever.SMS_RETRIEVED_ACTION)
-        requireActivity().registerReceiver(
-            smsConsentReceiver,
-            intentFilter,
-            com.google.android.gms.auth.api.phone.SmsRetriever.SEND_PERMISSION,
-            null,
-            RECEIVER_EXPORTED
-        )
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            requireActivity().registerReceiver(
+                smsConsentReceiver,
+                intentFilter,
+                com.google.android.gms.auth.api.phone.SmsRetriever.SEND_PERMISSION,
+                null,
+                RECEIVER_EXPORTED
+            )
+        }
 
         // Auto-fill trigger
         com.google.android.gms.auth.api.phone.SmsRetriever.getClient(requireContext()).startSmsRetriever()
@@ -158,7 +164,7 @@ class LoginFragment : Fragment() {
             //binding.root.postDelayed({ showBiometricPrompt() }, 500)
         }
         // ⭐ 2026 World-Class Notification Check
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             // Note: Manifest.permission.POST_NOTIFICATIONS use karein
             requestNotificationPermissionLauncher.launch(android.Manifest.permission.POST_NOTIFICATIONS)
         }
@@ -240,82 +246,64 @@ class LoginFragment : Fragment() {
     }
     // --- 📊 VIEWMODEL OBSERVATION (Fixed Progress Bar) ---
     private fun observeViewModel() {
-        viewModel.loginStatus.observe(viewLifecycleOwner) { result ->
-            binding.loadingOverlay.visibility = if (result is LoginViewModel.LoginResult.Loading) View.VISIBLE else View.GONE
+        // 2026 Gold Standard: Collecting StateFlow safely with lifecycle awareness
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.loginState.collect { state ->
+                    // Progress Bar visibility (Centralized)
+                    binding.loadingOverlay.visibility = if (state is LoginViewModel.LoginState.Loading) View.VISIBLE else View.GONE
 
-            when (result) {
-                is LoginViewModel.LoginResult.Loading -> {
-                }
+                    when (state) {
+                        is LoginViewModel.LoginState.Idle -> { /* Shanti: Kuch nahi karna */ }
 
-                is LoginViewModel.LoginResult.Success -> {
-                    // ⬇️ EXACT LOCATION: Navigation se thik pehle call karein
-                    AppSettings.startNewUserSession(requireContext())
-                    proceedToHome()
-                }
-
-                is LoginViewModel.LoginResult.NoProfile -> {
-                    countDownTimer?.cancel()
-                    toast("No profile found. Redirecting to Register...")
-                    binding.root.postDelayed({
-                        if (isAdded) (activity as? AuthActivity)?.showRegister()
-                    }, 1000)
-                }
-
-                is LoginViewModel.LoginResult.Error -> {
-                    val email = binding.etEmail.text.toString().trim()
-                    val msg = result.message
-
-                    // ⭐ GOLD STANDARD: User-Friendly Message Mapping
-                    val userFriendlyMsg = when {
-                        // Network Errors
-                        msg.contains("network", true) || msg.contains("timeout", true) || msg.contains("unreachable", true) ->
-                            getString(R.string.no_internet)
-
-                        // OTP Errors
-                        msg.contains("OTP", true) || msg.contains("verification", true) || msg.contains("code", true) ->
-                            "Invalid OTP! Please check and try again. 🔢"
-
-                        // Credential Errors
-                        msg.contains("password", true) || msg.contains("credential", true) ->
-                            "Incorrect Password! Please try again. 🔑"
-
-                        // Too many requests
-                        msg.contains("too-many-requests", true) ->
-                            "Too many attempts! Please try after some time. ⏳"
-
-                        else -> msg // Fallback for unknown errors
-                    }
-
-                    when {
-                        // 1. Agar OTP wala field dikh raha hai aur error OTP ka hai
-                        !binding.tilOtp.isGone && (msg.contains("OTP", true) || msg.contains("verification", true)) -> {
-                            binding.tilOtp.isErrorEnabled = true
-                            binding.tilOtp.error = userFriendlyMsg
-                            AppSettings.triggerErrorEffect(requireContext(), binding.tilOtp)
+                        is LoginViewModel.LoginState.Loading -> {
+                            // Aap chahein toh yahan button disable kar sakte hain
                         }
 
-                        // 2. Agar Password wala field dikh raha hai aur error password ka hai
-                        binding.layoutEmailLogin.isVisible && (msg.contains("password", true) || msg.contains("credential", true)) -> {
-                            if (email.isNotEmpty()) recordFailedAttempt(email)
-
-                            val prefs = requireContext().getSharedPreferences("login_lock", Context.MODE_PRIVATE)
-                            val currentAttempts = prefs.getInt("attempts_$email", 0)
-                            val remaining = MAX_ATTEMPTS - currentAttempts
-
-                            binding.tilPassword.isErrorEnabled = true
-                            binding.tilPassword.error = "$userFriendlyMsg ($remaining attempts left)"
-                            AppSettings.triggerErrorEffect(requireContext(), binding.tilPassword)
+                        is LoginViewModel.LoginState.Success -> {
+                            AppSettings.startNewUserSession(requireContext())
+                            proceedToHome()
                         }
 
-                        // 3. Network Error ya baki errors ke liye professional SnackBar ya Toast
-                        else -> {
-                            toast(userFriendlyMsg)
-                            // Button ko shake karein taaki user ko feedback mile
-                            AppSettings.triggerErrorEffect(requireContext(), binding.btnLoginAction)
+                        is LoginViewModel.LoginState.NoProfile -> {
+                            countDownTimer?.cancel()
+                            toast("No profile found. Redirecting to Register...")
+                            binding.root.postDelayed({
+                                if (isAdded) (activity as? AuthActivity)?.showRegister()
+                            }, 1000)
+                        }
+
+                        is LoginViewModel.LoginState.Error -> {
+                            handleLoginError(state.message)
                         }
                     }
                 }
             }
+        }
+    }
+
+    // ⭐ 2026 Modularization: Error handling ko alag function mein rakha taaki code "Clean" dikhe
+    private fun handleLoginError(msg: String) {
+        val email = binding.etEmail.text.toString().trim()
+        val userFriendlyMsg = when {
+            msg.contains("network", true) || msg.contains("timeout", true) -> getString(R.string.no_internet)
+            msg.contains("OTP", true) || msg.contains("verification", true) -> "Invalid OTP! Please check and try again."
+            msg.contains("password", true) || msg.contains("credential", true) -> "Incorrect Credentials! Please try again.🔑"
+            msg.contains("too-many-requests", true) -> "Too many attempts! Please try after some-time.⏳"
+            else -> msg
+        }
+
+        // Field specific error mapping
+        if (!binding.tilOtp.isGone && (msg.contains("OTP", true) || msg.contains("verification", true))) {
+            binding.tilOtp.error = userFriendlyMsg
+            AppSettings.triggerErrorEffect(requireContext(), binding.tilOtp)
+        } else if (binding.layoutEmailLogin.isVisible && (msg.contains("password", true) || msg.contains("credential", true))) {
+            if (email.isNotEmpty()) recordFailedAttempt(email)
+            binding.tilPassword.error = userFriendlyMsg
+            AppSettings.triggerErrorEffect(requireContext(), binding.tilPassword)
+        } else {
+            toast(userFriendlyMsg)
+            AppSettings.triggerErrorEffect(requireContext(), binding.btnLoginAction)
         }
     }
     private fun setupTextWatchers() {
@@ -673,6 +661,7 @@ class LoginFragment : Fragment() {
     }
 
     override fun onDestroyView() {
+        viewModel.resetState() // ✅ Resetting the flow state when user leaves
         countDownTimer?.cancel()
         countDownTimer = null
         _binding = null

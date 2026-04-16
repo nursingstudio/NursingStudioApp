@@ -624,18 +624,25 @@ class RegisterFragment : Fragment() {
 
         val userData = prepareUserData()
         val currentOtp = binding.etOtp.text.toString().trim()
+        val email = binding.etEmail.text.toString().trim()
+        val password = binding.etPassword.text.toString().trim()
 
         if (isOtpVerified) {
+            // 2026 Standard: Safe Argument Passing
             val phoneCred = if (verificationId != null) {
                 PhoneAuthProvider.getCredential(verificationId!!, currentOtp)
             } else null
 
-            viewModel.startRegistration(
-                binding.etEmail.text.toString().trim(),
-                binding.etPassword.text.toString().trim(),
-                phoneCred!!,
-                userData
-            )
+            if (phoneCred != null) {
+                // ✅ Yahan Order bilkul sahi hona chahiye jo ViewModel expect kar raha hai
+                viewModel.startRegistration(
+                    email = email,
+                    pass = password,
+                    userData = userData
+                )
+            } else {
+                toast("OTP Verification failed, please try again.")
+            }
         } else {
             toast("Verify mobile first")
         }
@@ -762,9 +769,11 @@ class RegisterFragment : Fragment() {
 
     private fun isNetworkAvailable(): Boolean {
         val connectivityManager = requireContext().getSystemService(Context.CONNECTIVITY_SERVICE) as android.net.ConnectivityManager
-        val network = connectivityManager.activeNetwork ?: return false
-        val capabilities = connectivityManager.getNetworkCapabilities(network) ?: return false
-        return capabilities.hasCapability(android.net.NetworkCapabilities.NET_CAPABILITY_INTERNET)
+        val capabilities = connectivityManager.getNetworkCapabilities(connectivityManager.activeNetwork)
+        return capabilities != null && (
+                capabilities.hasTransport(android.net.NetworkCapabilities.TRANSPORT_WIFI) ||
+                        capabilities.hasTransport(android.net.NetworkCapabilities.TRANSPORT_CELLULAR)
+                )
     }
 
     override fun onDestroyView() { super.onDestroyView(); countDownTimer?.cancel(); _binding = null }

@@ -3,11 +3,13 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     id("com.google.gms.google-services")
     id("com.google.firebase.crashlytics")
+    id("com.google.devtools.ksp")
+    id("com.google.dagger.hilt.android")
 }
 
 android {
     namespace = "com.example.nursingstudio"
-    compileSdk = 36 // Professional stable version
+    compileSdk = 37 // Professional stable version
 
     defaultConfig {
         applicationId = "com.example.nursingstudio"
@@ -126,6 +128,10 @@ dependencies {
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.firebase.appcheck.ktx)
     implementation(libs.google.firebase.appcheck.ktx)
+
+    // ✅ HILT + KSP (Modern 2026 Standard)
+    implementation(libs.hilt.android)
+    ksp(libs.hilt.android.compiler)
 
     // Debug tools
     debugImplementation(libs.androidx.compose.ui.tooling)
