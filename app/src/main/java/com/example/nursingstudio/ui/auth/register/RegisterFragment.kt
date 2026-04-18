@@ -27,40 +27,44 @@ import android.widget.ScrollView
 import android.widget.Spinner
 import android.widget.Toast
 import androidx.core.content.ContextCompat
+import androidx.core.graphics.toColorInt
 import androidx.core.widget.NestedScrollView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import com.example.nursingstudio.utils.AppSettings
-import com.example.nursingstudio.ui.auth.AuthActivity
-import com.example.nursingstudio.ui.main.MainActivity
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import com.example.nursingstudio.R
 import com.example.nursingstudio.databinding.FragmentRegisterBinding
 import com.example.nursingstudio.databinding.LayoutPolicyBottomSheetBinding
+import com.example.nursingstudio.ui.auth.AuthActivity
+import com.example.nursingstudio.ui.main.MainActivity
+import com.example.nursingstudio.utils.AppSettings
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.datepicker.CalendarConstraints
 import com.google.android.material.datepicker.DateValidatorPointBackward
 import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.android.material.textfield.TextInputLayout
-import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.PhoneAuthProvider
 import com.google.firebase.firestore.FieldValue
+import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 import java.util.TimeZone
-import androidx.core.graphics.toColorInt
 
+@AndroidEntryPoint
 class RegisterFragment : Fragment() {
     private var _binding: FragmentRegisterBinding? = null
     private val binding get() = _binding!!
-    private lateinit var auth: FirebaseAuth
     private val viewModel: RegisterViewModel by viewModels()
     private var verificationId: String? = null
     private var isOtpVerified = false
     private var countDownTimer: CountDownTimer? = null
     private var lastClickTime: Long = 0
-    // Naya Pattern: 8 Chars, 1 Upper, 1 Lower, 1 Number, 1 Special Char
     private val passwordPattern = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*#?&])[A-Za-z\\d@$!%*#?&]{8,}$"
 
     override fun onCreateView(
@@ -74,7 +78,6 @@ class RegisterFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        auth = FirebaseAuth.getInstance()
 
         setupUniversalErrorCleaner()
         binding.ccp.registerCarrierNumberEditText(binding.etMobile)
@@ -83,6 +86,9 @@ class RegisterFragment : Fragment() {
         binding.etDob.setOnClickListener { showDatePicker() }
         setupDynamicVisibility()
         setupPasswordStrengthChecker()
+        setupButtonEffects()
+        observeViewModel()
+        setupButtonEffects()
 
         binding.btnResendOtp.setOnClickListener {
             sendOtp()
@@ -103,79 +109,6 @@ class RegisterFragment : Fragment() {
         binding.tvChangeNumber.setOnClickListener {
             unlockMobileField()
         }
-
-        viewModel.regStatus.observe(viewLifecycleOwner) { result ->
-            when (result) {
-                is RegResult.Loading -> {
-                    binding.progressBar.visibility = View.VISIBLE
-                    binding.btnRegister.isEnabled = false
-                }
-
-                is RegResult.Success -> {
-                    binding.progressBar.visibility = View.GONE
-                    AppSettings.startNewUserSession(requireContext())
-                    AppSettings.triggerVibration(requireContext(), 200)
-                    toast("Registration Successful! ✨")
-                    startActivity(Intent(requireContext(), MainActivity::class.java))
-                    requireActivity().finish()
-                }
-
-                is RegResult.Error -> {
-                    binding.progressBar.visibility = View.GONE
-                    binding.btnRegister.isEnabled = true
-
-                    val msg = result.message
-
-                    // 2026 Gold Standard: Professional Mapping
-                    val friendlyMsg = when {
-                        msg.contains("network", true) || msg.contains("timeout", true) -> getString(R.string.no_internet)
-                        msg.contains("email-already-in-use", true) -> "This email is already registered. Please Login."
-                        msg.contains("invalid-email", true) -> "Invalid email, Please try again."
-                        msg.contains("too-many-requests", true) -> "Server busy! Please try again after some time. ⏳"
-                        else -> msg
-                    }
-
-                    // Specific field par error dikhana
-                    if (msg.contains("email", true)) {
-                        binding.tilEmail.isErrorEnabled = true
-                        binding.tilEmail.error = friendlyMsg
-                        AppSettings.triggerErrorEffect(requireContext(), binding.tilEmail)
-                    } else {
-                        toast(friendlyMsg)
-                        AppSettings.triggerErrorEffect(requireContext(), binding.btnRegister)
-                    }
-                }
-            }
-        }
-
-        // OTP Result ko observe karein
-        viewModel.otpStatus.observe(viewLifecycleOwner) { result ->
-            when (result) {
-                is OtpResult.Loading -> binding.progressBar.visibility = View.VISIBLE
-                is OtpResult.Success -> {
-                    binding.progressBar.visibility = View.GONE
-                    isOtpVerified = true
-                    handleOtpSuccessUI() // UI handle karne wala function
-                }
-
-                is OtpResult.Error -> {
-                    binding.progressBar.visibility = View.GONE
-                    val msg = result.message
-
-                    val friendlyOtpMsg = when {
-                        msg.contains("invalid-verification-code", true) -> "Incorrect OTP! Please check again. 🔢"
-                        msg.contains("session-expired", true) -> "OTP Expired! Please resend. ⏳"
-                        msg.contains("network", true) -> getString(R.string.no_internet)
-                        else -> msg
-                    }
-
-                    binding.tilOtp.isErrorEnabled = true
-                    binding.tilOtp.error = friendlyOtpMsg
-                    AppSettings.triggerErrorEffect(requireContext(), binding.tilOtp)
-                }
-            }
-        }
-
         binding.btnRegister.setOnClickListener {
             hideKeyboard()
             if (SystemClock.elapsedRealtime() - lastClickTime < 2000) return@setOnClickListener
@@ -186,8 +119,52 @@ class RegisterFragment : Fragment() {
 
             }
         }
-        setupButtonEffects()
     }
+    private fun observeViewModel() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.uiState.collectLatest { state ->
+                    // UI Loader Control
+                    binding.progressBar.visibility = if (state is RegisterViewModel.RegisterState.Loading) View.VISIBLE else View.GONE
+                    binding.btnRegister.isEnabled = state !is RegisterViewModel.RegisterState.Loading
+
+                    when (state) {
+                        is RegisterViewModel.RegisterState.Success -> {
+                            if (!isOtpVerified) {
+                                isOtpVerified = true
+                                handleOtpSuccessUI()
+                            } else {
+                                AppSettings.triggerVibration(requireContext(), 200)
+                                toast("Account Created! ✨")
+                                startActivity(Intent(requireContext(), MainActivity::class.java))
+                                requireActivity().finish()
+                            }
+                        }
+                        is RegisterViewModel.RegisterState.Error -> {
+                            handleErrorMessage(state.message)
+                        }
+                        is RegisterViewModel.RegisterState.Loading -> { }
+                        is RegisterViewModel.RegisterState.Idle -> { }
+                    }
+                }
+            }
+        }
+    }
+
+    private fun handleErrorMessage(msg: String) {
+        val friendlyMsg = when {
+            msg.contains("network", true) || msg.contains("timeout", true) -> getString(R.string.no_internet)
+            msg.contains("email-already-in-use", true) -> "This email is already registered. Please login."
+            msg.contains("invalid-verification-code", true) -> "Incorrect OTP! Please check and try again."
+            msg.contains("invalid-email", true) -> "Invalid email, Please try with correct email."
+            msg.contains("too-many-requests", true) -> "Server busy! Please try again later. ⏳"
+            msg.contains("session-expired", true) -> "OTP Expired! Please resend. ⏳"
+            else -> msg
+        }
+        toast(friendlyMsg)
+        AppSettings.triggerErrorEffect(requireContext(), binding.btnRegister)
+    }
+
     private fun setupButtonEffects() {
         with(binding) {
             AppSettings.setPushEffect(btnSendOtp)
@@ -249,31 +226,26 @@ class RegisterFragment : Fragment() {
     }
 
     private fun showDatePicker() {
-        // 1. TimeZone set karein
         val timeZoneUTC = TimeZone.getTimeZone("UTC")
 
-        // 2. Aaj ki date (Max Limit)
         val today = Calendar.getInstance(timeZoneUTC).timeInMillis
 
-        // 3. 1947 ki date (Min Limit)
         val startCalendar = Calendar.getInstance(timeZoneUTC)
         startCalendar.set(1947, Calendar.JANUARY, 1)
         val startDate = startCalendar.timeInMillis
 
-        // 4. Default Selection: Aaj se 17 saal piche (Nursing Rule)
+        // Default Selection: Aaj se 17 saal piche (Nursing Rule)
         val defaultCalendar = Calendar.getInstance(timeZoneUTC)
         defaultCalendar.add(Calendar.YEAR, -17)
         val defaultSelection = defaultCalendar.timeInMillis
 
-        // 5. Constraints banana
         val constraints = CalendarConstraints.Builder()
-            .setStart(startDate) // 1947 se pehle block
-            .setEnd(today)       // Aaj ke baad block
-            .setOpenAt(defaultSelection) // Calendar khulte hi 17 saal piche wala saal dikhayega
-            .setValidator(DateValidatorPointBackward.now()) // Future dates block
+            .setStart(startDate)
+            .setEnd(today)
+            .setOpenAt(defaultSelection)
+            .setValidator(DateValidatorPointBackward.now())
             .build()
 
-        // 6. DatePicker build karna
         val datePicker = MaterialDatePicker.Builder.datePicker()
             .setTheme(R.style.CustomMaterialCalendar)
             .setTitleText("Select Date of Birth")
@@ -364,7 +336,6 @@ class RegisterFragment : Fragment() {
                     "Reg. Number required"
                 )
             }
-            // --- UPDATE: Strong Password Validation (8 Chars + Complexity) ---
             val password = binding.etPassword.text.toString().trim()
             if (!password.matches(passwordPattern.toRegex())) {
                 return showError(tilPassword, "Password needs: 8+ chars, 1 Upper, 1 Lower, 1 Number & 1 Special Char")
@@ -428,7 +399,6 @@ class RegisterFragment : Fragment() {
         binding.etOtp.setText("")
         binding.etMobile.requestFocus()
     }
-
     private fun verifyOtpManual() {
         val code = binding.etOtp.text.toString().trim()
         if (code.length != 6) {
@@ -522,7 +492,6 @@ class RegisterFragment : Fragment() {
         val spannable = SpannableString(fullText)
         val saffron = ContextCompat.getColor(requireContext(), R.color.saffron_dark)
 
-        // 1. Terms & Conditions Block
         val tcClick = object : ClickableSpan() {
             override fun onClick(v: View) {
                 val tncHtml = Html.fromHtml(getString(R.string.tnc_content), Html.FROM_HTML_MODE_COMPACT)
@@ -535,10 +504,8 @@ class RegisterFragment : Fragment() {
             }
         }
 
-        // 2. Privacy Policy Block
         val ppClick = object : ClickableSpan() {
             override fun onClick(v: View) {
-                // Modern 2026 Standard Way
                 val privacyHtml = Html.fromHtml(getString(R.string.privacy_content), Html.FROM_HTML_MODE_COMPACT)
                 showPolicyBottomSheet("Privacy Policy", privacyHtml)
             }
@@ -549,7 +516,6 @@ class RegisterFragment : Fragment() {
             }
         }
 
-        // ... index calculation ...
         val tcStart = fullText.indexOf("Terms & Conditions")
         val ppStart = fullText.indexOf("Privacy Policy")
 
@@ -576,7 +542,6 @@ class RegisterFragment : Fragment() {
             binding.layoutRegDetails.visibility = if (id == R.id.rbRegYes) View.VISIBLE else View.GONE
         }
 
-        // Country Spinner: null pass kar sakte hain kyunki iska koi fix TextInputLayout nahi hai
         binding.spCountry.onItemSelectedListener = simpleListener(null) {
             val isIndia = it == "Bharat (India)"
             binding.spStateIndia.visibility = if (isIndia) View.VISIBLE else View.GONE
@@ -623,26 +588,16 @@ class RegisterFragment : Fragment() {
         }
 
         val userData = prepareUserData()
-        val currentOtp = binding.etOtp.text.toString().trim()
         val email = binding.etEmail.text.toString().trim()
         val password = binding.etPassword.text.toString().trim()
 
         if (isOtpVerified) {
-            // 2026 Standard: Safe Argument Passing
-            val phoneCred = if (verificationId != null) {
-                PhoneAuthProvider.getCredential(verificationId!!, currentOtp)
-            } else null
-
-            if (phoneCred != null) {
-                // ✅ Yahan Order bilkul sahi hona chahiye jo ViewModel expect kar raha hai
-                viewModel.startRegistration(
-                    email = email,
-                    pass = password,
-                    userData = userData
-                )
-            } else {
-                toast("OTP Verification failed, please try again.")
-            }
+            // ✅ 2026 Clean Call: Passing Map directly to ViewModel
+            viewModel.startRegistration(
+                email = email,
+                pass = password,
+                userData = userData // Ye ab clean Map accept karega
+            )
         } else {
             toast("Verify mobile first")
         }
