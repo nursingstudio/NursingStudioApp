@@ -22,25 +22,32 @@ class RegisterViewModel @Inject constructor(
 
     // 2. Start Registration Process
     fun startRegistration(email: String, pass: String, userData: Map<String, Any>) {
+        _uiState.value = RegisterState.Loading
+
         viewModelScope.launch {
-            _uiState.value = RegisterState.Loading
-
             repository.createUser(email, pass).onSuccess { authResult ->
-                val uid = authResult.user?.uid ?: ""
+                val user = authResult.user
+                val uid = user?.uid ?: ""
 
-                // Add UID to the data map before saving
-                val finalData = userData.toMutableMap().apply { put("uid", uid) }
+                // ✅ Fix: UID match ensure karna aur data sync karna
+                val finalData = userData.toMutableMap().apply {
+                    put("uid", uid)
+                    put("authProvider", "email")
+                }
 
                 repository.saveUserData(uid, finalData).onSuccess {
                     _uiState.value = RegisterState.Success
                 }.onFailure { e ->
-                    _uiState.value = RegisterState.Error(e.localizedMessage ?: "Firestore Save Failed")
+                    // Rollback: Agar Firestore fail hua toh Auth user delete karo
+                    user?.delete()
+                    _uiState.value = RegisterState.Error("Database Error: ${e.localizedMessage}")
                 }
             }.onFailure { e ->
-                _uiState.value = RegisterState.Error(e.localizedMessage ?: "Auth Failed")
+                _uiState.value = RegisterState.Error(e.localizedMessage ?: "Registration Failed")
             }
         }
     }
+
 
     // 3. OTP Verification
     fun verifyOtp(credential: AuthCredential) {

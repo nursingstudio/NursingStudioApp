@@ -163,6 +163,8 @@ class RegisterFragment : Fragment() {
         }
         toast(friendlyMsg)
         AppSettings.triggerErrorEffect(requireContext(), binding.btnRegister)
+
+        viewModel.resetState()
     }
 
     private fun setupButtonEffects() {
@@ -731,5 +733,10 @@ class RegisterFragment : Fragment() {
                 )
     }
 
-    override fun onDestroyView() { super.onDestroyView(); countDownTimer?.cancel(); _binding = null }
+    override fun onDestroyView() {
+        super.onDestroyView()
+        countDownTimer?.cancel()
+        viewModel.resetState()
+        _binding = null
+    }
 }

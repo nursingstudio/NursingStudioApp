@@ -98,7 +98,7 @@
     <string name="label_marital_req">Marital Status *</string>
     <string name="label_religion_req">Religion *</string>
     <string name="label_occ_edu">Occupation &amp; Education</string>
-    <string name="label_contact_ver">Contact &amp; Verification</string>
+    <string name="label_contact_details">Contact Details</string>
     <string name="label_address_details">Address Details</string>
     <string name="label_nursing_reg_title">Nursing Registration</string>
 
@@ -241,6 +241,7 @@
     <string name="nursing_studio">Nursing Studio</string>
     <string name="your_name">Your Name</string>
     <string name="_9999999999">9999999999</string>
+    <string name="weak">Weak</string>
 
 
 </resources>

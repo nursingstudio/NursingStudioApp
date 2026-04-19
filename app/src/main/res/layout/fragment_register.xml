@@ -51,7 +51,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="@string/hint_full_name_req"
-                app:errorEnabled="false"
+                app:errorEnabled="true"
+                app:helperTextEnabled="true"
+                android:importantForAutofill="yes"
                 app:cursorColor="@color/saffron"
                 app:boxStrokeColor="@color/saffron"
                 app:hintTextColor="@color/saffron"
@@ -61,6 +63,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="textPersonName"
+                    android:autofillHints="name"
                 android:imeOptions="actionNext"/>
             </com.google.android.material.textfield.TextInputLayout>
 
@@ -82,7 +85,9 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
                 android:hint="@string/label_dob_req"
-                app:errorEnabled="false"
+                app:errorEnabled="true"
+                app:helperTextEnabled="true"
+                android:importantForAutofill="yes"
                 app:errorIconDrawable="@null"
                 app:cursorColor="@color/saffron"
                 app:boxStrokeColor="@color/saffron"
@@ -92,6 +97,7 @@
                     android:id="@+id/etDob"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:autofillHints="Dob"
                     android:focusable="false"
                     android:clickable="true" />
             </com.google.android.material.textfield.TextInputLayout>
@@ -131,7 +137,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:visibility="gone"
-                app:errorEnabled="false"
+                app:errorEnabled="true"
+                app:helperTextEnabled="true"
+                android:importantForAutofill="yes"
                 app:errorIconDrawable="@null"
                 app:cursorColor="@color/saffron"
                 app:boxStrokeColor="@color/saffron"
@@ -141,6 +149,7 @@
                     android:id="@+id/etEducationOther"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:autofillHints="education"
                     android:hint="@string/hint_spec_edu" />
             </com.google.android.material.textfield.TextInputLayout>
 
@@ -155,7 +164,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:visibility="gone"
-                app:errorEnabled="false"
+                app:errorEnabled="true"
+                app:helperTextEnabled="true"
+                android:importantForAutofill="yes"
                 app:errorIconDrawable="@null"
                 app:cursorColor="@color/saffron"
                 app:boxStrokeColor="@color/saffron"
@@ -165,112 +176,57 @@
                     android:id="@+id/etOccupationOther"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:autofillHints="occupation"
                     android:hint="@string/hint_spec_occ" />
             </com.google.android.material.textfield.TextInputLayout>
 
             <TextView style="@style/SectionHeaderStyle"
                 android:layout_marginTop="4dp"
                 android:layout_marginBottom="4dp"
-                android:text="@string/label_contact_ver" />
+                android:text="@string/label_contact_details" />
 
-            <LinearLayout
-                android:id="@+id/layoutMobile"
-                android:layout_width="match_parent"
-                android:layout_height="56dp"
-                android:orientation="horizontal"
-                android:background="@drawable/edittext_background"
-                android:gravity="center_vertical"
-                android:paddingEnd="12dp">
-                <com.hbb20.CountryCodePicker
-                    android:id="@+id/ccp"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    app:ccp_autoFormatNumber="false"
-                    app:ccp_defaultNameCode="IN" />
-                <EditText
-                    android:id="@+id/etMobile"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:hint="@string/hint_mobile_req"
-                    android:inputType="phone"
-                    android:background="@null"
-                    android:maxLength="10"
-                    android:imeOptions="actionNext"/>
-            </LinearLayout>
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnSendOtp"
-                android:layout_width="match_parent"
-                android:layout_height="54dp"
-                android:text="@string/btn_send_otp"
-                android:layout_marginTop="4dp"
-                app:cornerRadius="12dp"
-                android:backgroundTint="@color/saffron" />
-
-            <LinearLayout android:id="@+id/layoutOtpBox"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:visibility="gone">
-                <com.google.android.material.textfield.TextInputLayout
-                    android:id="@+id/tilOtp"
-                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
-                    app:errorEnabled="false"
-                    app:errorIconDrawable="@null"
-                    app:cursorColor="@color/saffron"
-                    app:boxStrokeColor="@color/saffron"
-                    app:hintTextColor="@color/saffron"
-                    android:hint="@string/hint_otp_req">
-                    <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/etOtp"
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/tilMobile"
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:inputType="number"
-                        android:maxLength="6"/>
-                </com.google.android.material.textfield.TextInputLayout>
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnVerifyOtp"
-                    android:layout_width="match_parent"
-                    android:layout_height="54dp"
-                    android:text="@string/btn_verify_otp"
-                    app:cornerRadius="12dp"
-                    android:backgroundTint="@color/saffron_dark"
-                    android:layout_marginTop="4dp"/>
-            </LinearLayout>
-
-                    <TextView android:id="@+id/tvTimer"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/timer_format"
-                        android:visibility="gone"
-                        android:layout_gravity="center"
                         android:layout_marginTop="4dp"
-                        android:textColor="@color/text_secondary"/>
+                        app:errorEnabled="true"
+                        app:helperTextEnabled="true"
+                        android:importantForAutofill="yes"
+                        app:boxStrokeColor="@color/saffron"
+                        app:hintTextColor="@color/saffron"
+                        app:errorIconDrawable="@null">
 
-                    <TextView
-                        android:id="@+id/tvChangeNumber"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Wrong number? Change it"
-                        android:textColor="@color/saffron_dark"
-                        android:textSize="12sp"
-                        android:textStyle="bold"
-                        android:visibility="gone"
-                        android:layout_gravity="center"
-                        android:padding="8dp" />
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:gravity="center_vertical"
+                            android:paddingStart="8dp"
+                            android:paddingEnd="8dp" >
 
-                    <TextView android:id="@+id/btnResendOtp"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/btn_resend_otp"
-                        android:textColor="@color/saffron_dark"
-                        android:visibility="gone"
-                        android:layout_gravity="center"
-                        android:textStyle="bold"
-                        android:layout_marginTop="4dp"/>
+                            <com.hbb20.CountryCodePicker
+                                android:id="@+id/ccp"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                app:ccp_showNameCode="false"
+                                app:ccp_autoFormatNumber="true"
+                                app:ccp_contentColor="@color/text_primary" />
+
+                            <EditText
+                                android:id="@+id/etMobile"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:hint="@string/hint_mobile_req"
+                                android:inputType="phone"
+                                android:autofillHints="telephoneNumber"
+                                android:background="@null"
+                                android:maxLength="10"
+                                android:textSize="16sp"
+                                android:padding="12dp"/>
+                        </LinearLayout>
+                    </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/tilEmail"
@@ -278,7 +234,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
-                app:errorEnabled="false"
+                app:errorEnabled="true"
+                app:helperTextEnabled="true"
+                android:importantForAutofill="yes"
                 app:errorIconDrawable="@null"
                 app:cursorColor="@color/saffron"
                 app:boxStrokeColor="@color/saffron"
@@ -286,6 +244,7 @@
                 android:hint="@string/hint_email_req">
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/etEmail"
+                    android:autofillHints="emailAddress"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:inputType="textEmailAddress" />
@@ -307,7 +266,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:visibility="gone"
-                app:errorEnabled="false"
+                app:errorEnabled="true"
+                app:helperTextEnabled="true"
+                android:importantForAutofill="yes"
                 app:errorIconDrawable="@null"
                 app:cursorColor="@color/saffron"
                 app:boxStrokeColor="@color/saffron"
@@ -317,6 +278,7 @@
                     android:id="@+id/etCountryOther"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:autofillHints="country"
                     android:hint="@string/hint_country_req" />
             </com.google.android.material.textfield.TextInputLayout>
 
@@ -332,7 +294,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:visibility="gone"
-                app:errorEnabled="false"
+                app:errorEnabled="true"
+                app:helperTextEnabled="true"
+                android:importantForAutofill="yes"
                 app:errorIconDrawable="@null"
                 app:cursorColor="@color/saffron"
                 app:boxStrokeColor="@color/saffron"
@@ -342,6 +306,7 @@
                     android:id="@+id/etStateOther"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:autofillHints="state"
                     android:hint="@string/hint_state_req" />
             </com.google.android.material.textfield.TextInputLayout>
 
@@ -351,7 +316,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
-                app:errorEnabled="false"
+                app:errorEnabled="true"
+                app:helperTextEnabled="true"
+                android:importantForAutofill="yes"
                 app:errorIconDrawable="@null"
                 app:cursorColor="@color/saffron"
                 app:boxStrokeColor="@color/saffron"
@@ -359,6 +326,7 @@
                 android:hint="@string/hint_district_req">
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/etDistrict"
+                    android:autofillHints="district"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content" />
             </com.google.android.material.textfield.TextInputLayout>
@@ -369,7 +337,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
-                app:errorEnabled="false"
+                app:errorEnabled="true"
+                app:helperTextEnabled="true"
+                android:importantForAutofill="yes"
                 app:errorIconDrawable="@null"
                 app:cursorColor="@color/saffron"
                 app:boxStrokeColor="@color/saffron"
@@ -377,6 +347,7 @@
                 android:hint="@string/hint_address_req">
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/etAddress"
+                    android:autofillHints="address"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:gravity="top"
@@ -390,7 +361,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
-                app:errorEnabled="false"
+                app:errorEnabled="true"
+                app:helperTextEnabled="true"
+                android:importantForAutofill="yes"
                 app:errorIconDrawable="@null"
                 app:cursorColor="@color/saffron"
                 app:boxStrokeColor="@color/saffron"
@@ -398,6 +371,7 @@
                 android:hint="@string/hint_pincode_req">
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/etPincode"
+                    android:autofillHints="postalCode"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:inputType="number"
@@ -448,7 +422,9 @@
                     style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    app:errorEnabled="false"
+                    app:errorEnabled="true"
+                    app:helperTextEnabled="true"
+                    android:importantForAutofill="yes"
                     app:errorIconDrawable="@null"
                     app:cursorColor="@color/saffron"
                     app:boxStrokeColor="@color/saffron"
@@ -456,6 +432,7 @@
                     android:hint="@string/hint_reg_state">
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/etRegState"
+                        android:autofillHints="state"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content" />
                 </com.google.android.material.textfield.TextInputLayout>
@@ -465,7 +442,9 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="4dp"
-                    app:errorEnabled="false"
+                    app:errorEnabled="true"
+                    app:helperTextEnabled="true"
+                    android:importantForAutofill="yes"
                     app:errorIconDrawable="@null"
                     app:cursorColor="@color/saffron"
                     app:boxStrokeColor="@color/saffron"
@@ -473,6 +452,7 @@
                     android:hint="@string/hint_reg_num">
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/etRegNumber"
+                        android:autofillHints="registrationNumber"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content" />
                 </com.google.android.material.textfield.TextInputLayout>
@@ -484,7 +464,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
-                app:errorEnabled="false"
+                app:errorEnabled="true"
+                app:helperTextEnabled="true"
+                android:importantForAutofill="yes"
                 app:errorIconDrawable="@null"
                 app:cursorColor="@color/saffron"
                 app:boxStrokeColor="@color/saffron"
@@ -494,6 +476,7 @@
                 app:passwordToggleTint="@color/saffron">
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/etPassword"
+                    android:autofillHints="password"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:inputType="textPassword"
@@ -524,7 +507,7 @@
                             android:id="@+id/tvStrengthLabel"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Weak"
+                            android:text="@string/weak"
                             android:textSize="11sp"
                             android:layout_marginTop="2dp"
                             android:textColor="@color/text_secondary"
