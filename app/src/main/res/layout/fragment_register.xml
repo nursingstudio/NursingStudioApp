@@ -18,6 +18,8 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:maxWidth="480dp"
+            android:layout_gravity="center_horizontal"
             android:orientation="vertical"
             android:padding="12dp">
             <com.google.android.material.card.MaterialCardView
@@ -190,41 +192,38 @@
                         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
+                        android:layout_marginTop="8dp"
                         app:errorEnabled="true"
-                        app:helperTextEnabled="true"
-                        android:importantForAutofill="yes"
                         app:boxStrokeColor="@color/saffron"
-                        app:hintTextColor="@color/saffron"
+                        app:hintTextColor="@color/saffron_dark"
                         app:errorIconDrawable="@null">
 
                         <LinearLayout
                             android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
+                            android:layout_height="56dp"
                             android:orientation="horizontal"
                             android:gravity="center_vertical"
-                            android:paddingStart="8dp"
-                            android:paddingEnd="8dp" >
+                            android:paddingStart="12dp"
+                            android:paddingEnd="12dp">
 
                             <com.hbb20.CountryCodePicker
                                 android:id="@+id/ccp"
                                 android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
+                                android:layout_height="48dp"
                                 app:ccp_showNameCode="false"
-                                app:ccp_autoFormatNumber="true"
-                                app:ccp_contentColor="@color/text_primary" />
+                                app:ccp_autoFormatNumber="true" />
 
                             <EditText
                                 android:id="@+id/etMobile"
                                 android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
+                                android:layout_height="48dp"
                                 android:hint="@string/hint_mobile_req"
                                 android:inputType="phone"
-                                android:autofillHints="telephoneNumber"
                                 android:background="@null"
                                 android:maxLength="10"
-                                android:textSize="16sp"
-                                android:padding="12dp"/>
+                                android:autofillHints="phone"
+                                android:importantForAutofill="yes"
+                                android:textSize="16sp" />
                         </LinearLayout>
                     </com.google.android.material.textfield.TextInputLayout>
 
@@ -526,9 +525,9 @@
                     android:layout_height="wrap_content"
                     android:layout_alignParentStart="true"
                     android:layout_centerVertical="false"
-                    android:layout_marginTop="-4dp"
-                    android:minWidth="0dp"
-                    android:minHeight="0dp"
+                    android:layout_marginTop="0dp"
+                    android:minWidth="48dp"
+                    android:minHeight="48dp"
                     app:buttonTint="@color/saffron" />
 
                 <TextView

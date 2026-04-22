@@ -5,7 +5,6 @@ import android.content.Intent
 import android.content.res.ColorStateList
 import android.graphics.Color
 import android.os.Bundle
-import android.os.CountDownTimer
 import android.os.SystemClock
 import android.text.Editable
 import android.text.Html
@@ -15,7 +14,6 @@ import android.text.TextPaint
 import android.text.TextWatcher
 import android.text.method.LinkMovementMethod
 import android.text.style.ClickableSpan
-import android.util.Patterns
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -23,7 +21,6 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.CheckBox
-import android.widget.ScrollView
 import android.widget.Spinner
 import android.widget.Toast
 import androidx.core.content.ContextCompat
@@ -35,9 +32,10 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.example.nursingstudio.R
+import com.example.nursingstudio.data.model.User
 import com.example.nursingstudio.databinding.FragmentRegisterBinding
 import com.example.nursingstudio.databinding.LayoutPolicyBottomSheetBinding
-import com.example.nursingstudio.ui.auth.AuthActivity
+import com.example.nursingstudio.domain.validation.RegisterValidator
 import com.example.nursingstudio.ui.main.MainActivity
 import com.example.nursingstudio.utils.AppSettings
 import com.google.android.material.bottomsheet.BottomSheetDialog
@@ -45,8 +43,6 @@ import com.google.android.material.datepicker.CalendarConstraints
 import com.google.android.material.datepicker.DateValidatorPointBackward
 import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.android.material.textfield.TextInputLayout
-import com.google.firebase.auth.PhoneAuthProvider
-import com.google.firebase.firestore.FieldValue
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -61,11 +57,7 @@ class RegisterFragment : Fragment() {
     private var _binding: FragmentRegisterBinding? = null
     private val binding get() = _binding!!
     private val viewModel: RegisterViewModel by viewModels()
-    private var verificationId: String? = null
-    private var isOtpVerified = false
-    private var countDownTimer: CountDownTimer? = null
     private var lastClickTime: Long = 0
-    private val passwordPattern = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*#?&])[A-Za-z\\d@$!%*#?&]{8,}$"
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -90,25 +82,6 @@ class RegisterFragment : Fragment() {
         observeViewModel()
         setupButtonEffects()
 
-        binding.btnResendOtp.setOnClickListener {
-            sendOtp()
-        }
-
-        binding.btnSendOtp.setOnClickListener {
-            if (SystemClock.elapsedRealtime() - lastClickTime < 2000) return@setOnClickListener
-            lastClickTime = SystemClock.elapsedRealtime()
-            hideKeyboard()
-            sendOtp()
-        }
-
-        binding.btnVerifyOtp.setOnClickListener {
-            hideKeyboard()
-            verifyOtpManual()
-        }
-
-        binding.tvChangeNumber.setOnClickListener {
-            unlockMobileField()
-        }
         binding.btnRegister.setOnClickListener {
             hideKeyboard()
             if (SystemClock.elapsedRealtime() - lastClickTime < 2000) return@setOnClickListener
@@ -124,22 +97,18 @@ class RegisterFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.uiState.collectLatest { state ->
-                    // UI Loader Control
-                    binding.progressBar.visibility = if (state is RegisterViewModel.RegisterState.Loading) View.VISIBLE else View.GONE
+                    // ✅ Professional Loading Overlay Control
+                    binding.loadingOverlay.visibility = if (state is RegisterViewModel.RegisterState.Loading) View.VISIBLE else View.GONE
                     binding.btnRegister.isEnabled = state !is RegisterViewModel.RegisterState.Loading
 
                     when (state) {
                         is RegisterViewModel.RegisterState.Success -> {
-                            if (!isOtpVerified) {
-                                isOtpVerified = true
-                                handleOtpSuccessUI()
-                            } else {
-                                AppSettings.triggerVibration(requireContext(), 200)
-                                toast("Account Created! ✨")
-                                startActivity(Intent(requireContext(), MainActivity::class.java))
-                                requireActivity().finish()
+                            AppSettings.triggerVibration(requireContext(), 200)
+                            toast("Account Created! ✨")
+                            startActivity(Intent(requireContext(), MainActivity::class.java))
+                            requireActivity().finish()
                             }
-                        }
+
                         is RegisterViewModel.RegisterState.Error -> {
                             handleErrorMessage(state.message)
                         }
@@ -169,10 +138,7 @@ class RegisterFragment : Fragment() {
 
     private fun setupButtonEffects() {
         with(binding) {
-            AppSettings.setPushEffect(btnSendOtp)
-            AppSettings.setPushEffect(btnVerifyOtp)
             AppSettings.setPushEffect(btnRegister)
-            AppSettings.setPushEffect(btnResendOtp)
         }
     }
     private fun setupUniversalErrorCleaner() {
@@ -189,8 +155,7 @@ class RegisterFragment : Fragment() {
             binding.etEducationOther to binding.tilEducationOther,
             binding.etOccupationOther to binding.tilOccupationOther,
             binding.etCountryOther to binding.tilCountryOther,
-            binding.etStateOther to binding.tilStateOther,
-            binding.etOtp to binding.tilOtp
+            binding.etStateOther to binding.tilStateOther
         )
 
         inputMap.forEach { (editText, layout) ->
@@ -217,9 +182,9 @@ class RegisterFragment : Fragment() {
         binding.etMobile.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(s: Editable?) {
                 if (!s.isNullOrEmpty()) {
-                    binding.layoutMobile.background =
-                        ContextCompat.getDrawable(requireContext(), R.drawable.edittext_background)
-                }
+                    binding.tilMobile.error = null
+                    binding.tilMobile.isErrorEnabled = false
+                    }
             }
 
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
@@ -266,116 +231,67 @@ class RegisterFragment : Fragment() {
     }
 
     private fun validateInputsSerial(): Boolean {
-        with(binding) {
-            if (etName.text.isNullOrEmpty()) return showError(tilName, "Full Name is required")
-            if (spGender.selectedItemPosition == 0) return showError(spGender, "Select Gender")
-            if (etDob.text.isNullOrEmpty()) return showError(tilDob, "DOB is required")
-            if (spMarital.selectedItemPosition == 0) return showError(
-                spMarital,
-                "Select Marital Status"
-            )
-            if (spReligion.selectedItemPosition == 0) return showError(
-                spReligion,
-                "Select Religion"
-            )
-            if (spEducation.selectedItemPosition == 0) return showError(
-                spEducation,
-                "Select Education"
-            )
-            if (spEducation.selectedItem == "Other" && etEducationOther.text.isNullOrEmpty()) return showError(
-                tilEducationOther,
-                "Specify Education"
-            )
-            if (spOccupation.selectedItemPosition == 0) return showError(
-                spOccupation,
-                "Select Occupation"
-            )
-            if (spOccupation.selectedItem == "Other" && etOccupationOther.text.isNullOrEmpty()) return showError(
-                tilOccupationOther,
-                "Specify Occupation"
-            )
-            if (!isOtpVerified) return showError(layoutMobile, "Mobile verification mandatory")
-            if (etEmail.text.isNullOrEmpty() || !Patterns.EMAIL_ADDRESS.matcher(etEmail.text.toString())
-                    .matches()
-            ) return showError(tilEmail, "Valid Email required")
-            if (spCountry.selectedItem == "Bharat (India)" && spStateIndia.selectedItemPosition == 0) return showError(
-                spStateIndia,
-                "Select State"
-            )
-            if (spCountry.selectedItem == "Other") {
-                if (etCountryOther.text.isNullOrEmpty()) return showError(
-                    tilCountryOther,
-                    "Enter Country Name"
-                )
-                if (etStateOther.text.isNullOrEmpty()) return showError(
-                    tilStateOther,
-                    "Enter State Name"
-                )
-            } else if (spStateIndia.selectedItemPosition == 0) {
-                return showError(spStateIndia, "Select State")
+        val user = prepareUserData()
+        val pass = binding.etPassword.text.toString().trim()
+        return when (val result = RegisterValidator.validate(user, pass)) {
+            is RegisterValidator.ValidationResult.Success -> {
+                if (!binding.cbTerms.isChecked) {
+                    showError(binding.cbTerms, "Please accept Terms & Conditions")
+                    false
+                } else true
             }
-            if (etDistrict.text.isNullOrEmpty()) return showError(tilDistrict, "District required")
-            if (etAddress.text.isNullOrEmpty()) return showError(
-                tilAddress,
-                "Full Address required"
-            )
-            if (etPincode.text?.length != 6) return showError(
-                tilPincode,
-                "Valid 6-digit Pincode required"
-            )
-            // Radio Button Mandatory Check
-            if (rgNursingReg.checkedRadioButtonId == -1) return showError(
-                rgNursingReg,
-                "Please select Nursing Registration status"
-            )
-            if (rgNursingReg.checkedRadioButtonId == R.id.rbRegYes) {
-                if (etRegState.text.isNullOrEmpty()) return showError(
-                    tilRegState,
-                    "Reg. State required"
-                )
-                if (etRegNumber.text.isNullOrEmpty()) return showError(
-                    tilRegNumber,
-                    "Reg. Number required"
-                )
+            is RegisterValidator.ValidationResult.Error -> {
+                val viewToFocus: View = when(result.field) {
+                    "name" -> binding.tilName
+                    "gender" -> binding.spGender
+                    "dob" -> binding.tilDob
+                    "marital" -> binding.spMarital
+                    "religion" -> binding.spReligion
+                    "edu" -> binding.spEducation
+                    "edu_other" -> binding.tilEducationOther
+                    "occ" -> binding.spOccupation
+                    "occ_other" -> binding.tilOccupationOther
+                    "mobile" -> binding.tilMobile
+                    "email" -> binding.tilEmail
+                    "country" -> binding.spCountry
+                    "country_other" -> binding.tilCountryOther
+                    "state" -> binding.spStateIndia
+                    "state_other" -> binding.tilStateOther
+                    "district" -> binding.tilDistrict
+                    "address" -> binding.tilAddress
+                    "pincode" -> binding.tilPincode
+                    "is_reg" -> binding.rgNursingReg
+                    "reg_state" -> binding.tilRegState
+                    "reg_no" -> binding.tilRegNumber
+                    "pass" -> binding.tilPassword
+                    else -> binding.root
+                }
+                showError(viewToFocus, result.msg)
+                false
             }
-            val password = binding.etPassword.text.toString().trim()
-            if (!password.matches(passwordPattern.toRegex())) {
-                return showError(tilPassword, "Password needs: 8+ chars, 1 Upper, 1 Lower, 1 Number & 1 Special Char")
-            }
-
-            if (!cbTerms.isChecked) return showError(cbTerms, "Please accept Terms & Conditions")
         }
-        return true
     }
 
     private fun showError(view: View, message: String): Boolean {
-        toast(message)
         AppSettings.triggerErrorEffect(requireContext(), view)
 
         when (view) {
-            is Spinner -> {
-                view.background = ContextCompat.getDrawable(requireContext(), R.drawable.spinner_error_bg)
-            }
             is TextInputLayout -> {
-                view.isErrorEnabled = true
                 view.error = message
+                view.requestFocus()
+            }
+            is Spinner -> {
+                toast(message)
+                view.requestFocus()
             }
             is CheckBox -> {
                 view.buttonTintList = ColorStateList.valueOf(Color.RED)
+                toast(message)
             }
         }
-        view.requestFocus()
 
-        binding.registrationScrollView.postDelayed({
-            if (isAdded && _binding != null) {
-                val vTop = view.top
-                val parent = view.parent as? View
-                val finalTop =
-                    if (parent != null && parent !is ScrollView) vTop + parent.top else vTop
-                binding.registrationScrollView.smoothScrollTo(0, finalTop - 150)
-            }
-        }, 100)
-
+        // Professional Smooth Scroll
+        binding.registrationScrollView.smoothScrollTo(0, view.top - 200)
         return false
     }
 
@@ -383,84 +299,6 @@ class RegisterFragment : Fragment() {
         val imm =
             requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
         imm.hideSoftInputFromWindow(view?.windowToken, 0)
-    }
-
-    private fun unlockMobileField() {
-        countDownTimer?.cancel()
-
-        binding.etMobile.isEnabled = true
-        binding.ccp.isEnabled = true
-        binding.etMobile.alpha = 1.0f
-
-        binding.layoutOtpBox.visibility = View.GONE
-        binding.tvChangeNumber.visibility = View.GONE
-        binding.tvTimer.visibility = View.GONE
-        binding.btnSendOtp.visibility = View.VISIBLE
-        binding.btnSendOtp.text = getString(R.string.send_otp)
-
-        binding.etOtp.setText("")
-        binding.etMobile.requestFocus()
-    }
-    private fun verifyOtpManual() {
-        val code = binding.etOtp.text.toString().trim()
-        if (code.length != 6) {
-            toast("Enter 6 digit OTP")
-            return
-        }
-
-        if (verificationId != null) {
-            val credential = PhoneAuthProvider.getCredential(verificationId!!, code)
-            viewModel.verifyOtp(credential)
-        } else {
-            toast("Verification ID missing, try resending")
-        }
-    }
-
-    private fun sendOtp() {
-        val mobile = binding.etMobile.text.toString().trim()
-
-        if (mobile.length != 10) {
-            toast("Enter 10 digit mobile number")
-            binding.etMobile.requestFocus()
-            AppSettings.triggerErrorEffect(requireContext(), binding.etMobile)
-            return
-        }
-
-        hideKeyboard()
-        binding.loadingOverlay.visibility = View.VISIBLE
-
-        binding.etMobile.isEnabled = false
-        binding.ccp.isEnabled = false
-        binding.etMobile.alpha = 0.6f
-
-        (activity as? AuthActivity)?.sendOtp(mobile) { id ->
-            binding.loadingOverlay.visibility = View.GONE
-            verificationId = id
-
-            binding.layoutOtpBox.visibility = View.VISIBLE
-            binding.btnSendOtp.visibility = View.GONE
-            binding.tvChangeNumber.visibility = View.VISIBLE
-
-            startTimer()
-            toast("OTP Sent Successfully! ✨")
-        }
-    }
-
-    private fun startTimer() {
-        binding.tvTimer.visibility = View.VISIBLE
-        binding.tvTimer.text = getString(R.string.resend_in_seconds, 60)
-        binding.btnResendOtp.visibility = View.GONE
-        countDownTimer?.cancel()
-        countDownTimer = object : CountDownTimer(60000, 1000) {
-            override fun onTick(m: Long) {
-                val secondsRemaining = (m / 1000).toInt()
-                binding.tvTimer.text = getString(R.string.resend_in_seconds, secondsRemaining)
-            }
-            override fun onFinish() {
-                binding.tvTimer.visibility = View.GONE
-                binding.btnResendOtp.visibility = View.VISIBLE
-            }
-        }.start()
     }
 
     private fun showPolicyBottomSheet(title: String, content: CharSequence) {
@@ -593,39 +431,30 @@ class RegisterFragment : Fragment() {
         val email = binding.etEmail.text.toString().trim()
         val password = binding.etPassword.text.toString().trim()
 
-        if (isOtpVerified) {
-            // ✅ 2026 Clean Call: Passing Map directly to ViewModel
-            viewModel.startRegistration(
-                email = email,
-                pass = password,
-                userData = userData // Ye ab clean Map accept karega
-            )
-        } else {
-            toast("Verify mobile first")
-        }
+        // ✅ Direct Registration (No OTP Check)
+        viewModel.startRegistration(email, password, userData)
     }
 
-    private fun prepareUserData(): MutableMap<String, Any> {
+    private fun prepareUserData(): User {
         val b = binding
-        return mutableMapOf(
-            "fullName" to b.etName.text.toString().trim(),
-            "gender" to b.spGender.selectedItem.toString(),
-            "dob" to b.etDob.text.toString(),
-            "maritalStatus" to b.spMarital.selectedItem.toString(),
-            "religion" to b.spReligion.selectedItem.toString(),
-            "mobile" to b.ccp.fullNumberWithPlus,
-            "email" to b.etEmail.text.toString().trim(),
-            "education" to if (b.spEducation.selectedItem == "Other") b.etEducationOther.text.toString() else b.spEducation.selectedItem.toString(),
-            "occupation" to if (b.spOccupation.selectedItem == "Other") b.etOccupationOther.text.toString() else b.spOccupation.selectedItem.toString(),
-            "country" to if (b.spCountry.selectedItem == "Other") b.etCountryOther.text.toString() else b.spCountry.selectedItem.toString(),
-            "state" to if (b.spCountry.selectedItem == "Bharat (India)") b.spStateIndia.selectedItem.toString() else b.etStateOther.text.toString(),
-            "district" to b.etDistrict.text.toString(),
-            "address" to b.etAddress.text.toString(),
-            "pincode" to b.etPincode.text.toString(),
-            "nursingReg" to (b.rgNursingReg.checkedRadioButtonId == R.id.rbRegYes),
-            "regState" to b.etRegState.text.toString(),
-            "regNumber" to b.etRegNumber.text.toString(),
-            "registeredAt" to FieldValue.serverTimestamp()
+        return User(
+            fullName = b.etName.text.toString().trim(),
+            gender = b.spGender.selectedItem.toString(),
+            dob = b.etDob.text.toString(),
+            maritalStatus = b.spMarital.selectedItem.toString(),
+            religion = b.spReligion.selectedItem.toString(),
+            education = if (b.spEducation.selectedItem == "Other") b.etEducationOther.text.toString() else b.spEducation.selectedItem.toString(),
+            occupation = if (b.spOccupation.selectedItem == "Other") b.etOccupationOther.text.toString() else b.spOccupation.selectedItem.toString(),
+            mobile = b.ccp.fullNumberWithPlus,
+            email = b.etEmail.text.toString().trim(),
+            country = if (b.spCountry.selectedItem == "Other") b.etCountryOther.text.toString() else b.spCountry.selectedItem.toString(),
+            state = if (b.spCountry.selectedItem == "Bharat (India)") b.spStateIndia.selectedItem.toString() else b.etStateOther.text.toString(),
+            district = b.etDistrict.text.toString(),
+            address = b.etAddress.text.toString(),
+            pincode = b.etPincode.text.toString(),
+            isNursingRegistered = (b.rgNursingReg.checkedRadioButtonId == R.id.rbRegYes),
+            regState = b.etRegState.text.toString().takeIf { it.isNotEmpty() },
+            regNumber = b.etRegNumber.text.toString().takeIf { it.isNotEmpty() }
         )
     }
 
@@ -644,24 +473,6 @@ class RegisterFragment : Fragment() {
             override fun onNothingSelected(p0: AdapterView<*>?) {}
         }
 
-    private fun handleOtpSuccessUI() {
-        binding.layoutOtpBox.visibility = View.GONE
-        binding.tvTimer.visibility = View.GONE
-        binding.btnResendOtp.visibility = View.GONE
-        countDownTimer?.cancel()
-        binding.tvChangeNumber.visibility = View.GONE
-        binding.etMobile.isEnabled = false
-        binding.ccp.isEnabled = false
-        binding.etMobile.alpha = 0.7f
-
-        binding.btnSendOtp.apply {
-            visibility = View.VISIBLE
-            text = context.getString(R.string.verified)
-            isEnabled = false
-            setTextColor(ContextCompat.getColor(requireContext(), android.R.color.white))
-        }
-        toast("Mobile Verified Successfully! 🎉")
-    }
     private fun toast(m: String) = Toast.makeText(requireContext(), m, Toast.LENGTH_SHORT).show()
 
     private fun setupPasswordStrengthChecker() {
@@ -681,47 +492,29 @@ class RegisterFragment : Fragment() {
     }
 
     private fun updateStrengthIndicator(pass: String) {
-        var score = 0
-        val missingCriteria = mutableListOf<String>()
+        val criteria = mapOf(
+            "8+ chars" to (pass.length >= 8),
+            "1 Upper" to pass.any { it.isUpperCase() },
+            "1 Lower" to pass.any { it.isLowerCase() },
+            "1 Number" to pass.any { it.isDigit() },
+            "1 Special" to pass.any { "@$!%*#?&".contains(it) }
+        )
 
-        // Live Check Logic
-        if (pass.length >= 8) score++ else missingCriteria.add("8+ chars")
-        if (pass.any { it.isUpperCase() }) score++ else missingCriteria.add("1 Upper Case")
-        if (pass.any { it.isLowerCase() }) score++ else missingCriteria.add("1 Lower Case")
-        if (pass.any { it.isDigit() }) score++ else missingCriteria.add("1 Number")
-        if (pass.any { "@$!%*#?&".contains(it) }) score++ else missingCriteria.add("1 Special Char")
+        val score = criteria.values.count { it }
+        val missing = criteria.filter { !it.value }.keys.joinToString(", ")
 
-        val color: Int
-        val label: String
-        val progress: Int
-
-        when {
-            score <= 2 -> {
-                color = Color.RED
-                label = "Weak: Need ${missingCriteria.joinToString(", ")}"
-                progress = 25
-            }
-            score <= 4 -> {
-                color = "#FFA500".toColorInt() // Orange
-                label = "Medium: Need ${missingCriteria.joinToString(", ")}"
-                progress = 60
-            }
-            score == 5 -> {
-                color = "#4CAF50".toColorInt() // Green
-                label = "Strong Password"
-                progress = 100
-            }
-            else -> {
-                color = Color.GRAY
-                label = "Too Short"
-                progress = 10
-            }
+        val (color, label, progress) = when {
+            score <= 2 -> Triple(Color.RED, "Weak: Need $missing", 25)
+            score <= 4 -> Triple("#FFA500".toColorInt(), "Medium: Need $missing", 65)
+            else -> Triple("#4CAF50".toColorInt(), "Strong Password ✨", 100)
         }
 
         binding.passwordStrengthProgress.setProgress(progress, true)
         binding.passwordStrengthProgress.setIndicatorColor(color)
-        binding.tvStrengthLabel.text = label
-        binding.tvStrengthLabel.setTextColor(color)
+        binding.tvStrengthLabel.apply {
+            text = label
+            setTextColor(color)
+        }
     }
 
     private fun isNetworkAvailable(): Boolean {
@@ -735,7 +528,6 @@ class RegisterFragment : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
-        countDownTimer?.cancel()
         viewModel.resetState()
         _binding = null
     }

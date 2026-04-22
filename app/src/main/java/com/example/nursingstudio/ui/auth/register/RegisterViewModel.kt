@@ -2,12 +2,12 @@ package com.example.nursingstudio.ui.auth.register
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.nursingstudio.data.model.User
 import com.example.nursingstudio.data.repository.AuthRepository
-import com.google.firebase.auth.AuthCredential
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableStateFlow // ✅ New Import
-import kotlinx.coroutines.flow.StateFlow        // ✅ New Import
-import kotlinx.coroutines.flow.asStateFlow     // ✅ New Import
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -16,57 +16,39 @@ class RegisterViewModel @Inject constructor(
     private val repository: AuthRepository
 ) : ViewModel() {
 
-    // 1. Single StateFlow for the entire Register Screen
     private val _uiState = MutableStateFlow<RegisterState>(RegisterState.Idle)
     val uiState: StateFlow<RegisterState> = _uiState.asStateFlow()
 
-    // 2. Start Registration Process
-    fun startRegistration(email: String, pass: String, userData: Map<String, Any>) {
+    // ✅ 2026 Standard: Using Data Model instead of Map
+    fun startRegistration(email: String, pass: String, userModel: User) {
         _uiState.value = RegisterState.Loading
 
         viewModelScope.launch {
+            // 1. Create User in Firebase Auth
             repository.createUser(email, pass).onSuccess { authResult ->
-                val user = authResult.user
-                val uid = user?.uid ?: ""
+                val uid = authResult.user?.uid ?: ""
 
-                // ✅ Fix: UID match ensure karna aur data sync karna
-                val finalData = userData.toMutableMap().apply {
-                    put("uid", uid)
-                    put("authProvider", "email")
-                }
+                // 2. Prepare final model with UID
+                val finalUser = userModel.copy(uid = uid)
 
-                repository.saveUserData(uid, finalData).onSuccess {
+                // 3. Save to Firestore (Clean Architecture)
+                repository.saveUserData(uid, finalUser).onSuccess {
                     _uiState.value = RegisterState.Success
                 }.onFailure { e ->
-                    // Rollback: Agar Firestore fail hua toh Auth user delete karo
-                    user?.delete()
+                    // 2026 Professional Rollback logic
+                    authResult.user?.delete()
                     _uiState.value = RegisterState.Error("Database Error: ${e.localizedMessage}")
                 }
             }.onFailure { e ->
-                _uiState.value = RegisterState.Error(e.localizedMessage ?: "Registration Failed")
+                _uiState.value = RegisterState.Error(e.localizedMessage ?: "Auth Failed")
             }
         }
     }
 
-
-    // 3. OTP Verification
-    fun verifyOtp(credential: AuthCredential) {
-        viewModelScope.launch {
-            _uiState.value = RegisterState.Loading
-            repository.verifyOtp(credential).onSuccess {
-                _uiState.value = RegisterState.Success
-            }.onFailure { e ->
-                _uiState.value = RegisterState.Error(e.localizedMessage ?: "Invalid OTP")
-            }
-        }
-    }
-
-    // 4. Reset State (Essential for Clean Architecture)
     fun resetState() {
         _uiState.value = RegisterState.Idle
     }
 
-    // ⭐ 2026 Gold Standard: Unified Sealed Interface
     sealed interface RegisterState {
         object Idle : RegisterState
         object Loading : RegisterState

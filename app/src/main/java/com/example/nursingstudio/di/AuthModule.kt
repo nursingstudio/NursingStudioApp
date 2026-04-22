@@ -15,12 +15,11 @@ object AuthModule {
     // 2026 Standard: Provide Firebase instances here so Repository can use them
     @Provides
     @Singleton
-    fun provideFirebaseAuth(): FirebaseAuth = FirebaseAuth.getInstance()
+    internal fun provideFirebaseAuth(): FirebaseAuth = FirebaseAuth.getInstance()
 
     @Provides
     @Singleton
-    fun provideFirestore(): FirebaseFirestore = FirebaseFirestore.getInstance()
+   internal fun provideFirestore(): FirebaseFirestore = FirebaseFirestore.getInstance()
 
-    // NOTE: provideAuthRepository delete kar diya gaya hai.
-    // Hilt automatically AuthRepository ko inject kar lega kyunki uske constructor pe @Inject laga hai.
+
 }

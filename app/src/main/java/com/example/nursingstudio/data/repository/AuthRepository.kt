@@ -14,9 +14,9 @@ import javax.inject.Singleton
 
 @Singleton
 class AuthRepository @Inject constructor(
-    @ApplicationContext private val context: Context,
-    private val auth: FirebaseAuth, // ✅ Hilt will provide this from AuthModule
-    private val db: FirebaseFirestore // ✅ Hilt will provide this from AuthModule
+    @param:ApplicationContext private val context: Context,
+    private val auth: FirebaseAuth,
+    private val db: FirebaseFirestore
 ) {
     // 2026 Standard: Use Result wrapper for better error handling
     suspend fun createUser(email: String, pass: String): Result<AuthResult> = try {
@@ -26,19 +26,14 @@ class AuthRepository @Inject constructor(
         Result.failure(e)
     }
 
-    suspend fun saveUserData(uid: String, data: Map<String, Any>): Result<Void?> = try {
-        val result = db.collection("users").document(uid).set(data).await()
+    // ✅ Update saveUserData to use User Model
+    suspend fun saveUserData(uid: String, user: com.example.nursingstudio.data.model.User): Result<Void?> = try {
+        val result = db.collection("Users").document(uid).set(user).await()
         Result.success(result)
     } catch (e: Exception) {
         Result.failure(e)
     }
 
-    suspend fun verifyOtp(credential: AuthCredential): Result<AuthResult> = try {
-        val result = auth.signInWithCredential(credential).await()
-        Result.success(result)
-    } catch (e: Exception) {
-        Result.failure(e)
-    }
     // 1. ⭐ CHECK USER STATUS (For Smart Redirect)
     // Ye function check karega ki number database mein hai ya nahi
     suspend fun checkUserByPhone(phone: String): Boolean {
@@ -67,17 +62,6 @@ class AuthRepository @Inject constructor(
             }
 
             Result.success(Pair(result, isRegistered))
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
-    }
-
-    // 3. ⭐ WORLD-CLASS REGISTER: Full Data Save
-    // Jab OTP verify ho jaye, tab ye function sara metadata save karega
-    suspend fun finalizeRegistration(uid: String, userData: Map<String, Any>): Result<Unit> {
-        return try {
-            db.collection("Users").document(uid).set(userData).await()
-            Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(e)
         }
