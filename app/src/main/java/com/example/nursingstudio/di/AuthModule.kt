@@ -12,14 +12,11 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 object AuthModule {
 
-    // 2026 Standard: Provide Firebase instances here so Repository can use them
     @Provides
     @Singleton
-    internal fun provideFirebaseAuth(): FirebaseAuth = FirebaseAuth.getInstance()
+    fun provideFirebaseAuth(): FirebaseAuth = FirebaseAuth.getInstance()
 
     @Provides
     @Singleton
-   internal fun provideFirestore(): FirebaseFirestore = FirebaseFirestore.getInstance()
-
-
+    fun provideFirestore(): FirebaseFirestore = FirebaseFirestore.getInstance()
 }

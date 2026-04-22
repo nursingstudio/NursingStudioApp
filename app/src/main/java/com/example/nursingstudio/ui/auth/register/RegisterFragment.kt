@@ -104,9 +104,7 @@ class RegisterFragment : Fragment() {
                     when (state) {
                         is RegisterViewModel.RegisterState.Success -> {
                             AppSettings.triggerVibration(requireContext(), 200)
-                            toast("Account Created! ✨")
-                            startActivity(Intent(requireContext(), MainActivity::class.java))
-                            requireActivity().finish()
+                            showSuccessDialog()
                             }
 
                         is RegisterViewModel.RegisterState.Error -> {
@@ -524,6 +522,30 @@ class RegisterFragment : Fragment() {
                 capabilities.hasTransport(android.net.NetworkCapabilities.TRANSPORT_WIFI) ||
                         capabilities.hasTransport(android.net.NetworkCapabilities.TRANSPORT_CELLULAR)
                 )
+    }
+    private fun showSuccessDialog() {
+        // ✅ 2026 Professional Approach:
+        // Variable ki zarurat nahi agar humein sirf immediate visual feedback dena hai
+
+        // 1. Hide the loading overlay immediately
+        binding.loadingOverlay.visibility = View.GONE
+
+        // 2. Play a "Success" vibration
+        AppSettings.triggerVibration(requireContext(), 300)
+
+        // 3. Show a world-class Stylish Toast or Snack
+        toast("Welcome to Nursing Studio! Account Created ✨")
+
+        // 4. Smooth Delay before redirection
+        binding.root.postDelayed({
+            if (isAdded) { // Check if fragment is still attached to avoid crash
+                val intent = Intent(requireContext(), MainActivity::class.java).apply {
+                    flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                }
+                startActivity(intent)
+                requireActivity().finish()
+            }
+        }, 1200) // 1.2 Seconds delay
     }
 
     override fun onDestroyView() {
