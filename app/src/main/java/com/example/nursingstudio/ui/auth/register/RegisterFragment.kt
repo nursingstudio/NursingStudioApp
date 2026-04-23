@@ -71,8 +71,15 @@ class RegisterFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        // ✅ 2026 Gold Standard: Robust CCP Setup
+        binding.ccp.apply {
+            // 1. Link EditText
+            registerCarrierNumberEditText(binding.etMobile)
+            // 2. Auto-detect country
+            setAutoDetectedCountry(true)
+        }
+
         setupUniversalErrorCleaner()
-        binding.ccp.registerCarrierNumberEditText(binding.etMobile)
         setupAllSpinners()
         setupTermsLink()
         binding.etDob.setOnClickListener { showDatePicker() }
@@ -80,7 +87,6 @@ class RegisterFragment : Fragment() {
         setupPasswordStrengthChecker()
         setupButtonEffects()
         observeViewModel()
-        setupButtonEffects()
 
         binding.btnRegister.setOnClickListener {
             hideKeyboard()
@@ -180,8 +186,8 @@ class RegisterFragment : Fragment() {
         binding.etMobile.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(s: Editable?) {
                 if (!s.isNullOrEmpty()) {
-                    binding.tilMobile.error = null
-                    binding.tilMobile.isErrorEnabled = false
+                    binding.tvMobileError.visibility = View.GONE
+                    binding.tvMobileError.text = ""
                     }
             }
 
@@ -229,6 +235,12 @@ class RegisterFragment : Fragment() {
     }
 
     private fun validateInputsSerial(): Boolean {
+        // 1. Nursing Radio Group Check (Custom check)
+        if (binding.rgNursingReg.checkedRadioButtonId == -1) {
+            showError(binding.rgNursingReg, "Please select Yes or No for Nursing Registration")
+            return false
+        }
+
         val user = prepareUserData()
         val pass = binding.etPassword.text.toString().trim()
         return when (val result = RegisterValidator.validate(user, pass)) {
@@ -249,7 +261,7 @@ class RegisterFragment : Fragment() {
                     "edu_other" -> binding.tilEducationOther
                     "occ" -> binding.spOccupation
                     "occ_other" -> binding.tilOccupationOther
-                    "mobile" -> binding.tilMobile
+                    "mobile" -> binding.etMobile
                     "email" -> binding.tilEmail
                     "country" -> binding.spCountry
                     "country_other" -> binding.tilCountryOther
@@ -275,10 +287,20 @@ class RegisterFragment : Fragment() {
 
         when (view) {
             is TextInputLayout -> {
+                view.isErrorEnabled = true
                 view.error = message
                 view.requestFocus()
             }
+            is android.widget.EditText -> {
+                if (view.id == R.id.etMobile) {
+                    binding.tvMobileError.text = message
+                    binding.tvMobileError.visibility = View.VISIBLE
+                }
+                view.requestFocus()
+            }
             is Spinner -> {
+                // Focus on spinner box
+                view.background = ContextCompat.getDrawable(requireContext(), R.drawable.spinner_error_bg)
                 toast(message)
                 view.requestFocus()
             }
@@ -289,7 +311,13 @@ class RegisterFragment : Fragment() {
         }
 
         // Professional Smooth Scroll
-        binding.registrationScrollView.smoothScrollTo(0, view.top - 200)
+       // binding.registrationScrollView.smoothScrollTo(0, view.top - 200)
+       // return false
+        // ✅ 2026 Smooth Scroll Fix: Request focus first, then scroll
+        view.requestFocus()
+        binding.registrationScrollView.post {
+            binding.registrationScrollView.smoothScrollTo(0, view.top - 150)
+        }
         return false
     }
 

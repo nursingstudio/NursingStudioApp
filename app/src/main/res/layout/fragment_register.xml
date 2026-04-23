@@ -53,7 +53,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="@string/hint_full_name_req"
-                app:errorEnabled="true"
                 app:helperTextEnabled="true"
                 android:importantForAutofill="yes"
                 app:cursorColor="@color/saffron"
@@ -87,7 +86,6 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
                 android:hint="@string/label_dob_req"
-                app:errorEnabled="true"
                 app:helperTextEnabled="true"
                 android:importantForAutofill="yes"
                 app:errorIconDrawable="@null"
@@ -139,7 +137,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:visibility="gone"
-                app:errorEnabled="true"
                 app:helperTextEnabled="true"
                 android:importantForAutofill="yes"
                 app:errorIconDrawable="@null"
@@ -158,7 +155,7 @@
             <Spinner android:id="@+id/spOccupation"
                 android:layout_width="match_parent"
                 android:layout_height="48dp"
-                android:layout_marginTop="4dp"
+                android:layout_marginTop="6dp"
                 android:background="@drawable/spinner_bg"/>
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/tilOccupationOther"
@@ -166,7 +163,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:visibility="gone"
-                app:errorEnabled="true"
                 app:helperTextEnabled="true"
                 android:importantForAutofill="yes"
                 app:errorIconDrawable="@null"
@@ -182,36 +178,43 @@
                     android:hint="@string/hint_spec_occ" />
             </com.google.android.material.textfield.TextInputLayout>
 
-            <TextView style="@style/SectionHeaderStyle"
-                android:layout_marginTop="4dp"
-                android:layout_marginBottom="4dp"
-                android:text="@string/label_contact_details" />
-
-                    <com.google.android.material.textfield.TextInputLayout
-                        android:id="@+id/tilMobile"
-                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                    <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        app:errorEnabled="true"
-                        app:boxStrokeColor="@color/saffron"
-                        app:hintTextColor="@color/saffron_dark"
-                        app:errorIconDrawable="@null">
+                        android:orientation="vertical"
+                        android:layout_marginTop="8dp">
+
+                        <TextView
+                            style="@style/SectionHeaderStyle"
+                            android:layout_marginTop="4dp"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/label_contact_details"
+                            android:layout_marginBottom="4dp"/>
 
                         <LinearLayout
                             android:layout_width="match_parent"
-                            android:layout_height="56dp"
+                            android:layout_height="wrap_content"
                             android:orientation="horizontal"
+                            android:background="@drawable/spinner_bg"
                             android:gravity="center_vertical"
-                            android:paddingStart="12dp"
-                            android:paddingEnd="12dp">
+                            android:padding="2dp">
 
                             <com.hbb20.CountryCodePicker
                                 android:id="@+id/ccp"
                                 android:layout_width="wrap_content"
-                                android:layout_height="48dp"
+                                android:layout_height="wrap_content"
                                 app:ccp_showNameCode="false"
-                                app:ccp_autoFormatNumber="true" />
+                                app:ccp_autoFormatNumber="true"
+                                app:ccp_hintExampleNumber="true"
+                                android:paddingStart="8dp"
+                                android:paddingEnd="8dp" />
+
+                            <View
+                                android:layout_width="1dp"
+                                android:layout_height="24dp"
+                                android:background="#D1D1D1"
+                                android:layout_marginEnd="8dp"/>
 
                             <EditText
                                 android:id="@+id/etMobile"
@@ -219,13 +222,22 @@
                                 android:layout_height="48dp"
                                 android:hint="@string/hint_mobile_req"
                                 android:inputType="phone"
-                                android:background="@null"
-                                android:maxLength="10"
-                                android:autofillHints="phone"
+                                android:background="@android:color/transparent"
+                                android:textSize="16sp"
                                 android:importantForAutofill="yes"
-                                android:textSize="16sp" />
+                                android:autofillHints="phone" />
                         </LinearLayout>
-                    </com.google.android.material.textfield.TextInputLayout>
+
+                        <TextView
+                            android:id="@+id/tvMobileError"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textColor="@color/design_default_color_error"
+                            android:textSize="12sp"
+                            android:visibility="gone"
+                            android:layout_marginStart="4dp"
+                            android:layout_marginTop="2dp"/>
+                    </LinearLayout>
 
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/tilEmail"
@@ -233,7 +245,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
-                app:errorEnabled="true"
                 app:helperTextEnabled="true"
                 android:importantForAutofill="yes"
                 app:errorIconDrawable="@null"
@@ -265,7 +276,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:visibility="gone"
-                app:errorEnabled="true"
                 app:helperTextEnabled="true"
                 android:importantForAutofill="yes"
                 app:errorIconDrawable="@null"
@@ -284,7 +294,7 @@
             <Spinner android:id="@+id/spStateIndia"
                 android:layout_width="match_parent"
                 android:layout_height="48dp"
-                android:layout_marginTop="4dp"
+                android:layout_marginTop="6dp"
                 android:background="@drawable/spinner_bg"/>
 
             <com.google.android.material.textfield.TextInputLayout
@@ -293,7 +303,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:visibility="gone"
-                app:errorEnabled="true"
                 app:helperTextEnabled="true"
                 android:importantForAutofill="yes"
                 app:errorIconDrawable="@null"
@@ -315,7 +324,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
-                app:errorEnabled="true"
                 app:helperTextEnabled="true"
                 android:importantForAutofill="yes"
                 app:errorIconDrawable="@null"
@@ -336,7 +344,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
-                app:errorEnabled="true"
                 app:helperTextEnabled="true"
                 android:importantForAutofill="yes"
                 app:errorIconDrawable="@null"
@@ -360,7 +367,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
-                app:errorEnabled="true"
                 app:helperTextEnabled="true"
                 android:importantForAutofill="yes"
                 app:errorIconDrawable="@null"
@@ -421,7 +427,6 @@
                     style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    app:errorEnabled="true"
                     app:helperTextEnabled="true"
                     android:importantForAutofill="yes"
                     app:errorIconDrawable="@null"
@@ -441,7 +446,6 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="4dp"
-                    app:errorEnabled="true"
                     app:helperTextEnabled="true"
                     android:importantForAutofill="yes"
                     app:errorIconDrawable="@null"
@@ -463,7 +467,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
-                app:errorEnabled="true"
                 app:helperTextEnabled="true"
                 android:importantForAutofill="yes"
                 app:errorIconDrawable="@null"

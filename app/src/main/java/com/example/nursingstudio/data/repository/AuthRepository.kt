@@ -39,7 +39,7 @@ class AuthRepository @Inject constructor(
     suspend fun checkUserByPhone(phone: String): Boolean {
         return try {
             val query = db.collection("Users")
-                .whereEqualTo("phone", "+91$phone")
+                .whereEqualTo("mobile", "+91$phone")
                 .get()
                 .await()
             !query.isEmpty
