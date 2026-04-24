@@ -7,47 +7,50 @@ object RegisterValidator {
 
     fun validate(user: User, pass: String): ValidationResult {
         return when {
-            // Personal Info
-            user.fullName.isEmpty() -> ValidationResult.Error("Full Name is required", "name")
+            // 1. Personal Details
+            user.fullName.isBlank() -> ValidationResult.Error("Full Name is required", "name")
             user.gender == "Select Gender" -> ValidationResult.Error("Please select Gender", "gender")
-            user.dob.isEmpty() -> ValidationResult.Error("Date of Birth is required", "dob")
+            user.dob.isBlank() -> ValidationResult.Error("Date of Birth is required", "dob")
             user.maritalStatus == "Select Marital" -> ValidationResult.Error("Select Marital Status", "marital")
             user.religion == "Select Religion" -> ValidationResult.Error("Select Religion", "religion")
 
-            // Education & Occupation
-            // ✅ 2026 Standard: Context-Aware Validation
+            // 2. Education & Occupation
             user.education == "Select Education" -> ValidationResult.Error("Select Education", "edu")
-            // Agar spinner me "Other" hai aur text empty hai
-            user.education.isEmpty() -> ValidationResult.Error("Please specify your education", "edu_other")
+            user.education.isBlank() -> ValidationResult.Error("Please specify your education", "edu_other")
             user.occupation == "Select Occupation" -> ValidationResult.Error("Select Occupation", "occ")
-            user.occupation.isEmpty() -> ValidationResult.Error("Please specify your occupation", "occ_other")
+            user.occupation.isBlank() -> ValidationResult.Error("Please specify your occupation", "occ_other")
 
-            // Contact & Address
-            // ✅ Mobile Validation (Removing +91 or code to check pure 10 digits if needed)
-            user.mobile.isEmpty() -> ValidationResult.Error("Mobile Number is required", "mobile")
-            // Assuming CCP provides full number, we check if it's long enough
-            user.mobile.length < 10 -> ValidationResult.Error("Enter a valid 10-digit number", "mobile")
-            user.email.isEmpty() || !Patterns.EMAIL_ADDRESS.matcher(user.email).matches() ->
+            // 3. Contact Details
+            user.mobile.isBlank() -> ValidationResult.Error("Mobile Number is required", "mobile")
+            // 2026 Logic: Check only pure digits length (excluding +91)
+            user.mobile.filter { it.isDigit() }.length < 10 -> ValidationResult.Error("Enter a valid 10-digit number", "mobile")
+            user.email.isBlank() || !Patterns.EMAIL_ADDRESS.matcher(user.email).matches() ->
                 ValidationResult.Error("Valid Email required", "email")
-            user.country == "Other" -> ValidationResult.Error("Enter Country Name", "country_other")
-            user.country.isEmpty() -> ValidationResult.Error("Country name is required", "country_other")
+
+            // 4. Address Details (Refined Logic)
+            // ✅ Fixed: Checks if manual entry is too short
+            (user.country != "Bharat (India)" && user.country.length < 2) -> ValidationResult.Error("Enter valid Country Name", "country_other")
+            user.country.isBlank() -> ValidationResult.Error("Country is required", "country")
+
+            // State specific validation
             (user.country == "Bharat (India)" && user.state == "Select State/UT") -> ValidationResult.Error("Select State", "state")
-            (user.country != "Bharat (India)" && user.state.isEmpty()) -> ValidationResult.Error("Enter State Name", "state_other")
-            user.state.isEmpty() || user.state == "Select State/UT" -> ValidationResult.Error("Select State", "state")
-            user.district.isEmpty() -> ValidationResult.Error("District required", "district")
-            user.address.isEmpty() -> ValidationResult.Error("Full Address required", "address")
+            (user.country != "Bharat (India)" && user.state.isBlank()) -> ValidationResult.Error("Enter State Name", "state_other")
+
+            user.district.isBlank() -> ValidationResult.Error("District required", "district")
+            user.address.isBlank() -> ValidationResult.Error("Full Address required", "address")
             user.pincode.length != 6 -> ValidationResult.Error("Valid 6-digit Pincode required", "pincode")
 
-            // Nursing Registration (Yes/No Logic)
+            // 5. Nursing Registration (SERIAL POSITION FIXED)
+            // Hume check karna hai user ne Yes/No choose kiya ya nahi
+            user.isNursingRegistered == null -> ValidationResult.Error("Please select Nursing Registration status", "is_reg")
 
-            user.isNursingRegistered && user.regState.isNullOrEmpty() ->
-                ValidationResult.Error("Registration State required", "reg_state")
-            user.isNursingRegistered && user.regNumber.isNullOrEmpty() ->
-                ValidationResult.Error("Registration Number required", "reg_no")
+            // Agar Yes select kiya hai tabhi niche wale check chale
+            user.isNursingRegistered && user.regState.isNullOrBlank() -> ValidationResult.Error("Registration State required", "reg_state")
+            user.isNursingRegistered && user.regNumber.isNullOrBlank() -> ValidationResult.Error("Registration Number required", "reg_no")
 
-            // Password
+            // 6. Password Strength
             !pass.matches("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*#?&])[A-Za-z\\d@$!%*#?&]{8,}$".toRegex()) ->
-                ValidationResult.Error("Password must be strong (8+ chars, Upper, Lower, Number, Special)", "pass")
+                ValidationResult.Error("Password must be 8+ chars with Upper, Lower, Number & Special char", "pass")
 
             else -> ValidationResult.Success
         }

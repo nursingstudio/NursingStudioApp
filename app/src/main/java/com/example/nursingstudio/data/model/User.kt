@@ -17,7 +17,7 @@ data class User(
     val district: String = "",
     val address: String = "",
     val pincode: String = "",
-    val isNursingRegistered: Boolean = false,
+    val isNursingRegistered: Boolean? = null,
     val regState: String? = null,
     val regNumber: String? = null,
     val createdAt: Long = System.currentTimeMillis()

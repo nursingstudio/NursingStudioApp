@@ -11,6 +11,8 @@
         android:background="@color/app_background"
         android:fillViewport="true"
         android:scrollbars="none"
+        android:isScrollContainer="true"
+        android:overScrollMode="never"
         android:fitsSystemWindows="true"
         android:paddingTop="0dp"
         android:clipToPadding="false">
@@ -221,11 +223,13 @@
                                 android:layout_width="match_parent"
                                 android:layout_height="48dp"
                                 android:hint="@string/hint_mobile_req"
-                                android:inputType="phone"
+                                android:inputType="number"
+                                android:digits="0123456789"
+                                android:maxLength="10"
                                 android:background="@android:color/transparent"
                                 android:textSize="16sp"
                                 android:importantForAutofill="yes"
-                                android:autofillHints="phone" />
+                                android:autofillHints="phoneNumberDevice" />
                         </LinearLayout>
 
                         <TextView

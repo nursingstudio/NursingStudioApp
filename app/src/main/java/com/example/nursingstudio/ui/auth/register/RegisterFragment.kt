@@ -8,6 +8,7 @@ import android.os.Bundle
 import android.os.SystemClock
 import android.text.Editable
 import android.text.Html
+import android.text.InputFilter
 import android.text.SpannableString
 import android.text.Spanned
 import android.text.TextPaint
@@ -71,12 +72,12 @@ class RegisterFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // ✅ 2026 Gold Standard: Robust CCP Setup
-        binding.ccp.apply {
-            // 1. Link EditText
-            registerCarrierNumberEditText(binding.etMobile)
-            // 2. Auto-detect country
-            setAutoDetectedCountry(true)
+        // ✅ 2026 Gold Standard: Single Clean Filter for Mobile
+        binding.etMobile.apply {
+            inputType = android.text.InputType.TYPE_CLASS_NUMBER
+            filters = arrayOf(InputFilter.LengthFilter(10), InputFilter { source, _, _, _, _, _ ->
+                source.filter { it.isDigit() } // Force only digits, removes + or spaces
+            })
         }
 
         setupUniversalErrorCleaner()
@@ -235,12 +236,6 @@ class RegisterFragment : Fragment() {
     }
 
     private fun validateInputsSerial(): Boolean {
-        // 1. Nursing Radio Group Check (Custom check)
-        if (binding.rgNursingReg.checkedRadioButtonId == -1) {
-            showError(binding.rgNursingReg, "Please select Yes or No for Nursing Registration")
-            return false
-        }
-
         val user = prepareUserData()
         val pass = binding.etPassword.text.toString().trim()
         return when (val result = RegisterValidator.validate(user, pass)) {
@@ -310,14 +305,17 @@ class RegisterFragment : Fragment() {
             }
         }
 
-        // Professional Smooth Scroll
-       // binding.registrationScrollView.smoothScrollTo(0, view.top - 200)
-       // return false
-        // ✅ 2026 Smooth Scroll Fix: Request focus first, then scroll
-        view.requestFocus()
-        binding.registrationScrollView.post {
-            binding.registrationScrollView.smoothScrollTo(0, view.top - 150)
-        }
+        // ✅ World-Class Delay Scroll (2026 Industry Standard)
+        view.postDelayed({
+            view.requestFocus()
+            val scrollOffset = 300 // Extra space taaki user ko context dikhe
+            val targetY = (view.parent as? ViewGroup)?.let { parent ->
+                view.top + (parent.parent as? ViewGroup)?.top!!
+            } ?: view.top
+
+            binding.registrationScrollView.smoothScrollTo(0, targetY - scrollOffset)
+        }, 200) // 200ms delay taaki keyboard adjustment ke baad scroll ho
+
         return false
     }
 
@@ -463,6 +461,8 @@ class RegisterFragment : Fragment() {
 
     private fun prepareUserData(): User {
         val b = binding
+        // ✅ Standard: Get CLEAN number without +91 if user accidentally pasted it
+        val cleanMobile = b.ccp.fullNumberWithPlus
         return User(
             fullName = b.etName.text.toString().trim(),
             gender = b.spGender.selectedItem.toString(),
@@ -471,16 +471,20 @@ class RegisterFragment : Fragment() {
             religion = b.spReligion.selectedItem.toString(),
             education = if (b.spEducation.selectedItem == "Other") b.etEducationOther.text.toString() else b.spEducation.selectedItem.toString(),
             occupation = if (b.spOccupation.selectedItem == "Other") b.etOccupationOther.text.toString() else b.spOccupation.selectedItem.toString(),
-            mobile = b.ccp.fullNumberWithPlus,
+            mobile = cleanMobile,
             email = b.etEmail.text.toString().trim(),
             country = if (b.spCountry.selectedItem == "Other") b.etCountryOther.text.toString() else b.spCountry.selectedItem.toString(),
             state = if (b.spCountry.selectedItem == "Bharat (India)") b.spStateIndia.selectedItem.toString() else b.etStateOther.text.toString(),
             district = b.etDistrict.text.toString(),
             address = b.etAddress.text.toString(),
             pincode = b.etPincode.text.toString(),
-            isNursingRegistered = (b.rgNursingReg.checkedRadioButtonId == R.id.rbRegYes),
-            regState = b.etRegState.text.toString().takeIf { it.isNotEmpty() },
-            regNumber = b.etRegNumber.text.toString().takeIf { it.isNotEmpty() }
+
+            // Check if radio button is selected (Professional Check
+            isNursingRegistered = when (b.rgNursingReg.checkedRadioButtonId) {
+                R.id.rbRegYes -> true
+                R.id.rbRegNo -> false
+                else -> null // Mandatory choice
+            }
         )
     }
 
