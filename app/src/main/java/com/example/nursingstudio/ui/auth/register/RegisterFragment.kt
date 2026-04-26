@@ -72,11 +72,17 @@ class RegisterFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // ✅ 2026 Gold Standard: Single Clean Filter for Mobile
+        // ✅ Step 1: CCP Setup (Explicitly link first)
+        binding.ccp.apply {
+            registerCarrierNumberEditText(binding.etMobile)
+            // Agar CCP link nahi hua to manually crash hone se bchane ke liye
+        }
+
+        // ✅ Step 2: Mobile Input Logic (Sanitized)
         binding.etMobile.apply {
             inputType = android.text.InputType.TYPE_CLASS_NUMBER
             filters = arrayOf(InputFilter.LengthFilter(10), InputFilter { source, _, _, _, _, _ ->
-                source.filter { it.isDigit() } // Force only digits, removes + or spaces
+                source.filter { it.isDigit() }
             })
         }
 
@@ -461,23 +467,42 @@ class RegisterFragment : Fragment() {
 
     private fun prepareUserData(): User {
         val b = binding
-        // ✅ Standard: Get CLEAN number without +91 if user accidentally pasted it
-        val cleanMobile = b.ccp.fullNumberWithPlus
+        // ✅ Safe CCP Extraction (Avoids NullPointerException)
+        val cleanMobile = try {
+            if (b.etMobile.text.isNullOrBlank()) ""
+            else b.ccp.fullNumberWithPlus ?: ""
+        } catch (_: Exception) {
+            b.etMobile.text.toString() // Fallback agar CCP fail ho jaye
+        }
         return User(
-            fullName = b.etName.text.toString().trim(),
-            gender = b.spGender.selectedItem.toString(),
-            dob = b.etDob.text.toString(),
-            maritalStatus = b.spMarital.selectedItem.toString(),
-            religion = b.spReligion.selectedItem.toString(),
-            education = if (b.spEducation.selectedItem == "Other") b.etEducationOther.text.toString() else b.spEducation.selectedItem.toString(),
-            occupation = if (b.spOccupation.selectedItem == "Other") b.etOccupationOther.text.toString() else b.spOccupation.selectedItem.toString(),
+            fullName = b.etName.text?.toString()?.trim() ?: "",
+            gender = b.spGender.selectedItem?.toString() ?: "",
+            dob = b.etDob.text?.toString()?.trim() ?: "",
+            maritalStatus = b.spMarital.selectedItem?.toString() ?: "",
+            religion = b.spReligion.selectedItem?.toString() ?: "",
+
+            education = if (b.spEducation.selectedItem?.toString() == "Other")
+                b.etEducationOther.text?.toString()?.trim() ?: ""
+            else b.spEducation.selectedItem?.toString() ?: "",
+
+            occupation = if (b.spOccupation.selectedItem?.toString() == "Other")
+                b.etOccupationOther.text?.toString()?.trim() ?: ""
+            else b.spOccupation.selectedItem?.toString() ?: "",
+
             mobile = cleanMobile,
-            email = b.etEmail.text.toString().trim(),
-            country = if (b.spCountry.selectedItem == "Other") b.etCountryOther.text.toString() else b.spCountry.selectedItem.toString(),
-            state = if (b.spCountry.selectedItem == "Bharat (India)") b.spStateIndia.selectedItem.toString() else b.etStateOther.text.toString(),
-            district = b.etDistrict.text.toString(),
-            address = b.etAddress.text.toString(),
-            pincode = b.etPincode.text.toString(),
+            email = b.etEmail.text?.toString()?.trim() ?: "",
+
+            country = if (b.spCountry.selectedItem?.toString() == "Other")
+                b.etCountryOther.text?.toString()?.trim() ?: ""
+            else b.spCountry.selectedItem?.toString() ?: "",
+
+            state = if (b.spCountry.selectedItem?.toString() == "Bharat (India)")
+                b.spStateIndia.selectedItem?.toString() ?: ""
+            else b.etStateOther.text?.toString()?.trim() ?: "",
+
+            district = b.etDistrict.text?.toString()?.trim() ?: "",
+            address = b.etAddress.text?.toString()?.trim() ?: "",
+            pincode = b.etPincode.text?.toString()?.trim() ?: "",
 
             // Check if radio button is selected (Professional Check
             isNursingRegistered = when (b.rgNursingReg.checkedRadioButtonId) {
