@@ -6,6 +6,17 @@ import com.example.nursingstudio.data.model.User
 object RegisterValidator {
 
     fun validate(user: User, pass: String): ValidationResult {
+
+
+        // 🚀 2026 Gold Standard: Modular Number Sanitization
+        val cleanNumber = user.mobile.replace("\\s".toRegex(), "").replace("-", "") // Spaces/Dashes hatao
+        val pureDigits = cleanNumber.filter { it.isDigit() }
+        val isIndian = cleanNumber.startsWith("+91")
+
+        // Correct logic for 10-digit check
+        val isTenDigit = (isIndian && pureDigits.removePrefix("91").length == 10) ||
+                (!isIndian && pureDigits.length >= 7 && pureDigits.length <= 15)
+
         return when {
             // 1. Personal Details
             user.fullName.isBlank() -> ValidationResult.Error("Full Name is required", "name")
@@ -21,9 +32,10 @@ object RegisterValidator {
             user.occupation.isBlank() -> ValidationResult.Error("Please specify your occupation", "occ_other")
 
             // 3. Contact Details
-            user.mobile.isBlank() -> ValidationResult.Error("Mobile Number is required", "mobile")
-            // 2026 Logic: Check only pure digits length (excluding +91)
-            user.mobile.filter { it.isDigit() }.length < 10 -> ValidationResult.Error("Enter a valid 10-digit number", "mobile")
+
+            cleanNumber.isBlank() -> ValidationResult.Error("Mobile Number is required", "mobile")
+            !isTenDigit -> ValidationResult.Error("Enter a valid mobile number", "mobile")
+
             user.email.isBlank() || !Patterns.EMAIL_ADDRESS.matcher(user.email).matches() ->
                 ValidationResult.Error("Valid Email required", "email")
 

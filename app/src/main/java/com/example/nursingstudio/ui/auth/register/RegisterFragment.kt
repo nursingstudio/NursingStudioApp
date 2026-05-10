@@ -8,7 +8,6 @@ import android.os.Bundle
 import android.os.SystemClock
 import android.text.Editable
 import android.text.Html
-import android.text.InputFilter
 import android.text.SpannableString
 import android.text.Spanned
 import android.text.TextPaint
@@ -69,22 +68,48 @@ class RegisterFragment : Fragment() {
         return binding.root
     }
 
+    // 🚀 2026 Standard: Infinite Loop Protection Flag
+    private var isUpdating = false
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // ✅ Step 1: CCP Setup (Explicitly link first)
-        binding.ccp.apply {
-            registerCarrierNumberEditText(binding.etMobile)
-            // Agar CCP link nahi hua to manually crash hone se bchane ke liye
-        }
+        // ✅ Step 1: Secure CCP Link
+        binding.ccp.registerCarrierNumberEditText(binding.etMobile)
 
-        // ✅ Step 2: Mobile Input Logic (Sanitized)
-        binding.etMobile.apply {
-            inputType = android.text.InputType.TYPE_CLASS_NUMBER
-            filters = arrayOf(InputFilter.LengthFilter(10), InputFilter { source, _, _, _, _, _ ->
-                source.filter { it.isDigit() }
-            })
-        }
+        // ✅ Step 2: Smart & Safe TextWatcher (Hang-Proof)
+        binding.etMobile.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+
+            override fun afterTextChanged(s: Editable?) {
+                if (isUpdating) return // 🛑 Loop Protector: Agar hum khud change kar rahe hain, toh ruk jao
+
+                val input = s.toString().trim()
+                if (input.isEmpty()) return
+
+                // 🚀 Logic: Agar Suggestion/Paste mein + aa jaye
+                if (input.startsWith("+")) {
+                    isUpdating = true // Lock lagao
+                    try {
+                        binding.ccp.fullNumber = input
+                        // CCP set karne ke baad EditText mein sirf number bachega
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                    } finally {
+                        isUpdating = false // Lock kholo
+                    }
+                }
+
+                // Error UI Cleanup
+                if (input.isNotEmpty()) {
+                    binding.tvMobileError.visibility = View.GONE
+                    binding.tvMobileError.text = ""
+                }
+            }
+        })
+
+        // Baki codes (setupUniversalErrorCleaner, etc.) yahan se shuru honge...
 
         setupUniversalErrorCleaner()
         setupAllSpinners()
@@ -467,13 +492,7 @@ class RegisterFragment : Fragment() {
 
     private fun prepareUserData(): User {
         val b = binding
-        // ✅ Safe CCP Extraction (Avoids NullPointerException)
-        val cleanMobile = try {
-            if (b.etMobile.text.isNullOrBlank()) ""
-            else b.ccp.fullNumberWithPlus ?: ""
-        } catch (_: Exception) {
-            b.etMobile.text.toString() // Fallback agar CCP fail ho jaye
-        }
+
         return User(
             fullName = b.etName.text?.toString()?.trim() ?: "",
             gender = b.spGender.selectedItem?.toString() ?: "",
@@ -489,7 +508,7 @@ class RegisterFragment : Fragment() {
                 b.etOccupationOther.text?.toString()?.trim() ?: ""
             else b.spOccupation.selectedItem?.toString() ?: "",
 
-            mobile = cleanMobile,
+            mobile = b.ccp.fullNumberWithPlus ?: "", // Hamesha + ke sath save karein //
             email = b.etEmail.text?.toString()?.trim() ?: "",
 
             country = if (b.spCountry.selectedItem?.toString() == "Other")
@@ -505,6 +524,12 @@ class RegisterFragment : Fragment() {
             pincode = b.etPincode.text?.toString()?.trim() ?: "",
 
             // Check if radio button is selected (Professional Check
+            // ✅ Fix: In dono ko assign karna bhul gaye the aap
+            regState = if (b.rgNursingReg.checkedRadioButtonId == R.id.rbRegYes)
+                b.etRegState.text?.toString()?.trim() else null,
+            regNumber = if (b.rgNursingReg.checkedRadioButtonId == R.id.rbRegYes)
+                b.etRegNumber.text?.toString()?.trim() else null,
+
             isNursingRegistered = when (b.rgNursingReg.checkedRadioButtonId) {
                 R.id.rbRegYes -> true
                 R.id.rbRegNo -> false
