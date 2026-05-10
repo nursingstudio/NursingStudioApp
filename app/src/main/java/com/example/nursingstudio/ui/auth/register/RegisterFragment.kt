@@ -298,26 +298,24 @@ class RegisterFragment : Fragment() {
     }
 
     private fun showError(view: View, message: String): Boolean {
+        // Professional Vibration/Feedback
         AppSettings.triggerErrorEffect(requireContext(), view)
 
+        // 1. Visual Error Handling
         when (view) {
             is TextInputLayout -> {
                 view.isErrorEnabled = true
                 view.error = message
-                view.requestFocus()
             }
             is android.widget.EditText -> {
                 if (view.id == R.id.etMobile) {
                     binding.tvMobileError.text = message
                     binding.tvMobileError.visibility = View.VISIBLE
                 }
-                view.requestFocus()
             }
             is Spinner -> {
-                // Focus on spinner box
                 view.background = ContextCompat.getDrawable(requireContext(), R.drawable.spinner_error_bg)
                 toast(message)
-                view.requestFocus()
             }
             is CheckBox -> {
                 view.buttonTintList = ColorStateList.valueOf(Color.RED)
@@ -325,16 +323,22 @@ class RegisterFragment : Fragment() {
             }
         }
 
-        // ✅ World-Class Delay Scroll (2026 Industry Standard)
-        view.postDelayed({
-            view.requestFocus()
-            val scrollOffset = 300 // Extra space taaki user ko context dikhe
-            val targetY = (view.parent as? ViewGroup)?.let { parent ->
-                view.top + (parent.parent as? ViewGroup)?.top!!
-            } ?: view.top
+        // 🚀 2026 World-Class Master Scroll Logic
+        // 'view.post' ensure karta hai ki keyboard ya layout change ke baad scroll ho
+        view.post {
+            val rect = android.graphics.Rect()
+            // View ki boundary lene ke liye
+            view.getDrawingRect(rect)
 
-            binding.registrationScrollView.smoothScrollTo(0, targetY - scrollOffset)
-        }, 200) // 200ms delay taaki keyboard adjustment ke baad scroll ho
+            // 🛡️ Sabse Important Line: View ke coordinates ko ScrollView ke context mein map karna
+            binding.registrationScrollView.offsetDescendantRectToMyCoords(view, rect)
+
+            // View par focus lao
+            view.requestFocus()
+
+            // Smooth Scroll: -200 offset taaki error wala view screen ke center mein dikhe
+            binding.registrationScrollView.smoothScrollTo(0, rect.top - 200)
+        }
 
         return false
     }
