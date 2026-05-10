@@ -77,39 +77,40 @@ class RegisterFragment : Fragment() {
         // ✅ Step 1: Secure CCP Link
         binding.ccp.registerCarrierNumberEditText(binding.etMobile)
 
-        // ✅ Step 2: Smart & Safe TextWatcher (Hang-Proof)
+        // ✅ Step 2: 2026 Industry Standard: Master Watcher with Loop Protection & UI-Post
         binding.etMobile.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
 
             override fun afterTextChanged(s: Editable?) {
-                if (isUpdating) return // 🛑 Loop Protector: Agar hum khud change kar rahe hain, toh ruk jao
+                // 1. Check if we are already updating to prevent recursive loop
+                if (isUpdating) return
 
                 val input = s.toString().trim()
                 if (input.isEmpty()) return
 
-                // 🚀 Logic: Agar Suggestion/Paste mein + aa jaye
+                // 2. Handle Auto-fill or Manual +91 Entry
                 if (input.startsWith("+")) {
-                    isUpdating = true // Lock lagao
-                    try {
-                        binding.ccp.fullNumber = input
-                        // CCP set karne ke baad EditText mein sirf number bachega
-                    } catch (e: Exception) {
-                        e.printStackTrace()
-                    } finally {
-                        isUpdating = false // Lock kholo
+                    isUpdating = true
+                    // 'post' ensures this runs after the current UI cycle, preventing ANR
+                    binding.etMobile.post {
+                        try {
+                            binding.ccp.fullNumber = input
+                        } catch (e: Exception) {
+                            e.printStackTrace()
+                        } finally {
+                            isUpdating = false
+                        }
                     }
                 }
 
-                // Error UI Cleanup
+                // 3. Centralized Error Cleaner (Jo humne niche se delete kiya)
                 if (input.isNotEmpty()) {
                     binding.tvMobileError.visibility = View.GONE
                     binding.tvMobileError.text = ""
                 }
             }
         })
-
-        // Baki codes (setupUniversalErrorCleaner, etc.) yahan se shuru honge...
 
         setupUniversalErrorCleaner()
         setupAllSpinners()
@@ -214,18 +215,6 @@ class RegisterFragment : Fragment() {
                 override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
             })
         }
-
-        binding.etMobile.addTextChangedListener(object : TextWatcher {
-            override fun afterTextChanged(s: Editable?) {
-                if (!s.isNullOrEmpty()) {
-                    binding.tvMobileError.visibility = View.GONE
-                    binding.tvMobileError.text = ""
-                    }
-            }
-
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
-        })
     }
 
     private fun showDatePicker() {
