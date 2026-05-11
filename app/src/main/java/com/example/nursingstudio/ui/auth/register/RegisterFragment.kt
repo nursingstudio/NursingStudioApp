@@ -2,7 +2,6 @@ package com.example.nursingstudio.ui.auth.register
 
 import android.content.Context
 import android.content.Intent
-import android.content.res.ColorStateList
 import android.graphics.Color
 import android.os.Bundle
 import android.os.SystemClock
@@ -20,8 +19,6 @@ import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
-import android.widget.CheckBox
-import android.widget.Spinner
 import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.toColorInt
@@ -298,32 +295,17 @@ class RegisterFragment : Fragment() {
     }
 
     private fun showError(view: View, message: String): Boolean {
-        // Professional Vibration/Feedback
-        AppSettings.triggerErrorEffect(requireContext(), view)
+        // 1. AppSettings ko styling aur animation handle karne do
+        AppSettings.triggerErrorEffect(requireContext(), view, message)
 
-        // 1. Visual Error Handling
-        when (view) {
-            is TextInputLayout -> {
-                view.isErrorEnabled = true
-                view.error = message
-            }
-            is android.widget.EditText -> {
-                if (view.id == R.id.etMobile) {
-                    binding.tvMobileError.text = message
-                    binding.tvMobileError.visibility = View.VISIBLE
-                }
-            }
-            is Spinner -> {
-                view.background = ContextCompat.getDrawable(requireContext(), R.drawable.spinner_error_bg)
-                toast(message)
-            }
-            is CheckBox -> {
-                view.buttonTintList = ColorStateList.valueOf(Color.RED)
-                toast(message)
-            }
+        // 2. Special case for etMobile error label (Kyuki ye custom TextView hai)
+        if (view.id == R.id.etMobile) {
+            binding.tvMobileError.text = message
+            binding.tvMobileError.visibility = View.VISIBLE
+            binding.tvMobileError.setTextColor(ContextCompat.getColor(requireContext(), R.color.error_red))
         }
 
-        // 🚀 2026 World-Class Master Scroll Logic
+        // 🚀 2026 Pixel-Perfect Scroll Logic
         // 'view.post' ensure karta hai ki keyboard ya layout change ke baad scroll ho
         view.post {
             val rect = android.graphics.Rect()

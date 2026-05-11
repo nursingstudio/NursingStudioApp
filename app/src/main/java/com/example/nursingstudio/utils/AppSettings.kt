@@ -3,7 +3,7 @@ package com.example.nursingstudio.utils
 import android.content.Context
 import android.view.MotionEvent
 import android.view.View
-import android.view.animation.AnimationUtils
+import androidx.core.content.ContextCompat
 import androidx.core.content.edit
 import com.example.nursingstudio.R
 
@@ -37,15 +37,60 @@ object AppSettings {
      * CENTRAL AC: Shake + Vibrate Error Animation
      * Kisi bhi view par error aane par ise call karein
      */
-    fun triggerErrorEffect(context: Context, view: View) {
-        // 1. Shake Animation load aur start karein
-        val shake = AnimationUtils.loadAnimation(context, R.anim.shake)
+    /**
+     * 🚀 2026 Gold Standard: Universal View Error Styler
+     * Ye function automatic pehchanta hai ki view kya hai aur us par error theme apply karta hai
+     */
+    fun triggerErrorEffect(context: Context, view: View, message: String? = null) {
+        val errorColor = ContextCompat.getColor(context, R.color.error_red)
+
+        // 🚀 2026 Gold Standard: Hierarchy-Aware Styling
+        when (// 1. Agar view TextInputLayout hai (Jaise Name, Email, etc.)
+            view) {
+            is com.google.android.material.textfield.TextInputLayout -> {
+                if (message != null) {
+                    view.isErrorEnabled = true
+                    view.error = message
+                }
+                view.setErrorTextColor(android.content.res.ColorStateList.valueOf(errorColor))
+                view.setErrorIconTintList(android.content.res.ColorStateList.valueOf(errorColor))
+            }
+
+            // 2. Agar view Spinner hai
+            is android.widget.Spinner -> {
+                view.background = ContextCompat.getDrawable(context, R.drawable.spinner_error_bg)
+            }
+
+            // 3. Agar view CheckBox hai
+            is android.widget.CheckBox -> {
+                view.buttonTintList = android.content.res.ColorStateList.valueOf(errorColor)
+            }
+
+            // 4. Special Case: etMobile (Jo direct EditText hai, TIL ke andar nahi hai)
+            is android.widget.EditText -> {
+                // Agar mobile field hai toh border red kar sakte hain ya sirf animation rehne de sakte hain
+                // Kyunki iska error label (TextView) Fragment handle kar raha hai.
+                view.backgroundTintList = android.content.res.ColorStateList.valueOf(errorColor)
+            }
+
+            // 5. Custom Error Labels (TextViews)
+            is android.widget.TextView if message != null -> {
+                view.text = message
+                view.visibility = View.VISIBLE
+                view.setTextColor(errorColor)
+            }
+        }
+
+        // --- Standard Effects (Sabhi Views ke liye) ---
+
+        // 1. Shake Animation
+        val shake = android.view.animation.AnimationUtils.loadAnimation(context, R.anim.shake)
         view.startAnimation(shake)
 
-        // 2. Stronger Vibration for Error (50ms)
+        // 2. Strong Vibration
         triggerVibration(context, 50)
 
-        // 3. Request focus taaki cursor wahan chala jaye
+        // 3. Focus
         view.requestFocus()
     }
 
