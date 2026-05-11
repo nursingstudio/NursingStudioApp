@@ -155,17 +155,37 @@ class RegisterFragment : Fragment() {
     }
 
     private fun handleErrorMessage(msg: String) {
+        // 1. Logic Flags
+        val isAlreadyRegistered = msg.contains("email-already-in-use", true)
+
+        // 2. World-Class Friendly Messaging
         val friendlyMsg = when {
             msg.contains("network", true) || msg.contains("timeout", true) -> getString(R.string.no_internet)
-            msg.contains("email-already-in-use", true) -> "This email is already registered. Please login."
-            msg.contains("invalid-verification-code", true) -> "Incorrect OTP! Please check and try again."
-            msg.contains("invalid-email", true) -> "Invalid email, Please try with correct email."
+            isAlreadyRegistered -> "This email is already registered. Please login. Redirecting you to Login..."
+            msg.contains("invalid-email", true) -> "Invalid email format, Please try again with correct email."
             msg.contains("too-many-requests", true) -> "Server busy! Please try again later. ⏳"
-            msg.contains("session-expired", true) -> "OTP Expired! Please resend. ⏳"
             else -> msg
         }
+
+        // 3. Visual Feedback
         toast(friendlyMsg)
-        AppSettings.triggerErrorEffect(requireContext(), binding.btnRegister)
+
+        // Agar email issue hai toh focus email par le jao, varna register button shake karo
+        if (isAlreadyRegistered) {
+            AppSettings.triggerErrorEffect(requireContext(), binding.etEmail)
+        } else {
+            AppSettings.triggerErrorEffect(requireContext(), binding.btnRegister)
+        }
+
+        // 🚀 4. Gold Standard Auto-Redirection Logic
+        if (isAlreadyRegistered) {
+            binding.root.postDelayed({
+                if (isAdded) {
+                    // Aapka Login par jaane ka rasta (Back press ya NavComponent)
+                    requireActivity().onBackPressedDispatcher.onBackPressed()
+                }
+            }, 2000) // 2 Seconds taaki user message padh le
+        }
 
         viewModel.resetState()
     }
