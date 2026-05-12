@@ -1,6 +1,7 @@
 package com.example.nursingstudio.utils
 
 import android.content.Context
+import android.content.res.ColorStateList
 import android.view.MotionEvent
 import android.view.View
 import androidx.core.content.ContextCompat
@@ -52,8 +53,14 @@ object AppSettings {
                     view.isErrorEnabled = true
                     view.error = message
                 }
-                view.setErrorTextColor(android.content.res.ColorStateList.valueOf(errorColor))
-                view.setErrorIconTintList(android.content.res.ColorStateList.valueOf(errorColor))
+                // ✨ 2026 Gold Standard: Dynamic Cursor Coloring
+                // TextInputLayout ke andar ke EditText ko nikaal kar uska tint badalna
+                view.editText?.let { et ->
+                    et.textCursorDrawable?.setTint(errorColor) // Cursor ko Error Red rangna
+                    et.backgroundTintList = ColorStateList.valueOf(errorColor) // Underline ko bhi Red karna
+                }
+                view.setErrorTextColor(ColorStateList.valueOf(errorColor))
+                view.setErrorIconTintList(ColorStateList.valueOf(errorColor))
             }
 
             // 2. Agar view Spinner hai
@@ -63,14 +70,14 @@ object AppSettings {
 
             // 3. Agar view CheckBox hai
             is android.widget.CheckBox -> {
-                view.buttonTintList = android.content.res.ColorStateList.valueOf(errorColor)
+                view.buttonTintList = ColorStateList.valueOf(errorColor)
             }
 
             // 4. Special Case: etMobile (Jo direct EditText hai, TIL ke andar nahi hai)
             is android.widget.EditText -> {
                 // Agar mobile field hai toh border red kar sakte hain ya sirf animation rehne de sakte hain
                 // Kyunki iska error label (TextView) Fragment handle kar raha hai.
-                view.backgroundTintList = android.content.res.ColorStateList.valueOf(errorColor)
+                view.backgroundTintList = ColorStateList.valueOf(errorColor)
             }
 
             // 5. Custom Error Labels (TextViews)

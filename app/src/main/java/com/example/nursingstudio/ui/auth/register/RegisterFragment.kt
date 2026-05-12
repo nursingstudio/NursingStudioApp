@@ -28,6 +28,7 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import androidx.navigation.fragment.findNavController
 import com.example.nursingstudio.R
 import com.example.nursingstudio.data.model.User
 import com.example.nursingstudio.databinding.FragmentRegisterBinding
@@ -161,9 +162,9 @@ class RegisterFragment : Fragment() {
         // 2. World-Class Friendly Messaging
         val friendlyMsg = when {
             msg.contains("network", true) || msg.contains("timeout", true) -> getString(R.string.no_internet)
-            isAlreadyRegistered -> "This email is already registered. Please login. Redirecting you to Login..."
-            msg.contains("invalid-email", true) -> "Invalid email format, Please try again with correct email."
-            msg.contains("too-many-requests", true) -> "Server busy! Please try again later. ⏳"
+            isAlreadyRegistered -> getString(R.string.err_email_exists)
+            msg.contains("invalid-email", true) -> getString(R.string.err_invalid_email)
+            msg.contains("too-many-requests", true) -> getString(R.string.err_server_busy)
             else -> msg
         }
 
@@ -181,10 +182,15 @@ class RegisterFragment : Fragment() {
         if (isAlreadyRegistered) {
             binding.root.postDelayed({
                 if (isAdded) {
-                    // Aapka Login par jaane ka rasta (Back press ya NavComponent)
-                    requireActivity().onBackPressedDispatcher.onBackPressed()
+                    // 2026 Professional Navigation Logic
+                    try {
+                        findNavController().navigate(R.id.action_nav_register_to_nav_login)
+                    } catch (_: Exception) {
+                        // Safety Fallback
+                        requireActivity().onBackPressedDispatcher.onBackPressed()
+                    }
                 }
-            }, 2000) // 2 Seconds taaki user message padh le
+            }, 2000)
         }
 
         viewModel.resetState()

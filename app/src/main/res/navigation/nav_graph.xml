@@ -56,4 +56,34 @@
         android:name="com.example.nursingstudio.ui.features.staticpage.StaticPageFragment"
         android:label="Static Page" />
 
+    <!-- Login Fragment -->
+    <fragment
+        android:id="@+id/nav_login"
+        android:name="com.example.nursingstudio.ui.auth.login.LoginFragment"
+        android:label="Login"
+        tools:layout="@layout/fragment_login">
+        <!-- Action to Register -->
+        <action
+            android:id="@+id/action_nav_login_to_nav_register"
+            app:destination="@id/nav_register"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left" />
+    </fragment>
+
+    <!-- Register Fragment -->
+    <fragment
+        android:id="@+id/nav_register"
+        android:name="com.example.nursingstudio.ui.auth.register.RegisterFragment"
+        android:label="Create Account"
+        tools:layout="@layout/fragment_register">
+        <!-- 🚀 Gold Standard Action: Redirecting back to Login -->
+        <action
+            android:id="@+id/action_nav_register_to_nav_login"
+            app:destination="@id/nav_login"
+            app:popUpTo="@id/nav_login"
+            app:popUpToInclusive="true"
+            app:enterAnim="@anim/slide_in_left"
+            app:exitAnim="@anim/slide_out_right" />
+    </fragment>
+
 </navigation>

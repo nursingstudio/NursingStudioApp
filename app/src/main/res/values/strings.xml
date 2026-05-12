@@ -236,12 +236,17 @@
     <string name="device_compromised">DEVICE COMPROMISED</string>
     <string name="root_access_description">Nursing Studio detected root access. For your data safety, this app cannot run on rooted devices.</string>
     <string name="root_access_star_text">Remove root access or use a different device.</string>
-    <string name="hello_future_nursing_offiecr">Hello, Future Nursing Officer</string>
+    <string name="hello_future_nursing_officer">Hello, Future Nursing Officer</string>
     <string name="welcome">Welcome, …</string>
     <string name="nursing_studio">Nursing Studio</string>
     <string name="your_name">Your Name</string>
     <string name="_9999999999">9999999999</string>
     <string name="weak">Weak</string>
+
+    <string name="err_email_exists">This email is already registered. Please login. Redirecting you to Login…</string>
+    <string name="err_invalid_email">Please enter a valid email address.</string>
+    <string name="err_server_busy">Server busy! Please try again later. ⏳</string>
+
 
 
 </resources>
