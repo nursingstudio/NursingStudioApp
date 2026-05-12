@@ -157,7 +157,9 @@ class RegisterFragment : Fragment() {
 
     private fun handleErrorMessage(msg: String) {
         // 1. Logic Flags
-        val isAlreadyRegistered = msg.contains("email-already-in-use", true)
+        // 🚀 2026 Standard: Check for both Firebase Code and Friendly Message
+        val isAlreadyRegistered = msg.contains("email-already-in-use", true) ||
+                msg.contains("already in use", true) // Added for message-based catch
 
         // 2. World-Class Friendly Messaging
         val friendlyMsg = when {
@@ -171,26 +173,21 @@ class RegisterFragment : Fragment() {
         // 3. Visual Feedback
         toast(friendlyMsg)
 
-        // Agar email issue hai toh focus email par le jao, varna register button shake karo
         if (isAlreadyRegistered) {
             AppSettings.triggerErrorEffect(requireContext(), binding.etEmail)
-        } else {
-            AppSettings.triggerErrorEffect(requireContext(), binding.btnRegister)
-        }
 
-        // 🚀 4. Gold Standard Auto-Redirection Logic
-        if (isAlreadyRegistered) {
+            // ✨ Gold Standard: Explicitly navigation trigger
             binding.root.postDelayed({
                 if (isAdded) {
-                    // 2026 Professional Navigation Logic
                     try {
                         findNavController().navigate(R.id.action_nav_register_to_nav_login)
                     } catch (_: Exception) {
-                        // Safety Fallback
                         requireActivity().onBackPressedDispatcher.onBackPressed()
                     }
                 }
-            }, 2000)
+            }, 2500) // Slightly increased delay for user to read toast
+        } else {
+            AppSettings.triggerErrorEffect(requireContext(), binding.btnRegister)
         }
 
         viewModel.resetState()

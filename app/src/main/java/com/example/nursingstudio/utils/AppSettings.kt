@@ -56,7 +56,7 @@ object AppSettings {
                 // ✨ 2026 Gold Standard: Dynamic Cursor Coloring
                 // TextInputLayout ke andar ke EditText ko nikaal kar uska tint badalna
                 view.editText?.let { et ->
-                    et.textCursorDrawable?.setTint(errorColor) // Cursor ko Error Red rangna
+                    et.textCursorDrawable?.setTint(errorColor)
                     et.backgroundTintList = ColorStateList.valueOf(errorColor) // Underline ko bhi Red karna
                 }
                 view.setErrorTextColor(ColorStateList.valueOf(errorColor))
@@ -98,7 +98,10 @@ object AppSettings {
         triggerVibration(context, 50)
 
         // 3. Focus
-        view.requestFocus()
+        // 🚀 World-Class Fix for Cursor: Post the focus to next frame
+        view.post {
+            view.requestFocus()
+        }
     }
 
     fun setPushEffect(view: View) {
