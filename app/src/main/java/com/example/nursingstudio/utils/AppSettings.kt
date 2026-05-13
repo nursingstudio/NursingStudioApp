@@ -55,10 +55,17 @@ object AppSettings {
                 }
                 // ✨ 2026 Gold Standard: Dynamic Cursor Coloring
                 // TextInputLayout ke andar ke EditText ko nikaal kar uska tint badalna
+                // 🚀 2026 Gold Standard: Immediate Tinting
                 view.editText?.let { et ->
-                    et.textCursorDrawable?.setTint(errorColor)
-                    et.backgroundTintList = ColorStateList.valueOf(errorColor) // Underline ko bhi Red karna
+                    // Cursor drawable ko pakad kar tint karna
+                    val drawable = et.textCursorDrawable
+                    drawable?.setTint(errorColor)
+                    et.textCursorDrawable = drawable
+
+                    // Underline color
+                    et.backgroundTintList = ColorStateList.valueOf(errorColor)
                 }
+
                 view.setErrorTextColor(ColorStateList.valueOf(errorColor))
                 view.setErrorIconTintList(ColorStateList.valueOf(errorColor))
             }
@@ -99,9 +106,10 @@ object AppSettings {
 
         // 3. Focus
         // 🚀 World-Class Fix for Cursor: Post the focus to next frame
-        view.post {
+        // Focus ko 50ms delay se dena taaki tint render ho jaye
+        view.postDelayed({
             view.requestFocus()
-        }
+        }, 50)
     }
 
     fun setPushEffect(view: View) {
