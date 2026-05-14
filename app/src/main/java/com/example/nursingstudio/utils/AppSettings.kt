@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.res.ColorStateList
 import android.view.MotionEvent
 import android.view.View
+import android.view.animation.AnimationUtils
 import androidx.core.content.ContextCompat
 import androidx.core.content.edit
 import com.example.nursingstudio.R
@@ -11,6 +12,10 @@ import com.example.nursingstudio.R
 object AppSettings {
     private const val PREF_SETTINGS = "settings_prefs"
     private const val KEY_VIBRATION = "enable_vibration"
+
+    // 🚀 2026 Performance: Memory Efficient Vibrator Retrieval
+    private fun getVibrator(context: Context) =
+        (context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as android.os.VibratorManager).defaultVibrator
 
     fun isVibrationEnabled(context: Context): Boolean {
         val sp = context.getSharedPreferences(PREF_SETTINGS, Context.MODE_PRIVATE)
@@ -24,104 +29,93 @@ object AppSettings {
 
     fun triggerVibration(context: Context, ms: Long) {
         if (!isVibrationEnabled(context)) return
-
-        // 1. Android 12+ (API 31) direct VibratorManager usage
-        val vibratorManager = context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as android.os.VibratorManager
-        val vibrator = vibratorManager.defaultVibrator
-
-        // 2. Simple, modern vibration execution
+        val vibrator = getVibrator(context)
         if (vibrator.hasVibrator()) {
             vibrator.vibrate(android.os.VibrationEffect.createOneShot(ms, android.os.VibrationEffect.DEFAULT_AMPLITUDE))
         }
     }
+
     /**
-     * CENTRAL AC: Shake + Vibrate Error Animation
-     * Kisi bhi view par error aane par ise call karein
-     */
-    /**
-     * 🚀 2026 Gold Standard: Universal View Error Styler
-     * Ye function automatic pehchanta hai ki view kya hai aur us par error theme apply karta hai
+     * 🚀 2026 Gold Standard: Universal View Error Styler (Modularized)
      */
     fun triggerErrorEffect(context: Context, view: View, message: String? = null) {
         val errorColor = ContextCompat.getColor(context, R.color.error_red)
 
-        // 🚀 2026 Gold Standard: Hierarchy-Aware Styling
-        when (// 1. Agar view TextInputLayout hai (Jaise Name, Email, etc.)
-            view) {
-            is com.google.android.material.textfield.TextInputLayout -> {
-                if (message != null) {
-                    view.isErrorEnabled = true
-                    view.error = message
-                }
+        // Step 1: Branching to specialized handlers for high scalability
+        when (view) {
+            is com.google.android.material.textfield.TextInputLayout ->
+                handleTILError(context, view, message, errorColor)
 
-                // 🚀 2026 Gold Standard: Forced Cursor Re-Assignment
-                view.editText?.let { et ->
-                    // Warning fix: Direct tinting without unused variables
-                    et.textCursorDrawable?.let { drawable ->
-                        drawable.setTint(errorColor)
-                        // CRITICAL: Tint karne ke baad wapas assign karna zaroori hai
-                        et.textCursorDrawable = drawable
-                    }
+            is android.widget.EditText ->
+                handleEditTextError(view, errorColor)
 
-                    // Underline/Background tint
-                    et.backgroundTintList = ColorStateList.valueOf(errorColor)
-
-                    // UI ko refresh karne ke liye force invalidate
-                    et.invalidate()
-                }
-
-                view.setErrorTextColor(ColorStateList.valueOf(errorColor))
-                view.setErrorIconTintList(ColorStateList.valueOf(errorColor))
-            }
-
-            // 2. Agar view Spinner hai
-            is android.widget.Spinner -> {
+            is android.widget.Spinner ->
                 view.background = ContextCompat.getDrawable(context, R.drawable.spinner_error_bg)
-            }
 
-            // 3. Agar view CheckBox hai
-            is android.widget.CheckBox -> {
+            is android.widget.CheckBox ->
                 view.buttonTintList = ColorStateList.valueOf(errorColor)
-            }
 
-            // 4. Special Case: etMobile (Jo direct EditText hai, TIL ke andar nahi hai)
-            is android.widget.EditText -> {
-                // Agar mobile field hai toh border red kar sakte hain ya sirf animation rhne de sakte hain
-                // Kyunki iska error label (TextView) Fragment handle kar raha hai.
-                view.backgroundTintList = ColorStateList.valueOf(errorColor)
-            }
-
-            // 5. Custom Error Labels (TextViews)
-            is android.widget.TextView if message != null -> {
-                view.text = message
-                view.visibility = View.VISIBLE
-                view.setTextColor(errorColor)
+            is android.widget.TextView -> if (message != null) {
+                view.apply {
+                    text = message
+                    visibility = View.VISIBLE
+                    setTextColor(errorColor)
+                }
             }
         }
 
-        // --- Standard Effects (Sabhi Views ke liye) ---
+        // Step 2: Apply common UX effects (Shake, Vibrate)
+        applyStandardEffects(context, view)
 
-        // 1. Shake Animation
-        val shake = android.view.animation.AnimationUtils.loadAnimation(context, R.anim.shake)
-        view.startAnimation(shake)
+        // Step 3: World-Class Focus & Frame Refresh Fix
+        view.post {
+            // 2026 Performance Tip: Force OS to re-calculate UI insets
+            view.requestApplyInsets()
 
-        // 2. Strong Vibration
-        triggerVibration(context, 50)
-
-        // 3. Focus
-        // --- Final Execution ---
-        view.postDelayed({
-            if (view is com.google.android.material.textfield.TextInputLayout) {
-                view.editText?.let {
-                    it.requestFocus()
-                    // Cursor position at the end
-                    it.setSelection(it.text?.length ?: 0)
+            view.postDelayed({
+                if (view is com.google.android.material.textfield.TextInputLayout) {
+                    view.editText?.let { et ->
+                        et.requestFocus()
+                        et.setSelection(et.text?.length ?: 0)
+                        et.requestLayout()
+                    }
+                } else {
+                    view.requestFocus()
                 }
-            } else {
-                view.requestFocus()
-            }
-        }, 150) // 150ms is the "Sweet Spot" for 2026 high-end devices
+            }, 180)
+        }
     }
+
+    // --- Private World-Class Modular Handlers ---
+
+    private fun handleTILError(context: Context, til: com.google.android.material.textfield.TextInputLayout, message: String?, color: Int) {
+        til.isErrorEnabled = true
+        til.error = message
+        til.setErrorTextColor(ColorStateList.valueOf(color))
+        til.setErrorIconTintList(ColorStateList.valueOf(color))
+
+        til.editText?.let { et ->
+            // ✨ Final Cursor Solution: Direct Injection
+            et.textCursorDrawable = ContextCompat.getDrawable(context, R.drawable.cursor_error_red)
+            et.backgroundTintList = ColorStateList.valueOf(color)
+
+            if (et.isFocused) et.clearFocus()
+            et.invalidate()
+        }
+    }
+
+    private fun handleEditTextError(et: android.widget.EditText, color: Int) {
+        et.backgroundTintList = ColorStateList.valueOf(color)
+        et.invalidate()
+    }
+
+    private fun applyStandardEffects(context: Context, view: View) {
+        val shake = AnimationUtils.loadAnimation(context, R.anim.shake)
+        view.startAnimation(shake)
+        triggerVibration(context, 50)
+    }
+
+    // --- Interaction & Session Logic ---
 
     fun setPushEffect(view: View) {
         view.setOnTouchListener { v, event ->
@@ -132,14 +126,13 @@ object AppSettings {
                 }
                 MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
                     v.animate().scaleX(1f).scaleY(1f).setDuration(80).start()
-                    if (event.action == MotionEvent.ACTION_UP) {
-                        v.performClick()
-                    }
+                    if (event.action == MotionEvent.ACTION_UP) v.performClick()
                 }
             }
             true
         }
     }
+
     fun startNewUserSession(context: Context) {
         // 1. Purana shared preferences poori tarah saaf (Suresh vs Alok issue fix)
         val session = context.getSharedPreferences("session", Context.MODE_PRIVATE)
