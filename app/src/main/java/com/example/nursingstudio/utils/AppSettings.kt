@@ -53,17 +53,20 @@ object AppSettings {
                     view.isErrorEnabled = true
                     view.error = message
                 }
-                // ✨ 2026 Gold Standard: Dynamic Cursor Coloring
-                // TextInputLayout ke andar ke EditText ko nikaal kar uska tint badalna
-                // 🚀 2026 Gold Standard: Immediate Tinting
+
+                // ✨ 2026 Gold Standard: Immediate & Forced Cursor Refresh
                 view.editText?.let { et ->
-                    // Cursor drawable ko pakad kar tint karna
+                    // 1. Cursor Drawable Tinting
                     val drawable = et.textCursorDrawable
                     drawable?.setTint(errorColor)
                     et.textCursorDrawable = drawable
 
-                    // Underline color
+                    // 2. Background/Underline Tinting
                     et.backgroundTintList = ColorStateList.valueOf(errorColor)
+
+                    // 3. 🚀 World-Class Trick: Force Cursor Refresh
+                    // Pehle focus htana aur fir postDelayed mein wapas dena
+                    et.clearFocus()
                 }
 
                 view.setErrorTextColor(ColorStateList.valueOf(errorColor))
@@ -82,7 +85,7 @@ object AppSettings {
 
             // 4. Special Case: etMobile (Jo direct EditText hai, TIL ke andar nahi hai)
             is android.widget.EditText -> {
-                // Agar mobile field hai toh border red kar sakte hain ya sirf animation rehne de sakte hain
+                // Agar mobile field hai toh border red kar sakte hain ya sirf animation rhne de sakte hain
                 // Kyunki iska error label (TextView) Fragment handle kar raha hai.
                 view.backgroundTintList = ColorStateList.valueOf(errorColor)
             }
@@ -105,11 +108,20 @@ object AppSettings {
         triggerVibration(context, 50)
 
         // 3. Focus
-        // 🚀 World-Class Fix for Cursor: Post the focus to next frame
-        // Focus ko 50ms delay se dena taaki tint render ho jaye
+        // --- Final Execution ---
+// 🚀 2026 Industry Standard: Frame-Perfect Focus
         view.postDelayed({
-            view.requestFocus()
-        }, 50)
+            if (view is com.google.android.material.textfield.TextInputLayout) {
+                // TextInputLayout ke case mein direct uske andar ke EditText ko focus dena
+                view.editText?.let {
+                    it.requestFocus()
+                    // Cursor ko text ke end mein le jaana (Pro UX)
+                    it.setSelection(it.text?.length ?: 0)
+                }
+            } else {
+                view.requestFocus()
+            }
+        }, 100) // Increase to 100ms for solid rendering guarantee
     }
 
     fun setPushEffect(view: View) {
