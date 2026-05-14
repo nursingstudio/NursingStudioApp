@@ -12,6 +12,10 @@ object AppSettings {
     private const val PREF_SETTINGS = "settings_prefs"
     private const val KEY_VIBRATION = "enable_vibration"
 
+    // 🚀 2026 Performance: Memory Efficient Vibrator Retrieval
+    private fun getVibrator(context: Context) =
+        (context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as android.os.VibratorManager).defaultVibrator
+
     fun isVibrationEnabled(context: Context): Boolean {
         val sp = context.getSharedPreferences(PREF_SETTINGS, Context.MODE_PRIVATE)
         return sp.getBoolean(KEY_VIBRATION, true)
@@ -24,24 +28,12 @@ object AppSettings {
 
     fun triggerVibration(context: Context, ms: Long) {
         if (!isVibrationEnabled(context)) return
-
-        // 1. Android 12+ (API 31) direct VibratorManager usage
-        val vibratorManager = context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as android.os.VibratorManager
-        val vibrator = vibratorManager.defaultVibrator
-
-        // 2. Simple, modern vibration execution
+        val vibrator = getVibrator(context)
         if (vibrator.hasVibrator()) {
             vibrator.vibrate(android.os.VibrationEffect.createOneShot(ms, android.os.VibrationEffect.DEFAULT_AMPLITUDE))
         }
     }
-    /**
-     * CENTRAL AC: Shake + Vibrate Error Animation
-     * Kisi bhi view par error aane par ise call karein
-     */
-    /**
-     * 🚀 2026 Gold Standard: Universal View Error Styler
-     * Ye function automatic pehchanta hai ki view kya hai aur us par error theme apply karta hai
-     */
+
     fun triggerErrorEffect(context: Context, view: View, message: String? = null) {
         val errorColor = ContextCompat.getColor(context, R.color.error_red)
 
