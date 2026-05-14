@@ -54,19 +54,20 @@ object AppSettings {
                     view.error = message
                 }
 
-                // ✨ 2026 Gold Standard: Immediate & Forced Cursor Refresh
+                // 🚀 2026 Gold Standard: Forced Cursor Re-Assignment
                 view.editText?.let { et ->
-                    // 1. Cursor Drawable Tinting
-                    val drawable = et.textCursorDrawable
-                    drawable?.setTint(errorColor)
-                    et.textCursorDrawable = drawable
+                    // Warning fix: Direct tinting without unused variables
+                    et.textCursorDrawable?.let { drawable ->
+                        drawable.setTint(errorColor)
+                        // CRITICAL: Tint karne ke baad wapas assign karna zaroori hai
+                        et.textCursorDrawable = drawable
+                    }
 
-                    // 2. Background/Underline Tinting
+                    // Underline/Background tint
                     et.backgroundTintList = ColorStateList.valueOf(errorColor)
 
-                    // 3. 🚀 World-Class Trick: Force Cursor Refresh
-                    // Pehle focus htana aur fir postDelayed mein wapas dena
-                    et.clearFocus()
+                    // UI ko refresh karne ke liye force invalidate
+                    et.invalidate()
                 }
 
                 view.setErrorTextColor(ColorStateList.valueOf(errorColor))
@@ -109,19 +110,17 @@ object AppSettings {
 
         // 3. Focus
         // --- Final Execution ---
-// 🚀 2026 Industry Standard: Frame-Perfect Focus
         view.postDelayed({
             if (view is com.google.android.material.textfield.TextInputLayout) {
-                // TextInputLayout ke case mein direct uske andar ke EditText ko focus dena
                 view.editText?.let {
                     it.requestFocus()
-                    // Cursor ko text ke end mein le jaana (Pro UX)
+                    // Cursor position at the end
                     it.setSelection(it.text?.length ?: 0)
                 }
             } else {
                 view.requestFocus()
             }
-        }, 100) // Increase to 100ms for solid rendering guarantee
+        }, 150) // 150ms is the "Sweet Spot" for 2026 high-end devices
     }
 
     fun setPushEffect(view: View) {
