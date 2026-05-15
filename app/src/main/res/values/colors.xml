@@ -1,18 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="saffron">#FF9933</color>
-    <color name="saffron_dark">#D35400</color>
-    <color name="saffron_light">#4DFF9933</color>
+<color name="brand_blue">#004B71</color>
+<color name="brand_saffron">#FF9500</color>
+<color name="brand_red">#D32F2F</color>
+<color name="app_background">#FDFDFD</color>
+<color name="surface_variant">#F5F5F5</color>
+<color name="text_primary">#121212</color>
+<color name="text_secondary">#4A4A4A</color>
 
-    <color name="app_background">#FFF4E3</color>
-    <color name="text_primary">#1A1A1A</color>
-    <color name="text_secondary">#595959</color>
-    <color name="white">#FFFFFFFF</color>
+<color name="error_red">#B00020</color>
+<color name="success_green">#2E7D32</color>
+<color name="white">#FFFFFF</color>
+<color name="black">#000000</color>
 
-    <color name="error_red">#E53935</color>
+<color name="saffron_light">#26FF9500</color>
 
+    <color name="border_grey">#D1D1D1</color>
+    <color name="overlay_black">#80000000</color>
+    <color name="progress_track">#E0E0E0</color>
+
+    <color name="brand_saffron_dark">#D35400</color>
+
+    <color name="saffron">@color/brand_saffron</color>
+    <color name="saffron_dark">@color/brand_saffron_dark</color>
     <color name="greyish_blue">#546E7A</color>
-
     <color name="on_saffron">#FFFFFF</color>
 
 </resources>

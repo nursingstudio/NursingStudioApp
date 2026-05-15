@@ -2,24 +2,30 @@
 
     // main theme //
     <style name="Theme.NursingStudio" parent="Theme.Material3.Light.NoActionBar">
-        <item name="colorPrimary">@color/saffron</item>
+        <item name="colorPrimary">@color/brand_blue</item>
         <item name="colorOnPrimary">@color/white</item>
-
-        <item name="colorOnSurface">#444444</item>
-        <item name="colorOnSurfaceVariant">#757575</item>
-
-        <item name="colorControlNormal">#757575</item>
-        <item name="colorControlActivated">@color/saffron</item>
+        <item name="colorSecondary">@color/brand_saffron</item>
+        <item name="colorOnSecondary">@color/white</item>
 
         <item name="android:windowBackground">@color/app_background</item>
-
-        <item name="android:textColorHighlight">#4DFFD580</item>
-
-        <item name="android:windowDisablePreview">true</item>
+        <item name="colorSurface">@color/white</item>
+        <item name="colorOnSurface">@color/text_primary</item>
 
         <item name="colorError">@color/error_red</item>
+        <item name="colorOnError">@color/white</item>
+
+        <item name="android:textColorHighlight">@color/saffron_light</item>
+
+        <item name="android:windowDisablePreview">true</item>
+        <item name="colorOnSurfaceVariant">@color/text_secondary</item>
+        <item name="colorControlNormal">@color/text_secondary</item>
+
         <item name="helperTextTextAppearance">@style/TextAppearance.App.Error</item>
         <item name="errorTextAppearance">@style/TextAppearance.App.Error</item>
+
+        <item name="android:textColorHint">#546E7A</item>
+
+        <item name="colorControlActivated">@color/brand_saffron</item>
     </style>
 
     <style name="TextAppearance.App.Error" parent="TextAppearance.MaterialComponents.Caption">

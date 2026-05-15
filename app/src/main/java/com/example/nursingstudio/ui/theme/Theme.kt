@@ -5,15 +5,21 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 
 private val LightColorScheme = lightColorScheme(
-    primary = Saffron,
-    secondary = SaffronDark,
-    tertiary = SaffronLight,
-    background = AppBackground
+    primary = PrimaryBlue,
+    onPrimary = Color.White,
+    secondary = SecondarySaffron,
+    onSecondary = Color.White,
+    error = ErrorRed,
+    background = LightBackground,
+    onBackground = OnSurfaceText,
+    surface = Color.White,
+    onSurface = OnSurfaceText
 )
 
 @Composable
@@ -26,7 +32,7 @@ fun NursingStudioTheme(
             val window = (view.context as Activity).window
             // 2026 Modern Way: Property use karein, setter method nahi
             @Suppress("DEPRECATION")
-            window.statusBarColor = Saffron.toArgb()
+            window.statusBarColor = SecondarySaffron.toArgb()
 
             // Icons brightness control
             WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = false

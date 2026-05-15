@@ -26,8 +26,8 @@ import com.example.nursingstudio.ui.features.social.SocialAdapter
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
-import kotlinx.coroutines.launch
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 
 @AndroidEntryPoint // ✅ Mandatory for any Activity hosting Hilt Fragments
 class MainActivity : AppCompatActivity() {
