@@ -61,8 +61,6 @@
                         android:hint="@string/hint_full_name_req"
                         app:helperTextEnabled="true"
                         android:importantForAutofill="yes"
-                        app:cursorColor="@color/brand_saffron"
-                        app:boxStrokeColor="@color/brand_saffron"
                         app:boxStrokeWidthFocused="2dp"
                         app:errorIconDrawable="@null">
 
@@ -101,8 +99,6 @@
                         app:helperTextEnabled="true"
                         android:importantForAutofill="yes"
                         app:errorIconDrawable="@null"
-                        app:cursorColor="@color/brand_saffron"
-                        app:boxStrokeColor="@color/brand_saffron"
                         app:boxStrokeWidthFocused="2dp"
                         app:startIconDrawable="@android:drawable/ic_menu_my_calendar"
                         app:startIconTint="@color/brand_blue">
@@ -162,8 +158,6 @@
                         app:helperTextEnabled="true"
                         android:importantForAutofill="yes"
                         app:errorIconDrawable="@null"
-                        app:cursorColor="@color/brand_saffron"
-                        app:boxStrokeColor="@color/brand_saffron"
                         app:boxStrokeWidthFocused="2dp"
                         android:layout_marginTop="4dp">
 
@@ -191,8 +185,6 @@
                         app:helperTextEnabled="true"
                         android:importantForAutofill="yes"
                         app:errorIconDrawable="@null"
-                        app:cursorColor="@color/brand_saffron"
-                        app:boxStrokeColor="@color/brand_saffron"
                         app:boxStrokeWidthFocused="2dp"
                         android:layout_marginTop="4dp">
 
@@ -280,8 +272,6 @@
                         app:helperTextEnabled="true"
                         android:importantForAutofill="yes"
                         app:errorIconDrawable="@null"
-                        app:cursorColor="@color/brand_saffron"
-                        app:boxStrokeColor="@color/brand_saffron"
                         app:boxStrokeWidthFocused="2dp"
                         android:hint="@string/hint_email_req">
 
@@ -313,8 +303,6 @@
                         app:helperTextEnabled="true"
                         android:importantForAutofill="yes"
                         app:errorIconDrawable="@null"
-                        app:cursorColor="@color/brand_saffron"
-                        app:boxStrokeColor="@color/brand_saffron"
                         app:boxStrokeWidthFocused="2dp"
                         android:layout_marginTop="4dp">
 
@@ -342,8 +330,6 @@
                         app:helperTextEnabled="true"
                         android:importantForAutofill="yes"
                         app:errorIconDrawable="@null"
-                        app:cursorColor="@color/brand_saffron"
-                        app:boxStrokeColor="@color/brand_saffron"
                         app:boxStrokeWidthFocused="2dp"
                         android:layout_marginTop="4dp">
 
@@ -365,8 +351,6 @@
                         app:helperTextEnabled="true"
                         android:importantForAutofill="yes"
                         app:errorIconDrawable="@null"
-                        app:cursorColor="@color/brand_saffron"
-                        app:boxStrokeColor="@color/brand_saffron"
                         app:boxStrokeWidthFocused="2dp"
                         android:hint="@string/hint_district_req">
 
@@ -387,8 +371,6 @@
                         app:helperTextEnabled="true"
                         android:importantForAutofill="yes"
                         app:errorIconDrawable="@null"
-                        app:cursorColor="@color/brand_saffron"
-                        app:boxStrokeColor="@color/brand_saffron"
                         app:boxStrokeWidthFocused="2dp"
                         android:hint="@string/hint_address_req">
 
@@ -412,8 +394,6 @@
                         app:helperTextEnabled="true"
                         android:importantForAutofill="yes"
                         app:errorIconDrawable="@null"
-                        app:cursorColor="@color/brand_saffron"
-                        app:boxStrokeColor="@color/brand_saffron"
                         app:boxStrokeWidthFocused="2dp"
                         android:hint="@string/hint_pincode_req">
 
@@ -475,8 +455,6 @@
                             app:helperTextEnabled="true"
                             android:importantForAutofill="yes"
                             app:errorIconDrawable="@null"
-                            app:cursorColor="@color/brand_saffron"
-                            app:boxStrokeColor="@color/brand_saffron"
                             app:boxStrokeWidthFocused="2dp"
                             android:hint="@string/hint_reg_state">
 
@@ -497,8 +475,6 @@
                             app:helperTextEnabled="true"
                             android:importantForAutofill="yes"
                             app:errorIconDrawable="@null"
-                            app:cursorColor="@color/brand_saffron"
-                            app:boxStrokeColor="@color/brand_saffron"
                             app:boxStrokeWidthFocused="2dp"
                             android:hint="@string/hint_reg_num">
 
@@ -520,12 +496,9 @@
                         app:helperTextEnabled="true"
                         android:importantForAutofill="yes"
                         app:errorIconDrawable="@null"
-                        app:cursorColor="@color/brand_saffron"
-                        app:boxStrokeColor="@color/brand_saffron"
                         app:boxStrokeWidthFocused="2dp"
                         android:hint="@string/hint_set_pass"
-                        app:passwordToggleEnabled="true"
-                        app:passwordToggleTint="@color/brand_saffron">
+                        app:passwordToggleEnabled="true">
 
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/etPassword"

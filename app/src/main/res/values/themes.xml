@@ -17,12 +17,22 @@
         <item name="colorControlNormal">@color/text_secondary</item>
         <item name="colorControlActivated">@color/brand_blue</item>
         <item name="android:textColorHint">@color/text_secondary</item>
-
-        <item name="passwordToggleTint">@color/text_secondary</item>
         <item name="colorError">@color/error_red</item>
         <item name="colorOnError">@color/white</item>
         <item name="android:textColorHighlight">@color/saffron_light</item>
+
+        <item name="textInputStyle">@style/Widget.Material3.TextInputLayout.OutlinedBox.CustomGlobal</item>
+        <item name="bottomSheetDialogTheme">@style/BottomSheetDialogTheme</item>
+
         <item name="android:windowDisablePreview">true</item>
+    </style>
+
+    <style name="Widget.Material3.TextInputLayout.OutlinedBox.CustomGlobal" parent="Widget.Material3.TextInputLayout.OutlinedBox">
+        <item name="boxStrokeColor">@color/brand_blue</item> <item name="boxStrokeWidthFocused">2dp</item>
+        <item name="cursorColor">@color/brand_blue</item>
+        <item name="passwordToggleTint">@color/text_secondary</item>
+        <item name="hintTextColor">@color/brand_blue</item>
+        <item name="shapeAppearanceOverlay">@style/ShapeAppearanceOverlay.App.Card.Rounded</item>
     </style>
 
     <style name="TextAppearance.App.Error" parent="TextAppearance.Material3.BodySmall">
@@ -66,14 +76,17 @@
         <item name="colorSecondary">@color/brand_blue</item>
     </style>
 
-    <style name="BottomSheetDialogTheme" parent="Theme.Design.Light.BottomSheetDialog">
+    <style name="BottomSheetDialogTheme" parent="ThemeOverlay.Material3.BottomSheetDialog">
         <item name="bottomSheetStyle">@style/CustomBottomSheetStyle</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
         <item name="android:windowIsFloating">false</item>
         <item name="colorSecondaryContainer">@color/brand_saffron_dark</item>
     </style>
 
-    <style name="CustomBottomSheetStyle" parent="Widget.Design.BottomSheet.Modal">
-        <item name="android:background">@android:color/transparent</item>
+    <style name="CustomBottomSheetStyle" parent="Widget.Material3.BottomSheet.Modal">
+        <item name="backgroundTint">@color/surface_card</item>
+        <item name="shapeAppearanceOverlay">@style/ShapeAppearanceOverlay.App.Card.Rounded</item>
+        <item name="behavior_peekHeight">auto</item>
         <item name="enableEdgeToEdge">true</item>
     </style>
 
