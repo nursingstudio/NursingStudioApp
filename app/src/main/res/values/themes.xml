@@ -4,8 +4,7 @@
     <style name="Theme.NursingStudio" parent="Theme.Material3.Light.NoActionBar">
         <item name="colorPrimary">@color/brand_blue</item>
         <item name="colorOnPrimary">@color/white</item>
-        <item name="colorSecondary">@color/brand_saffron</item>
-        <item name="colorOnSecondary">@color/white</item>
+        <item name="colorSecondary">@color/brand_saffron_dark</item> <item name="colorOnSecondary">@color/white</item>
         <item name="colorTertiary">@color/medical_teal</item>
 
         <item name="android:windowBackground">@color/app_background</item>
@@ -15,7 +14,7 @@
         <item name="colorOnSurfaceVariant">@color/text_secondary</item>
 
         <item name="colorControlNormal">@color/text_secondary</item>
-        <item name="colorControlActivated">@color/brand_blue</item>
+        <item name="colorControlActivated">@color/brand_saffron_dark</item>
         <item name="android:textColorHint">@color/text_secondary</item>
         <item name="colorError">@color/error_red</item>
         <item name="colorOnError">@color/white</item>
@@ -23,12 +22,32 @@
 
         <item name="textInputStyle">@style/Widget.Material3.TextInputLayout.OutlinedBox.CustomGlobal</item>
         <item name="bottomSheetDialogTheme">@style/BottomSheetDialogTheme</item>
+        <item name="materialCardViewStyle">@style/Widget.Material3.CardView.CustomGlobalBorder</item>
+        <item name="navigationViewStyle">@style/Widget.App.NavigationView.Premium</item>
 
         <item name="android:windowDisablePreview">true</item>
     </style>
 
+    <style name="Widget.Material3.CardView.CustomGlobalBorder" parent="Widget.Material3.CardView.Filled">
+        <item name="cardBackgroundColor">@color/surface_card</item>
+        <item name="cardElevation">0dp</item>
+        <item name="strokeColor">@color/brand_saffron_dark</item> <item name="strokeWidth">1dp</item>
+        <item name="shapeAppearanceOverlay">@style/ShapeAppearanceOverlay.App.Card.Rounded</item>
+    </style>
+
+    <style name="Widget.App.NavigationView.Premium" parent="Widget.Material3.NavigationView">
+        <item name="backgroundTint">@color/surface_card</item>
+        <item name="itemIconTint">@color/text_secondary</item>
+        <item name="itemTextColor">@color/text_primary</item>
+        <item name="itemShapeAppearanceOverlay">@style/ShapeAppearanceOverlay.App.Card.Rounded</item>
+        <item name="itemShapeInsetStart">8dp</item>
+        <item name="itemShapeInsetEnd">8dp</item>
+        <item name="itemBackground">@drawable/drawer_item_selector</item>
+    </style>
+
     <style name="Widget.Material3.TextInputLayout.OutlinedBox.CustomGlobal" parent="Widget.Material3.TextInputLayout.OutlinedBox">
-        <item name="boxStrokeColor">@color/brand_blue</item> <item name="boxStrokeWidthFocused">2dp</item>
+        <item name="boxStrokeColor">@color/brand_blue</item>
+        <item name="boxStrokeWidthFocused">2dp</item>
         <item name="cursorColor">@color/brand_blue</item>
         <item name="passwordToggleTint">@color/text_secondary</item>
         <item name="hintTextColor">@color/brand_blue</item>
@@ -94,6 +113,7 @@
         <item name="shapeAppearanceOverlay">@style/ShapeAppearanceOverlay.App.Card.Rounded</item>
         <item name="colorPrimary">@color/brand_saffron_dark</item>
         <item name="buttonBarPositiveButtonStyle">@style/SaffronButtonStyle</item>
+        <item name="buttonBarNegativeButtonStyle">@style/SaffronButtonStyle</item>
         <item name="android:backgroundDimEnabled">true</item>
         <item name="android:backgroundDimAmount">0.65</item>
         <item name="colorSurface">@color/surface_card</item>
@@ -102,6 +122,7 @@
     <style name="SaffronButtonStyle" parent="Widget.Material3.Button.TextButton">
         <item name="android:textColor">@color/brand_saffron_dark</item>
         <item name="android:textStyle">bold</item>
+        <item name="rippleColor">@color/saffron_ripple</item>
     </style>
 
     <style name="ShapeAppearanceOverlay.App.Card.Rounded" parent="ShapeAppearance.Material3.Corner.Medium">

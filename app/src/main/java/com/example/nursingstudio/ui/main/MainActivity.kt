@@ -192,7 +192,7 @@ class MainActivity : AppCompatActivity() {
                     dataStoreManager.subscriptionType.collect { type ->
                         headerBinding.tvDrawerSubscription.text = "Plan: $type"
                         headerBinding.tvDrawerSubscription.setTextColor(
-                            if (type == "Premium") getColor(R.color.saffron)
+                            if (type == "Premium") getColor(R.color.brand_saffron)
                             else getColor(android.R.color.white)
                         )
                     }

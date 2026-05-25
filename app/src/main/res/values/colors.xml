@@ -4,8 +4,9 @@
     <color name="brand_saffron">#FF9500</color>
     <color name="brand_saffron_dark">#E25800</color>
     <color name="medical_teal">#0F766E</color>
-    <color name="saffron_light">#1FFF9500</color>
 
+    <color name="saffron_light">#1FE25800</color>
+    <color name="saffron_ripple">#2CE25800</color>
     <color name="app_background">#FAFAFC</color>
     <color name="surface_card">#FFFFFF</color>
     <color name="surface_variant">#F1F5F9</color>
