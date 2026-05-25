@@ -246,7 +246,23 @@
     <string name="err_email_exists">This email is already registered. Please login. Redirecting you to Login…</string>
     <string name="err_invalid_email">Please enter a valid email address.</string>
     <string name="err_server_busy">Server busy! Please try again later. ⏳</string>
-
+    <string name="notice_board">Notice Board</string>
+    <string name="abhi_koi_notice_nahi_hai_jaldi_hi_important_updates_yahan_dikhai_jayengi">Abhi koi notice nahi hai. Jaldi hi important updates yahan dikhai jayengi.</string>
+    <string name="pdf_library">PDF Library</string>
+    <string name="access_important_pdfs_for_nursing_competitive_exams">Access important PDFs for nursing competitive exams.</string>
+    <string name="important_pdfs">Important PDFs</string>
+    <string name="imp_pdf">Important PDFs</string>
+    <string name="high_yield_notes_and_summaries">High-yield notes and summaries.</string>
+    <string name="topic_wise_pdfs">Topic-wise PDFs</string>
+    <string name="topic_wise_notes">Topic-wise Notes</string>
+    <string name="system_wise_unit_wise_pdf_notes">System-wise, unit-wise PDF notes.</string>
+    <string name="question_papers">Question Papers</string>
+    <string name="previous_question_papers">Previous Question Papers</string>
+    <string name="past_exams_pdfs_to_practice">Past exams PDFs to practice.</string>
+    <string name="online_test_series">Online Test Series</string>
+    <string name="boost_your_preparation_with_real_time_analysis">Boost your preparation with real-time analysis.</string>
+    <string name="full_syllabus_mock_test">Full Syllabus Mock Test</string>
+    <string name="_100_questions_90_minutes">100 Questions | 90 Minutes</string>
 
 
 </resources>

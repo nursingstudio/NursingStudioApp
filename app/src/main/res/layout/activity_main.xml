@@ -17,7 +17,7 @@
             android:id="@+id/topAppBar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            android:background="@color/saffron"
+            android:background="@color/brand_saffron_dark"
             android:elevation="4dp"
             android:title="@string/nursing_studio"
             android:titleTextColor="@android:color/white"

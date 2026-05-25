@@ -15,7 +15,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="PDF Library"
+            android:text="@string/pdf_library"
             android:textSize="20sp"
             android:textStyle="bold"
             android:textColor="@color/text_primary"
@@ -24,7 +24,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Access important PDFs for nursing competitive exams."
+            android:text="@string/access_important_pdfs_for_nursing_competitive_exams"
             android:textSize="14sp"
             android:textColor="@color/text_secondary"
             android:layout_marginBottom="16dp" />
@@ -41,7 +41,7 @@
             app:cardCornerRadius="16dp"
             app:cardElevation="4dp"
             app:strokeWidth="1dp"
-            app:strokeColor="@color/saffron">
+            app:strokeColor="@color/brand_saffron_dark">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -54,7 +54,7 @@
                     android:layout_width="40dp"
                     android:layout_height="40dp"
                     android:src="@drawable/ic_pdf"
-                    android:contentDescription="Important PDFs" />
+                    android:contentDescription="@string/important_pdfs" />
 
                 <LinearLayout
                     android:layout_width="0dp"
@@ -66,7 +66,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Important PDFs"
+                        android:text="@string/imp_pdf"
                         android:textSize="16sp"
                         android:textStyle="bold"
                         android:textColor="@color/text_primary" />
@@ -74,7 +74,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="High-yield notes and summaries."
+                        android:text="@string/high_yield_notes_and_summaries"
                         android:textSize="13sp"
                         android:textColor="@color/text_secondary" />
                 </LinearLayout>
@@ -93,7 +93,7 @@
             app:cardCornerRadius="16dp"
             app:cardElevation="4dp"
             app:strokeWidth="1dp"
-            app:strokeColor="@color/saffron">
+            app:strokeColor="@color/brand_saffron_dark">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -106,7 +106,7 @@
                     android:layout_width="40dp"
                     android:layout_height="40dp"
                     android:src="@drawable/ic_pdf"
-                    android:contentDescription="Topic-wise PDFs" />
+                    android:contentDescription="@string/topic_wise_pdfs" />
 
                 <LinearLayout
                     android:layout_width="0dp"
@@ -118,7 +118,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Topic-wise Notes"
+                        android:text="@string/topic_wise_notes"
                         android:textSize="16sp"
                         android:textStyle="bold"
                         android:textColor="@color/text_primary" />
@@ -126,7 +126,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="System-wise, unit-wise PDF notes."
+                        android:text="@string/system_wise_unit_wise_pdf_notes"
                         android:textSize="13sp"
                         android:textColor="@color/text_secondary" />
                 </LinearLayout>
@@ -145,7 +145,7 @@
             app:cardCornerRadius="16dp"
             app:cardElevation="4dp"
             app:strokeWidth="1dp"
-            app:strokeColor="@color/saffron">
+            app:strokeColor="@color/brand_saffron_dark">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -158,7 +158,7 @@
                     android:layout_width="40dp"
                     android:layout_height="40dp"
                     android:src="@drawable/ic_pdf"
-                    android:contentDescription="Question Papers" />
+                    android:contentDescription="@string/question_papers" />
 
                 <LinearLayout
                     android:layout_width="0dp"
@@ -170,7 +170,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Previous Question Papers"
+                        android:text="@string/previous_question_papers"
                         android:textSize="16sp"
                         android:textStyle="bold"
                         android:textColor="@color/text_primary" />
@@ -178,7 +178,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Past exams PDFs to practice."
+                        android:text="@string/past_exams_pdfs_to_practice"
                         android:textSize="13sp"
                         android:textColor="@color/text_secondary" />
                 </LinearLayout>

@@ -13,7 +13,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/enter_security_mpin"
-        android:textColor="@color/saffron_dark"
+        android:textColor="@color/brand_saffron_dark"
         android:textSize="18sp"
         android:textStyle="bold"
         tools:ignore="TextContrastCheck" />
@@ -153,7 +153,7 @@
             app:iconGravity="textStart"
             app:iconSize="32dp"
             app:iconPadding="0dp"
-            app:iconTint="@color/saffron_dark" />
+            app:iconTint="@color/brand_saffron_dark" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnKey0"

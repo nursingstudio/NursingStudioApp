@@ -64,7 +64,7 @@
         android:layout_marginBottom="10dp"
         app:cornerRadius="16dp"
         android:textStyle="bold"
-        app:backgroundTint="@color/saffron"
+        app:backgroundTint="@color/brand_saffron"
         app:layout_constraintTop_toBottomOf="@id/tilVerifyPassword"
         app:layout_constraintBottom_toBottomOf="parent" />
 

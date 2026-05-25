@@ -12,7 +12,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Notice Board"
+            android:text="@string/notice_board"
             android:textSize="20sp"
             android:textStyle="bold"
             android:layout_marginBottom="8dp" />
@@ -20,7 +20,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Abhi koi notice nahi hai. Jaldi hi important updates yahan dikhai jayengi."
+            android:text="@string/abhi_koi_notice_nahi_hai_jaldi_hi_important_updates_yahan_dikhai_jayengi"
             android:textSize="14sp" />
 
     </LinearLayout>

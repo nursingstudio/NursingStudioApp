@@ -383,7 +383,7 @@ class RegisterFragment : Fragment() {
     private fun setupTermsLink() {
         val fullText = "I have read and agree to the Terms & Conditions and Privacy Policy."
         val spannable = SpannableString(fullText)
-        val saffron = ContextCompat.getColor(requireContext(), R.color.saffron_dark)
+        val saffron = ContextCompat.getColor(requireContext(), R.color.brand_saffron_dark)
 
         val tcClick = object : ClickableSpan() {
             override fun onClick(v: View) {

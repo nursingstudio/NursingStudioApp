@@ -11,7 +11,7 @@
         android:layout_width="40dp"
         android:layout_height="4dp"
         android:layout_gravity="center_horizontal"
-        android:background="@color/saffron_dark"
+        android:background="@color/brand_saffron_dark"
         android:layout_marginBottom="16dp"/>
 
     <TextView
@@ -20,7 +20,7 @@
         android:layout_height="wrap_content"
         android:textSize="20sp"
         android:textStyle="bold"
-        android:textColor="@color/saffron_dark"
+        android:textColor="@color/brand_saffron_dark"
         android:layout_marginBottom="12dp"
         android:text="@string/policy_title_tnc"/>
 
@@ -50,7 +50,7 @@
         android:enabled="false"
         android:alpha="0.5"
         app:cornerRadius="12dp"
-        android:backgroundTint="@color/saffron"
+        android:backgroundTint="@color/brand_saffron"
         android:textColor="@android:color/white"
         android:insetTop="0dp"
         android:insetBottom="0dp"/>

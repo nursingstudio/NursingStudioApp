@@ -102,7 +102,7 @@
                         android:layout_height="32dp"
                         android:src="@drawable/ic_quiz"
                         android:contentDescription="@string/test_series"
-                        app:tint="@color/saffron" />
+                        app:tint="@color/brand_saffron_dark" />
 
                     <TextView
                         android:text="@string/test_series"
@@ -137,7 +137,7 @@
                         android:layout_height="32dp"
                         android:src="@drawable/ic_pdf"
                         android:contentDescription="@string/pdfs"
-                        app:tint="@color/saffron" />
+                        app:tint="@color/brand_saffron_dark" />
 
                     <TextView
                         android:text="@string/pdfs"
@@ -180,7 +180,7 @@
                         android:layout_height="32dp"
                         android:src="@drawable/ic_video"
                         android:contentDescription="@string/videos"
-                        app:tint="@color/saffron" />
+                        app:tint="@color/brand_saffron_dark" />
 
                     <TextView
                         android:text="@string/videos"
@@ -215,7 +215,7 @@
                         android:layout_height="32dp"
                         android:src="@drawable/ic_progress"
                         android:contentDescription="@string/progress"
-                        app:tint="@color/saffron" />
+                        app:tint="@color/brand_saffron_dark" />
 
                     <TextView
                         android:text="@string/progress"
