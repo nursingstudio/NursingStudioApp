@@ -4,107 +4,147 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.database.ContentObserver
+import android.os.Build
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.provider.Settings
-import android.util.Base64
 import android.view.View
 import android.widget.LinearLayout
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import com.example.nursingstudio.R
 import com.example.nursingstudio.databinding.LayoutSecurityAlertBinding
 import com.example.nursingstudio.ui.auth.login.LoginFragment
 import com.example.nursingstudio.ui.auth.register.RegisterFragment
-import com.example.nursingstudio.ui.main.MainActivity
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.play.core.appupdate.AppUpdateManagerFactory
 import com.google.android.play.core.appupdate.AppUpdateOptions
 import com.google.android.play.core.install.model.AppUpdateType
 import com.google.android.play.core.install.model.UpdateAvailability
-import com.google.android.play.core.integrity.IntegrityManagerFactory
-import com.google.android.play.core.integrity.IntegrityTokenRequest
-import com.google.firebase.BuildConfig
 import com.google.firebase.FirebaseApp
-import com.google.firebase.FirebaseException
 import com.google.firebase.appcheck.FirebaseAppCheck
 import com.google.firebase.appcheck.debug.DebugAppCheckProviderFactory
 import com.google.firebase.appcheck.playintegrity.PlayIntegrityAppCheckProviderFactory
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.PhoneAuthCredential
-import com.google.firebase.auth.PhoneAuthOptions
-import com.google.firebase.auth.PhoneAuthProvider
-import com.google.firebase.crashlytics.FirebaseCrashlytics
 import dagger.hilt.android.AndroidEntryPoint
 import java.io.File
-import java.util.concurrent.TimeUnit
 
-@AndroidEntryPoint // ✅ 2026 Gold Standard: This allows Hilt to inject into Fragments
+@AndroidEntryPoint // ✅ Hilt Multi-Thread Injection Engine Allowed
 class AuthActivity : AppCompatActivity() {
-
-    private val auth = FirebaseAuth.getInstance()
 
     private var securitySheet: BottomSheetDialog? = null
     private lateinit var usbReceiver: BroadcastReceiver
+
+    // ⭐ 2026 GOLD STANDARD: Real-time Database Engine Observers for System Settings
+    private var devOptionsObserver: ContentObserver? = null
+    private var adbObserver: ContentObserver? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         FirebaseApp.initializeApp(this)
 
-        // ⭐ 2026 GOLD STANDARD: Smart App Check Initialization
+        // ⭐ 2026 GOLD STANDARD: Double-Layer Guard to Silences Kotlin Linter Warning on Build Variants
         val firebaseAppCheck = FirebaseAppCheck.getInstance()
 
-        if (BuildConfig.DEBUG) {
-            // Debug mode: For Testing (Emulators/Physical devices)
+        @Suppress("KotlinConstantConditions", "ConstantConditions")
+        val isDebugEnvironment = com.example.nursingstudio.BuildConfig.DEBUG
+
+        @Suppress("KotlinConstantConditions", "ConstantConditions")
+        if (isDebugEnvironment) {
+            // Debug mode: Loaded safely when variants switched to debug config
             firebaseAppCheck.installAppCheckProviderFactory(
                 DebugAppCheckProviderFactory.getInstance()
             )
         } else {
-            // Release mode: For Play Store (World-Class Security)
+            // Release mode: Signed dynamic security check for Google Play Store
             firebaseAppCheck.installAppCheckProviderFactory(
                 PlayIntegrityAppCheckProviderFactory.getInstance()
             )
-
         }
 
         setContentView(R.layout.activity_auth)
 
-        // ⭐ Security Check Call
+        // Architectural isolation of standard verification engine
         window.decorView.postDelayed({ checkEnvironmentIntegrity() }, 500)
 
-        // ⭐ 2026 INTEL-LOGIC: Auto-dismiss alert when USB is unplugged
-         usbReceiver = object : BroadcastReceiver() {
+        // ⭐ 2026 INTEL-LOGIC: Auto-dismiss system hardware structural listener
+        usbReceiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context?, intent: Intent?) {
                 val connected = intent?.extras?.getBoolean("connected") ?: false
-                if (!isFinishing && !isDestroyed && securitySheet?.isShowing == true) {
-                    securitySheet!!.dismiss()
-                }
-                if (!connected && securitySheet?.isShowing == true) {
-                    // Agar alert USB wala tha, toh band kar do
-                    securitySheet?.dismiss()
+                if (!isFinishing && !isDestroyed) {
+                    // Real-time immediate validation when state changes
+                    checkEnvironmentIntegrity()
+                    if (!connected && securitySheet?.isShowing == true) {
+                        securitySheet?.dismiss()
+                    }
                 }
             }
         }
-        registerReceiver(usbReceiver, IntentFilter("android.hardware.usb.action.USB_STATE"))
+
+        // Android 14+ Explicit Context Broadcast Verification Standard Compliance
+        val usbFilter = IntentFilter().apply {
+            addAction("android.hardware.usb.action.USB_STATE")
+            addAction(Intent.ACTION_POWER_CONNECTED)
+            addAction(Intent.ACTION_POWER_DISCONNECTED)
+        }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            registerReceiver(usbReceiver, usbFilter, RECEIVER_EXPORTED)
+        } else {
+            registerReceiver(usbReceiver, usbFilter)
+        }
+
+        // ⭐ SETUP REAL-TIME SYSTEM REGISTRY OBSERVERS
+        setupSystemSettingsObservers()
 
         if (savedInstanceState == null) {
             showLogin()
         }
 
-        // Delay updates for better UX
         window.decorView.postDelayed({ checkForUpdates() }, 2000)
     }
+
     override fun onResume() {
         super.onResume()
-        // 500ms delay taaki system settings fresh read ho sake
-        window.decorView.postDelayed({ checkEnvironmentIntegrity() }, 500)
+        checkEnvironmentIntegrity()
     }
-    // Login Fragment dikhane ke liye
+
+    // ⭐ 2026 SECURE RUNTIME PIPELINE: Continuous Tracking Architecture
+    private fun setupSystemSettingsObservers() {
+        val mainHandler = Handler(Looper.getMainLooper())
+
+        devOptionsObserver = object : ContentObserver(mainHandler) {
+            override fun onChange(selfChange: Boolean) {
+                super.onChange(selfChange)
+                checkEnvironmentIntegrity()
+            }
+        }
+
+        adbObserver = object : ContentObserver(mainHandler) {
+            override fun onChange(selfChange: Boolean) {
+                super.onChange(selfChange)
+                checkEnvironmentIntegrity()
+            }
+        }
+
+        // Register secure listener nodes deep inside Android ContentResolver
+        contentResolver.registerContentObserver(
+            Settings.Global.getUriFor(Settings.Global.DEVELOPMENT_SETTINGS_ENABLED),
+            false,
+            devOptionsObserver!!
+        )
+        contentResolver.registerContentObserver(
+            Settings.Global.getUriFor(Settings.Global.ADB_ENABLED),
+            false,
+            adbObserver!!
+        )
+    }
+
     fun showLogin() {
         replaceFragment(LoginFragment(), false)
     }
 
-    // Register Fragment dikhane ke liye (Iska error aa raha tha na? Ab nahi aayega!)
     fun showRegister() {
         replaceFragment(RegisterFragment(), true)
     }
@@ -112,134 +152,59 @@ class AuthActivity : AppCompatActivity() {
     private fun replaceFragment(fragment: Fragment, addToBackStack: Boolean) {
         val transaction = supportFragmentManager.beginTransaction()
 
-        // ⭐ WORLD-CLASS PREMIUM ANIMATION ⭐
-        // Parameters: (Enter, Exit, PopEnter, PopExit)
+        // ⭐ PREMIUM ACCELERATED SEAMLESS INTERPOLATION CORE ANIMATIONS
         transaction.setCustomAnimations(
-            R.anim.slide_in_right,  // Naya fragment aate waqt
-            R.anim.slide_out_left,  // Purana fragment jaate waqt
-            R.anim.slide_in_left,   // Back dabane par purana wapas aate waqt
-            R.anim.slide_out_right  // Back dabane par naya jaate waqt
+            R.anim.slide_in_right,
+            R.anim.slide_out_left,
+            R.anim.slide_in_left,
+            R.anim.slide_out_right
         )
 
         transaction.replace(R.id.auth_container, fragment)
-
         if (addToBackStack) {
             transaction.addToBackStack(null)
         }
-
         transaction.commit()
     }
 
-    // --- ⚡ OTP SENDER (Fragment se call hoga) ⚡ ---
-    // --- ⚡ SECURE OTP SENDER (Updated with Play Integrity) ⚡ ---
-// AuthActivity.kt (Optimized Master Hub)
-    fun sendOtp(mobile: String, onCodeSent: (String) -> Unit) {
-        val integrityManager = IntegrityManagerFactory.create(applicationContext)
-
-        // ⭐ 2026 Standard: Base64 Nonce
-        val nonceRaw = "nursing_studio_${System.currentTimeMillis()}"
-        val nonce = Base64.encodeToString(
-            nonceRaw.toByteArray(),
-            Base64.URL_SAFE or Base64.NO_WRAP or Base64.NO_PADDING
-        )
-
-        val integrityTokenRequest = IntegrityTokenRequest.builder()
-            .setNonce(nonce)
-            .setCloudProjectNumber(1009948838228L)
-            .build()
-
-        // Baaki code same rahega...
-        integrityManager.requestIntegrityToken(integrityTokenRequest)
-            .addOnCompleteListener { _ -> proceedToVerify(mobile, onCodeSent) }
-    }
-
-    private fun proceedToVerify(mobile: String, onCodeSent: (String) -> Unit) {
-        val options = PhoneAuthOptions.newBuilder(auth)
-            .setPhoneNumber("+91$mobile")
-            .setTimeout(60L, TimeUnit.SECONDS)
-            .setActivity(this)
-            .setCallbacks(object : PhoneAuthProvider.OnVerificationStateChangedCallbacks() {
-                override fun onCodeSent(id: String, token: PhoneAuthProvider.ForceResendingToken) {
-                    onCodeSent(id)
-                }
-
-                override fun onVerificationFailed(e: FirebaseException) {
-                    // ⭐ WORLD-CLASS LOGGING: Sends the error to your Firebase Console
-                    FirebaseCrashlytics.getInstance().apply {
-                        log("OTP Failed for number: $mobile")
-                        recordException(e)
-                    }
-                    // 2026 Professional Error Mapping (User Friendly)
-                    val errorMsg = when {
-                        e.message?.contains("not authorized") == true -> "Security error: Please verify SHA-256 in Firebase Console."
-                        e.message?.contains("quota") == true -> "SMS limit reached. Try again in 24 hours."
-                        else -> e.localizedMessage ?: "Verification Failed"
-                    }
-                    Toast.makeText(this@AuthActivity, errorMsg, Toast.LENGTH_LONG).show()
-                }
-
-                override fun onVerificationCompleted(credential: PhoneAuthCredential) {
-                    // ⭐ 2026 PRO LOGIC: Background safe auto-login
-                    val currentFragment = supportFragmentManager.findFragmentById(R.id.auth_container)
-
-                    // 1. Agar OTP code mil gaya hai toh UI update karein
-                    credential.smsCode?.let { code ->
-                        if (currentFragment is LoginFragment) {
-                            currentFragment.binding.etOtpLogin.setText(code)
-                        }
-                    }
-
-                    // 2. Direct sign-in (Faster & Crash-proof)
-                    auth.signInWithCredential(credential).addOnCompleteListener { task ->
-                        if (task.isSuccessful) {
-                            if (currentFragment is LoginFragment) {
-                                currentFragment.proceedToHome()
-                            } else {
-                                // Fallback: Direct transition
-                                val intent = Intent(this@AuthActivity, MainActivity::class.java)
-                                intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-                                startActivity(intent)
-                                finish()
-                            }
-                        }
-                    }
-                }
-            }).build()
-        PhoneAuthProvider.verifyPhoneNumber(options)
-    }
     private fun checkForUpdates() {
         val appUpdateManager = AppUpdateManagerFactory.create(this)
-        val appUpdateInfoTask = appUpdateManager.appUpdateInfo
-
-        appUpdateInfoTask.addOnSuccessListener { appUpdateInfo ->
+        appUpdateManager.appUpdateInfo.addOnSuccessListener { appUpdateInfo ->
             if (appUpdateInfo.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE
                 && appUpdateInfo.isUpdateTypeAllowed(AppUpdateType.IMMEDIATE)
             ) {
-                // ⭐ 2026 GOLD STANDARD: Activity Result Launcher for Updates
                 val updateOptions = AppUpdateOptions.newBuilder(AppUpdateType.IMMEDIATE)
                     .setAllowAssetPackDeletion(true)
                     .build()
 
                 appUpdateManager.startUpdateFlow(
                     appUpdateInfo,
-                    this@AuthActivity, // Explicitly use Activity context
+                    this@AuthActivity,
                     updateOptions
                 )
             }
         }
     }
-    // ⭐ 2026 WORLD-CLASS SECURITY: Environment Integrity Check
+
+    // ⭐ 2026 SYSTEM LAYER PROTECTION: Deep Structural Validation Checks
     private fun checkEnvironmentIntegrity() {
-        // 1. Fetch current states
-        val isDevOptions = try { Settings.Global.getInt(contentResolver, Settings.Global.DEVELOPMENT_SETTINGS_ENABLED, 0) != 0 } catch (_: Exception) { false }
-        val isUsbDebugging = try { Settings.Global.getInt(contentResolver, Settings.Global.ADB_ENABLED, 0) != 0 } catch (_: Exception) { false }
+        val isDevOptions = try {
+            Settings.Global.getInt(contentResolver, Settings.Global.DEVELOPMENT_SETTINGS_ENABLED, 0) != 0
+        } catch (_: Exception) {
+            false
+        }
+        val isUsbDebugging = try {
+            Settings.Global.getInt(contentResolver, Settings.Global.ADB_ENABLED, 0) != 0
+        } catch (_: Exception) {
+            false
+        }
+
         val batteryStatus: Intent? = registerReceiver(null, IntentFilter(Intent.ACTION_BATTERY_CHANGED))
-        val isUsbConnected = (batteryStatus?.getIntExtra(android.os.BatteryManager.EXTRA_PLUGGED, -1) ?: -1) == android.os.BatteryManager.BATTERY_PLUGGED_USB
+        val isUsbConnected = (batteryStatus?.getIntExtra(android.os.BatteryManager.EXTRA_PLUGGED, -1)
+            ?: -1) == android.os.BatteryManager.BATTERY_PLUGGED_USB
         val isRooted = checkRootMethod()
 
-        // ⭐ 2026 WORLD-CLASS LOGIC: Single Entry, Single Exit (No Dead Code Warnings)
         var activeThreat: SecurityType? = null
-
         when {
             isRooted -> activeThreat = SecurityType.ROOTED_DEVICE
             isUsbDebugging -> activeThreat = SecurityType.USB_DEBUGGING
@@ -247,48 +212,44 @@ class AuthActivity : AppCompatActivity() {
             isUsbConnected -> activeThreat = SecurityType.ACTIVE_USB
         }
 
-        // 2. Action based on threat state
+        // Synchronous execution path safety mapping
         if (activeThreat != null) {
             showSecurityAlert(activeThreat)
         } else {
-            // Agar koi threat nahi hai, toh purana alert hata do (Warning-Free Dismissal)
             securitySheet?.takeIf { it.isShowing }?.dismiss()
         }
-
-        // 3. PLAY INTEGRITY (Keep as it is, but only for Release)
-        // Ye check karega ki app Play Store se hai ya MOD APK hai
-        /*
-        if (!BuildConfig.DEBUG) {
-            val integrityManager = IntegrityManagerFactory.create(applicationContext)
-            val nonce = Base64.encodeToString("nursing_studio_verify".toByteArray(), Base64.URL_SAFE)
-
-            val integrityTokenRequest = IntegrityTokenRequest.builder()
-                .setNonce(nonce)
-                .setCloudProjectNumber(1009948838228L) // Aapka Project Number
-                .build()
-
-            integrityManager.requestIntegrityToken(integrityTokenRequest)
-                .addOnSuccessListener { _ ->
-                    // App is Genuine
-                }
-                .addOnFailureListener { _ ->
-                    // Agar Integrity fail ho jaye (Matlab MOD APK ya Tampered App hai)
-                    Toast.makeText(this, "Security Breach: Official App Required", Toast.LENGTH_LONG).show()
-                    finishAffinity()
-                }
-        }
-
-         */
     }
-    // ⭐ 2026 Professional Security Enum
+
+    // 3. PLAY INTEGRITY (Keep as it is, but only for Release)
+    // Ye check karega ki app Play Store se hai ya MOD APK hai
+    /*
+    if (!BuildConfig.DEBUG) {
+        val integrityManager = IntegrityManagerFactory.create(applicationContext)
+        val nonce = Base64.encodeToString("nursing_studio_verify".toByteArray(), Base64.URL_SAFE)
+
+        val integrityTokenRequest = IntegrityTokenRequest.builder()
+            .setNonce(nonce)
+            .setCloudProjectNumber(1009948838228L) // Aapka Project Number
+            .build()
+
+        integrityManager.requestIntegrityToken(integrityTokenRequest)
+            .addOnSuccessListener { _ ->
+                // App is Genuine
+            }
+            .addOnFailureListener { _ ->
+                // Agar Integrity fail ho jaye (Matlab MOD APK ya Tampered App hai)
+                Toast.makeText(this, "Security Breach: Official App Required", Toast.LENGTH_LONG).show()
+                finishAffinity()
+            }
+    }
+    */
+
     enum class SecurityType {
         DEVELOPER_OPTIONS, USB_DEBUGGING, ACTIVE_USB, ROOTED_DEVICE
     }
 
     private fun showSecurityAlert(type: SecurityType) {
-        // Purani line: if (securitySheet?.isShowing == true) return
         if (securitySheet?.isShowing == true) {
-            // Agar alert badal gaya hai (e.g., USB se Dev Mode), toh purana dismiss karo
             securitySheet?.dismiss()
         }
 
@@ -319,7 +280,7 @@ class AuthActivity : AppCompatActivity() {
                 binding.tvAlertDesc.text = getString(R.string.active_usb_description)
                 binding.tvWarningStar.text = getString(R.string.active_usb_star_text)
                 binding.btnSettings.visibility = View.GONE
-                // Isse button poori width le lega
+
                 val params = binding.btnExit.layoutParams as LinearLayout.LayoutParams
                 params.weight = 2f
                 params.marginEnd = 0
@@ -336,7 +297,7 @@ class AuthActivity : AppCompatActivity() {
         binding.btnExit.setOnClickListener { finishAffinity() }
         securitySheet?.show()
     }
-    // ⭐ Root detection logic (World-Class Utility)
+
     private fun checkRootMethod(): Boolean {
         val paths = arrayOf(
             "/system/app/Superuser.apk", "/sbin/su", "/system/bin/su", "/system/xbin/su",
@@ -346,14 +307,21 @@ class AuthActivity : AppCompatActivity() {
         for (path in paths) {
             if (File(path).exists()) return true
         }
+        for (binary in arrayOf("su")) {
+            val targets = arrayOf("/system/xbin/", "/system/bin/", "/vendor/bin/", "/sbin/")
+            for (target in targets) {
+                if (File(target + binary).exists()) return true
+            }
+        }
         return false
     }
+
     override fun onDestroy() {
-        super.onDestroy()
         try {
+            devOptionsObserver?.let { contentResolver.unregisterContentObserver(it) }
+            adbObserver?.let { contentResolver.unregisterContentObserver(it) }
             unregisterReceiver(usbReceiver)
-        } catch (_: Exception) {
-            // Receiver already unregistered
-        }
+        } catch (_: Exception) {}
+        super.onDestroy()
     }
 }
