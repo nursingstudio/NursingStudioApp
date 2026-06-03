@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:clipToOutline="true"
@@ -11,7 +12,7 @@
         android:id="@+id/titleBackground"
         android:layout_width="match_parent"
         android:layout_height="60dp"
-        android:background="@color/brand_saffron"
+        android:background="@color/brand_saffron_dark"
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
@@ -33,45 +34,55 @@
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="24dp"
         android:layout_marginTop="20dp"
-        android:lineSpacingExtra="4dp"
+        android:lineSpacingMultiplier="1.25"
         android:text="@string/security_description_text"
-        android:textColor="#444444"
+        android:textColor="@color/text_secondary"
         android:textSize="15sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/titleBackground" />
 
-    <LinearLayout
-        android:id="@+id/warningBox"
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/warningBoxCard"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="24dp"
         android:layout_marginTop="20dp"
-        android:background="@drawable/bg_warning_light"
-        android:gravity="center_vertical"
-        android:orientation="horizontal"
-        android:padding="12dp"
+        app:cardElevation="2dp"
+        app:cardMaxElevation="4dp"
+        app:cardBackgroundColor="@color/bg_warning_light"
+        app:strokeColor="@color/brand_saffron_dark"
+        app:strokeWidth="1dp"
+        app:cardCornerRadius="12dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/tvAlertDesc">
 
-        <ImageView
-            android:layout_width="20dp"
-            android:layout_height="20dp"
-            android:contentDescription="@string/star_mark"
-            android:src="@drawable/ic_star"
-            app:tint="@color/brand_saffron_dark" />
-
-        <TextView
-            android:id="@+id/tvWarningStar"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginStart="10dp"
-            android:text="@string/warning_star_text_as_advice"
-            android:textColor="@color/brand_saffron_dark"
-            android:textSize="13sp"
-            android:textStyle="bold" />
-    </LinearLayout>
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:padding="14dp">
+
+            <ImageView
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:contentDescription="@string/star_mark"
+                android:src="@drawable/ic_star"
+                app:tint="@color/brand_saffron_dark" />
+
+            <TextView
+                android:id="@+id/tvWarningStar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:text="@string/warning_star_text_as_advice"
+                android:textColor="@color/brand_saffron_dark"
+                android:textSize="13sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -80,30 +91,35 @@
         android:layout_marginTop="24dp"
         android:orientation="horizontal"
         android:weightSum="2"
-        app:layout_constraintTop_toBottomOf="@id/warningBox">
+        app:layout_constraintTop_toBottomOf="@id/warningBoxCard">
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnExit"
-            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            style="@style/Widget.Material3.Button.OutlinedButton"
             android:layout_width="0dp"
-            android:layout_height="50dp"
+            android:layout_height="52dp"
             android:layout_marginEnd="8dp"
             android:layout_weight="1"
             android:text="@string/close_app"
-            android:textColor="@color/brand_saffron"
-            app:strokeColor="@color/brand_saffron"
-            app:strokeWidth="1.5dp"
+            android:textColor="@color/brand_blue"
+            android:textSize="15sp"
+            android:textStyle="bold"
+            app:strokeColor="@color/brand_blue"
+            app:strokeWidth="1dp"
             app:cornerRadius="12dp" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnSettings"
+            style="@style/Widget.Material3.Button"
             android:layout_width="0dp"
-            android:layout_height="50dp"
+            android:layout_height="52dp"
             android:layout_marginStart="8dp"
             android:layout_weight="1"
             android:text="@string/go_to_settings"
+            android:textSize="15sp"
             android:textStyle="bold"
-            app:backgroundTint="@color/brand_saffron"
+            android:textColor="@color/white"
+            app:backgroundTint="@color/brand_blue"
             app:cornerRadius="12dp" />
     </LinearLayout>
 

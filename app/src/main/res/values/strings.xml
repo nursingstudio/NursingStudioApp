@@ -182,7 +182,7 @@
     <string name="Enable_biometric_for_security">Secure your Nursing Studio account with your fingerprint or face lock for faster access.</string>
     <string name="setup_secure_login">Setup Secure Login</string>
     <string name="maybe_later">Maybe Later</string>
-    <string name="don_t_ask_again">Don\'t ask again</string>
+    <string name="don_t_ask_again">Don\'t Ask Again</string>
     <string name="fingerprint_icon">Fingerprint Icon</string>
     <string name="login">Login</string>
     <string name="resend_in_s">Resend in %1$ds</string>
@@ -222,7 +222,7 @@
     <string name="usb_debugging_description">Nursing Studio app detected "USB Debugging" is ON. For security reasons, it is recommended to change USB debugging setting to \"Off\" while using this app.</string>
     <string name="usb_debugging_star_text">Disable usb debugging under developer option for enhanced security.</string>
     <string name="go_to_settings">Go to Settings</string>
-    <string name="close_app">Close App</string>
+    <string name="close_app">CLOSE APP</string>
     <string name="warning_star_text_as_advice">Warning Star Text as Advice.</string>
     <string name="security_description_text">For security reasons, Nursing Studio does not allow the use of Developer Options. Please disable it to continue.</string>
     <string name="developer_options">DEVELOPER OPTIONS</string>

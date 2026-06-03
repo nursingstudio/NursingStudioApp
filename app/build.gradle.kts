@@ -71,6 +71,11 @@ android {
     }
 }
 
+// ⭐ 2026 KSP OPTIMIZATION ENGINE: Redirects sources into standard layout directories
+ksp {
+    arg("correctErrorTypes", "true")
+}
+
 dependencies {
     // 1. Android & UI Core
     implementation(libs.androidx.core.ktx)

@@ -5,9 +5,12 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:padding="24dp"
+    android:paddingStart="24dp"
+    android:paddingEnd="24dp"
+    android:paddingTop="32dp"
+    android:paddingBottom="32dp"
     android:gravity="center_horizontal"
-    android:background="@color/app_background">
+    android:background="@color/surface_card">
 
     <TextView
         android:layout_width="wrap_content"
@@ -16,6 +19,7 @@
         android:textColor="@color/brand_saffron_dark"
         android:textSize="18sp"
         android:textStyle="bold"
+        android:fontFamily="sans-serif-black"
         tools:ignore="TextContrastCheck" />
 
     <LinearLayout
@@ -24,22 +28,22 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:layout_marginTop="24dp"
-        android:layout_marginBottom="32dp">
-        <View android:layout_width="15dp"
-            android:layout_height="15dp"
-            android:layout_margin="8dp"
+        android:layout_marginBottom="24dp">
+        <View android:layout_width="16dp"
+            android:layout_height="16dp"
+            android:layout_margin="10dp"
             android:background="@drawable/mpin_dot_empty" />
-        <View android:layout_width="15dp"
-            android:layout_height="15dp"
-            android:layout_margin="8dp"
+        <View android:layout_width="16dp"
+            android:layout_height="16dp"
+            android:layout_margin="10dp"
             android:background="@drawable/mpin_dot_empty" />
-        <View android:layout_width="15dp"
-            android:layout_height="15dp"
-            android:layout_margin="8dp"
+        <View android:layout_width="16dp"
+            android:layout_height="16dp"
+            android:layout_margin="10dp"
             android:background="@drawable/mpin_dot_empty" />
-        <View android:layout_width="15dp"
-            android:layout_height="15dp"
-            android:layout_margin="8dp"
+        <View android:layout_width="16dp"
+            android:layout_height="16dp"
+            android:layout_margin="10dp"
             android:background="@drawable/mpin_dot_empty" />
     </LinearLayout>
 
@@ -48,142 +52,201 @@
         android:layout_height="wrap_content"
         android:columnCount="3"
         android:rowCount="4"
-        android:layout_marginTop="16dp"
         android:alignmentMode="alignMargins"
+        android:useDefaultMargins="true"
         android:columnOrderPreserved="false">
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnKey1"
             style="@style/MpinKeyStyle"
             android:layout_width="0dp"
-            android:layout_height="80dp"
+            android:layout_height="72dp"
             android:layout_columnWeight="1"
+            android:layout_margin="6dp"
             android:text="@string/_1"
-            android:textSize="26sp"
-            android:textColor="@color/text_primary" />
+            android:textSize="24sp"
+            android:textColor="@color/text_primary"
+            app:strokeColor="@color/border_grey"
+            app:strokeWidth="1dp" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnKey2"
             style="@style/MpinKeyStyle"
             android:layout_width="0dp"
-            android:layout_height="80dp"
+            android:layout_height="72dp"
             android:layout_columnWeight="1"
+            android:layout_margin="6dp"
             android:text="@string/_2"
-            android:textSize="26sp"
-            android:textColor="@color/text_primary" />
+            android:textSize="24sp"
+            android:textColor="@color/text_primary"
+            app:strokeColor="@color/border_grey"
+            app:strokeWidth="1dp" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnKey3"
             style="@style/MpinKeyStyle"
             android:layout_width="0dp"
-            android:layout_height="80dp"
+            android:layout_height="72dp"
             android:layout_columnWeight="1"
+            android:layout_margin="6dp"
             android:text="@string/_3"
-            android:textSize="26sp"
-            android:textColor="@color/text_primary" />
+            android:textSize="24sp"
+            android:textColor="@color/text_primary"
+            app:strokeColor="@color/border_grey"
+            app:strokeWidth="1dp" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnKey4"
             style="@style/MpinKeyStyle"
             android:layout_width="0dp"
-            android:layout_height="80dp"
+            android:layout_height="72dp"
             android:layout_columnWeight="1"
+            android:layout_margin="6dp"
             android:text="@string/_4"
-            android:textSize="26sp"
-            android:textColor="@color/text_primary" />
+            android:textSize="24sp"
+            android:textColor="@color/text_primary"
+            app:strokeColor="@color/border_grey"
+            app:strokeWidth="1dp" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnKey5"
             style="@style/MpinKeyStyle"
             android:layout_width="0dp"
-            android:layout_height="80dp"
+            android:layout_height="72dp"
             android:layout_columnWeight="1"
+            android:layout_margin="6dp"
             android:text="@string/_5"
-            android:textSize="26sp"
-            android:textColor="@color/text_primary" />
+            android:textSize="24sp"
+            android:textColor="@color/text_primary"
+            app:strokeColor="@color/border_grey"
+            app:strokeWidth="1dp" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnKey6"
             style="@style/MpinKeyStyle"
             android:layout_width="0dp"
-            android:layout_height="80dp"
+            android:layout_height="72dp"
             android:layout_columnWeight="1"
+            android:layout_margin="6dp"
             android:text="@string/_6"
-            android:textSize="26sp"
-            android:textColor="@color/text_primary" />
+            android:textSize="24sp"
+            android:textColor="@color/text_primary"
+            app:strokeColor="@color/border_grey"
+            app:strokeWidth="1dp" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnKey7"
             style="@style/MpinKeyStyle"
             android:layout_width="0dp"
-            android:layout_height="80dp"
+            android:layout_height="72dp"
             android:layout_columnWeight="1"
+            android:layout_margin="6dp"
             android:text="@string/_7"
-            android:textSize="26sp"
-            android:textColor="@color/text_primary" />
+            android:textSize="24sp"
+            android:textColor="@color/text_primary"
+            app:strokeColor="@color/border_grey"
+            app:strokeWidth="1dp" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnKey8"
             style="@style/MpinKeyStyle"
             android:layout_width="0dp"
-            android:layout_height="80dp"
+            android:layout_height="72dp"
             android:layout_columnWeight="1"
+            android:layout_margin="6dp"
             android:text="@string/_8"
-            android:textSize="26sp"
-            android:textColor="@color/text_primary" />
+            android:textSize="24sp"
+            android:textColor="@color/text_primary"
+            app:strokeColor="@color/border_grey"
+            app:strokeWidth="1dp" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnKey9"
             style="@style/MpinKeyStyle"
             android:layout_width="0dp"
-            android:layout_height="80dp"
+            android:layout_height="72dp"
             android:layout_columnWeight="1"
+            android:layout_margin="6dp"
             android:text="@string/_9"
-            android:textSize="26sp"
-            android:textColor="@color/text_primary" />
+            android:textSize="24sp"
+            android:textColor="@color/text_primary"
+            app:strokeColor="@color/border_grey"
+            app:strokeWidth="1dp" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnKeyBio"
             style="@style/MpinKeyStyle"
             android:layout_width="0dp"
-            android:layout_height="80dp"
+            android:layout_height="72dp"
             android:layout_columnWeight="1"
+            android:layout_margin="6dp"
+            android:padding="0dp"
+            app:contentPadding="0dp"
+            android:insetLeft="0dp"
+            app:iconGravity="textStart"
+            android:insetRight="0dp"
+            android:insetTop="0dp"
+            android:insetBottom="0dp"
             android:contentDescription="@string/biometric_login_fingerprint"
             app:icon="@drawable/ic_fingerprint"
-            app:iconGravity="textStart"
             app:iconSize="32dp"
             app:iconPadding="0dp"
-            app:iconTint="@color/brand_saffron_dark" />
+            app:iconTint="@color/brand_saffron_dark"
+            app:strokeColor="@color/border_grey"
+            app:strokeWidth="1dp" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnKey0"
             style="@style/MpinKeyStyle"
             android:layout_width="0dp"
-            android:layout_height="80dp"
+            android:layout_height="72dp"
             android:layout_columnWeight="1"
+            android:layout_margin="6dp"
             android:text="@string/_0"
-            android:textSize="26sp"
-            android:textColor="@color/text_primary" />
+            android:textSize="24sp"
+            android:textColor="@color/text_primary"
+            app:strokeColor="@color/border_grey"
+            app:strokeWidth="1dp" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnKeyDel"
             style="@style/MpinKeyStyle"
             android:layout_width="0dp"
-            android:layout_height="80dp"
+            android:layout_height="72dp"
             android:layout_columnWeight="1"
+            android:layout_margin="6dp"
+            android:padding="0dp"
+            app:contentPadding="0dp"
+            android:insetLeft="0dp"
+            android:insetRight="0dp"
+            android:insetTop="0dp"
+            android:insetBottom="0dp"
             android:contentDescription="@string/backspace"
             app:icon="@drawable/ic_backspace"
             app:iconGravity="textStart"
-            app:iconSize="28dp"
-            app:iconTint="@color/text_primary" />
+            app:iconSize="26dp"
+            app:iconPadding="0dp"
+            app:iconTint="@color/text_primary"
+            app:strokeColor="@color/border_grey"
+            app:strokeWidth="1dp" />
 
     </GridLayout>
 
-    <TextView
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/btnForgotMpin"
+        style="@style/Widget.Material3.Button.OutlinedButton"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="48dp"
+        android:layout_marginTop="20dp"
         android:text="@string/forgot_mpin"
-        android:textColor="@color/text_secondary"
-        android:layout_marginTop="16dp" />
+        android:textColor="@color/brand_blue"
+        android:textSize="14sp"
+        android:textStyle="bold"
+        android:textAllCaps="false"
+        app:strokeColor="@color/brand_saffron_dark"
+        app:strokeWidth="1dp"
+        app:cornerRadius="10dp"
+        app:rippleColor="@color/saffron_ripple"
+        android:fontFamily="sans-serif-medium" />
+
 </LinearLayout>
