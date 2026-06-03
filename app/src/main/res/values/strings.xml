@@ -263,6 +263,7 @@
     <string name="boost_your_preparation_with_real_time_analysis">Boost your preparation with real-time analysis.</string>
     <string name="full_syllabus_mock_test">Full Syllabus Mock Test</string>
     <string name="_100_questions_90_minutes">100 Questions | 90 Minutes</string>
+    <string name="plan">Plan: %1$s</string>
 
 
 </resources>

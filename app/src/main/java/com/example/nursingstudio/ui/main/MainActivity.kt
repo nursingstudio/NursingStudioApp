@@ -2,7 +2,6 @@ package com.example.nursingstudio.ui.main
 
 import android.content.Intent
 import android.os.Bundle
-import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.content.edit
 import androidx.core.net.toUri
@@ -22,6 +21,7 @@ import com.example.nursingstudio.data.model.SocialItem
 import com.example.nursingstudio.databinding.ActivityMainBinding
 import com.example.nursingstudio.databinding.DrawerHeaderBinding
 import com.example.nursingstudio.ui.auth.AuthActivity
+import com.example.nursingstudio.ui.base.BaseActivity
 import com.example.nursingstudio.ui.features.social.SocialAdapter
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.firebase.auth.FirebaseAuth
@@ -29,8 +29,9 @@ import com.google.firebase.firestore.FirebaseFirestore
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
-@AndroidEntryPoint // ✅ Mandatory for any Activity hosting Hilt Fragments
-class MainActivity : AppCompatActivity() {
+@AndroidEntryPoint
+class MainActivity : BaseActivity() { // ✅ ⭐ 2026 GOLD STANDARD: Extends BaseActivity for unbreakable live runtime security checks
+
     private lateinit var binding: ActivityMainBinding
     private lateinit var headerBinding: DrawerHeaderBinding
     private lateinit var navController: NavController
@@ -52,7 +53,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
-        super.onCreate(savedInstanceState)
+        super.onCreate(savedInstanceState) // Dynamic BaseActivity hooks setup validation automatically
 
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
@@ -74,8 +75,8 @@ class MainActivity : AppCompatActivity() {
         viewModel.syncUserData(currentUser.uid)
         observeUserData()
     }
+
     private fun setupHeader() {
-        // ⭐ 2026 Standard: Header views ko bind karna bina findViewById ke
         val headerView = binding.navigationView.getHeaderView(0)
         headerBinding = DrawerHeaderBinding.bind(headerView)
 
@@ -84,6 +85,7 @@ class MainActivity : AppCompatActivity() {
             binding.drawerLayout.closeDrawer(GravityCompat.START)
         }
     }
+
     private fun setupNavigation() {
         setSupportActionBar(binding.topAppBar)
 
@@ -123,11 +125,11 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    // Hamburger Menu ke click ko handle karne ke liye mandatory override
     override fun onSupportNavigateUp(): Boolean {
         val appBarConfiguration = AppBarConfiguration(navController.graph, binding.drawerLayout)
         return NavigationUI.navigateUp(navController, appBarConfiguration) || super.onSupportNavigateUp()
     }
+
     private fun openUrl(url: String, packageName: String? = null) {
         try {
             val intent = Intent(Intent.ACTION_VIEW, url.toUri())
@@ -172,25 +174,23 @@ class MainActivity : AppCompatActivity() {
         val key = "social_click_${channel.lowercase().replace(" ", "_")}"
         sp.edit { putInt(key, sp.getInt(key, 0) + 1) }
     }
+
     private fun observeUserData() {
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
-                // Name Observe
                 launch {
                     dataStoreManager.userName.collect { name ->
                         headerBinding.tvHeaderName.text = name ?: "Scholar"
                     }
                 }
-                // Mobile Observe
                 launch {
                     dataStoreManager.userMobile.collect { mobile ->
                         headerBinding.tvHeaderMobile.text = mobile ?: ""
                     }
                 }
-                // Subscription Observe
                 launch {
                     dataStoreManager.subscriptionType.collect { type ->
-                        headerBinding.tvDrawerSubscription.text = "Plan: $type"
+                        headerBinding.tvDrawerSubscription.text = getString(R.string.plan, type)
                         headerBinding.tvDrawerSubscription.setTextColor(
                             if (type == "Premium") getColor(R.color.brand_saffron)
                             else getColor(android.R.color.white)
@@ -200,6 +200,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
+
     private fun shareApp() {
         val shareText = "Start smart preparation for nursing competitive exams with Nursing Studio.\n\nDownload: $URL_PLAYSTORE"
         val shareIntent = Intent(Intent.ACTION_SEND).apply {
