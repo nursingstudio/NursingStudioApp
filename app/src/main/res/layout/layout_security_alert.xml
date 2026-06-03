@@ -50,7 +50,7 @@
         android:layout_marginTop="20dp"
         app:cardElevation="2dp"
         app:cardMaxElevation="4dp"
-        app:cardBackgroundColor="@color/bg_warning_light"
+        app:cardBackgroundColor="@color/app_background"
         app:strokeColor="@color/brand_saffron_dark"
         app:strokeWidth="1dp"
         app:cardCornerRadius="12dp"
