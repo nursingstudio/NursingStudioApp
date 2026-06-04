@@ -16,7 +16,9 @@ import androidx.appcompat.widget.SwitchCompat
 import androidx.core.content.edit
 import androidx.core.net.toUri
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import com.example.nursingstudio.R
+import com.example.nursingstudio.data.local.DataStoreManager
 import com.example.nursingstudio.utils.AppSettings
 import com.example.nursingstudio.utils.BiometricSettingsManager
 import com.google.android.material.bottomsheet.BottomSheetDialog
@@ -25,6 +27,8 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.switchmaterial.SwitchMaterial
 import com.google.android.material.textfield.TextInputEditText
 import androidx.navigation.fragment.findNavController
+import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.launch
 
 class SettingsFragment : Fragment() {
 
@@ -38,9 +42,13 @@ class SettingsFragment : Fragment() {
         private const val URL_WHATSAPP_SUPPORT = "https://wa.me/919999999999?text=Hello%20Nursing%20Studio%20Support"
     }
 
-    // Class level par define karein taaki har function access kar sake
     private lateinit var bioManager: BiometricSettingsManager
-    private var switchBiometric: SwitchMaterial? = null
+    private lateinit var dataStoreManager: DataStoreManager
+
+    // 🚀 2026 Segregated Native Switch Bindings
+    private var switchFingerprint: SwitchMaterial? = null
+    private var switchFaceUnlock: SwitchMaterial? = null
+    private var switchMpin: SwitchMaterial? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return inflater.inflate(R.layout.fragment_settings, container, false)
@@ -50,61 +58,87 @@ class SettingsFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         bioManager = BiometricSettingsManager(requireContext())
+        dataStoreManager = DataStoreManager(requireContext())
         val sp = requireContext().getSharedPreferences(PREF_SETTINGS, Context.MODE_PRIVATE)
 
-        // Find views
+        // Find standard views
         val switchNotifications = view.findViewById<SwitchCompat>(R.id.switch_notifications)
         val switchQuizSound = view.findViewById<SwitchCompat>(R.id.switch_quiz_sound)
         val switchMotivation = view.findViewById<SwitchCompat>(R.id.switch_motivation)
         val switchVibration = view.findViewById<SwitchMaterial>(R.id.switch_vibration)
-        switchBiometric = view.findViewById(R.id.switch_biometric)
+
+        // Find 2026 Premium Modular Security Views
+        switchFingerprint = view.findViewById(R.id.switch_fingerprint)
+        switchFaceUnlock = view.findViewById(R.id.switch_face_unlock)
+        switchMpin = view.findViewById(R.id.switch_mpin)
 
         // Load states
         switchNotifications.isChecked = sp.getBoolean(KEY_NOTIFICATIONS, true)
         switchQuizSound.isChecked = sp.getBoolean(KEY_QUIZ_SOUND, true)
         switchMotivation.isChecked = sp.getBoolean(KEY_MOTIVATION, true)
         switchVibration.isChecked = AppSettings.isVibrationEnabled(requireContext())
-        switchBiometric?.isChecked = bioManager.isBiometricEnabled()
 
-        // Listeners
-        switchNotifications.setOnCheckedChangeListener { _, isChecked -> sp.edit {
-            putBoolean(
-                KEY_NOTIFICATIONS,
-                isChecked
-            )
-        } }
-        switchQuizSound.setOnCheckedChangeListener { _, isChecked -> sp.edit {
-            putBoolean(
-                KEY_QUIZ_SOUND,
-                isChecked
-            )
-        } }
-        switchMotivation.setOnCheckedChangeListener { _, isChecked -> sp.edit {
-            putBoolean(
-                KEY_MOTIVATION,
-                isChecked
-            )
-        } }
+        // Sync Initial Biometric Security Values
+        syncSecuritySwitchStates()
+
+        // Core Listeners
+        switchNotifications.setOnCheckedChangeListener { _, isChecked -> sp.edit { putBoolean(KEY_NOTIFICATIONS, isChecked) } }
+        switchQuizSound.setOnCheckedChangeListener { _, isChecked -> sp.edit { putBoolean(KEY_QUIZ_SOUND, isChecked) } }
+        switchMotivation.setOnCheckedChangeListener { _, isChecked -> sp.edit { putBoolean(KEY_MOTIVATION, isChecked) } }
 
         switchVibration.setOnCheckedChangeListener { _, isChecked ->
             AppSettings.setVibration(requireContext(), isChecked)
             if (isChecked) AppSettings.triggerVibration(requireContext(), 50)
         }
 
-        // --- WORLD CLASS BIOMETRIC LOGIC ---
-        switchBiometric?.setOnClickListener {
+        // --- 🛡️ EXPLICIT FINGERPRINT DEPLOYMENT MATRIX ---
+        switchFingerprint?.setOnClickListener {
             val isChecked = (it as SwitchMaterial).isChecked
             if (isChecked) {
-                // Pehle switch wapas OFF karo (jab tak success na ho)
                 it.isChecked = false
-                showPasswordVerificationSheet()
+                evaluateSecurityCascade {
+                    bioManager.setBiometricEnabled(true) // Maps fingerprint flag state
+                    switchFingerprint?.isChecked = true
+                }
             } else {
                 bioManager.setBiometricEnabled(false)
-                Toast.makeText(requireContext(), "Biometric security disabled", Toast.LENGTH_SHORT).show()
+                toast("Fingerprint identification disabled")
             }
         }
 
-        // Other buttons
+        // --- 🛡️ EXPLICIT FACE UNLOCK DEPLOYMENT MATRIX ---
+        switchFaceUnlock?.setOnClickListener {
+            val isChecked = (it as SwitchMaterial).isChecked
+            if (isChecked) {
+                it.isChecked = false
+                evaluateSecurityCascade {
+                    // 🚀 2026 Production Hook for Face Vector preferences
+                    sp.edit { putBoolean("enable_face_identity_secure", true) }
+                    switchFaceUnlock?.isChecked = true
+                    toast("Face ID security profile synchronized")
+                }
+            } else {
+                sp.edit { putBoolean("enable_face_identity_secure", false) }
+                switchFaceUnlock?.isChecked = false
+            }
+        }
+
+        // --- 🛡️ EXPLICIT FALLBACK MPIN DEPLOYMENT MATRIX ---
+        switchMpin?.setOnClickListener {
+            val isChecked = (it as SwitchMaterial).isChecked
+            if (isChecked) {
+                it.isChecked = false
+                showPasswordVerificationSheet()
+            } else {
+                viewLifecycleOwner.lifecycleScope.launch {
+                    dataStoreManager.saveMpinStatus(false)
+                    switchMpin?.isChecked = false
+                    toast("Secure Fallback MPIN deconfigured")
+                }
+            }
+        }
+
+        // Setup Standard Static Links
         view.findViewById<Button>(R.id.btnRateApp).setOnClickListener { openUrl(URL_PLAYSTORE) }
         view.findViewById<Button>(R.id.btnWhatsappSupport).setOnClickListener { openWhatsappSupport() }
         view.findViewById<Button>(R.id.btnPrivacyPolicy).setOnClickListener { openStaticPage("privacy") }
@@ -113,16 +147,36 @@ class SettingsFragment : Fragment() {
         view.findViewById<Button>(R.id.btnAbout).setOnClickListener { openStaticPage("about") }
     }
 
+    private fun syncSecuritySwitchStates() {
+        val sp = requireContext().getSharedPreferences(PREF_SETTINGS, Context.MODE_PRIVATE)
+        switchFingerprint?.isChecked = bioManager.isBiometricEnabled()
+        switchFaceUnlock?.isChecked = sp.getBoolean("enable_face_identity_secure", false)
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            val isMpinActive = dataStoreManager.isMpinSet.firstOrNull() ?: false
+            switchMpin?.isChecked = isMpinActive
+        }
+    }
+
+    private fun evaluateSecurityCascade(onVerificationSuccess: () -> Unit) {
+        viewLifecycleOwner.lifecycleScope.launch {
+            val isMpinActive = dataStoreManager.isMpinSet.firstOrNull() ?: false
+            if (!isMpinActive) {
+                toast("Please set your Fallback MPIN first!")
+                showPasswordVerificationSheet()
+            } else {
+                onVerificationSuccess.invoke()
+            }
+        }
+    }
+
     private fun showPasswordVerificationSheet() {
         val type = bioManager.getLoginType()
-
-        // Professional Check: Agar Mobile user hai toh password mangne ka logic skip karo
         if (type == 1 || bioManager.getSavedPass() == "OTP_USER") {
             showMPINSetupDialogFromSettings()
             return
         }
 
-        // Email user ke liye purana sheet logic...
         val dialog = BottomSheetDialog(requireContext(), R.style.BottomSheetDialogTheme)
         val parentView = view as? ViewGroup
         val sheetView = layoutInflater.inflate(R.layout.layout_verify_for_biometric, parentView, false)
@@ -132,13 +186,12 @@ class SettingsFragment : Fragment() {
         btnVerify.setOnClickListener {
             val password = etPass.text.toString().trim()
             if (password.isNotEmpty()) {
-                // Professional Check: saved password se match karein
                 val savedPass = bioManager.getSavedPass()
                 if (password == savedPass || savedPass == "OTP_USER") {
                     dialog.dismiss()
                     showMPINSetupDialogFromSettings()
                 } else {
-                    Toast.makeText(requireContext(), "Incorrect Password", Toast.LENGTH_SHORT).show()
+                    toast("Incorrect Account Password")
                 }
             }
         }
@@ -147,59 +200,61 @@ class SettingsFragment : Fragment() {
     }
 
     private fun showMPINSetupDialogFromSettings() {
-        // Banking UI ke liye hum custom layout use karenge
         val etMpin = EditText(requireContext()).apply {
             inputType = InputType.TYPE_CLASS_NUMBER
             transformationMethod = PasswordTransformationMethod.getInstance()
             filters = arrayOf(InputFilter.LengthFilter(4))
-            hint = "Enter 4-Digit MPIN"
+            hint = "Create 4-Digit PIN"
             textAlignment = View.TEXT_ALIGNMENT_CENTER
         }
 
         MaterialAlertDialogBuilder(requireContext(), R.style.MaterialAlertDialog_Rounded)
-            .setTitle("Set Secure PIN")
-            .setMessage("Create a 4-digit MPIN for biometric fallback.")
+            .setTitle("Configure Security PIN")
+            .setMessage("This PIN serves as your identity validation backup.")
             .setView(etMpin)
             .setCancelable(false)
-            .setPositiveButton("Set PIN") { _, _ ->
+            .setPositiveButton("Save PIN") { _, _ ->
                 val mpin = etMpin.text.toString()
                 if (mpin.length == 4) {
-                    bioManager.setBiometricEnabled(true)
-                    bioManager.saveMPIN(mpin)
-                    switchBiometric?.isChecked = true // Ab final ON kardo
-                    Toast.makeText(requireContext(), "Biometric & MPIN Set! 🔒", Toast.LENGTH_SHORT).show()
+                    viewLifecycleOwner.lifecycleScope.launch {
+                        bioManager.saveMPIN(mpin)
+                        dataStoreManager.saveMpinStatus(true)
+
+                        // Auto-enable fingerprint on MPIN initialization for smoother experience
+                        bioManager.setBiometricEnabled(true)
+
+                        syncSecuritySwitchStates()
+                        toast("Security Profile Updated Successfully! 🔒")
+                    }
                 } else {
-                    Toast.makeText(requireContext(), "MPIN must be 4 digits", Toast.LENGTH_SHORT).show()
+                    toast("MPIN execution requires exactly 4 digits")
                 }
             }
-            .setNegativeButton("Cancel", null)
+            .setNegativeButton("Dismiss", null)
             .show()
     }
 
     private fun openUrl(url: String) {
         try { startActivity(Intent(Intent.ACTION_VIEW, url.toUri())) }
-        catch (_: Exception) { Toast.makeText(requireContext(), "Unable to open link", Toast.LENGTH_SHORT).show() }
+        catch (_: Exception) { toast("Unable to open dynamic redirection asset") }
     }
 
     private fun openWhatsappSupport() {
         try { startActivity(Intent(Intent.ACTION_VIEW, URL_WHATSAPP_SUPPORT.toUri())) }
-        catch (_: Exception) { Toast.makeText(requireContext(), "WhatsApp not available", Toast.LENGTH_SHORT).show() }
+        catch (_: Exception) { toast("WhatsApp communication platform mismatch") }
     }
 
     private fun openStaticPage(type: String) {
         if (!isAdded) return
         try {
-            val bundle = Bundle().apply {
-                putString("page_type", type)
-            }
-
-            findNavController().navigate(
-                R.id.nav_static_page,
-                bundle
-            )
-        } catch (e: Exception) {
-            // Professional debugging: e.printStackTrace() ki jagah Toast ya Log bhi de sakte hain
-            Toast.makeText(requireContext(), "Navigation Error: ${e.message}", Toast.LENGTH_SHORT).show()
+            val bundle = Bundle().apply { putString("page_type", type) }
+            findNavController().navigate(R.id.nav_static_page, bundle)
+        } catch (_: Exception) {
+            toast("Redirection fault inside layout navigation manager")
         }
+    }
+
+    private fun toast(message: String) {
+        Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
     }
 }

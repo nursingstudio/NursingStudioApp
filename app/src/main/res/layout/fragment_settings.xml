@@ -106,16 +106,54 @@
             android:padding="10dp"
             app:useMaterialThemeColors="true" />
 
-        <com.google.android.material.switchmaterial.SwitchMaterial
-            android:id="@+id/switch_biometric"
-            android:layout_width="match_parent"
+        <TextView
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:text="@string/biometric_login_fingerprint"
+            android:text="@string/security_settings"
+            android:textStyle="bold"
             android:textSize="16sp"
             android:textColor="@color/text_primary"
-            android:padding="10dp"
-            app:useMaterialThemeColors="true" />
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="4dp" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@drawable/bg_button_outline_rounded"
+            android:padding="8dp"
+            android:layout_marginTop="4dp">
+
+            <com.google.android.material.switchmaterial.SwitchMaterial
+                android:id="@+id/switch_fingerprint"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/enable_fingerprint_login"
+                android:textSize="15sp"
+                android:textColor="@color/text_primary"
+                android:padding="10dp"
+                app:useMaterialThemeColors="true" />
+
+            <com.google.android.material.switchmaterial.SwitchMaterial
+                android:id="@+id/switch_face_unlock"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/enable_face_unlock"
+                android:textSize="15sp"
+                android:textColor="@color/text_primary"
+                android:padding="10dp"
+                app:useMaterialThemeColors="true" />
+
+            <com.google.android.material.switchmaterial.SwitchMaterial
+                android:id="@+id/switch_mpin"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/security_fallback_mpin"
+                android:textSize="15sp"
+                android:textColor="@color/text_primary"
+                android:padding="10dp"
+                app:useMaterialThemeColors="true" />
+        </LinearLayout>
 
         <!-- Motivation toggle -->
         <TextView

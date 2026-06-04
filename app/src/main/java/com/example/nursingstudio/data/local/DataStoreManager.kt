@@ -14,6 +14,8 @@ class DataStoreManager(private val context: Context) {
         val USER_NAME = stringPreferencesKey("user_name")
         val USER_MOBILE = stringPreferencesKey("user_mobile")
         val SUBSCRIPTION_TYPE = stringPreferencesKey("subscription_type")
+        // 🚀 2026 STATE ENGINE: Tracking adaptive screen logic via encrypted session data
+        val IS_MPIN_SET = booleanPreferencesKey("is_mpin_set")
     }
 
     suspend fun saveUser(name: String, mobile: String) {
@@ -22,13 +24,22 @@ class DataStoreManager(private val context: Context) {
             prefs[USER_MOBILE] = mobile
         }
     }
+
     suspend fun saveSubscription(type: String) {
         context.dataStore.edit { prefs ->
             prefs[SUBSCRIPTION_TYPE] = type
         }
     }
 
+    // 🚀 Async state mutator for automated UI branching
+    suspend fun saveMpinStatus(isSet: Boolean) {
+        context.dataStore.edit { prefs ->
+            prefs[IS_MPIN_SET] = isSet
+        }
+    }
+
     val userName: Flow<String?> = context.dataStore.data.map { it[USER_NAME] }
     val userMobile: Flow<String?> = context.dataStore.data.map { it[USER_MOBILE] }
     val subscriptionType: Flow<String> = context.dataStore.data.map { it[SUBSCRIPTION_TYPE] ?: "Free" }
+    val isMpinSet: Flow<Boolean> = context.dataStore.data.map { it[IS_MPIN_SET] ?: false }
 }

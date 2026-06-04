@@ -13,7 +13,6 @@ import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
 import androidx.biometric.BiometricPrompt
-import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.core.content.edit
 import androidx.fragment.app.Fragment
@@ -23,14 +22,17 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.lifecycle.withResumed
 import com.example.nursingstudio.R
+import com.example.nursingstudio.data.local.DataStoreManager
 import com.example.nursingstudio.databinding.FragmentLoginBinding
 import com.example.nursingstudio.ui.auth.AuthActivity
 import com.example.nursingstudio.ui.main.MainActivity
 import com.example.nursingstudio.utils.AppSettings
 import com.example.nursingstudio.utils.BiometricSettingsManager
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import java.util.Locale
+import kotlin.time.Duration.Companion.milliseconds
 
 @AndroidEntryPoint
 class LoginFragment : Fragment() {
@@ -43,8 +45,9 @@ class LoginFragment : Fragment() {
     private var _binding: FragmentLoginBinding? = null
     internal val binding get() = _binding!!
     private val viewModel: LoginViewModel by viewModels()
+    private lateinit var dataStoreManager: DataStoreManager
+    private var isAdaptiveUiOverridden = false
 
-    // 🚀 2026 Modern Permission Launcher for Application Alerts
     private val requestNotificationPermissionLauncher = registerForActivityResult(
         androidx.activity.result.contract.ActivityResultContracts.RequestPermission()
     ) { isGranted ->
@@ -55,9 +58,8 @@ class LoginFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
-        // ⭐ 2026 UI Focus Optimization
         viewLifecycleOwner.lifecycleScope.launch {
-            kotlinx.coroutines.delay(200)
+            kotlinx.coroutines.delay(200.milliseconds)
             binding.etEmail.clearFocus()
             binding.etPassword.clearFocus()
             hideKeyboard()
@@ -66,6 +68,7 @@ class LoginFragment : Fragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = FragmentLoginBinding.inflate(inflater, container, false)
+        dataStoreManager = DataStoreManager(requireContext())
         return binding.root
     }
 
@@ -73,16 +76,11 @@ class LoginFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         setupInitialUI()
+        checkAdaptiveSessionState()
         setupClickListeners()
         setupTextWatchers()
         observeViewModel()
 
-        val bioManager = BiometricSettingsManager(requireContext())
-        if (bioManager.isBiometricEnabled()) {
-            binding.root.postDelayed({ showBiometricPrompt() }, 500)
-        }
-
-        // 🛡️ Post Notification Runtime Compliance Check
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             requestNotificationPermissionLauncher.launch(android.Manifest.permission.POST_NOTIFICATIONS)
         }
@@ -92,6 +90,33 @@ class LoginFragment : Fragment() {
         binding.tvAppTagline.alpha = 0f
         binding.tvAppTagline.animate().alpha(0.85f).setDuration(1000).start()
         AppSettings.setPushEffect(binding.btnLoginAction)
+    }
+
+    // 🚀 2026 DYNAMIC SESSION ROUTER: Checks layout mode instantly on start
+    private fun checkAdaptiveSessionState() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                if (isAdaptiveUiOverridden) return@repeatOnLifecycle
+
+                val isMpinConfigured = dataStoreManager.isMpinSet.firstOrNull() ?: false
+                val cachedName = dataStoreManager.userName.firstOrNull() ?: "User"
+
+                if (isMpinConfigured) {
+                    binding.layoutDefaultForm.visibility = View.GONE
+                    binding.layoutAdaptiveMpinForm.visibility = View.VISIBLE
+                    binding.tvWelcomeUser.text = getString(R.string.welcome_back, cachedName)
+
+                    // Instant biometric prompt initialization if active
+                    val bioManager = BiometricSettingsManager(requireContext())
+                    if (bioManager.isBiometricEnabled()) {
+                        showBiometricPrompt()
+                    }
+                } else {
+                    binding.layoutDefaultForm.visibility = View.VISIBLE
+                    binding.layoutAdaptiveMpinForm.visibility = View.GONE
+                }
+            }
+        }
     }
 
     // --- 🛡️ ACCOUNT SECURITY LOCK FRAMEWORK ---
@@ -123,15 +148,12 @@ class LoginFragment : Fragment() {
                 putInt("attempts_$email", 0)
             })
         } else {
-            prefs.edit {
-                putInt("attempts_$email", attempts)
-            }
+            prefs.edit { putInt("attempts_$email", attempts) }
         }
     }
 
     private fun checkAndHandleLock(email: String): Boolean {
         val isLocked = isUserLocked(email)
-
         if (isLocked) {
             val timeLeft = getRemainingLockTime(email)
             binding.tilEmail.isErrorEnabled = true
@@ -142,7 +164,7 @@ class LoginFragment : Fragment() {
                     while (isUserLocked(email)) {
                         val currentTimeLeft = getRemainingLockTime(email)
                         binding.tilEmail.error = "Account locked! Try after $currentTimeLeft"
-                        kotlinx.coroutines.delay(1000)
+                        kotlinx.coroutines.delay(1000.milliseconds)
                     }
                     binding.tilEmail.isErrorEnabled = false
                     binding.tilEmail.error = null
@@ -155,17 +177,15 @@ class LoginFragment : Fragment() {
         return isLocked
     }
 
-    // --- 📊 HIGH-PERFORMANCE DATA STREAMS MONITOR ---
+    // --- 📊 REACTION SUBSYSTEM LIVE STREAMS ---
     private fun observeViewModel() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.loginState.collect { state ->
-                    // Automated Non-blocking UI Toggle
                     binding.loadingOverlay.visibility = if (state is LoginViewModel.LoginState.Loading) View.VISIBLE else View.GONE
 
                     when (state) {
-                        is LoginViewModel.LoginState.Idle -> { /* State Rest Container */ }
-                        is LoginViewModel.LoginState.Loading -> { /* Framework Operational */ }
+                        is LoginViewModel.LoginState.Idle, is LoginViewModel.LoginState.Loading -> {}
                         is LoginViewModel.LoginState.Success -> {
                             AppSettings.startNewUserSession(requireContext())
                             proceedToHome()
@@ -176,9 +196,7 @@ class LoginFragment : Fragment() {
                                 if (isAdded) (activity as? AuthActivity)?.showRegister()
                             }, 1000)
                         }
-                        is LoginViewModel.LoginState.Error -> {
-                            handleLoginError(state.message)
-                        }
+                        is LoginViewModel.LoginState.Error -> handleLoginError(state.message)
                     }
                 }
             }
@@ -189,8 +207,7 @@ class LoginFragment : Fragment() {
         val email = binding.etEmail.text.toString().trim()
         val userFriendlyMsg = when {
             msg.contains("network", true) || msg.contains("timeout", true) -> getString(R.string.no_internet)
-            msg.contains("password", true) || msg.contains("credential", true) -> "Incorrect Credentials! Please try again.🔑"
-            msg.contains("too-many-requests", true) -> "Too many attempts! Please try after some time.⏳"
+            msg.contains("password", true) || msg.contains("credential", true) -> "Incorrect Credentials!🔑"
             else -> msg
         }
 
@@ -238,6 +255,22 @@ class LoginFragment : Fragment() {
         binding.tvForgotPassword.setOnClickListener {
             showForgotPasswordSheet()
         }
+
+        // 🚀 ADAPTIVE UI TRIGGERS
+        binding.tvDifferentUser.setOnClickListener {
+            isAdaptiveUiOverridden = true
+            binding.layoutAdaptiveMpinForm.visibility = View.GONE
+            binding.layoutDefaultForm.visibility = View.VISIBLE
+        }
+
+        binding.tvForgotMpinAction.setOnClickListener {
+            toast("Redirecting to verify credentials via BottomSheet...")
+            showForgotPasswordSheet()
+        }
+
+        binding.btnFingerprintTrigger.setOnClickListener { showBiometricPrompt() }
+        binding.btnFaceUnlockTrigger.setOnClickListener { showBiometricPrompt() }
+        binding.layoutActiveDots.setOnClickListener { showMpinBottomSheet() }
     }
 
     private fun performEmailLogin() {
@@ -252,37 +285,20 @@ class LoginFragment : Fragment() {
 
         if (isUserLocked(email)) {
             binding.tilPassword.isErrorEnabled = true
-            binding.tilPassword.error = "This account is locked. Try after ${getRemainingLockTime(email)} hrs"
+            binding.tilPassword.error = "Account locked! Try after ${getRemainingLockTime(email)}"
             AppSettings.triggerErrorEffect(requireContext(), binding.tilPassword)
             return
         }
 
         clearAllErrors()
 
-        when {
-            email.isEmpty() -> {
-                binding.tilEmail.error = getString(R.string.error_email_empty)
-                AppSettings.triggerErrorEffect(requireContext(), binding.tilEmail)
-                return
-            }
-            !Patterns.EMAIL_ADDRESS.matcher(email).matches() -> {
-                binding.tilEmail.error = getString(R.string.error_email_invalid)
-                AppSettings.triggerErrorEffect(requireContext(), binding.tilEmail)
-                return
-            }
+        if (email.isEmpty() || !Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+            binding.tilEmail.error = getString(R.string.error_email_invalid)
+            return
         }
-
-        when {
-            pass.isEmpty() -> {
-                binding.tilPassword.error = getString(R.string.error_password_empty)
-                AppSettings.triggerErrorEffect(requireContext(), binding.tilPassword)
-                return
-            }
-            pass.length < 8 -> {
-                binding.tilPassword.error = getString(R.string.error_password_length)
-                AppSettings.triggerErrorEffect(requireContext(), binding.tilPassword)
-                return
-            }
+        if (pass.isEmpty() || pass.length < 8) {
+            binding.tilPassword.error = getString(R.string.error_password_length)
+            return
         }
         viewModel.loginWithEmail(email, pass)
     }
@@ -313,12 +329,6 @@ class LoginFragment : Fragment() {
         binding.tilEmail.isErrorEnabled = false
         binding.tilPassword.error = null
         binding.tilPassword.isErrorEnabled = false
-
-        binding.btnLoginAction.post {
-            val params = binding.btnLoginAction.layoutParams as ConstraintLayout.LayoutParams
-            params.topMargin = (24 * resources.displayMetrics.density).toInt()
-            binding.btnLoginAction.layoutParams = params
-        }
     }
 
     private fun showForgotPasswordSheet() {
@@ -333,11 +343,12 @@ class LoginFragment : Fragment() {
                 override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
                     super.onAuthenticationSucceeded(result)
                     val manager = BiometricSettingsManager(requireContext())
-                    val email = manager.getSavedEmail()
-                    val password = manager.getSavedPass()
+                    val savedEmail = manager.getSavedEmail()
+                    val savedPassword = manager.getSavedPass()
 
-                    if (email != null) {
-                        viewModel.loginWithEmail(email, password)
+                    // 🚀 2026 Reactive Safeguard Scope Execution without dead-code warning
+                    if (!savedEmail.isNullOrEmpty() && savedPassword.isNotEmpty()) {
+                        viewModel.loginWithEmail(savedEmail, savedPassword)
                     } else {
                         proceedToHome()
                     }
@@ -345,8 +356,7 @@ class LoginFragment : Fragment() {
 
                 override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
                     super.onAuthenticationError(errorCode, errString)
-                    if (errorCode == BiometricPrompt.ERROR_NEGATIVE_BUTTON ||
-                        errorCode == BiometricPrompt.ERROR_USER_CANCELED) {
+                    if (errorCode == BiometricPrompt.ERROR_NEGATIVE_BUTTON || errorCode == BiometricPrompt.ERROR_USER_CANCELED) {
                         showMpinBottomSheet()
                     }
                 }
@@ -354,7 +364,7 @@ class LoginFragment : Fragment() {
 
         val promptInfo = BiometricPrompt.PromptInfo.Builder()
             .setTitle("Secure Login")
-            .setSubtitle("Scan fingerprint or use MPIN")
+            .setSubtitle("Scan fingerprint or face identity")
             .setNegativeButtonText("Use MPIN")
             .build()
         biometricPrompt.authenticate(promptInfo)
@@ -369,9 +379,7 @@ class LoginFragment : Fragment() {
                     proceedToHome()
                 }
             },
-            onBiometricRequest = {
-                showBiometricPrompt()
-            }
+            onBiometricRequest = { showBiometricPrompt() }
         )
         mpinSheet.show(childFragmentManager, "MpinSheet")
     }
