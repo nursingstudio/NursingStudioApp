@@ -10,7 +10,8 @@
     android:paddingTop="32dp"
     android:paddingBottom="32dp"
     android:gravity="center_horizontal"
-    android:background="@color/surface_card">
+    android:clipToOutline="true"
+    android:background="@drawable/bg_bottom_sheet">
 
     <TextView
         android:layout_width="wrap_content"
@@ -19,7 +20,6 @@
         android:textColor="@color/brand_saffron_dark"
         android:textSize="18sp"
         android:textStyle="bold"
-        android:fontFamily="sans-serif-black"
         tools:ignore="TextContrastCheck" />
 
     <LinearLayout
@@ -246,7 +246,6 @@
         app:strokeColor="@color/brand_saffron_dark"
         app:strokeWidth="1dp"
         app:cornerRadius="10dp"
-        app:rippleColor="@color/saffron_ripple"
-        android:fontFamily="sans-serif-medium" />
+        app:rippleColor="@color/saffron_ripple" />
 
 </LinearLayout>

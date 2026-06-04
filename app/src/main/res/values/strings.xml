@@ -3,7 +3,7 @@
 
     <string name="tnc_content">
         <![CDATA[
-        <font color="#FF9933"><b>YOUR PRIVACY &amp; SECURITY IS OUR TOP PRIORITY.</b></font><br><br>
+        <font color="#004B71"><b>YOUR PRIVACY &amp; SECURITY IS OUR TOP PRIORITY.</b></font><br><br>
 
         <b>1. SINGLE DEVICE POLICY:</b><br>
         To maintain account security, one User ID is strictly limited to <b>ONE MOBILE DEVICE ONLY</b>. Accessing Nursing Studio on multiple devices (Mobiles, Tablets, or Laptops) simultaneously is prohibited.<br><br>
@@ -27,7 +27,7 @@
 
         <string name="privacy_content">
         <![CDATA[
-        <font color="#FF9933"><b>YOUR PRIVACY IS OUR TOP PRIORITY.</b></font><br><br>
+        <font color="#004B71"><b>YOUR PRIVACY IS OUR TOP PRIORITY.</b></font><br><br>
 
         <b>1. DATA ENCRYPTION:</b><br>
         Your personal details are encrypted and stored on world-class <b>GOOGLE FIREBASE</b> servers. Your trust is our biggest asset.<br><br>
