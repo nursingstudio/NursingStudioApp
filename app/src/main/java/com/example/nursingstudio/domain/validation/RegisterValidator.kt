@@ -53,7 +53,6 @@ object RegisterValidator {
             user.pincode.length != 6 -> ValidationResult.Error("Valid 6-digit Pincode required", "pincode")
 
             // 5. Nursing Registration (SERIAL POSITION FIXED)
-            // Hume check karna hai user ne Yes/No choose kiya ya nahi
             user.isNursingRegistered == null -> ValidationResult.Error("Please select Nursing Registration status", "is_reg")
 
             // Agar Yes select kiya hai tabhi niche wale check chale

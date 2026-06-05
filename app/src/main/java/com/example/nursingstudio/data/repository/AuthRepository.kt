@@ -48,7 +48,7 @@ class AuthRepository @Inject constructor(
         }
     }
 
-    // 2. ⭐ UNIFIED OTP VERIFICATION & DATA SYNC
+    // 2. ⭐ VERIFICATION & DATA SYNC
     // User login kare ya register, ye function dono handle karega
     suspend fun verifyAndSyncUser(credential: AuthCredential): Result<Pair<AuthResult, Boolean>> {
         return try {

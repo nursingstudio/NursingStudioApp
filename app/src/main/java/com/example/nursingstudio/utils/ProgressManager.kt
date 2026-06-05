@@ -1,6 +1,7 @@
 package com.example.nursingstudio.utils
 
 import android.content.Context
+import androidx.core.content.edit
 
 object ProgressManager {
 
@@ -9,7 +10,7 @@ object ProgressManager {
     fun increment(context: Context, key: String) {
         val sp = context.getSharedPreferences(PREF, Context.MODE_PRIVATE)
         val current = sp.getInt(key, 0)
-        sp.edit().putInt(key, current + 1).apply()
+        sp.edit { putInt(key, current + 1) }
     }
 
     fun get(context: Context, key: String): Int {
