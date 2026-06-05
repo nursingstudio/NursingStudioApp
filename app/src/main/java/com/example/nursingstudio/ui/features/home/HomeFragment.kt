@@ -160,10 +160,15 @@ class HomeFragment : Fragment() {
             .setCancelable(false)
             .create()
 
+        // 🚀 2026 METRIC ADJUSTMENT HOOK: Explicitly modifying window configurations to avoid multi-line text wrapping
+        biometricDialog?.setOnShowListener {
+            val width = (resources.displayMetrics.widthPixels * 0.92).toInt() // Takes 92% screen layout structure width safely
+            biometricDialog?.window?.setLayout(width, ViewGroup.LayoutParams.WRAP_CONTENT)
+        }
+
         dialogView.findViewById<View>(R.id.btnSetupNow).setOnClickListener {
             biometricDialog?.dismiss()
             if (isAdded && activity != null) {
-                // 🚀 Automated Adaptive Onboarding: Smooth redirection to Modular cockpit dashboard
                 navigateToFragment(R.id.nav_settings)
             }
         }
@@ -174,7 +179,6 @@ class HomeFragment : Fragment() {
 
         dialogView.findViewById<View>(R.id.btnNever).setOnClickListener {
             biometricDialog?.dismiss()
-            // Maps the deconfiguration flag for implicit session branching control
             requireContext().getSharedPreferences("nursing_studio_preferences", Context.MODE_PRIVATE).edit {
                 putBoolean("cascade_mpin_onboarding_never_ask", true)
             }

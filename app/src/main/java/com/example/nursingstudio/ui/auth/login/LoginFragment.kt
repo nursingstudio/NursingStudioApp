@@ -5,12 +5,16 @@ import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.text.Editable
+import android.text.InputFilter
+import android.text.InputType
 import android.text.TextWatcher
+import android.text.method.PasswordTransformationMethod
 import android.util.Patterns
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
+import android.widget.EditText
 import android.widget.Toast
 import androidx.biometric.BiometricPrompt
 import androidx.core.content.ContextCompat
@@ -28,6 +32,7 @@ import com.example.nursingstudio.ui.auth.AuthActivity
 import com.example.nursingstudio.ui.main.MainActivity
 import com.example.nursingstudio.utils.AppSettings
 import com.example.nursingstudio.utils.BiometricSettingsManager
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
@@ -263,16 +268,51 @@ class LoginFragment : Fragment() {
             binding.layoutDefaultForm.visibility = View.VISIBLE
         }
 
+        // 🚀 ROUTING FORGOT MPIN FLOW INDEPENDENT OF PASSWORD RESET LAYOUT
+        // 🚀 RESOLVED FIXED LINE 270 ERRORS:
         binding.tvForgotMpinAction.setOnClickListener {
-            toast("Redirecting to verify credentials via BottomSheet...")
-            showForgotPasswordSheet()
+            val forgotMpinSheet = ForgotMpinBottomSheet(onResetVerified = {
+                showLocalMpinSetupDialog()
+            })
+            forgotMpinSheet.show(childFragmentManager, "ForgotMpinTag")
         }
 
         binding.btnFingerprintTrigger.setOnClickListener { showBiometricPrompt() }
         binding.btnFaceUnlockTrigger.setOnClickListener { showBiometricPrompt() }
         binding.layoutActiveDots.setOnClickListener { showMpinBottomSheet() }
     }
+    // 🚀 NEW SECURE LAYER: Independent setup configuration specifically for Login context
+    private fun showLocalMpinSetupDialog() {
+        val etMpin = EditText(requireContext()).apply {
+            inputType = InputType.TYPE_CLASS_NUMBER
+            transformationMethod = PasswordTransformationMethod.getInstance()
+            filters = arrayOf(InputFilter.LengthFilter(4))
+            hint = "Create 4-Digit PIN"
+            textAlignment = View.TEXT_ALIGNMENT_CENTER
+        }
 
+        MaterialAlertDialogBuilder(requireContext(), R.style.MaterialAlertDialog_Rounded)
+            .setTitle("Reset Security PIN")
+            .setMessage("Set a secure fallback 4-digit pin profile to access account operations.")
+            .setView(etMpin)
+            .setCancelable(false)
+            .setPositiveButton("Save PIN") { _, _ ->
+                val mpin = etMpin.text.toString()
+                if (mpin.length == 4) {
+                    viewLifecycleOwner.lifecycleScope.launch {
+                        val bioManager = BiometricSettingsManager(requireContext())
+                        bioManager.saveMPIN(mpin)
+                        dataStoreManager.saveMpinStatus(true)
+                        toast("Security PIN updated successfully! 🔒")
+                        checkAdaptiveSessionState()
+                    }
+                } else {
+                    toast("PIN validation requires exactly 4 digits")
+                }
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
+    }
     private fun performEmailLogin() {
         val email = binding.etEmail.text.toString().trim()
         val pass = binding.etPassword.text.toString().trim()
@@ -336,40 +376,50 @@ class LoginFragment : Fragment() {
         bottomSheet.show(childFragmentManager, "ForgotPasswordSheet")
     }
 
+    // 🚀 RESOLVED FIXED LINE 351 LOOP CANCELLATION CRITICAL BUG
     private fun showBiometricPrompt() {
         val executor = ContextCompat.getMainExecutor(requireContext())
-        val biometricPrompt = BiometricPrompt(this, executor,
-            object : BiometricPrompt.AuthenticationCallback() {
-                override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
-                    super.onAuthenticationSucceeded(result)
-                    val manager = BiometricSettingsManager(requireContext())
-                    val savedEmail = manager.getSavedEmail()
-                    val savedPassword = manager.getSavedPass()
 
-                    // 🚀 2026 Reactive Safeguard Scope Execution without dead-code warning
-                    if (!savedEmail.isNullOrEmpty() && savedPassword.isNotEmpty()) {
-                        viewModel.loginWithEmail(savedEmail, savedPassword)
-                    } else {
-                        proceedToHome()
-                    }
-                }
+        // Declare prompt instance up-front to correctly bind access scoped logic blocks
+        var biometricPromptInstance: BiometricPrompt? = null
 
-                override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
-                    super.onAuthenticationError(errorCode, errString)
-                    if (errorCode == BiometricPrompt.ERROR_NEGATIVE_BUTTON || errorCode == BiometricPrompt.ERROR_USER_CANCELED) {
-                        showMpinBottomSheet()
-                    }
+        val callback = object : BiometricPrompt.AuthenticationCallback() {
+            override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
+                super.onAuthenticationSucceeded(result)
+
+                // 🛡️ Safe termination lock access to stop infinite hardware loop instances
+                biometricPromptInstance?.cancelAuthentication()
+
+                val manager = BiometricSettingsManager(requireContext())
+                val savedEmail = manager.getSavedEmail()
+                val savedPassword = manager.getSavedPass()
+
+                if (!savedEmail.isNullOrEmpty() && savedPassword.isNotEmpty()) {
+                    viewModel.loginWithEmail(savedEmail, savedPassword)
+                    proceedToHome()
+                } else {
+                    proceedToHome()
                 }
-            })
+            }
+
+            override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
+                super.onAuthenticationError(errorCode, errString)
+                if (errorCode == BiometricPrompt.ERROR_NEGATIVE_BUTTON || errorCode == BiometricPrompt.ERROR_USER_CANCELED) {
+                    showMpinBottomSheet()
+                }
+            }
+        }
+
+        biometricPromptInstance = BiometricPrompt(this, executor, callback)
 
         val promptInfo = BiometricPrompt.PromptInfo.Builder()
             .setTitle("Secure Login")
             .setSubtitle("Scan fingerprint or face identity")
             .setNegativeButtonText("Use MPIN")
             .build()
-        biometricPrompt.authenticate(promptInfo)
-    }
 
+        biometricPromptInstance.authenticate(promptInfo)
+    }
     private fun showMpinBottomSheet() {
         val mpinSheet = MpinBottomSheet(
             onMpinSuccess = { email, pass ->

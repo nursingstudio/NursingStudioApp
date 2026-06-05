@@ -278,6 +278,10 @@
     <string name="security_fallback_mpin">Security Fallback MPIN</string>
     <string name="enable_fingerprint_login">Enable Fingerprint Login</string>
     <string name="security_settings">Security Settings</string>
+    <string name="don_t_ask">Don\'t Ask</string>
+    <string name="enter_account_password">Enter Account Password</string>
+    <string name="to_verify_confirm_your_account_password">To verify your corporate session identity, please confirm your primary account password below.</string>
+    <string name="reset_security_mpin">Reset Security MPIN</string>
 
 
 </resources>

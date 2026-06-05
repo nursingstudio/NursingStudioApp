@@ -91,38 +91,44 @@ class SettingsFragment : Fragment() {
             if (isChecked) AppSettings.triggerVibration(requireContext(), 50)
         }
 
-        // --- 🛡️ EXPLICIT FINGERPRINT DEPLOYMENT MATRIX ---
+        // --- 🛡️ EXPLICIT GRANULAR FINGERPRINT COMPONENT AUTH ---
         switchFingerprint?.setOnClickListener {
             val isChecked = (it as SwitchMaterial).isChecked
             if (isChecked) {
                 it.isChecked = false
                 evaluateSecurityCascade {
-                    bioManager.setBiometricEnabled(true) // Maps fingerprint flag state
-                    switchFingerprint?.isChecked = true
+                    // 🚀 2026 HARDWARE REQUIREMENT: Force hardware layer biometric evaluation before checking flag
+                    triggerNativeHardwareVerification("Verify Fingerprint identity to complete initialization") {
+                        bioManager.setBiometricEnabled(true)
+                        switchFingerprint?.isChecked = true
+                        toast("Fingerprint Authentication Enabled 🔒")
+                    }
                 }
             } else {
                 bioManager.setBiometricEnabled(false)
-                toast("Fingerprint identification disabled")
+                toast("Fingerprint validation offline")
             }
         }
 
-        // --- 🛡️ EXPLICIT FACE UNLOCK DEPLOYMENT MATRIX ---
+        // --- 🛡️ EXPLICIT GRANULAR FACE UNLOCK COMPONENT AUTH ---
         switchFaceUnlock?.setOnClickListener {
             val isChecked = (it as SwitchMaterial).isChecked
             if (isChecked) {
                 it.isChecked = false
                 evaluateSecurityCascade {
-                    // 🚀 2026 Production Hook for Face Vector preferences
-                    sp.edit { putBoolean("enable_face_identity_secure", true) }
-                    switchFaceUnlock?.isChecked = true
-                    toast("Face ID security profile synchronized")
+                    // 🚀 Trigger native device execution for hardware identification verification
+                    triggerNativeHardwareVerification("Authenticate face geometric matrix profile") {
+                        bioManager.setFaceUnlockEnabled(true)
+                        switchFaceUnlock?.isChecked = true
+                        toast("Secure Face ID Profile Synchronized 🎯")
+                    }
                 }
             } else {
-                sp.edit { putBoolean("enable_face_identity_secure", false) }
+                bioManager.setFaceUnlockEnabled(false)
                 switchFaceUnlock?.isChecked = false
+                toast("Face ID profile detached")
             }
         }
-
         // --- 🛡️ EXPLICIT FALLBACK MPIN DEPLOYMENT MATRIX ---
         switchMpin?.setOnClickListener {
             val isChecked = (it as SwitchMaterial).isChecked
@@ -256,5 +262,28 @@ class SettingsFragment : Fragment() {
 
     private fun toast(message: String) {
         Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+    }
+
+    private fun triggerNativeHardwareVerification(promptTitle: String, onAuthSuccess: () -> Unit) {
+        val executor = androidx.core.content.ContextCompat.getMainExecutor(requireContext())
+        val biometricPrompt = androidx.biometric.BiometricPrompt(this, executor,
+            object : androidx.biometric.BiometricPrompt.AuthenticationCallback() {
+                override fun onAuthenticationSucceeded(result: androidx.biometric.BiometricPrompt.AuthenticationResult) {
+                    super.onAuthenticationSucceeded(result)
+                    activity?.runOnUiThread { onAuthSuccess.invoke() }
+                }
+                override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
+                    super.onAuthenticationError(errorCode, errString)
+                    activity?.runOnUiThread { toast("Hardware verification failed: $errString") }
+                }
+            })
+
+        val promptInfo = androidx.biometric.BiometricPrompt.PromptInfo.Builder()
+            .setTitle(promptTitle)
+            .setSubtitle("Required authentication component sequence active.")
+            .setNegativeButtonText("Cancel Execution")
+            .build()
+
+        biometricPrompt.authenticate(promptInfo)
     }
 }
