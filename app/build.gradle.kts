@@ -102,7 +102,6 @@ dependencies {
 
     // 3. Authentication & Security
     implementation(libs.androidx.biometric)
-    implementation(libs.androidx.security.crypto)
     implementation(libs.play.services.auth)
     implementation(libs.play.services.auth.api.phone)
     implementation(libs.integrity)
