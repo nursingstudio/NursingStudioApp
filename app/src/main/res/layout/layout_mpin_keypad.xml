@@ -174,42 +174,7 @@
             app:strokeWidth="1dp" />
 
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnKeyBio"
-            style="@style/MpinKeyStyle"
-            android:layout_width="0dp"
-            android:layout_height="72dp"
-            android:layout_columnWeight="1"
-            android:layout_margin="6dp"
-            android:padding="0dp"
-            app:contentPadding="0dp"
-            android:insetLeft="0dp"
-            app:iconGravity="textStart"
-            android:insetRight="0dp"
-            android:insetTop="0dp"
-            android:insetBottom="0dp"
-            android:contentDescription="@string/biometric_login_fingerprint"
-            app:icon="@drawable/ic_fingerprint"
-            app:iconSize="32dp"
-            app:iconPadding="0dp"
-            app:iconTint="@color/brand_saffron_dark"
-            app:strokeColor="@color/border_grey"
-            app:strokeWidth="1dp" />
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnKey0"
-            style="@style/MpinKeyStyle"
-            android:layout_width="0dp"
-            android:layout_height="72dp"
-            android:layout_columnWeight="1"
-            android:layout_margin="6dp"
-            android:text="@string/_0"
-            android:textSize="24sp"
-            android:textColor="@color/text_primary"
-            app:strokeColor="@color/border_grey"
-            app:strokeWidth="1dp" />
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnKeyDel"
+            android:id="@+id/btnKeyBackspace"
             style="@style/MpinKeyStyle"
             android:layout_width="0dp"
             android:layout_height="72dp"
@@ -230,22 +195,88 @@
             app:strokeColor="@color/border_grey"
             app:strokeWidth="1dp" />
 
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnKey0"
+            style="@style/MpinKeyStyle"
+            android:layout_width="0dp"
+            android:layout_height="72dp"
+            android:layout_columnWeight="1"
+            android:layout_margin="6dp"
+            android:text="@string/_0"
+            android:textSize="24sp"
+            android:textColor="@color/text_primary"
+            app:strokeColor="@color/border_grey"
+            app:strokeWidth="1dp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnKeyEnter"
+            style="@style/MpinKeyStyle"
+            android:layout_width="0dp"
+            android:layout_height="72dp"
+            android:layout_columnWeight="1"
+            android:layout_margin="6dp"
+            android:padding="0dp"
+            app:contentPadding="0dp"
+            android:insetLeft="0dp"
+            android:insetRight="0dp"
+            android:insetTop="0dp"
+            android:insetBottom="0dp"
+            android:contentDescription="@string/submit_pin"
+            app:icon="@drawable/ic_check"
+            app:iconGravity="textStart"
+            app:iconSize="28dp"
+            app:iconPadding="0dp"
+            app:iconTint="@color/brand_blue"
+            app:strokeColor="@color/border_grey"
+            app:strokeWidth="1dp" />
+
     </GridLayout>
 
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/btnForgotMpin"
-        style="@style/Widget.Material3.Button.OutlinedButton"
-        android:layout_width="wrap_content"
-        android:layout_height="48dp"
-        android:layout_marginTop="20dp"
-        android:text="@string/forgot_mpin"
-        android:textColor="@color/brand_blue"
-        android:textSize="14sp"
-        android:textStyle="bold"
-        android:textAllCaps="false"
-        app:strokeColor="@color/brand_saffron_dark"
-        app:strokeWidth="1dp"
-        app:cornerRadius="10dp"
-        app:rippleColor="@color/saffron_ripple" />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:layout_marginTop="24dp"
+        android:weightSum="2">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnForgotMpin"
+            style="@style/Widget.Material3.Button.OutlinedButton"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_weight="1"
+            android:layout_marginEnd="6dp"
+            android:text="@string/forgot_mpin"
+            android:textColor="@color/brand_blue"
+            android:textSize="13sp"
+            android:textStyle="bold"
+            android:textAllCaps="false"
+            app:strokeColor="@color/brand_saffron_dark"
+            app:strokeWidth="1dp"
+            app:cornerRadius="10dp"
+            app:rippleColor="@color/saffron_ripple" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnUseBiometrics"
+            style="@style/Widget.Material3.Button.OutlinedButton"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_weight="1"
+            android:layout_marginStart="6dp"
+            android:text="@string/biometrics"
+            android:textColor="@color/brand_saffron_dark"
+            android:textSize="13sp"
+            android:textStyle="bold"
+            android:textAllCaps="false"
+            app:icon="@drawable/ic_fingerprint"
+            app:iconSize="18dp"
+            app:iconTint="@color/brand_saffron_dark"
+            app:strokeColor="@color/brand_blue"
+            app:strokeWidth="1dp"
+            app:cornerRadius="10dp"
+            app:rippleColor="@color/saffron_ripple" />
+
+    </LinearLayout>
 
 </LinearLayout>

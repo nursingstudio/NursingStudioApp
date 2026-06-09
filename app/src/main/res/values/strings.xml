@@ -282,6 +282,10 @@
     <string name="enter_account_password">Enter Account Password</string>
     <string name="to_verify_confirm_your_account_password">To verify your corporate session identity, please confirm your primary account password below.</string>
     <string name="reset_security_mpin">Reset Security MPIN</string>
+    <string name="enter">Enter</string>
+    <string name="face_unlock_verification">Face Unlock Verification</string>
+    <string name="biometrics">Biometrics</string>
+    <string name="submit_pin">Submit PIN</string>
 
 
 </resources>

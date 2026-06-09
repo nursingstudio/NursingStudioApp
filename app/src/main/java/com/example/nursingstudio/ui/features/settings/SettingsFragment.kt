@@ -96,7 +96,8 @@ class SettingsFragment : Fragment() {
                 evaluateSecurityCascade {
                     triggerNativeHardwareVerification(
                         promptTitle = "Confirm Fingerprint",
-                        promptSubtitle = "Please scan your fingerprint to enable quick access."
+                        promptSubtitle = "Please scan your fingerprint to enable quick access.",
+                        isFaceVerification = false
                     ) {
                         bioManager.setBiometricEnabled(true)
                         switchFingerprint?.isChecked = true
@@ -120,7 +121,8 @@ class SettingsFragment : Fragment() {
                 evaluateSecurityCascade {
                     triggerNativeHardwareVerification(
                         promptTitle = "Confirm Face Identity",
-                        promptSubtitle = "Please scan your face to enable quick access."
+                        promptSubtitle = "Please scan your face to enable quick access.",
+                        isFaceVerification = true
                     ) {
                         bioManager.setFaceUnlockEnabled(true)
                         switchFaceUnlock?.isChecked = true
@@ -261,7 +263,12 @@ class SettingsFragment : Fragment() {
             .show()
     }
 
-    private fun triggerNativeHardwareVerification(promptTitle: String, promptSubtitle: String, onAuthSuccess: () -> Unit) {
+    private fun triggerNativeHardwareVerification(
+        promptTitle: String,
+        promptSubtitle: String,
+        isFaceVerification: Boolean,
+        onAuthSuccess: () -> Unit
+    ) {
         val executor = androidx.core.content.ContextCompat.getMainExecutor(requireContext())
         var wrongAttemptCount = 0
 
@@ -271,6 +278,17 @@ class SettingsFragment : Fragment() {
             object : BiometricPrompt.AuthenticationCallback() {
                 override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
                     super.onAuthenticationSucceeded(result)
+
+                    val hardwareAuthenticationType = result.authenticationType
+
+                    if (hardwareAuthenticationType == BiometricPrompt.AUTHENTICATION_RESULT_TYPE_DEVICE_CREDENTIAL) {
+                        biometricPrompt?.cancelAuthentication()
+                        activity?.runOnUiThread {
+                            toast("Security Policy: Device PIN/Pattern fallback authentication restricted here.")
+                        }
+                        return
+                    }
+
                     wrongAttemptCount = 0
                     activity?.runOnUiThread { onAuthSuccess.invoke() }
                 }
