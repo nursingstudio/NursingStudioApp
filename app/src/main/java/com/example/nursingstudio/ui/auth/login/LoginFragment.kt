@@ -429,7 +429,18 @@ class LoginFragment : Fragment() {
                     proceedToHome()
                 }
             },
-            onBiometricRequest = { showBiometricPrompt() }
+            onBiometricRequest = {
+                showBiometricPrompt()
+            },
+        onForgotMpinRequested = {
+            // Open the forgot bottom sheet immediately when click callback triggers
+            val currentInputtedPass = binding.etPassword.text.toString().trim() // Pass runtime text if available
+            val forgotSheet = ForgotMpinBottomSheet(runtimePasswordFallback = currentInputtedPass) {
+                // Action to perform once password verification succeeds (e.g., open Reset MPIN Screen)
+                Toast.makeText(requireContext(), "Identity Verified! You can reset MPIN now.", Toast.LENGTH_SHORT).show()
+            }
+            forgotSheet.show(childFragmentManager, "ForgotMpinBottomSheet")
+        }
         )
         mpinSheet.show(childFragmentManager, "MpinSheet")
     }

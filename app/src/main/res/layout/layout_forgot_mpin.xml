@@ -17,19 +17,22 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/reset_security_mpin"
+        android:text="@string/verify_password_title"
         android:textSize="20sp"
         android:textStyle="bold"
-        android:textColor="@color/brand_saffron_dark" />
+        android:textColor="@color/brand_saffron_dark"
+        android:fontFamily="sans-serif-black" />
 
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/to_verify_confirm_your_account_password"
+        android:text="@string/verify_password_subtitle"
         android:textSize="13sp"
         android:textColor="@color/text_secondary"
-        android:layout_marginTop="4dp"
-        android:layout_marginBottom="20dp" />
+        android:layout_marginTop="6dp"
+        android:layout_marginBottom="24dp"
+        android:lineSpacingMultiplier="1.15"
+        android:fontFamily="sans-serif" />
 
     <com.google.android.material.textfield.TextInputLayout
         style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
@@ -37,14 +40,20 @@
         android:layout_height="wrap_content"
         android:hint="@string/enter_account_password"
         app:passwordToggleEnabled="true"
-        app:boxStrokeColor="?attr/colorPrimary">
+        app:boxStrokeColor="?attr/colorPrimary"
+        app:boxCornerRadiusTopStart="10dp"
+        app:boxCornerRadiusTopEnd="10dp"
+        app:boxCornerRadiusBottomStart="10dp"
+        app:boxCornerRadiusBottomEnd="10dp">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/etForgotMpinPassword"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:inputType="textPassword"
-            android:fontFamily="sans-serif" />
+            android:fontFamily="sans-serif"
+            android:imeOptions="actionDone"
+            android:importantForAutofill="no" />
     </com.google.android.material.textfield.TextInputLayout>
 
     <com.google.android.material.button.MaterialButton
@@ -53,8 +62,10 @@
         android:layout_width="match_parent"
         android:layout_height="54dp"
         android:layout_marginTop="24dp"
-        android:text="@string/verify_identity"
+        android:text="@string/confirm_continue_action"
         android:textColor="@color/white"
         app:cornerRadius="12dp"
-        android:textStyle="bold" />
+        android:textSize="15sp"
+        android:textStyle="bold"
+        android:fontFamily="sans-serif-medium" />
 </LinearLayout>

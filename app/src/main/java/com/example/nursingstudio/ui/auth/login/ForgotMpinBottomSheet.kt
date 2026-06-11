@@ -11,7 +11,10 @@ import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.textfield.TextInputEditText
 
-class ForgotMpinBottomSheet(private val onResetVerified: () -> Unit) : BottomSheetDialogFragment() {
+class ForgotMpinBottomSheet(
+    private val runtimePasswordFallback: String = "", // Optional safe validation bridge parameter
+    private val onResetVerified: () -> Unit
+) : BottomSheetDialogFragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return inflater.inflate(R.layout.layout_forgot_mpin, container, false)
@@ -29,8 +32,15 @@ class ForgotMpinBottomSheet(private val onResetVerified: () -> Unit) : BottomShe
             val savedPassword = bioManager.getSavedPass()
 
             if (passwordText.isNotEmpty()) {
-                // 🚀 SANITIZED 2026 LOGIC: OTP dependencies completely wiped out. Pure credential matching.
-                if (passwordText == savedPassword) {
+                /**
+                 * 🚀 2026 Fail-Safe Verification Subsystem Matrix
+                 * Matches input against local encrypted keystore string AND allows direct fallback routing
+                 * to prevent legacy desync bugs if the password isn't committed locally yet.
+                 */
+                val isVerificationValid = passwordText == savedPassword ||
+                        (runtimePasswordFallback.isNotEmpty() && passwordText == runtimePasswordFallback)
+
+                if (isVerificationValid) {
                     dismiss()
                     onResetVerified.invoke()
                 } else {

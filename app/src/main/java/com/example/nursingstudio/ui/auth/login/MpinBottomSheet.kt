@@ -15,19 +15,18 @@ import com.google.android.material.button.MaterialButton
 
 class MpinBottomSheet(
     private val onMpinSuccess: (email: String?, pass: String?) -> Unit,
-    private val onBiometricRequest: () -> Unit
+    private val onBiometricRequest: () -> Unit,
+    private val onForgotMpinRequested: () -> Unit // 🚀 2026 Standard Event Parameter Injection
 ) : BottomSheetDialogFragment() {
 
     private var _binding: LayoutMpinKeypadBinding? = null
     private val binding get() = _binding!!
     private var enteredMpin = ""
 
-    // Maintain a tracking list for dynamic UI components
     private val numericButtons = ArrayList<MaterialButton>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        // Gold Standard: Transparent background for custom glass effect
         setStyle(STYLE_NORMAL, R.style.GlassBottomSheetDialogTheme)
     }
 
@@ -52,9 +51,6 @@ class MpinBottomSheet(
         }
     }
 
-    /**
-     * Line 49-60: Initialize numeric view references sequentially from binding architecture
-     */
     private fun initializeNumericButtonsList() {
         numericButtons.clear()
         numericButtons.add(binding.btnKey1)
@@ -69,29 +65,20 @@ class MpinBottomSheet(
         numericButtons.add(binding.btnKey0)
     }
 
-    /**
-     * Line 66-80: 2026 Cyber-Security Standard Shuffle Engine
-     * Executes every single time the sheet displays to prevent over-the-shoulder tracking.
-     */
     private fun shuffleAndPopulateKeypad() {
         val digitsList = arrayListOf("1", "2", "3", "4", "5", "6", "7", "8", "9", "0")
-        digitsList.shuffle() // Cryptographic-safe collection shuffle
+        digitsList.shuffle()
 
-        // Map randomized values directly to the views matrix
         for (i in numericButtons.indices) {
             numericButtons[i].text = digitsList[i]
-            numericButtons[i].tag = digitsList[i] // Secure tagging for character parsing
+            numericButtons[i].tag = digitsList[i]
         }
     }
 
-    /**
-     * Line 86-145: Fully Optimized Event Handling Engine
-     */
     private fun setupKeypadControllers() {
         val bioManager = BiometricSettingsManager(requireContext())
         val correctMpin = bioManager.getMPIN()
 
-        // Core Input Accumulation Logic
         val handleKeyClick: (String) -> Unit = { digit ->
             if (enteredMpin.length < 4) {
                 enteredMpin += digit
@@ -99,7 +86,6 @@ class MpinBottomSheet(
             }
         }
 
-        // Bind numeric click handlers dynamically using the random tags
         numericButtons.forEach { button ->
             button.setOnClickListener {
                 val numericValue = button.tag.toString()
@@ -107,7 +93,6 @@ class MpinBottomSheet(
             }
         }
 
-        // Dynamic Backspace Engine Configuration
         binding.btnKeyBackspace.setOnClickListener {
             if (enteredMpin.isNotEmpty()) {
                 enteredMpin = enteredMpin.dropLast(1)
@@ -115,7 +100,6 @@ class MpinBottomSheet(
             }
         }
 
-        // Long press clear optimization
         binding.btnKeyBackspace.setOnLongClickListener {
             enteredMpin = ""
             updateMpinDots(0)
@@ -123,9 +107,6 @@ class MpinBottomSheet(
             true
         }
 
-        /**
-         * Strict Submission Handler via manual Enter click action
-         */
         binding.btnKeyEnter.setOnClickListener {
             when {
                 enteredMpin.length < 4 -> {
@@ -138,7 +119,6 @@ class MpinBottomSheet(
                     dismiss()
                 }
                 else -> {
-                    // Wrong MPIN sequence execution pipeline
                     AppSettings.triggerErrorEffect(requireContext(), binding.layoutMpinDots)
                     enteredMpin = ""
                     binding.root.postDelayed({ updateMpinDots(0) }, 300)
@@ -147,10 +127,19 @@ class MpinBottomSheet(
             }
         }
 
-        // Modern Biometrics Callout Binding
         binding.btnUseBiometrics.setOnClickListener {
             dismiss()
             onBiometricRequest()
+        }
+
+        /**
+         * Exact Location: End of setupKeypadControllers framework scope
+         * 🚀 2026 Inter-Sheet Communication Bridge Execution
+         * Maps layout design button directly to navigation routing callbacks safely.
+         */
+        binding.btnForgotMpin.setOnClickListener {
+            dismiss() // Safe dismiss to prevent bottom-sheet layering overlap crashes
+            onForgotMpinRequested.invoke() // Emits callback trigger outwards to the lifecycle host
         }
     }
 
@@ -160,7 +149,6 @@ class MpinBottomSheet(
             val dot = dotsLayout.getChildAt(i)
             if (i < length) {
                 dot.setBackgroundResource(R.drawable.mpin_dot_filled)
-                // Premium Micro-Interaction Animations
                 dot.animate().scaleX(1.2f).scaleY(1.2f).setDuration(100).withEndAction {
                     dot.animate().scaleX(1.0f).scaleY(1.0f).setDuration(100).start()
                 }.start()

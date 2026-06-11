@@ -272,20 +272,21 @@
     <string name="face_unlock_indicator">Face Unlock Indicator</string>
     <string name="mpin_security_indicator">MPIN Security Indicator</string>
     <string name="choose_security_standard">Choose Security Standard</string>
-    <string name="enable_fingerprint_face_unlock_or_secure_mpin_options_for_automated_1_tap_instant_validation">Enable fingerprint, face unlock, or secure MPIN options for automated 1-tap instant validation.</string>
-    <string name="configure_security_credentials">Configure Security Credentials</string>
+    <string name="enable_biometric_or_mpin_subtitle">Enable biometrics or a secure MPIN for fast, one-tap sign in.</string><string name="configure_security_credentials">Configure Security Credentials</string>
     <string name="enable_face_unlock">Enable Face Unlock</string>
     <string name="security_fallback_mpin">Security Fallback MPIN</string>
     <string name="enable_fingerprint_login">Enable Fingerprint Login</string>
     <string name="security_settings">Security Settings</string>
     <string name="don_t_ask">Don\'t Ask</string>
-    <string name="enter_account_password">Enter Account Password</string>
-    <string name="to_verify_confirm_your_account_password">To verify your corporate session identity, please confirm your primary account password below.</string>
-    <string name="reset_security_mpin">Reset Security MPIN</string>
+    <string name="enter_account_password">Enter Your Account Password</string>
+    <string name="verify_password_title">Verify Your Password to Reset MPIN</string>
+    <string name="verify_password_subtitle">Please confirm your account password to verify your identity and reset your MPIN.</string>
+    <string name="confirm_continue_action">Confirm &amp; Continue</string>
     <string name="enter">Enter</string>
     <string name="face_unlock_verification">Face Unlock Verification</string>
     <string name="biometrics">Biometrics</string>
     <string name="submit_pin">Submit PIN</string>
+    <string name="enable_secure_access">Enable Secure Access</string>
 
 
 </resources>
