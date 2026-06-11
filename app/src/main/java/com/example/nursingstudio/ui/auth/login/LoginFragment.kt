@@ -16,8 +16,7 @@ import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import android.widget.Toast
-import androidx.biometric.BiometricPrompt
-import androidx.core.content.ContextCompat
+import androidx.biometric.BiometricManager
 import androidx.core.content.edit
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -31,13 +30,16 @@ import com.example.nursingstudio.databinding.FragmentLoginBinding
 import com.example.nursingstudio.ui.auth.AuthActivity
 import com.example.nursingstudio.ui.main.MainActivity
 import com.example.nursingstudio.utils.AppSettings
+import com.example.nursingstudio.utils.BiometricAuthHelper
 import com.example.nursingstudio.utils.BiometricSettingsManager
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import java.util.Locale
 import kotlin.time.Duration.Companion.milliseconds
+import androidx.core.view.isVisible
 
 @AndroidEntryPoint
 class LoginFragment : Fragment() {
@@ -50,8 +52,14 @@ class LoginFragment : Fragment() {
     private var _binding: FragmentLoginBinding? = null
     internal val binding get() = _binding!!
     private val viewModel: LoginViewModel by viewModels()
+
     private lateinit var dataStoreManager: DataStoreManager
+    private lateinit var bioSettingsManager: BiometricSettingsManager
+    private lateinit var biometricHelper: BiometricAuthHelper
+
     private var isAdaptiveUiOverridden = false
+    // 🚀 FIXED: Dynamic verification tracker container to cleanly kill the ticker loop anytime fragment context transitions
+    private var securityLockTickerJob: Job? = null
 
     private val requestNotificationPermissionLauncher = registerForActivityResult(
         androidx.activity.result.contract.ActivityResultContracts.RequestPermission()
@@ -65,15 +73,19 @@ class LoginFragment : Fragment() {
         super.onResume()
         viewLifecycleOwner.lifecycleScope.launch {
             kotlinx.coroutines.delay(200.milliseconds)
-            binding.etEmail.clearFocus()
-            binding.etPassword.clearFocus()
-            hideKeyboard()
+            if (_binding != null) {
+                binding.etEmail.clearFocus()
+                binding.etPassword.clearFocus()
+                hideKeyboard()
+            }
         }
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = FragmentLoginBinding.inflate(inflater, container, false)
         dataStoreManager = DataStoreManager(requireContext())
+        bioSettingsManager = BiometricSettingsManager(requireContext())
+        biometricHelper = BiometricAuthHelper(this)
         return binding.root
     }
 
@@ -97,7 +109,6 @@ class LoginFragment : Fragment() {
         AppSettings.setPushEffect(binding.btnLoginAction)
     }
 
-    // 🚀 2026 DYNAMIC SESSION ROUTER: Checks layout mode instantly on start
     private fun checkAdaptiveSessionState() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
@@ -111,9 +122,8 @@ class LoginFragment : Fragment() {
                     binding.layoutAdaptiveMpinForm.visibility = View.VISIBLE
                     binding.tvWelcomeUser.text = getString(R.string.welcome_back, cachedName)
 
-                    // Instant biometric prompt initialization if active
-                    val bioManager = BiometricSettingsManager(requireContext())
-                    if (bioManager.isBiometricEnabled()) {
+                    if (bioSettingsManager.isBiometricAuthActive() &&
+                        biometricHelper.checkBiometricAvailability() == BiometricManager.BIOMETRIC_SUCCESS) {
                         showBiometricPrompt()
                     }
                 } else {
@@ -124,7 +134,6 @@ class LoginFragment : Fragment() {
         }
     }
 
-    // --- 🛡️ ACCOUNT SECURITY LOCK FRAMEWORK ---
     private fun isUserLocked(email: String): Boolean {
         if (email.isEmpty()) return false
         val prefs = requireContext().getSharedPreferences("login_lock", Context.MODE_PRIVATE)
@@ -148,10 +157,10 @@ class LoginFragment : Fragment() {
 
         if (attempts >= MAX_ATTEMPTS) {
             val lockUntil = System.currentTimeMillis() + (LOCK_TIME_HOURS * 60 * 60 * 1000)
-            prefs.edit(action = {
+            prefs.edit {
                 putLong("lock_timestamp_$email", lockUntil)
                 putInt("attempts_$email", 0)
-            })
+            }
         } else {
             prefs.edit { putInt("attempts_$email", attempts) }
         }
@@ -164,7 +173,9 @@ class LoginFragment : Fragment() {
             binding.tilEmail.isErrorEnabled = true
             binding.tilEmail.error = "Account locked! Try after $timeLeft"
 
-            viewLifecycleOwner.lifecycleScope.launch {
+            // 🚀 FIXED: Cleaned and structured background security tracking to terminate loops gracefully on lifecycle exit vectors
+            securityLockTickerJob?.cancel()
+            securityLockTickerJob = viewLifecycleOwner.lifecycleScope.launch {
                 viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
                     while (isUserLocked(email)) {
                         val currentTimeLeft = getRemainingLockTime(email)
@@ -182,7 +193,6 @@ class LoginFragment : Fragment() {
         return isLocked
     }
 
-    // --- 📊 REACTION SUBSYSTEM LIVE STREAMS ---
     private fun observeViewModel() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
@@ -192,6 +202,14 @@ class LoginFragment : Fragment() {
                     when (state) {
                         is LoginViewModel.LoginState.Idle, is LoginViewModel.LoginState.Loading -> {}
                         is LoginViewModel.LoginState.Success -> {
+                            // 🚀 FIXED: Enforced a strong condition barrier checking that inputs are populated before executing encryption keys payload serialization
+                            val inputtedEmail = binding.etEmail.text.toString().trim()
+                            val inputtedPassword = binding.etPassword.text.toString().trim()
+
+                            if (inputtedEmail.isNotEmpty() && inputtedPassword.isNotEmpty() && binding.layoutDefaultForm.isVisible) {
+                                bioSettingsManager.saveCredentials(inputtedEmail, inputtedPassword)
+                            }
+
                             AppSettings.startNewUserSession(requireContext())
                             proceedToHome()
                         }
@@ -242,7 +260,7 @@ class LoginFragment : Fragment() {
                 binding.tilPassword.error = null
                 binding.tilPassword.isErrorEnabled = false
             }
-            override fun beforeTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun afterTextChanged(s: Editable?) {}
         })
     }
@@ -261,15 +279,12 @@ class LoginFragment : Fragment() {
             showForgotPasswordSheet()
         }
 
-        // 🚀 ADAPTIVE UI TRIGGERS
         binding.tvDifferentUser.setOnClickListener {
             isAdaptiveUiOverridden = true
             binding.layoutAdaptiveMpinForm.visibility = View.GONE
             binding.layoutDefaultForm.visibility = View.VISIBLE
         }
 
-        // 🚀 ROUTING FORGOT MPIN FLOW INDEPENDENT OF PASSWORD RESET LAYOUT
-        // 🚀 RESOLVED FIXED LINE 270 ERRORS:
         binding.tvForgotMpinAction.setOnClickListener {
             val forgotMpinSheet = ForgotMpinBottomSheet(onResetVerified = {
                 showLocalMpinSetupDialog()
@@ -281,7 +296,7 @@ class LoginFragment : Fragment() {
         binding.btnFaceUnlockTrigger.setOnClickListener { showBiometricPrompt() }
         binding.layoutActiveDots.setOnClickListener { showMpinBottomSheet() }
     }
-    // 🚀 NEW SECURE LAYER: Independent setup configuration specifically for Login context
+
     private fun showLocalMpinSetupDialog() {
         val etMpin = EditText(requireContext()).apply {
             inputType = InputType.TYPE_CLASS_NUMBER
@@ -291,28 +306,34 @@ class LoginFragment : Fragment() {
             textAlignment = View.TEXT_ALIGNMENT_CENTER
         }
 
-        MaterialAlertDialogBuilder(requireContext(), R.style.MaterialAlertDialog_Rounded)
+        // 🚀 FIXED: Standardized dialog button initialization to guarantee strict data binding validations before closing
+        val dialog = MaterialAlertDialogBuilder(requireContext(), R.style.MaterialAlertDialog_Rounded)
             .setTitle("Reset Security PIN")
             .setMessage("Set a secure fallback 4-digit pin profile to access account operations.")
             .setView(etMpin)
             .setCancelable(false)
-            .setPositiveButton("Save PIN") { _, _ ->
-                val mpin = etMpin.text.toString()
-                if (mpin.length == 4) {
-                    viewLifecycleOwner.lifecycleScope.launch {
-                        val bioManager = BiometricSettingsManager(requireContext())
-                        bioManager.saveMPIN(mpin)
-                        dataStoreManager.saveMpinStatus(true)
-                        toast("Security PIN updated successfully! 🔒")
-                        checkAdaptiveSessionState()
-                    }
-                } else {
-                    toast("PIN validation requires exactly 4 digits")
-                }
-            }
+            .setPositiveButton("Save PIN", null) // Overriding directly below to intercept closing
             .setNegativeButton("Cancel", null)
-            .show()
+            .create()
+
+        dialog.show()
+
+        dialog.getButton(android.content.DialogInterface.BUTTON_POSITIVE).setOnClickListener {
+            val mpin = etMpin.text.toString()
+            if (mpin.length == 4) {
+                viewLifecycleOwner.lifecycleScope.launch {
+                    bioSettingsManager.saveMPIN(mpin)
+                    dataStoreManager.saveMpinStatus(true)
+                    toast("Security PIN updated successfully! 🔒")
+                    dialog.dismiss()
+                    checkAdaptiveSessionState()
+                }
+            } else {
+                toast("PIN validation requires exactly 4 digits")
+            }
+        }
     }
+
     private fun performEmailLogin() {
         val email = binding.etEmail.text.toString().trim()
         val pass = binding.etPassword.text.toString().trim()
@@ -376,54 +397,30 @@ class LoginFragment : Fragment() {
         bottomSheet.show(childFragmentManager, "ForgotPasswordSheet")
     }
 
-    // 🚀 RESOLVED FIXED LINE 351 LOOP CANCELLATION CRITICAL BUG
     private fun showBiometricPrompt() {
-        val executor = ContextCompat.getMainExecutor(requireContext())
-
-        // Declare prompt instance up-front to correctly bind access scoped logic blocks
-        var biometricPromptInstance: BiometricPrompt? = null
-
-        val callback = object : BiometricPrompt.AuthenticationCallback() {
-            override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
-                super.onAuthenticationSucceeded(result)
-
-                // 🛡️ Safe termination lock access to stop infinite hardware loop instances
-                biometricPromptInstance?.cancelAuthentication()
-
-                val manager = BiometricSettingsManager(requireContext())
-                val savedEmail = manager.getSavedEmail()
-                val savedPassword = manager.getSavedPass()
+        biometricHelper.triggerAuthentication(
+            title = "Secure Login",
+            subtitle = "Scan fingerprint or face identity",
+            onSuccess = { _ ->
+                val savedEmail = bioSettingsManager.getSavedEmail()
+                val savedPassword = bioSettingsManager.getSavedPass()
 
                 if (!savedEmail.isNullOrEmpty() && savedPassword.isNotEmpty()) {
                     viewModel.loginWithEmail(savedEmail, savedPassword)
-                    proceedToHome()
                 } else {
                     proceedToHome()
                 }
+            },
+            onError = { _ ->
+                showMpinBottomSheet()
             }
-
-            override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
-                super.onAuthenticationError(errorCode, errString)
-                if (errorCode == BiometricPrompt.ERROR_NEGATIVE_BUTTON || errorCode == BiometricPrompt.ERROR_USER_CANCELED) {
-                    showMpinBottomSheet()
-                }
-            }
-        }
-
-        biometricPromptInstance = BiometricPrompt(this, executor, callback)
-
-        val promptInfo = BiometricPrompt.PromptInfo.Builder()
-            .setTitle("Secure Login")
-            .setSubtitle("Scan fingerprint or face identity")
-            .setNegativeButtonText("Use MPIN")
-            .build()
-
-        biometricPromptInstance.authenticate(promptInfo)
+        )
     }
+
     private fun showMpinBottomSheet() {
         val mpinSheet = MpinBottomSheet(
             onMpinSuccess = { email, pass ->
-                if (email != null && pass != null) {
+                if (!email.isNullOrEmpty() && !pass.isNullOrEmpty()) {
                     viewModel.loginWithEmail(email, pass)
                 } else {
                     proceedToHome()
@@ -432,15 +429,13 @@ class LoginFragment : Fragment() {
             onBiometricRequest = {
                 showBiometricPrompt()
             },
-        onForgotMpinRequested = {
-            // Open the forgot bottom sheet immediately when click callback triggers
-            val currentInputtedPass = binding.etPassword.text.toString().trim() // Pass runtime text if available
-            val forgotSheet = ForgotMpinBottomSheet(runtimePasswordFallback = currentInputtedPass) {
-                // Action to perform once password verification succeeds (e.g., open Reset MPIN Screen)
-                Toast.makeText(requireContext(), "Identity Verified! You can reset MPIN now.", Toast.LENGTH_SHORT).show()
+            onForgotMpinRequested = {
+                val currentInputtedPass = binding.etPassword.text.toString().trim()
+                val forgotSheet = ForgotMpinBottomSheet(runtimePasswordFallback = currentInputtedPass) {
+                    Toast.makeText(requireContext(), "Identity Verified! You can reset MPIN now.", Toast.LENGTH_SHORT).show()
+                }
+                forgotSheet.show(childFragmentManager, "ForgotMpinBottomSheet")
             }
-            forgotSheet.show(childFragmentManager, "ForgotMpinBottomSheet")
-        }
         )
         mpinSheet.show(childFragmentManager, "MpinSheet")
     }
@@ -453,6 +448,8 @@ class LoginFragment : Fragment() {
     }
 
     override fun onDestroyView() {
+        // 🚀 FIXED: Explicitly stop background security ticker coroutines to completely eradicate structural leaks
+        securityLockTickerJob?.cancel()
         viewModel.resetState()
         _binding = null
         super.onDestroyView()

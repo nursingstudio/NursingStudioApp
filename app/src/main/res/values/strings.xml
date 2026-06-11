@@ -274,7 +274,7 @@
     <string name="choose_security_standard">Choose Security Standard</string>
     <string name="enable_biometric_or_mpin_subtitle">Enable biometrics or a secure MPIN for fast, one-tap sign in.</string><string name="configure_security_credentials">Configure Security Credentials</string>
     <string name="enable_face_unlock">Enable Face Unlock</string>
-    <string name="security_fallback_mpin">Security Fallback MPIN</string>
+    <string name="security_fallback_mpin">Set Secure MPIN</string>
     <string name="enable_fingerprint_login">Enable Fingerprint Login</string>
     <string name="security_settings">Security Settings</string>
     <string name="don_t_ask">Don\'t Ask</string>
@@ -287,6 +287,7 @@
     <string name="biometrics">Biometrics</string>
     <string name="submit_pin">Submit PIN</string>
     <string name="enable_secure_access">Enable Secure Access</string>
+    <string name="enable_biometric_login">Enable Biometric Login</string>
 
 
 </resources>

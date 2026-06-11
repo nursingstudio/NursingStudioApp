@@ -36,6 +36,7 @@ import com.example.nursingstudio.databinding.LayoutPolicyBottomSheetBinding
 import com.example.nursingstudio.domain.validation.RegisterValidator
 import com.example.nursingstudio.ui.main.MainActivity
 import com.example.nursingstudio.utils.AppSettings
+import com.example.nursingstudio.utils.BiometricSettingsManager
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.datepicker.CalendarConstraints
 import com.google.android.material.datepicker.DateValidatorPointBackward
@@ -55,7 +56,11 @@ class RegisterFragment : Fragment() {
     private var _binding: FragmentRegisterBinding? = null
     private val binding get() = _binding!!
     private val viewModel: RegisterViewModel by viewModels()
+
+    // 🚀 FIXED 2026 CORE LINK: Injected BiometricSettingsManager to prevent post-registration setup failures
+    private lateinit var bioSettingsManager: BiometricSettingsManager
     private var lastClickTime: Long = 0
+    private var isUpdating = false
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -63,34 +68,26 @@ class RegisterFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentRegisterBinding.inflate(inflater, container, false)
+        bioSettingsManager = BiometricSettingsManager(requireContext())
         return binding.root
     }
-
-    // 🚀 2026 Standard: Infinite Loop Protection Flag
-    private var isUpdating = false
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // ✅ Step 1: Secure CCP Link
         binding.ccp.registerCarrierNumberEditText(binding.etMobile)
 
-        // ✅ Step 2: 2026 Industry Standard: Master Watcher with Loop Protection & UI-Post
         binding.etMobile.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
 
             override fun afterTextChanged(s: Editable?) {
-                // 1. Check if we are already updating to prevent recursive loop
                 if (isUpdating) return
-
                 val input = s.toString().trim()
                 if (input.isEmpty()) return
 
-                // 2. Handle Auto-fill or Manual +91 Entry
                 if (input.startsWith("+")) {
                     isUpdating = true
-                    // 'post' ensures this runs after the current UI cycle, preventing ANR
                     binding.etMobile.post {
                         try {
                             binding.ccp.fullNumber = input
@@ -102,7 +99,6 @@ class RegisterFragment : Fragment() {
                     }
                 }
 
-                // 3. Centralized Error Cleaner (Jo humne niche se delete kiya)
                 if (input.isNotEmpty()) {
                     binding.tvMobileError.visibility = View.GONE
                     binding.tvMobileError.text = ""
@@ -126,24 +122,25 @@ class RegisterFragment : Fragment() {
 
             if (validateInputsSerial()) {
                 performRegistration()
-
             }
         }
     }
+
     private fun observeViewModel() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.uiState.collectLatest { state ->
-                    // ✅ Professional Loading Overlay Control
                     binding.loadingOverlay.visibility = if (state is RegisterViewModel.RegisterState.Loading) View.VISIBLE else View.GONE
                     binding.btnRegister.isEnabled = state !is RegisterViewModel.RegisterState.Loading
 
                     when (state) {
                         is RegisterViewModel.RegisterState.Success -> {
                             AppSettings.triggerVibration(requireContext(), 200)
-                            showSuccessDialog()
-                            }
-
+                            // 🚀 FIXED: Dynamic verification parameters extraction to guarantee local credential consistency
+                            val finalEmail = binding.etEmail.text.toString().trim()
+                            val finalPassword = binding.etPassword.text.toString().trim()
+                            showSuccessDialog(finalEmail, finalPassword)
+                        }
                         is RegisterViewModel.RegisterState.Error -> {
                             handleErrorMessage(state.message)
                         }
@@ -156,12 +153,9 @@ class RegisterFragment : Fragment() {
     }
 
     private fun handleErrorMessage(msg: String) {
-        // 1. Logic Flags
-        // 🚀 2026 Standard: Check for both Firebase Code and Friendly Message
         val isAlreadyRegistered = msg.contains("email-already-in-use", true) ||
-                msg.contains("already in use", true) // Added for message-based catch
+                msg.contains("already in use", true)
 
-        // 2. World-Class Friendly Messaging
         val friendlyMsg = when {
             msg.contains("network", true) || msg.contains("timeout", true) -> getString(R.string.no_internet)
             isAlreadyRegistered -> getString(R.string.err_email_exists)
@@ -170,13 +164,11 @@ class RegisterFragment : Fragment() {
             else -> msg
         }
 
-        // 3. Visual Feedback
         toast(friendlyMsg)
 
         if (isAlreadyRegistered) {
             AppSettings.triggerErrorEffect(requireContext(), binding.etEmail)
 
-            // ✨ Gold Standard: Explicitly navigation trigger
             binding.root.postDelayed({
                 if (isAdded) {
                     try {
@@ -185,11 +177,10 @@ class RegisterFragment : Fragment() {
                         requireActivity().onBackPressedDispatcher.onBackPressed()
                     }
                 }
-            }, 2500) // Slightly increased delay for user to read toast
+            }, 2500)
         } else {
             AppSettings.triggerErrorEffect(requireContext(), binding.btnRegister)
         }
-
         viewModel.resetState()
     }
 
@@ -198,6 +189,7 @@ class RegisterFragment : Fragment() {
             AppSettings.setPushEffect(btnRegister)
         }
     }
+
     private fun setupUniversalErrorCleaner() {
         val inputMap = mapOf(
             binding.etName to binding.tilName,
@@ -223,15 +215,7 @@ class RegisterFragment : Fragment() {
                         layout.isErrorEnabled = false
                     }
                 }
-
-                override fun beforeTextChanged(
-                    s: CharSequence?,
-                    start: Int,
-                    count: Int,
-                    after: Int
-                ) {
-                }
-
+                override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
                 override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
             })
         }
@@ -239,16 +223,12 @@ class RegisterFragment : Fragment() {
 
     private fun showDatePicker() {
         val timeZoneUTC = TimeZone.getTimeZone("UTC")
-
         val today = Calendar.getInstance(timeZoneUTC).timeInMillis
 
-        val startCalendar = Calendar.getInstance(timeZoneUTC)
-        startCalendar.set(1947, Calendar.JANUARY, 1)
+        val startCalendar = Calendar.getInstance(timeZoneUTC).apply { set(1947, Calendar.JANUARY, 1) }
         val startDate = startCalendar.timeInMillis
 
-        // Default Selection: Aaj se 17 saal piche (Nursing Rule)
-        val defaultCalendar = Calendar.getInstance(timeZoneUTC)
-        defaultCalendar.add(Calendar.YEAR, -17)
+        val defaultCalendar = Calendar.getInstance(timeZoneUTC).apply { add(Calendar.YEAR, -17) }
         val defaultSelection = defaultCalendar.timeInMillis
 
         val constraints = CalendarConstraints.Builder()
@@ -318,39 +298,26 @@ class RegisterFragment : Fragment() {
     }
 
     private fun showError(view: View, message: String): Boolean {
-        // 1. AppSettings ko styling aur animation handle karne do
         AppSettings.triggerErrorEffect(requireContext(), view, message)
 
-        // 2. Special case for etMobile error label (Kyuki ye custom TextView hai)
         if (view.id == R.id.etMobile) {
             binding.tvMobileError.text = message
             binding.tvMobileError.visibility = View.VISIBLE
             binding.tvMobileError.setTextColor(ContextCompat.getColor(requireContext(), R.color.error_red))
         }
 
-        // 🚀 2026 Pixel-Perfect Scroll Logic
-        // 'view.post' ensure karta hai ki keyboard ya layout change ke baad scroll ho
         view.post {
             val rect = android.graphics.Rect()
-            // View ki boundary lene ke liye
             view.getDrawingRect(rect)
-
-            // 🛡️ Sabse Important Line: View ke coordinates ko ScrollView ke context mein map karna
             binding.registrationScrollView.offsetDescendantRectToMyCoords(view, rect)
-
-            // View par focus lao
             view.requestFocus()
-
-            // Smooth Scroll: -200 offset taaki error wala view screen ke center mein dikhe
             binding.registrationScrollView.smoothScrollTo(0, rect.top - 200)
         }
-
         return false
     }
 
     private fun hideKeyboard() {
-        val imm =
-            requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        val imm = requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
         imm.hideSoftInputFromWindow(view?.windowToken, 0)
     }
 
@@ -373,10 +340,7 @@ class RegisterFragment : Fragment() {
             }
         })
 
-        sheetBinding.btnAccept.setOnClickListener {
-            bottomSheetDialog.dismiss()
-        }
-
+        sheetBinding.btnAccept.setOnClickListener { bottomSheetDialog.dismiss() }
         bottomSheetDialog.show()
     }
 
@@ -436,7 +400,8 @@ class RegisterFragment : Fragment() {
         }
 
         binding.spCountry.onItemSelectedListener = simpleListener(null) {
-            val isIndia = it == "Bharat (India)"
+            // 🚀 FIXED: Secure index matching evaluation to override potential localization text string issues
+            val isIndia = binding.spCountry.selectedItemPosition == 0
             binding.spStateIndia.visibility = if (isIndia) View.VISIBLE else View.GONE
             binding.tilCountryOther.visibility = if (isIndia) View.GONE else View.VISIBLE
             binding.tilStateOther.visibility = if (isIndia) View.GONE else View.VISIBLE
@@ -456,11 +421,7 @@ class RegisterFragment : Fragment() {
         val spins = arrayOf(binding.spGender, binding.spMarital, binding.spReligion, binding.spEducation, binding.spOccupation, binding.spCountry, binding.spStateIndia)
 
         for (i in spins.indices) {
-            val adapter = ArrayAdapter(
-                requireContext(),
-                android.R.layout.simple_spinner_dropdown_item,
-                lists[i]
-            )
+            val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_dropdown_item, lists[i])
             spins[i].adapter = adapter
 
             spins[i].onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
@@ -473,6 +434,7 @@ class RegisterFragment : Fragment() {
             }
         }
     }
+
     private fun performRegistration() {
         if (!isNetworkAvailable()) {
             toast(getString(R.string.no_internet))
@@ -484,12 +446,12 @@ class RegisterFragment : Fragment() {
         val email = binding.etEmail.text.toString().trim()
         val password = binding.etPassword.text.toString().trim()
 
-        // ✅ Direct Registration (No OTP Check)
         viewModel.startRegistration(email, password, userData)
     }
 
     private fun prepareUserData(): User {
         val b = binding
+        val isIndiaSelected = b.spCountry.selectedItemPosition == 0
 
         return User(
             fullName = b.etName.text?.toString()?.trim() ?: "",
@@ -506,32 +468,23 @@ class RegisterFragment : Fragment() {
                 b.etOccupationOther.text?.toString()?.trim() ?: ""
             else b.spOccupation.selectedItem?.toString() ?: "",
 
-            mobile = b.ccp.fullNumberWithPlus ?: "", // Hamesha + ke sath save karein //
+            mobile = b.ccp.fullNumberWithPlus ?: "",
             email = b.etEmail.text?.toString()?.trim() ?: "",
 
-            country = if (b.spCountry.selectedItem?.toString() == "Other")
-                b.etCountryOther.text?.toString()?.trim() ?: ""
-            else b.spCountry.selectedItem?.toString() ?: "",
-
-            state = if (b.spCountry.selectedItem?.toString() == "Bharat (India)")
-                b.spStateIndia.selectedItem?.toString() ?: ""
-            else b.etStateOther.text?.toString()?.trim() ?: "",
+            country = if (isIndiaSelected) "Bharat (India)" else b.etCountryOther.text?.toString()?.trim() ?: "",
+            state = if (isIndiaSelected) b.spStateIndia.selectedItem?.toString() ?: "" else b.etStateOther.text?.toString()?.trim() ?: "",
 
             district = b.etDistrict.text?.toString()?.trim() ?: "",
             address = b.etAddress.text?.toString()?.trim() ?: "",
             pincode = b.etPincode.text?.toString()?.trim() ?: "",
 
-            // Check if radio button is selected (Professional Check
-            // ✅ Fix: In dono ko assign karna bhul gaye the aap
-            regState = if (b.rgNursingReg.checkedRadioButtonId == R.id.rbRegYes)
-                b.etRegState.text?.toString()?.trim() else null,
-            regNumber = if (b.rgNursingReg.checkedRadioButtonId == R.id.rbRegYes)
-                b.etRegNumber.text?.toString()?.trim() else null,
+            regState = if (b.rgNursingReg.checkedRadioButtonId == R.id.rbRegYes) b.etRegState.text?.toString()?.trim() else null,
+            regNumber = if (b.rgNursingReg.checkedRadioButtonId == R.id.rbRegYes) b.etRegNumber.text?.toString()?.trim() else null,
 
             isNursingRegistered = when (b.rgNursingReg.checkedRadioButtonId) {
                 R.id.rbRegYes -> true
                 R.id.rbRegNo -> false
-                else -> null // Mandatory choice
+                else -> null
             }
         )
     }
@@ -540,7 +493,6 @@ class RegisterFragment : Fragment() {
         object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
                 val selected = p0?.getItemAtPosition(p2).toString()
-
                 if (p2 > 0) {
                     p0?.background = ContextCompat.getDrawable(requireContext(), R.drawable.spinner_bg)
                     layout?.error = null
@@ -603,29 +555,27 @@ class RegisterFragment : Fragment() {
                         capabilities.hasTransport(android.net.NetworkCapabilities.TRANSPORT_CELLULAR)
                 )
     }
-    private fun showSuccessDialog() {
-        // ✅ 2026 Professional Approach:
-        // Variable ki zarurat nahi agar humein sirf immediate visual feedback dena hai
 
-        // 1. Hide the loading overlay immediately
+    // 🚀 FIXED GOLD STANDARD ENHANCEMENT: Captures explicit user inputs and synchronizes local keystore profiles instantly on onboarding success
+    private fun showSuccessDialog(email: String, pass: String) {
         binding.loadingOverlay.visibility = View.GONE
-
-        // 2. Play a "Success" vibration
         AppSettings.triggerVibration(requireContext(), 300)
 
-        // 3. Show a world-class Stylish Toast or Snack
+        if (email.isNotEmpty() && pass.isNotEmpty()) {
+            bioSettingsManager.saveCredentials(email, pass)
+        }
+
         toast("Welcome to Nursing Studio! Account Created ✨")
 
-        // 4. Smooth Delay before redirection
         binding.root.postDelayed({
-            if (isAdded) { // Check if fragment is still attached to avoid crash
+            if (isAdded) {
                 val intent = Intent(requireContext(), MainActivity::class.java).apply {
                     flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
                 }
                 startActivity(intent)
                 requireActivity().finish()
             }
-        }, 1200) // 1.2 Seconds delay
+        }, 1200)
     }
 
     override fun onDestroyView() {

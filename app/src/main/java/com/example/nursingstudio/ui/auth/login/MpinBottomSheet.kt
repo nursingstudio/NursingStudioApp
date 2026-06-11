@@ -16,7 +16,7 @@ import com.google.android.material.button.MaterialButton
 class MpinBottomSheet(
     private val onMpinSuccess: (email: String?, pass: String?) -> Unit,
     private val onBiometricRequest: () -> Unit,
-    private val onForgotMpinRequested: () -> Unit // 🚀 2026 Standard Event Parameter Injection
+    private val onForgotMpinRequested: () -> Unit
 ) : BottomSheetDialogFragment() {
 
     private var _binding: LayoutMpinKeypadBinding? = null
@@ -45,7 +45,9 @@ class MpinBottomSheet(
     }
 
     private fun setupGlassEffect() {
-        dialog?.window?.let { window ->
+        // 🚀 FIXED: Secured the window... window hierarchy parameters mapping to isolate runtime context exceptions during rapid dialog swaps
+        val currentDialog = dialog ?: return
+        currentDialog.window?.let { window ->
             window.attributes.blurBehindRadius = 30
             window.addFlags(WindowManager.LayoutParams.FLAG_BLUR_BEHIND)
         }
@@ -53,23 +55,28 @@ class MpinBottomSheet(
 
     private fun initializeNumericButtonsList() {
         numericButtons.clear()
-        numericButtons.add(binding.btnKey1)
-        numericButtons.add(binding.btnKey2)
-        numericButtons.add(binding.btnKey3)
-        numericButtons.add(binding.btnKey4)
-        numericButtons.add(binding.btnKey5)
-        numericButtons.add(binding.btnKey6)
-        numericButtons.add(binding.btnKey7)
-        numericButtons.add(binding.btnKey8)
-        numericButtons.add(binding.btnKey9)
-        numericButtons.add(binding.btnKey0)
+        // 🚀 FIXED: Enforced structured layout initialization variables mappings using strict safe call checking indicators
+        _binding?.let { b ->
+            numericButtons.add(b.btnKey1)
+            numericButtons.add(b.btnKey2)
+            numericButtons.add(b.btnKey3)
+            numericButtons.add(b.btnKey4)
+            numericButtons.add(b.btnKey5)
+            numericButtons.add(b.btnKey6)
+            numericButtons.add(b.btnKey7)
+            numericButtons.add(b.btnKey8)
+            numericButtons.add(b.btnKey9)
+            numericButtons.add(b.btnKey0)
+        }
     }
 
     private fun shuffleAndPopulateKeypad() {
         val digitsList = arrayListOf("1", "2", "3", "4", "5", "6", "7", "8", "9", "0")
         digitsList.shuffle()
 
-        for (i in numericButtons.indices) {
+        // 🚀 FIXED: Strict length bounding parameters verification check introduced to seamlessly eliminate structural indexing array leakage
+        val iterationLimit = minOf(numericButtons.size, digitsList.size)
+        for (i in 0 until iterationLimit) {
             numericButtons[i].text = digitsList[i]
             numericButtons[i].tag = digitsList[i]
         }
@@ -88,8 +95,10 @@ class MpinBottomSheet(
 
         numericButtons.forEach { button ->
             button.setOnClickListener {
-                val numericValue = button.tag.toString()
-                handleKeyClick(numericValue)
+                val numericValue = button.tag?.toString() ?: ""
+                if (numericValue.isNotEmpty()) {
+                    handleKeyClick(numericValue)
+                }
             }
         }
 
@@ -121,7 +130,9 @@ class MpinBottomSheet(
                 else -> {
                     AppSettings.triggerErrorEffect(requireContext(), binding.layoutMpinDots)
                     enteredMpin = ""
-                    binding.root.postDelayed({ updateMpinDots(0) }, 300)
+                    binding.root.postDelayed({
+                        if (_binding != null) updateMpinDots(0)
+                    }, 300)
                     Toast.makeText(context, "Incorrect MPIN!", Toast.LENGTH_SHORT).show()
                 }
             }
@@ -132,19 +143,15 @@ class MpinBottomSheet(
             onBiometricRequest()
         }
 
-        /**
-         * Exact Location: End of setupKeypadControllers framework scope
-         * 🚀 2026 Inter-Sheet Communication Bridge Execution
-         * Maps layout design button directly to navigation routing callbacks safely.
-         */
         binding.btnForgotMpin.setOnClickListener {
-            dismiss() // Safe dismiss to prevent bottom-sheet layering overlap crashes
-            onForgotMpinRequested.invoke() // Emits callback trigger outwards to the lifecycle host
+            dismiss()
+            onForgotMpinRequested.invoke()
         }
     }
 
     private fun updateMpinDots(length: Int) {
-        val dotsLayout = binding.layoutMpinDots
+        // 🚀 FIXED: Complete structural protection null-safety check added to circumvent UI postDelayed rendering anomalies
+        val dotsLayout = _binding?.layoutMpinDots ?: return
         for (i in 0 until dotsLayout.childCount) {
             val dot = dotsLayout.getChildAt(i)
             if (i < length) {
@@ -159,6 +166,7 @@ class MpinBottomSheet(
     }
 
     override fun onDestroyView() {
+        numericButtons.clear()
         super.onDestroyView()
         _binding = null
     }

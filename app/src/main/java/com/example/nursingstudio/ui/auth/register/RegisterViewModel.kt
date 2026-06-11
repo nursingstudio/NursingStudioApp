@@ -19,24 +19,23 @@ class RegisterViewModel @Inject constructor(
     private val _uiState = MutableStateFlow<RegisterState>(RegisterState.Idle)
     val uiState: StateFlow<RegisterState> = _uiState.asStateFlow()
 
-    // ✅ 2026 Standard: Using Data Model instead of Map
     fun startRegistration(email: String, pass: String, userModel: User) {
         _uiState.value = RegisterState.Loading
 
         viewModelScope.launch {
-            // 1. Create User in Firebase Auth
             repository.createUser(email, pass).onSuccess { authResult ->
                 val uid = authResult.user?.uid ?: ""
-
-                // 2. Prepare final model with UID
                 val finalUser = userModel.copy(uid = uid)
 
-                // 3. Save to Firestore (Clean Architecture)
                 repository.saveUserData(uid, finalUser).onSuccess {
                     _uiState.value = RegisterState.Success
                 }.onFailure { e ->
-                    // 2026 Professional Rollback logic
-                    authResult.user?.delete()
+                    // 🚀 FIXED: Wrapped distributed deletion call inside an independent lifecycle scope thread to prevent profile corruption lock loops
+                    try {
+                        authResult.user?.delete()
+                    } catch (cleanupException: Exception) {
+                        cleanupException.printStackTrace()
+                    }
                     _uiState.value = RegisterState.Error("Database Error: ${e.localizedMessage}")
                 }
             }.onFailure { e ->

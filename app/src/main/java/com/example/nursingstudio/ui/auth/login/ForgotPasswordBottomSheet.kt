@@ -13,8 +13,15 @@ import com.example.nursingstudio.ui.auth.AuthActivity
 import com.example.nursingstudio.R
 import com.example.nursingstudio.databinding.LayoutForgotPasswordBinding
 import com.example.nursingstudio.utils.AppSettings
+import com.google.android.material.bottomsheet.BottomSheetBehavior
+import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseAuthInvalidUserException
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlin.time.Duration.Companion.milliseconds
 
 class ForgotPasswordBottomSheet : BottomSheetDialogFragment() {
 
@@ -25,7 +32,6 @@ class ForgotPasswordBottomSheet : BottomSheetDialogFragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setStyle(STYLE_NORMAL, R.style.BottomSheetDialogTheme)
-
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
@@ -35,46 +41,32 @@ class ForgotPasswordBottomSheet : BottomSheetDialogFragment() {
 
     override fun onStart() {
         super.onStart()
-        dialog?.let { d ->
-            val bottomSheet = d.findViewById<View>(com.google.android.material.R.id.design_bottom_sheet)
-            val behavior = com.google.android.material.bottomsheet.BottomSheetBehavior.from(bottomSheet)
+        // 🚀 FIXED: 2026 Absolute Zero-Warning Keyboard Architecture Validation Gate
+        val currentDialog = dialog as? BottomSheetDialog ?: return
+        val bottomSheet = currentDialog.findViewById<View>(com.google.android.material.R.id.design_bottom_sheet) ?: return
+        val behavior = BottomSheetBehavior.from(bottomSheet)
 
-            // 1. IMPORTANT: Window ko resize karne ke liye set karein
-            d.window?.setSoftInputMode(android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE)
+        bottomSheet.layoutParams.height = ViewGroup.LayoutParams.WRAP_CONTENT
+        behavior.skipCollapsed = true
+        behavior.state = BottomSheetBehavior.STATE_EXPANDED
 
-            // 2. Height setup
-            bottomSheet.layoutParams.height = ViewGroup.LayoutParams.WRAP_CONTENT
-            behavior.skipCollapsed = true
-            behavior.state = com.google.android.material.bottomsheet.BottomSheetBehavior.STATE_EXPANDED
+        // Clean programmatic system window-insets handling that perfectly adjusts inner layout padding reactively
+        androidx.core.view.ViewCompat.setOnApplyWindowInsetsListener(bottomSheet) { _, insets ->
+            val imeInsets = insets.getInsets(androidx.core.view.WindowInsetsCompat.Type.ime())
+            val systemBars = insets.getInsets(androidx.core.view.WindowInsetsCompat.Type.systemBars())
 
-            androidx.core.view.ViewCompat.setOnApplyWindowInsetsListener(bottomSheet) { view, insets ->
-                val imeHeight = insets.getInsets(androidx.core.view.WindowInsetsCompat.Type.ime()).bottom
-
-                view.setPadding(0, 0, 0, imeHeight)
-                insets
-            }
+            // Apply precise safe padding limits without jumping components text layouts
+            _binding?.root?.setPadding(0, 0, 0, imeInsets.bottom - systemBars.bottom)
+            insets
         }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // Ensure the view scrolls to show the button when keyboard pops up
-        binding.etForgotEmail.setOnFocusChangeListener { _, hasFocus ->
-            if (hasFocus) {
-                // 2026 Standard: Smooth scroll with a slight delay to wait for keyboard
-                binding.root.postDelayed({
-                    // Scroll to the very bottom so button is visible
-                    val lastChild = binding.root.getChildAt(0)
-                    binding.root.smoothScrollTo(0, lastChild?.bottom ?: 0)
-                }, 300)
-            }
-        }
-
         binding.etForgotEmail.addTextChangedListener(object : android.text.TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-
                 binding.tilForgotEmail.error = null
                 binding.tilForgotEmail.isErrorEnabled = false
             }
@@ -88,16 +80,19 @@ class ForgotPasswordBottomSheet : BottomSheetDialogFragment() {
     }
 
     private fun handlePasswordResetFlow(email: String) {
-        val controller = androidx.core.view.WindowCompat.getInsetsController(requireDialog().window!!, binding.root)
-        controller.hide(androidx.core.view.WindowInsetsCompat.Type.ime())
+        // Safe hide keyboard vector sequence using direct clean reference maps without redundant lets
+        val currentWindow = dialog?.window
+        if (currentWindow != null) {
+            androidx.core.view.WindowCompat.getInsetsController(currentWindow, binding.root).apply {
+                hide(androidx.core.view.WindowInsetsCompat.Type.ime())
+            }
+        }
 
-        // 1. Connectivity Check
         if (!isNetworkAvailable()) {
             showError(getString(R.string.no_internet))
             return
         }
 
-        // 2. Validation Check
         if (email.isEmpty()) {
             binding.tilForgotEmail.error = getString(R.string.error_email_empty)
             AppSettings.triggerErrorEffect(requireContext(), binding.tilForgotEmail)
@@ -110,7 +105,6 @@ class ForgotPasswordBottomSheet : BottomSheetDialogFragment() {
             return
         }
 
-        // 3. Modern 2026 Logic & modern progress handling
         binding.btnResetPassword.isEnabled = false
         binding.btnResetPassword.text = ""
         binding.progressLoading.visibility = View.VISIBLE
@@ -119,33 +113,33 @@ class ForgotPasswordBottomSheet : BottomSheetDialogFragment() {
 
     private fun sendResetEmail(email: String) {
         auth.sendPasswordResetEmail(email).addOnCompleteListener { task ->
-            binding.progressLoading.visibility = View.GONE
-            binding.btnResetPassword.isEnabled = true
-            binding.btnResetPassword.text = getString(R.string.send_reset_link)
+            // Structural null safety initialization verification gate
+            val b = _binding ?: return@addOnCompleteListener
+
+            b.progressLoading.visibility = View.GONE
+            b.btnResetPassword.isEnabled = true
+            b.btnResetPassword.text = getString(R.string.send_reset_link)
 
             if (task.isSuccessful) {
-                // ✅ Link sent successfully
                 Toast.makeText(context, getString(R.string.reset_link_sent), Toast.LENGTH_LONG).show()
                 dismiss()
             } else {
                 val exception = task.exception
-                // ⭐ INDUSTRY GOLD STANDARD: Handling Firebase Auth Error Codes
-                if (exception is com.google.firebase.auth.FirebaseAuthInvalidUserException) {
-                    // 🚨 User NOT Registered (ERROR_USER_NOT_FOUND)
-                    binding.tilForgotEmail.isErrorEnabled = true
-                    binding.tilForgotEmail.error = getString(R.string.email_not_linked)
-                    AppSettings.triggerErrorEffect(requireContext(), binding.tilForgotEmail)
+                if (exception is FirebaseAuthInvalidUserException) {
+                    b.tilForgotEmail.isErrorEnabled = true
+                    b.tilForgotEmail.error = getString(R.string.email_not_linked)
+                    AppSettings.triggerErrorEffect(requireContext(), b.tilForgotEmail)
 
                     Toast.makeText(context, getString(R.string.redirecting), Toast.LENGTH_SHORT).show()
 
-                    binding.root.postDelayed({
+                    viewLifecycleOwner.lifecycleScope.launch {
+                        delay(3500.milliseconds)
                         if (isAdded) {
                             dismiss()
                             (activity as? AuthActivity)?.showRegister()
                         }
-                    }, 3500)
+                    }
                 } else {
-                    // Other errors (like bad format, network, etc)
                     showError("Error: ${exception?.localizedMessage}")
                 }
             }
@@ -161,7 +155,9 @@ class ForgotPasswordBottomSheet : BottomSheetDialogFragment() {
 
     private fun showError(message: String) {
         Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
-        AppSettings.triggerErrorEffect(requireContext(), binding.btnResetPassword)
+        _binding?.let { b ->
+            AppSettings.triggerErrorEffect(requireContext(), b.btnResetPassword)
+        }
     }
 
     override fun onDestroyView() {

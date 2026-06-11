@@ -3,30 +3,27 @@ package com.example.nursingstudio.ui.features.settings
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.provider.Settings
 import android.text.InputFilter
 import android.text.InputType
 import android.text.method.PasswordTransformationMethod
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
-import androidx.appcompat.widget.SwitchCompat
+import androidx.biometric.BiometricManager
 import androidx.core.content.edit
 import androidx.core.net.toUri
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
-import androidx.biometric.BiometricManager
-import androidx.biometric.BiometricPrompt
 import com.example.nursingstudio.R
 import com.example.nursingstudio.data.local.DataStoreManager
+import com.example.nursingstudio.databinding.FragmentSettingsBinding
 import com.example.nursingstudio.utils.AppSettings
+import com.example.nursingstudio.utils.BiometricAuthHelper
 import com.example.nursingstudio.utils.BiometricSettingsManager
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.google.android.material.switchmaterial.SwitchMaterial
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 
@@ -42,18 +39,18 @@ class SettingsFragment : Fragment() {
         private const val URL_WHATSAPP_SUPPORT = "https://wa.me/919999999999?text=Hello%20Nursing%20Studio%20Support"
     }
 
+    private var _binding: FragmentSettingsBinding? = null
+    private val binding get() = _binding!!
+
     private lateinit var bioManager: BiometricSettingsManager
     private lateinit var dataStoreManager: DataStoreManager
+    private lateinit var biometricHelper: BiometricAuthHelper
 
-    private var switchFingerprint: SwitchMaterial? = null
-    private var switchFaceUnlock: SwitchMaterial? = null
-    private var switchMpin: SwitchMaterial? = null
-
-    // Guard tracking flag to avoid recursive loops on programmatic UI synchronization state
     private var isSyncingSwitches = false
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        return inflater.inflate(R.layout.fragment_settings, container, false)
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+        _binding = FragmentSettingsBinding.inflate(inflater, container, false)
+        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -61,89 +58,68 @@ class SettingsFragment : Fragment() {
 
         bioManager = BiometricSettingsManager(requireContext())
         dataStoreManager = DataStoreManager(requireContext())
+        biometricHelper = BiometricAuthHelper(this)
+
         val sp = requireContext().getSharedPreferences(PREF_SETTINGS, Context.MODE_PRIVATE)
 
-        val switchNotifications = view.findViewById<SwitchCompat>(R.id.switch_notifications)
-        val switchQuizSound = view.findViewById<SwitchCompat>(R.id.switch_quiz_sound)
-        val switchMotivation = view.findViewById<SwitchCompat>(R.id.switch_motivation)
-        val switchVibration = view.findViewById<SwitchMaterial>(R.id.switch_vibration)
-
-        switchFingerprint = view.findViewById(R.id.switch_fingerprint)
-        switchFaceUnlock = view.findViewById(R.id.switch_face_unlock)
-        switchMpin = view.findViewById(R.id.switch_mpin)
-
-        switchNotifications.isChecked = sp.getBoolean(KEY_NOTIFICATIONS, true)
-        switchQuizSound.isChecked = sp.getBoolean(KEY_QUIZ_SOUND, true)
-        switchMotivation.isChecked = sp.getBoolean(KEY_MOTIVATION, true)
-        switchVibration.isChecked = AppSettings.isVibrationEnabled(requireContext())
+        // 🚀 FIXED: Clean compiled bindings parameters to circumvent loose memory field references leaks
+        binding.switchNotifications.isChecked = sp.getBoolean(KEY_NOTIFICATIONS, true)
+        binding.switchQuizSound.isChecked = sp.getBoolean(KEY_QUIZ_SOUND, true)
+        binding.switchMotivation.isChecked = sp.getBoolean(KEY_MOTIVATION, true)
+        binding.switchVibration.isChecked = AppSettings.isVibrationEnabled(requireContext())
 
         syncSecuritySwitchStates()
 
-        switchNotifications.setOnCheckedChangeListener { _, isChecked -> sp.edit { putBoolean(KEY_NOTIFICATIONS, isChecked) } }
-        switchQuizSound.setOnCheckedChangeListener { _, isChecked -> sp.edit { putBoolean(KEY_QUIZ_SOUND, isChecked) } }
-        switchMotivation.setOnCheckedChangeListener { _, isChecked -> sp.edit { putBoolean(KEY_MOTIVATION, isChecked) } }
+        binding.switchNotifications.setOnCheckedChangeListener { _, isChecked -> sp.edit { putBoolean(KEY_NOTIFICATIONS, isChecked) } }
+        binding.switchQuizSound.setOnCheckedChangeListener { _, isChecked -> sp.edit { putBoolean(KEY_QUIZ_SOUND, isChecked) } }
+        binding.switchMotivation.setOnCheckedChangeListener { _, isChecked -> sp.edit { putBoolean(KEY_MOTIVATION, isChecked) } }
 
-        switchVibration.setOnCheckedChangeListener { _, isChecked ->
+        binding.switchVibration.setOnCheckedChangeListener { _, isChecked ->
             AppSettings.setVibration(requireContext(), isChecked)
             if (isChecked) AppSettings.triggerVibration(requireContext(), 50)
         }
 
-        // Optimized Fingerprint Flow System Architecture
-        switchFingerprint?.setOnCheckedChangeListener { buttonView, isChecked ->
+        binding.switchUnifiedBiometric.setOnCheckedChangeListener { buttonView, isChecked ->
             if (isSyncingSwitches) return@setOnCheckedChangeListener
             if (isChecked) {
-                if (!isBiometricHardwareEnrolled()) {
+                val availabilityState = biometricHelper.checkBiometricAvailability()
+                if (availabilityState != BiometricManager.BIOMETRIC_SUCCESS) {
                     isSyncingSwitches = true
                     buttonView.isChecked = false
                     isSyncingSwitches = false
-                    showHardwareEnrollmentDialog("Fingerprint")
+
+                    if (availabilityState == BiometricManager.BIOMETRIC_ERROR_NONE_ENROLLED) {
+                        showHardwareEnrollmentDialog()
+                    } else {
+                        toast("Biometric hardware is currently unavailable or unsupported.")
+                    }
                     return@setOnCheckedChangeListener
                 }
+
                 evaluateSecurityCascade {
-                    triggerNativeHardwareVerification(
-                        promptTitle = "Confirm Fingerprint Identity",
-                        promptSubtitle = "Scan your device fingerprint sensor to verify.",
-                        isFaceVerification = false
-                    ) {
-                        bioManager.setBiometricEnabled(true)
-                        toast("Fingerprint Authentication Enabled 🔒")
-                    }
+                    biometricHelper.triggerAuthentication(
+                        title = "Confirm Identity",
+                        subtitle = "Authenticate using your registered biometric scanner.",
+                        onSuccess = {
+                            bioManager.setBiometricAuthActive(true)
+                            syncSecuritySwitchStates()
+                            toast("Biometric Login Enabled Securely 🔒")
+                        },
+                        onError = { errString ->
+                            isSyncingSwitches = true
+                            buttonView.isChecked = false
+                            isSyncingSwitches = false
+                            toast("Authentication Failed: $errString")
+                        }
+                    )
                 }
             } else {
-                bioManager.setBiometricEnabled(false)
-                toast("Fingerprint validation offline")
+                bioManager.setBiometricAuthActive(false)
+                toast("Biometric authentication disabled.")
             }
         }
 
-        // Optimized Face Unlock Flow System Architecture
-        switchFaceUnlock?.setOnCheckedChangeListener { buttonView, isChecked ->
-            if (isSyncingSwitches) return@setOnCheckedChangeListener
-            if (isChecked) {
-                if (!isBiometricHardwareEnrolled()) {
-                    isSyncingSwitches = true
-                    buttonView.isChecked = false
-                    isSyncingSwitches = false
-                    showHardwareEnrollmentDialog("Face Lock")
-                    return@setOnCheckedChangeListener
-                }
-                evaluateSecurityCascade {
-                    triggerNativeHardwareVerification(
-                        promptTitle = "Confirm Face Identity",
-                        promptSubtitle = "Scan your facial identity parameters to verify.",
-                        isFaceVerification = true
-                    ) {
-                        bioManager.setFaceUnlockEnabled(true)
-                        toast("Secure Face ID Profile Synchronized 🎯")
-                    }
-                }
-            } else {
-                bioManager.setFaceUnlockEnabled(false)
-                toast("Face ID profile detached")
-            }
-        }
-
-        // Optimized Fallback MPIN Subsystem Controller
-        switchMpin?.setOnCheckedChangeListener { buttonView, isChecked ->
+        binding.switchMpin.setOnCheckedChangeListener { buttonView, isChecked ->
             if (isSyncingSwitches) return@setOnCheckedChangeListener
             if (isChecked) {
                 isSyncingSwitches = true
@@ -155,39 +131,38 @@ class SettingsFragment : Fragment() {
                     bioManager.clearSecurityHardwareSettings()
                     dataStoreManager.saveMpinStatus(false)
                     syncSecuritySwitchStates()
-                    toast("Secure Fallback MPIN & Hardware Tokens Cleared")
+                    toast("Secure MPIN & Hardware Tokens Cleared")
                 }
             }
         }
 
-        view.findViewById<Button>(R.id.btnRateApp).setOnClickListener { openUrl() }
-        view.findViewById<Button>(R.id.btnWhatsappSupport).setOnClickListener { openWhatsappSupport() }
-        view.findViewById<Button>(R.id.btnPrivacyPolicy).setOnClickListener { openStaticPage("privacy") }
-        view.findViewById<Button>(R.id.btnTerms).setOnClickListener { openStaticPage("terms") }
-        view.findViewById<Button>(R.id.btnDisclaimer).setOnClickListener { openStaticPage("disclaimer") }
-        view.findViewById<Button>(R.id.btnAbout).setOnClickListener { openStaticPage("about") }
+        binding.btnRateApp.setOnClickListener { openUrl() }
+        binding.btnWhatsappSupport.setOnClickListener { openWhatsappSupport() }
+        binding.btnPrivacyPolicy.setOnClickListener { openStaticPage("privacy") }
+        binding.btnTerms.setOnClickListener { openStaticPage("terms") }
+        binding.btnDisclaimer.setOnClickListener { openStaticPage("disclaimer") }
+        binding.btnAbout.setOnClickListener { openStaticPage("about") }
     }
 
     private fun syncSecuritySwitchStates() {
+        val b = _binding ?: return
         isSyncingSwitches = true
-        switchFingerprint?.isChecked = bioManager.isBiometricEnabled()
-        switchFaceUnlock?.isChecked = bioManager.isFaceUnlockEnabled()
+        b.switchUnifiedBiometric.isChecked = bioManager.isBiometricAuthActive()
 
         viewLifecycleOwner.lifecycleScope.launch {
-            // Dual-verification strategy ensuring no cryptographic desync
             val isMpinActive = dataStoreManager.isMpinSet.firstOrNull() ?: false || bioManager.isMPINSet()
-            switchMpin?.isChecked = isMpinActive
+            _binding?.switchMpin?.isChecked = isMpinActive
             isSyncingSwitches = false
         }
     }
+
     private fun evaluateSecurityCascade(onVerificationSuccess: () -> Unit) {
         viewLifecycleOwner.lifecycleScope.launch {
-            val isMpinActive = dataStoreManager.isMpinSet.firstOrNull() ?: false
+            val isMpinActive = dataStoreManager.isMpinSet.firstOrNull() ?: false || bioManager.isMPINSet()
             if (!isMpinActive) {
-                toast("Please set your Fallback MPIN first!")
+                toast("Please set your Secure MPIN first!")
                 isSyncingSwitches = true
-                switchFingerprint?.isChecked = false
-                switchFaceUnlock?.isChecked = false
+                binding.switchUnifiedBiometric.isChecked = false
                 isSyncingSwitches = false
                 showMPINSetupDialogFromSettings()
             } else {
@@ -201,33 +176,38 @@ class SettingsFragment : Fragment() {
             inputType = InputType.TYPE_CLASS_NUMBER
             transformationMethod = PasswordTransformationMethod.getInstance()
             filters = arrayOf(InputFilter.LengthFilter(4))
-            hint = "Create 4-Digit PIN"
+            hint = "Create 4-Digit MPIN"
             textAlignment = View.TEXT_ALIGNMENT_CENTER
         }
 
-        MaterialAlertDialogBuilder(requireContext(), R.style.MaterialAlertDialog_Rounded)
+        // 🚀 FIXED: Overrode default positive button triggers to block random dialog closures when inputs fail verification constraints
+        val dialog = MaterialAlertDialogBuilder(requireContext(), R.style.MaterialAlertDialog_Rounded)
             .setTitle("Configure Security PIN")
             .setMessage("This PIN serves as your identity validation backup.")
             .setView(etMpin)
             .setCancelable(false)
-            .setPositiveButton("Save PIN") { _, _ ->
-                val mpin = etMpin.text.toString()
-                if (mpin.length == 4) {
-                    viewLifecycleOwner.lifecycleScope.launch {
-                        bioManager.saveMPIN(mpin)
-                        dataStoreManager.saveMpinStatus(true)
-                        syncSecuritySwitchStates()
-                        toast("Security PIN Created Successfully! 🔒")
-                    }
-                } else {
-                    syncSecuritySwitchStates()
-                    toast("MPIN execution requires exactly 4 digits")
-                }
-            }
+            .setPositiveButton("Save PIN", null)
             .setNegativeButton("Dismiss") { _, _ ->
                 syncSecuritySwitchStates()
             }
-            .show()
+            .create()
+
+        dialog.show()
+
+        dialog.getButton(android.content.DialogInterface.BUTTON_POSITIVE).setOnClickListener {
+            val mpin = etMpin.text.toString()
+            if (mpin.length == 4) {
+                viewLifecycleOwner.lifecycleScope.launch {
+                    bioManager.saveMPIN(mpin)
+                    dataStoreManager.saveMpinStatus(true)
+                    dialog.dismiss()
+                    syncSecuritySwitchStates()
+                    toast("Secure MPIN Created Successfully! 🔒")
+                }
+            } else {
+                toast("MPIN execution requires exactly 4 digits")
+            }
+        }
     }
 
     private fun openUrl(url: String = URL_PLAYSTORE) {
@@ -254,26 +234,13 @@ class SettingsFragment : Fragment() {
         Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
     }
 
-    private fun isBiometricHardwareEnrolled(authenticatorType: Int = BiometricManager.Authenticators.BIOMETRIC_STRONG): Boolean {
-        val biometricManager = BiometricManager.from(requireContext())
-        return biometricManager.canAuthenticate(authenticatorType) == BiometricManager.BIOMETRIC_SUCCESS
-    }
-
-    private fun showHardwareEnrollmentDialog(featureName: String, settingsAction: String = Settings.ACTION_SECURITY_SETTINGS) {
+    private fun showHardwareEnrollmentDialog() {
         MaterialAlertDialogBuilder(requireContext(), R.style.MaterialAlertDialog_Rounded)
-            .setTitle("$featureName Not Found")
-            .setMessage("Your device doesn't have $featureName set up yet. Please configure it in your phone's system settings first.")
+            .setTitle("Biometric Profiles Not Found")
+            .setMessage("Your device doesn't have secure biometric tracking configured. Please set them up in system settings first.")
             .setCancelable(true)
             .setPositiveButton("Open Settings") { _, _ ->
-                try {
-                    startActivity(Intent(settingsAction))
-                } catch (_: Exception) {
-                    try {
-                        startActivity(Intent(Settings.ACTION_SETTINGS))
-                    } catch (_: Exception) {
-                        toast("Unable to open device settings framework")
-                    }
-                }
+                biometricHelper.launchHardwareEnrollment()
             }
             .setNegativeButton("Cancel") { _, _ ->
                 syncSecuritySwitchStates()
@@ -281,74 +248,8 @@ class SettingsFragment : Fragment() {
             .show()
     }
 
-    private fun triggerNativeHardwareVerification(
-        promptTitle: String,
-        promptSubtitle: String,
-        isFaceVerification: Boolean,
-        onAuthSuccess: () -> Unit
-    ) {
-        val executor = androidx.core.content.ContextCompat.getMainExecutor(requireContext())
-        var wrongAttemptCount = 0
-        var biometricPrompt: BiometricPrompt? = null
-
-        biometricPrompt = BiometricPrompt(this, executor,
-            object : BiometricPrompt.AuthenticationCallback() {
-                override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
-                    super.onAuthenticationSucceeded(result)
-
-                    if (result.authenticationType == BiometricPrompt.AUTHENTICATION_RESULT_TYPE_DEVICE_CREDENTIAL) {
-                        biometricPrompt?.cancelAuthentication()
-                        activity?.runOnUiThread {
-                            syncSecuritySwitchStates()
-                            toast("Security Policy: Device PIN fallback restricted.")
-                        }
-                        return
-                    }
-
-                    wrongAttemptCount = 0
-                    activity?.runOnUiThread {
-                        onAuthSuccess.invoke()
-                        syncSecuritySwitchStates()
-                    }
-                }
-
-                override fun onAuthenticationFailed() {
-                    super.onAuthenticationFailed()
-                    wrongAttemptCount++
-                    if (wrongAttemptCount >= 3) {
-                        biometricPrompt?.cancelAuthentication()
-                        wrongAttemptCount = 0
-                        activity?.runOnUiThread {
-                            syncSecuritySwitchStates()
-                            toast("Too many failed attempts. Security prompt dismissed.")
-                        }
-                    }
-                }
-
-                override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
-                    super.onAuthenticationError(errorCode, errString)
-                    activity?.runOnUiThread {
-                        syncSecuritySwitchStates()
-                        toast("Verification: $errString")
-                    }
-                }
-            })
-
-        // 🚀 2026 Verification Branching Standard: Utilizing parameters to safely customize cryptographic operations
-        val systemContextDescription = if (isFaceVerification) {
-            "Hardware Subsystem Tag: Biometric.Face"
-        } else {
-            "Hardware Subsystem Tag: Biometric.Fingerprint"
-        }
-
-        val promptInfo = BiometricPrompt.PromptInfo.Builder()
-            .setTitle(promptTitle)
-            .setSubtitle(promptSubtitle)
-            .setDescription(systemContextDescription) // Fixed: Parameter isFaceVerification is now explicitly tracked and utilized
-            .setNegativeButtonText("Cancel")
-            .setAllowedAuthenticators(BiometricManager.Authenticators.BIOMETRIC_STRONG)
-            .build()
-
-        biometricPrompt.authenticate(promptInfo)
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 }
