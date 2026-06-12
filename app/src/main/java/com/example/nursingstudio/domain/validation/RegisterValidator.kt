@@ -37,18 +37,21 @@ object RegisterValidator {
             // ==========================================
             // 2. EDUCATION & OCCUPATION
             // ==========================================
-            user.education.isBlank() || user.education.equals("Select Education", ignoreCase = true) ->
+            // ==========================================
+            // 2. EDUCATION & OCCUPATION (Strict Hierarchy Branching)
+            // ==========================================
+            // 🚀 2026 GOLD STANDARD: Explicit Context-Aware State Validation for Dropdown vs Manual Input
+            (user.education.equals("Select Education", ignoreCase = true)) ->
                 ValidationResult.Error("Select Education", "edu")
 
-            // 🚀 2026 GOLD STANDARD: Explicit token tagging to route validation directly to TIL layers
-            (user.education.equals("Other", ignoreCase = true) || user.education.length < 2) ->
+            (user.education.isBlank() || user.education.equals("Other", ignoreCase = true) || user.education.trim().length < 2) ->
                 ValidationResult.Error("Please specify your education", "edu_other")
 
-            user.occupation.isBlank() || user.occupation.equals("Select Occupation", ignoreCase = true) ->
+// 🚀 2026 GOLD STANDARD: Explicit Context-Aware State Validation for Dropdown vs Manual Input
+            (user.occupation.equals("Select Occupation", ignoreCase = true)) ->
                 ValidationResult.Error("Select Occupation", "occ")
 
-            // 🚀 2026 GOLD STANDARD: Enforces direct text layout constraints for other selection boundaries
-            (user.occupation.equals("Other", ignoreCase = true) || user.occupation.length < 2) ->
+            (user.occupation.isBlank() || user.occupation.equals("Other", ignoreCase = true) || user.occupation.trim().length < 2) ->
                 ValidationResult.Error("Please specify your occupation", "occ_other")
 
             // ==========================================

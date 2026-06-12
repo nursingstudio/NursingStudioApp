@@ -30,7 +30,7 @@ class RegisterViewModel @Inject constructor(
                 repository.saveUserData(uid, finalUser).onSuccess {
                     _uiState.value = RegisterState.Success
                 }.onFailure { e ->
-                    // 🚀 FIXED: Wrapped distributed deletion call inside an independent lifecycle scope thread to prevent profile corruption lock loops
+                    // 🚀 CRITICAL CLEANUP: Independent transaction fallback layer preventing ghost auth accumulation
                     try {
                         authResult.user?.delete()
                     } catch (cleanupException: Exception) {

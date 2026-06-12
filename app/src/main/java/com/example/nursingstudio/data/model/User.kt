@@ -1,5 +1,7 @@
 package com.example.nursingstudio.data.model
 
+import com.google.firebase.Timestamp
+
 // ✅ 2026 Industry Model Style
 data class User(
     val uid: String = "",
@@ -20,5 +22,6 @@ data class User(
     val isNursingRegistered: Boolean? = null,
     val regState: String? = null,
     val regNumber: String? = null,
-    val createdAt: Long = System.currentTimeMillis()
+    // 🚀 2026 Gold Standard: Architecture-safe nullable timestamp container
+    val createdAt: Timestamp? = null
 )
