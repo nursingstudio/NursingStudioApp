@@ -40,12 +40,16 @@ object RegisterValidator {
             user.education.isBlank() || user.education.equals("Select Education", ignoreCase = true) ->
                 ValidationResult.Error("Select Education", "edu")
 
-            user.education.length < 2 -> ValidationResult.Error("Please specify your education", "edu_other")
+            // 🚀 2026 GOLD STANDARD: Explicit token tagging to route validation directly to TIL layers
+            (user.education.equals("Other", ignoreCase = true) || user.education.length < 2) ->
+                ValidationResult.Error("Please specify your education", "edu_other")
 
             user.occupation.isBlank() || user.occupation.equals("Select Occupation", ignoreCase = true) ->
                 ValidationResult.Error("Select Occupation", "occ")
 
-            user.occupation.length < 2 -> ValidationResult.Error("Please specify your occupation", "occ_other")
+            // 🚀 2026 GOLD STANDARD: Enforces direct text layout constraints for other selection boundaries
+            (user.occupation.equals("Other", ignoreCase = true) || user.occupation.length < 2) ->
+                ValidationResult.Error("Please specify your occupation", "occ_other")
 
             // ==========================================
             // 3. CONTACT DETAILS
@@ -59,20 +63,17 @@ object RegisterValidator {
             // ==========================================
             // 4. ADDRESS DETAILS (2026 Dynamic Logic Fix)
             // ==========================================
-            user.country.isBlank() -> ValidationResult.Error("Country is required", "country")
-
-            // 🚀 FIXED LOGIC LINE: Standardized matching parameters to avoid character anomalies
-            user.country.equals("Select Country", ignoreCase = true) -> ValidationResult.Error("Country is required", "country")
-
-            (!user.country.equals("Bharat (India)", ignoreCase = true) && user.country.length < 2) ->
-                ValidationResult.Error("Enter valid Country Name", "country_other")
-
-            // 🚀 FIXED CRITICAL BUG: Catches partial index matching ("Select State/UT" or "Select State") seamlessly
+            // Condition A: Bharat selected but State dropdown is still on default prompt
             (user.country.equals("Bharat (India)", ignoreCase = true) &&
                     (user.state.isBlank() || user.state.startsWith("Select State", ignoreCase = true))) ->
                 ValidationResult.Error("Select State", "state")
 
-            (!user.country.equals("Bharat (India)", ignoreCase = true) && user.state.isBlank()) ->
+            // Condition B: 'Other' selected but Custom Country text input is left blank/short
+            (!user.country.equals("Bharat (India)", ignoreCase = true) && user.country.trim().length < 2) ->
+                ValidationResult.Error("Enter valid Country Name", "country_other")
+
+            // Condition C: 'Other' selected, Country is specified, but Custom State text input is left blank/short
+            (!user.country.equals("Bharat (India)", ignoreCase = true) && user.state.trim().length < 2) ->
                 ValidationResult.Error("Enter State Name", "state_other")
 
             user.district.isBlank() -> ValidationResult.Error("District required", "district")
