@@ -35,22 +35,28 @@
         android:fontFamily="sans-serif" />
 
     <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/tilForgotMpinPassword"
         style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="@string/enter_account_password"
         app:passwordToggleEnabled="true"
-        app:boxStrokeColor="?attr/colorPrimary"
-        app:boxCornerRadiusTopStart="10dp"
-        app:boxCornerRadiusTopEnd="10dp"
-        app:boxCornerRadiusBottomStart="10dp"
-        app:boxCornerRadiusBottomEnd="10dp">
+        app:passwordToggleTint="@color/text_secondary"
+        app:boxStrokeColor="@color/brand_blue"
+        app:hintTextColor="@color/brand_blue"
+        app:boxStrokeWidthFocused="2dp"
+        app:errorTextAppearance="@style/TextAppearance.App.Error"
+        app:boxCornerRadiusTopStart="12dp"
+        app:boxCornerRadiusTopEnd="12dp"
+        app:boxCornerRadiusBottomStart="12dp"
+        app:boxCornerRadiusBottomEnd="12dp">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/etForgotMpinPassword"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:inputType="textPassword"
+            android:textColor="@color/text_primary"
             android:fontFamily="sans-serif"
             android:imeOptions="actionDone"
             android:importantForAutofill="no" />
@@ -64,6 +70,7 @@
         android:layout_marginTop="24dp"
         android:text="@string/confirm_continue_action"
         android:textColor="@color/white"
+        app:backgroundTint="@color/brand_blue"
         app:cornerRadius="12dp"
         android:textSize="15sp"
         android:textStyle="bold"

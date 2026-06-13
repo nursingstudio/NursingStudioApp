@@ -9,7 +9,6 @@ import android.text.method.PasswordTransformationMethod
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.EditText
 import android.widget.Toast
 import androidx.biometric.BiometricManager
 import androidx.core.content.edit
@@ -172,22 +171,54 @@ class SettingsFragment : Fragment() {
     }
 
     private fun showMPINSetupDialogFromSettings() {
-        val etMpin = EditText(requireContext()).apply {
+        // 🚀 2026 Gold Standard Layout Container for perfect margin encapsulation inside Material Dialog
+        val containerFrame = android.widget.FrameLayout(requireContext()).apply {
+            val paddingPx = (24 * resources.displayMetrics.density).toInt()
+            setPadding(paddingPx, (8 * resources.displayMetrics.density).toInt(), paddingPx, 0)
+        }
+
+        val styledContext = android.view.ContextThemeWrapper(
+            requireContext(),
+            com.google.android.material.R.style.Widget_Material3_TextInputLayout_OutlinedBox
+        )
+
+        val textInputLayout = com.google.android.material.textfield.TextInputLayout(
+            styledContext,
+            null,
+            com.google.android.material.R.attr.textInputStyle
+        ).apply {
+            boxStrokeColor = androidx.core.content.ContextCompat.getColor(requireContext(), R.color.brand_blue)
+            hintTextColor = android.content.res.ColorStateList.valueOf(
+                androidx.core.content.ContextCompat.getColor(requireContext(), R.color.brand_blue)
+            )
+            setBoxCornerRadii(
+                (12 * resources.displayMetrics.density), (12 * resources.displayMetrics.density),
+                (12 * resources.displayMetrics.density), (12 * resources.displayMetrics.density)
+            )
+            endIconMode = com.google.android.material.textfield.TextInputLayout.END_ICON_PASSWORD_TOGGLE
+        }
+
+        val etMpin = com.google.android.material.textfield.TextInputEditText(textInputLayout.context).apply {
             inputType = InputType.TYPE_CLASS_NUMBER
             transformationMethod = PasswordTransformationMethod.getInstance()
             filters = arrayOf(InputFilter.LengthFilter(4))
-            hint = "Create 4-Digit MPIN"
+            hint = "Enter 4-Digit MPIN"
+            textSize = 16f
             textAlignment = View.TEXT_ALIGNMENT_CENTER
+            setTextColor(androidx.core.content.ContextCompat.getColor(requireContext(), R.color.text_primary))
         }
 
-        // 🚀 FIXED: Overrode default positive button triggers to block random dialog closures when inputs fail verification constraints
+        textInputLayout.addView(etMpin)
+        containerFrame.addView(textInputLayout)
+
+        // 🚀 2026 Human-Centric Microcopy Integration
         val dialog = MaterialAlertDialogBuilder(requireContext(), R.style.MaterialAlertDialog_Rounded)
-            .setTitle("Configure Security PIN")
-            .setMessage("This PIN serves as your identity validation backup.")
-            .setView(etMpin)
+            .setTitle("Set Secure MPIN")
+            .setMessage("Create a 4-digit security MPIN to protect your account. This acts as your secure master key to unlock the app and manage your biometric settings instantly.")
+            .setView(containerFrame)
             .setCancelable(false)
-            .setPositiveButton("Save PIN", null)
-            .setNegativeButton("Dismiss") { _, _ ->
+            .setPositiveButton("Save MPIN", null)
+            .setNegativeButton("Cancel") { _, _ ->
                 syncSecuritySwitchStates()
             }
             .create()
@@ -195,17 +226,18 @@ class SettingsFragment : Fragment() {
         dialog.show()
 
         dialog.getButton(android.content.DialogInterface.BUTTON_POSITIVE).setOnClickListener {
-            val mpin = etMpin.text.toString()
+            val mpin = etMpin.text.toString().trim()
             if (mpin.length == 4) {
+                textInputLayout.error = null
                 viewLifecycleOwner.lifecycleScope.launch {
                     bioManager.saveMPIN(mpin)
                     dataStoreManager.saveMpinStatus(true)
                     dialog.dismiss()
                     syncSecuritySwitchStates()
-                    toast("Secure MPIN Created Successfully! 🔒")
+                    toast("Secure MPIN saved successfully! 🔒")
                 }
             } else {
-                toast("MPIN execution requires exactly 4 digits")
+                textInputLayout.error = "MPIN requires exactly 4 digits."
             }
         }
     }

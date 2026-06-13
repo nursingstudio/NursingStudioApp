@@ -66,9 +66,7 @@
     <string name="tab_mobile">Mobile</string>
     <string name="hint_email">Email Address</string>
     <string name="hint_password">Password</string>
-    <string name="hint_otp">Enter 6-digit OTP</string>
     <string name="btn_login">Login</string>
-    <string name="btn_send_otp">Send OTP</string>
     <string name="label_forgot_password">Forgot Password?</string>
     <string name="label_go_register">New User? Register Now</string>
 
@@ -106,10 +104,7 @@
     <string name="hint_spec_edu">Specify Education *</string>
     <string name="hint_spec_occ">Specify Occupation *</string>
     <string name="hint_mobile_req">Mobile Number *</string>
-    <string name="btn_verify_otp">Verify OTP</string>
-    <string name="hint_otp_req">Enter 6-Digit OTP *</string>
     <string name="timer_format">Resend in %1$s</string>
-    <string name="btn_resend_otp">Resend OTP</string>
     <string name="hint_email_req">Email Address *</string>
     <string name="hint_country_req">Enter Country Name *</string>
     <string name="hint_state_req">Enter State/Region *</string>
@@ -202,20 +197,15 @@
     <string name="_9">9</string>
     <string name="_0">0</string>
     <string name="backspace">backspace</string>
-    <string name="no_internet">No Internet Connection! Please check your mobile Data/Wi-Fi. 🌐</string>
+    <string name="no_internet">No Internet Connection! Please check your mobile Data/Wi-Fi.</string>
     <string name="reset_link_sent">Password Reset link sent! Please check your email inbox/spam folder.</string>
     <string name="reset_hint">Note: If this email is registered, you will receive a reset link. If you don\'t receive it within a few minutes, please check your spam folder or register for a new account.</string>
-    <string name="send_otp">Send OTP</string>
-    <string name="verified">Verified ✅</string>
-    <string name="resend_in_seconds">Resend in %1$ds</string>
     <string name="error_email_empty">Please enter your registered email address to proceed.</string>
     <string name="error_email_invalid">The email address entered is invalid. Please verify and try again.</string>
     <string name="error_password_empty">Security check: Please enter your password to continue.</string>
     <string name="error_password_length">For your security, password must be at least 8 characters long.</string>
     <string name="error_mobile_empty">Mobile number is required for verification.</string>
     <string name="error_mobile_invalid">Please enter a valid 10-digit mobile number.</string>
-    <string name="error_otp_empty">Verification required: Please enter the 6-digit security code sent to your device.</string>
-    <string name="error_otp_invalid">Invalid code: The security code must be exactly 6 digits long. Please check and try again.</string>
     <string name="email_not_linked">This email is not linked to any account. Please Register first.</string>
     <string name="redirecting">Redirecting to Register…</string>
     <string name="usb_debugging_enabled">USB Debugging Enabled</string>

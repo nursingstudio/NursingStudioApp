@@ -87,6 +87,19 @@ class HomeFragment : Fragment() {
     }
 
     private fun setupDailyMotivation() {
+        // 🚀 Architectural Reactive Gate: Validate if user enabled the motivation component from settings first
+        val settingsPref = requireContext().getSharedPreferences("settings_prefs", Context.MODE_PRIVATE)
+        val isMotivationEnabled = settingsPref.getBoolean("enable_motivation", true)
+
+        if (!isMotivationEnabled) {
+            // Safe fallback structure to smoothly hide components container from user layout view context
+            binding.tvMotivation.visibility = View.GONE
+            // If there's an outer card wrapper layout like cardMotivation, hide that component explicitly.
+            return
+        } else {
+            binding.tvMotivation.visibility = View.VISIBLE
+        }
+
         val quotes = listOf(
             "Consistency beats intensity.",
             "Small steps daily create big success.",

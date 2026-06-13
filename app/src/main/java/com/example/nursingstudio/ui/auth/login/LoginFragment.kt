@@ -14,10 +14,10 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
-import android.widget.EditText
 import android.widget.Toast
 import androidx.biometric.BiometricManager
 import androidx.core.content.edit
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
@@ -39,7 +39,6 @@ import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import java.util.Locale
 import kotlin.time.Duration.Companion.milliseconds
-import androidx.core.view.isVisible
 
 @AndroidEntryPoint
 class LoginFragment : Fragment() {
@@ -286,10 +285,15 @@ class LoginFragment : Fragment() {
         }
 
         binding.tvForgotMpinAction.setOnClickListener {
-            val forgotMpinSheet = ForgotMpinBottomSheet(onResetVerified = {
-                showLocalMpinSetupDialog()
-            })
-            forgotMpinSheet.show(childFragmentManager, "ForgotMpinTag")
+            val currentInputtedPass = binding.etPassword.text.toString().trim()
+            val forgotMpinSheet = ForgotMpinBottomSheet(
+                runtimePasswordFallback = currentInputtedPass,
+                onResetVerified = {
+                    // Synchronous execution post handling
+                    showLocalMpinSetupDialog()
+                }
+            )
+            forgotMpinSheet.show(childFragmentManager, "ForgotMpinBottomSheet")
         }
 
         binding.btnFingerprintTrigger.setOnClickListener { showBiometricPrompt() }
@@ -298,38 +302,73 @@ class LoginFragment : Fragment() {
     }
 
     private fun showLocalMpinSetupDialog() {
-        val etMpin = EditText(requireContext()).apply {
+        // 🚀 2026 UI Architecture: Programmatically structured modern material input layout context encapsulation
+        val containerFrame = android.widget.FrameLayout(requireContext()).apply {
+            val paddingPx = (24 * resources.displayMetrics.density).toInt()
+            setPadding(paddingPx, (8 * resources.displayMetrics.density).toInt(), paddingPx, 0)
+        }
+
+        // 🚀 2026 Gold Standard: ContextThemeWrapper runtime encapsulation bypassing read-only style limitations smoothly
+        val styledContext = android.view.ContextThemeWrapper(
+            requireContext(),
+            com.google.android.material.R.style.Widget_Material3_TextInputLayout_OutlinedBox
+        )
+
+        val textInputLayout = com.google.android.material.textfield.TextInputLayout(
+            styledContext,
+            null,
+            com.google.android.material.R.attr.textInputStyle
+        ).apply {
+            // Explicit color arrays explicitly declared preventing any runtime theme leaks
+            boxStrokeColor = androidx.core.content.ContextCompat.getColor(requireContext(), R.color.brand_saffron_dark)
+            hintTextColor = android.content.res.ColorStateList.valueOf(
+                androidx.core.content.ContextCompat.getColor(requireContext(), R.color.brand_saffron_dark)
+            )
+            setBoxCornerRadii(
+                (12 * resources.displayMetrics.density), (12 * resources.displayMetrics.density),
+                (12 * resources.displayMetrics.density), (12 * resources.displayMetrics.density)
+            )
+            endIconMode = com.google.android.material.textfield.TextInputLayout.END_ICON_PASSWORD_TOGGLE
+        }
+
+        val etMpin = com.google.android.material.textfield.TextInputEditText(textInputLayout.context).apply {
             inputType = InputType.TYPE_CLASS_NUMBER
             transformationMethod = PasswordTransformationMethod.getInstance()
             filters = arrayOf(InputFilter.LengthFilter(4))
-            hint = "Create 4-Digit PIN"
+            hint = "Enter New 4-Digit MPIN"
+            textSize = 18f
             textAlignment = View.TEXT_ALIGNMENT_CENTER
+            setTextColor(androidx.core.content.ContextCompat.getColor(requireContext(), R.color.text_primary))
         }
 
-        // 🚀 FIXED: Standardized dialog button initialization to guarantee strict data binding validations before closing
+        textInputLayout.addView(etMpin)
+        containerFrame.addView(textInputLayout)
+
         val dialog = MaterialAlertDialogBuilder(requireContext(), R.style.MaterialAlertDialog_Rounded)
-            .setTitle("Reset Security PIN")
-            .setMessage("Set a secure fallback 4-digit pin profile to access account operations.")
-            .setView(etMpin)
+            .setTitle("Reset Secure MPIN")
+            .setMessage("Protect your account by setting up a fresh, private 4-digit security MPIN. This secure code acts as your dynamic profile shield, allowing you to instantly unlock and authorize future app sessions without needing your password.")
+            .setView(containerFrame)
             .setCancelable(false)
-            .setPositiveButton("Save PIN", null) // Overriding directly below to intercept closing
+            .setPositiveButton("Save MPIN", null)
             .setNegativeButton("Cancel", null)
             .create()
 
         dialog.show()
 
+        // Enforce strict asynchronous validations preventing premature dismiss transactions
         dialog.getButton(android.content.DialogInterface.BUTTON_POSITIVE).setOnClickListener {
-            val mpin = etMpin.text.toString()
+            val mpin = etMpin.text.toString().trim()
             if (mpin.length == 4) {
+                textInputLayout.error = null
                 viewLifecycleOwner.lifecycleScope.launch {
                     bioSettingsManager.saveMPIN(mpin)
                     dataStoreManager.saveMpinStatus(true)
-                    toast("Security PIN updated successfully! 🔒")
+                    toast("Security MPIN updated successfully! 🔒")
                     dialog.dismiss()
                     checkAdaptiveSessionState()
                 }
             } else {
-                toast("PIN validation requires exactly 4 digits")
+                textInputLayout.error = "MPIN requires exactly 4 digits"
             }
         }
     }
@@ -353,13 +392,31 @@ class LoginFragment : Fragment() {
 
         clearAllErrors()
 
-        if (email.isEmpty() || !Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-            binding.tilEmail.error = getString(R.string.error_email_invalid)
-            return
+        // 🚀 2026 Standard Form Sanitization: Clean separation of field emptiness vs format constraints
+        when {
+            email.isEmpty() -> {
+                binding.tilEmail.error = getString(R.string.error_email_empty)
+                AppSettings.triggerErrorEffect(requireContext(), binding.tilEmail)
+                return
+            }
+            !Patterns.EMAIL_ADDRESS.matcher(email).matches() -> {
+                binding.tilEmail.error = getString(R.string.error_email_invalid)
+                AppSettings.triggerErrorEffect(requireContext(), binding.tilEmail)
+                return
+            }
         }
-        if (pass.isEmpty() || pass.length < 8) {
-            binding.tilPassword.error = getString(R.string.error_password_length)
-            return
+        // 🚀 2026 Standard Password Validation: Granular evaluation separating empty states from depth limits
+        when {
+            pass.isEmpty() -> {
+                binding.tilPassword.error = getString(R.string.error_password_empty)
+                AppSettings.triggerErrorEffect(requireContext(), binding.tilPassword)
+                return
+            }
+            pass.length < 8 -> {
+                binding.tilPassword.error = getString(R.string.error_password_length)
+                AppSettings.triggerErrorEffect(requireContext(), binding.tilPassword)
+                return
+            }
         }
         viewModel.loginWithEmail(email, pass)
     }
@@ -399,8 +456,8 @@ class LoginFragment : Fragment() {
 
     private fun showBiometricPrompt() {
         biometricHelper.triggerAuthentication(
-            title = "Secure Login",
-            subtitle = "Scan fingerprint or face identity",
+            title = "Secure Biometric Login",
+            subtitle = "Scan Fingerprint or Face for Secure Login.",
             onSuccess = { _ ->
                 val savedEmail = bioSettingsManager.getSavedEmail()
                 val savedPassword = bioSettingsManager.getSavedPass()
@@ -431,9 +488,13 @@ class LoginFragment : Fragment() {
             },
             onForgotMpinRequested = {
                 val currentInputtedPass = binding.etPassword.text.toString().trim()
-                val forgotSheet = ForgotMpinBottomSheet(runtimePasswordFallback = currentInputtedPass) {
-                    Toast.makeText(requireContext(), "Identity Verified! You can reset MPIN now.", Toast.LENGTH_SHORT).show()
-                }
+                val forgotSheet = ForgotMpinBottomSheet(
+                    runtimePasswordFallback = currentInputtedPass,
+                    onResetVerified = {
+                        // 🚀 FIXED: Routed the verification stream back to the global material dialog pipeline
+                        showLocalMpinSetupDialog()
+                    }
+                )
                 forgotSheet.show(childFragmentManager, "ForgotMpinBottomSheet")
             }
         )

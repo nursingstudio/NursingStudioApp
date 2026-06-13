@@ -41,22 +41,27 @@ class ForgotPasswordBottomSheet : BottomSheetDialogFragment() {
 
     override fun onStart() {
         super.onStart()
-        // 🚀 FIXED: 2026 Absolute Zero-Warning Keyboard Architecture Validation Gate
         val currentDialog = dialog as? BottomSheetDialog ?: return
         val bottomSheet = currentDialog.findViewById<View>(com.google.android.material.R.id.design_bottom_sheet) ?: return
-        val behavior = BottomSheetBehavior.from(bottomSheet)
 
+        // 🚀 FIXED: Removed the deprecated SOFT_INPUT_ADJUST_RESIZE flag completely.
+        // The programmatic WindowInsets framework handles scaling implicitly via layout boundaries.
+        val behavior = BottomSheetBehavior.from(bottomSheet)
         bottomSheet.layoutParams.height = ViewGroup.LayoutParams.WRAP_CONTENT
         behavior.skipCollapsed = true
         behavior.state = BottomSheetBehavior.STATE_EXPANDED
 
-        // Clean programmatic system window-insets handling that perfectly adjusts inner layout padding reactively
+        // 🚀 2026 Fluid Keyboard Alignment: Pure programmatic calculation layout padding bounds
         androidx.core.view.ViewCompat.setOnApplyWindowInsetsListener(bottomSheet) { _, insets ->
-            val imeInsets = insets.getInsets(androidx.core.view.WindowInsetsCompat.Type.ime())
-            val systemBars = insets.getInsets(androidx.core.view.WindowInsetsCompat.Type.systemBars())
+            val imeVisible = insets.isVisible(androidx.core.view.WindowInsetsCompat.Type.ime())
+            val imeHeight = insets.getInsets(androidx.core.view.WindowInsetsCompat.Type.ime()).bottom
+            val systemBarsHeight = insets.getInsets(androidx.core.view.WindowInsetsCompat.Type.systemBars()).bottom
 
-            // Apply precise safe padding limits without jumping components text layouts
-            _binding?.root?.setPadding(0, 0, 0, imeInsets.bottom - systemBars.bottom)
+            _binding?.let { b ->
+                val targetPadding = if (imeVisible) (imeHeight - systemBarsHeight).coerceAtLeast(0) else 0
+                // central linear surface shifts exactly to balance above virtual keyboards frame
+                b.root.setPadding(b.root.paddingLeft, b.root.paddingTop, b.root.paddingRight, targetPadding)
+            }
             insets
         }
     }
@@ -80,7 +85,6 @@ class ForgotPasswordBottomSheet : BottomSheetDialogFragment() {
     }
 
     private fun handlePasswordResetFlow(email: String) {
-        // Safe hide keyboard vector sequence using direct clean reference maps without redundant lets
         val currentWindow = dialog?.window
         if (currentWindow != null) {
             androidx.core.view.WindowCompat.getInsetsController(currentWindow, binding.root).apply {
@@ -113,7 +117,6 @@ class ForgotPasswordBottomSheet : BottomSheetDialogFragment() {
 
     private fun sendResetEmail(email: String) {
         auth.sendPasswordResetEmail(email).addOnCompleteListener { task ->
-            // Structural null safety initialization verification gate
             val b = _binding ?: return@addOnCompleteListener
 
             b.progressLoading.visibility = View.GONE
