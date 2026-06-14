@@ -302,16 +302,19 @@ class LoginFragment : Fragment() {
     }
 
     private fun showLocalMpinSetupDialog() {
-        // 🚀 2026 UI Architecture: Programmatically structured modern material input layout context encapsulation
+        // 🚀 2026 UI Architecture: Programmatically structured clean layout encapsulation frame using device density metrics
         val containerFrame = android.widget.FrameLayout(requireContext()).apply {
-            val paddingPx = (24 * resources.displayMetrics.density).toInt()
-            setPadding(paddingPx, (8 * resources.displayMetrics.density).toInt(), paddingPx, 0)
+            val paddingHorizontal = (24 * resources.displayMetrics.density).toInt()
+            val paddingTop = (12 * resources.displayMetrics.density).toInt()
+            setPadding(paddingHorizontal, paddingTop, paddingHorizontal, 0)
+            layoutParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
         }
 
-        // 🚀 2026 Gold Standard: ContextThemeWrapper runtime encapsulation bypassing read-only style limitations smoothly
+        // 🚀 FIXED: Routed ContextThemeWrapper straight into your Centralized Custom Global XML Style Profile
+        // This eliminates all manual cursor tint hacks, text colors, error boundaries, and selection pointer issues completely
         val styledContext = android.view.ContextThemeWrapper(
             requireContext(),
-            com.google.android.material.R.style.Widget_Material3_TextInputLayout_OutlinedBox
+            R.style.Widget_Material3_TextInputLayout_OutlinedBox_CustomGlobal
         )
 
         val textInputLayout = com.google.android.material.textfield.TextInputLayout(
@@ -319,15 +322,11 @@ class LoginFragment : Fragment() {
             null,
             com.google.android.material.R.attr.textInputStyle
         ).apply {
-            // Explicit color arrays explicitly declared preventing any runtime theme leaks
-            boxStrokeColor = androidx.core.content.ContextCompat.getColor(requireContext(), R.color.brand_saffron_dark)
-            hintTextColor = android.content.res.ColorStateList.valueOf(
-                androidx.core.content.ContextCompat.getColor(requireContext(), R.color.brand_saffron_dark)
+            layoutParams = android.widget.FrameLayout.LayoutParams(
+                android.widget.FrameLayout.LayoutParams.MATCH_PARENT,
+                android.widget.FrameLayout.LayoutParams.WRAP_CONTENT
             )
-            setBoxCornerRadii(
-                (12 * resources.displayMetrics.density), (12 * resources.displayMetrics.density),
-                (12 * resources.displayMetrics.density), (12 * resources.displayMetrics.density)
-            )
+            // Enforce password visibility icons natively backed by your central system parameters
             endIconMode = com.google.android.material.textfield.TextInputLayout.END_ICON_PASSWORD_TOGGLE
         }
 
@@ -336,17 +335,27 @@ class LoginFragment : Fragment() {
             transformationMethod = PasswordTransformationMethod.getInstance()
             filters = arrayOf(InputFilter.LengthFilter(4))
             hint = "Enter New 4-Digit MPIN"
-            textSize = 18f
+            textSize = 16f
             textAlignment = View.TEXT_ALIGNMENT_CENTER
-            setTextColor(androidx.core.content.ContextCompat.getColor(requireContext(), R.color.text_primary))
         }
+
+        // 🚀 FIXED: Dynamic reactive observer clearing error frames smoothly the moment user clicks or updates data streams
+        etMpin.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                textInputLayout.error = null
+                textInputLayout.isErrorEnabled = false
+            }
+            override fun afterTextChanged(s: Editable?) {}
+        })
 
         textInputLayout.addView(etMpin)
         containerFrame.addView(textInputLayout)
 
+        // 🚀 2026 Human-Centric Master Alert Dialog Configuration System
         val dialog = MaterialAlertDialogBuilder(requireContext(), R.style.MaterialAlertDialog_Rounded)
             .setTitle("Reset Secure MPIN")
-            .setMessage("Protect your account by setting up a fresh, private 4-digit security MPIN. This secure code acts as your dynamic profile shield, allowing you to instantly unlock and authorize future app sessions without needing your password.")
+            .setMessage(getString(R.string.mpin_reset_dialog_msg))
             .setView(containerFrame)
             .setCancelable(false)
             .setPositiveButton("Save MPIN", null)
@@ -355,20 +364,38 @@ class LoginFragment : Fragment() {
 
         dialog.show()
 
-        // Enforce strict asynchronous validations preventing premature dismiss transactions
+        // 🚀 FIXED: Dynamic fluid boundaries scaling dialog component horizontally to exactly 92% layout metrics parameters
+        val metricsWidth = (resources.displayMetrics.widthPixels * 0.92).toInt()
+        dialog.window?.setLayout(metricsWidth, ViewGroup.LayoutParams.WRAP_CONTENT)
+
         dialog.getButton(android.content.DialogInterface.BUTTON_POSITIVE).setOnClickListener {
             val mpin = etMpin.text.toString().trim()
-            if (mpin.length == 4) {
-                textInputLayout.error = null
-                viewLifecycleOwner.lifecycleScope.launch {
-                    bioSettingsManager.saveMPIN(mpin)
-                    dataStoreManager.saveMpinStatus(true)
-                    toast("Security MPIN updated successfully! 🔒")
-                    dialog.dismiss()
-                    checkAdaptiveSessionState()
+
+            // 🚀 FIXED: Resolved references by binding accurately to your class initialized variable token layer 'bioSettingsManager'
+            val previouslySavedMpin = bioSettingsManager.getMPIN()
+
+            when {
+                mpin.length != 4 -> {
+                    textInputLayout.isErrorEnabled = true
+                    textInputLayout.error = "MPIN requires exactly 4 digits"
+                    // Globally verified enterprise security feedback trigger
+                    AppSettings.triggerErrorEffect(requireContext(), textInputLayout)
                 }
-            } else {
-                textInputLayout.error = "MPIN requires exactly 4 digits"
+                previouslySavedMpin != null && mpin == previouslySavedMpin -> {
+                    textInputLayout.isErrorEnabled = true
+                    textInputLayout.error = getString(R.string.error_duplicate_mpin)
+                    AppSettings.triggerErrorEffect(requireContext(), textInputLayout)
+                }
+                else -> {
+                    textInputLayout.error = null
+                    viewLifecycleOwner.lifecycleScope.launch {
+                        bioSettingsManager.saveMPIN(mpin)
+                        dataStoreManager.saveMpinStatus(true)
+                        toast("Security MPIN updated successfully! 🔒")
+                        dialog.dismiss()
+                        checkAdaptiveSessionState()
+                    }
+                }
             }
         }
     }

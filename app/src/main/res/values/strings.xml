@@ -120,6 +120,9 @@
     <string name="yes">Yes</string>
     <string name="no">No</string>
 
+    <string name="mpin_reset_dialog_msg">Set up a fresh, private 4-digit secure MPIN to instantly unlock and authorize future app sessions without password.</string>
+    <string name="error_duplicate_mpin">New MPIN cannot be the same as your previous MPIN.</string>
+
     <string name="policy_btn_text">I Understand</string>
     <string name="policy_title_tnc">Terms &amp; Conditions</string>
 

@@ -27,7 +27,7 @@ class MpinBottomSheet(
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setStyle(STYLE_NORMAL, R.style.GlassBottomSheetDialogTheme)
+        setStyle(STYLE_NORMAL, R.style.BottomSheetDialogTheme)
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {

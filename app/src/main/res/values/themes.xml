@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources xmlns:tools="http://schemas.android.com/tools">
+<resources>
 
     <style name="Theme.NursingStudio" parent="Theme.Material3.Light.NoActionBar">
         <item name="colorPrimary">@color/brand_blue</item>
@@ -51,6 +51,7 @@
         <item name="cursorColor">@color/brand_blue</item>
         <item name="passwordToggleTint">@color/text_secondary</item>
         <item name="hintTextColor">@color/brand_blue</item>
+
         <item name="shapeAppearanceOverlay">@style/ShapeAppearanceOverlay.App.Card.Rounded</item>
     </style>
 
@@ -140,14 +141,5 @@
         <item name="cornerSize">50%</item>
     </style>
 
-    <style name="GlassBottomSheetDialogTheme" parent="Theme.Design.Light.BottomSheetDialog">
-        <item name="bottomSheetStyle">@style/GlassBottomSheetStyle</item>
-        <item name="android:windowIsFloating">false</item>
-        <item name="android:windowSoftInputMode">adjustResize</item>
-    </style>
-
-    <style name="GlassBottomSheetStyle" parent="Widget.Design.BottomSheet.Modal">
-        <item name="android:background">@android:color/transparent</item>
-    </style>
 
 </resources>

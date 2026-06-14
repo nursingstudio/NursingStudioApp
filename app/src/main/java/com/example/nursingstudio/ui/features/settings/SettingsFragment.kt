@@ -214,7 +214,7 @@ class SettingsFragment : Fragment() {
         // 🚀 2026 Human-Centric Microcopy Integration
         val dialog = MaterialAlertDialogBuilder(requireContext(), R.style.MaterialAlertDialog_Rounded)
             .setTitle("Set Secure MPIN")
-            .setMessage("Create a 4-digit security MPIN to protect your account. This acts as your secure master key to unlock the app and manage your biometric settings instantly.")
+            .setMessage("Create a 4-digit secure MPIN to manage your biometric settings & Instant Login without password.")
             .setView(containerFrame)
             .setCancelable(false)
             .setPositiveButton("Save MPIN", null)
