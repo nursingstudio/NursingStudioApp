@@ -69,6 +69,14 @@ class SettingsFragment : Fragment() {
 
         syncSecuritySwitchStates()
 
+        // 🚀 2026 UI Architecture: Bind dynamic premium push response feedback loops globally on all action targets
+        AppSettings.setPushEffect(binding.btnRateApp)
+        AppSettings.setPushEffect(binding.btnWhatsappSupport)
+        AppSettings.setPushEffect(binding.btnPrivacyPolicy)
+        AppSettings.setPushEffect(binding.btnTerms)
+        AppSettings.setPushEffect(binding.btnDisclaimer)
+        AppSettings.setPushEffect(binding.btnAbout)
+
         binding.switchNotifications.setOnCheckedChangeListener { _, isChecked -> sp.edit { putBoolean(KEY_NOTIFICATIONS, isChecked) } }
         binding.switchQuizSound.setOnCheckedChangeListener { _, isChecked -> sp.edit { putBoolean(KEY_QUIZ_SOUND, isChecked) } }
         binding.switchMotivation.setOnCheckedChangeListener { _, isChecked -> sp.edit { putBoolean(KEY_MOTIVATION, isChecked) } }
@@ -130,7 +138,7 @@ class SettingsFragment : Fragment() {
                     bioManager.clearSecurityHardwareSettings()
                     dataStoreManager.saveMpinStatus(false)
                     syncSecuritySwitchStates()
-                    toast("Secure MPIN & Hardware Tokens Cleared")
+                    toast("Secure MPIN & Biometric Credentials Cleared")
                 }
             }
         }
@@ -174,12 +182,14 @@ class SettingsFragment : Fragment() {
         // 🚀 2026 Gold Standard Layout Container for perfect margin encapsulation inside Material Dialog
         val containerFrame = android.widget.FrameLayout(requireContext()).apply {
             val paddingPx = (24 * resources.displayMetrics.density).toInt()
-            setPadding(paddingPx, (8 * resources.displayMetrics.density).toInt(), paddingPx, 0)
+            setPadding(paddingPx, (12 * resources.displayMetrics.density).toInt(), paddingPx, 0)
+            layoutParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
         }
 
+        // 🚀 FIXED: Pointed ContextThemeWrapper directly to your enterprise custom global style layer
         val styledContext = android.view.ContextThemeWrapper(
             requireContext(),
-            com.google.android.material.R.style.Widget_Material3_TextInputLayout_OutlinedBox
+            R.style.Widget_Material3_TextInputLayout_OutlinedBox_CustomGlobal
         )
 
         val textInputLayout = com.google.android.material.textfield.TextInputLayout(
@@ -187,14 +197,11 @@ class SettingsFragment : Fragment() {
             null,
             com.google.android.material.R.attr.textInputStyle
         ).apply {
-            boxStrokeColor = androidx.core.content.ContextCompat.getColor(requireContext(), R.color.brand_blue)
-            hintTextColor = android.content.res.ColorStateList.valueOf(
-                androidx.core.content.ContextCompat.getColor(requireContext(), R.color.brand_blue)
+            layoutParams = android.widget.FrameLayout.LayoutParams(
+                android.widget.FrameLayout.LayoutParams.MATCH_PARENT,
+                android.widget.FrameLayout.LayoutParams.WRAP_CONTENT
             )
-            setBoxCornerRadii(
-                (12 * resources.displayMetrics.density), (12 * resources.displayMetrics.density),
-                (12 * resources.displayMetrics.density), (12 * resources.displayMetrics.density)
-            )
+            // Let the centralized theme manage borders, cursors, and drop colors dynamically
             endIconMode = com.google.android.material.textfield.TextInputLayout.END_ICON_PASSWORD_TOGGLE
         }
 
@@ -208,16 +215,26 @@ class SettingsFragment : Fragment() {
             setTextColor(androidx.core.content.ContextCompat.getColor(requireContext(), R.color.text_primary))
         }
 
+        // 🚀 FIXED: Dynamic reactive TextWatcher framework to instantly drop error layouts the second user inputs data
+        etMpin.addTextChangedListener(object : android.text.TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                textInputLayout.error = null
+                textInputLayout.isErrorEnabled = false
+            }
+            override fun afterTextChanged(s: android.text.Editable?) {}
+        })
+
         textInputLayout.addView(etMpin)
         containerFrame.addView(textInputLayout)
 
-        // 🚀 2026 Human-Centric Microcopy Integration
+        // 🚀 2026 Human-Centric Premium Dialog Interface
         val dialog = MaterialAlertDialogBuilder(requireContext(), R.style.MaterialAlertDialog_Rounded)
             .setTitle("Set Secure MPIN")
             .setMessage("Create a 4-digit secure MPIN to manage your biometric settings & Instant Login without password.")
             .setView(containerFrame)
             .setCancelable(false)
-            .setPositiveButton("Save MPIN", null)
+            .setPositiveButton("Save MPIN", null) // Set to null here to intercept click event overrides later
             .setNegativeButton("Cancel") { _, _ ->
                 syncSecuritySwitchStates()
             }
@@ -225,10 +242,17 @@ class SettingsFragment : Fragment() {
 
         dialog.show()
 
+        // Sync dialog width metrics horizontally to fit device view matrix perfectly
+        val metricsWidth = (resources.displayMetrics.widthPixels * 0.92).toInt()
+        dialog.window?.setLayout(metricsWidth, ViewGroup.LayoutParams.WRAP_CONTENT)
+
+        // Intercept positive action click events to prevent manual verification dialog dismiss leaks
         dialog.getButton(android.content.DialogInterface.BUTTON_POSITIVE).setOnClickListener {
             val mpin = etMpin.text.toString().trim()
+
             if (mpin.length == 4) {
                 textInputLayout.error = null
+                textInputLayout.isErrorEnabled = false
                 viewLifecycleOwner.lifecycleScope.launch {
                     bioManager.saveMPIN(mpin)
                     dataStoreManager.saveMpinStatus(true)
@@ -237,7 +261,10 @@ class SettingsFragment : Fragment() {
                     toast("Secure MPIN saved successfully! 🔒")
                 }
             } else {
+                // 🚀 FIXED: Triggers high-fidelity haptic errors using global centralized AppSettings rule engine
+                textInputLayout.isErrorEnabled = true
                 textInputLayout.error = "MPIN requires exactly 4 digits."
+                AppSettings.triggerErrorEffect(requireContext(), textInputLayout)
             }
         }
     }
