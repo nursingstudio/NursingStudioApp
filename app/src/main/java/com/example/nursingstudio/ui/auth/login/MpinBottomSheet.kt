@@ -42,6 +42,9 @@ class MpinBottomSheet(
         initializeNumericButtonsList()
         shuffleAndPopulateKeypad()
         setupKeypadControllers()
+
+        AppSettings.setPushEffect(binding.btnForgotMpin)
+        AppSettings.setPushEffect(binding.btnUseBiometrics)
     }
 
     private fun setupGlassEffect() {

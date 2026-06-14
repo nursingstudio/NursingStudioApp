@@ -105,8 +105,8 @@ class SettingsFragment : Fragment() {
 
                 evaluateSecurityCascade {
                     biometricHelper.triggerAuthentication(
-                        title = "Confirm Identity",
-                        subtitle = "Authenticate using your registered biometric scanner.",
+                        title = "Confirm Your Identity",
+                        subtitle = "Authenticate using your registered biometrics.",
                         onSuccess = {
                             bioManager.setBiometricAuthActive(true)
                             syncSecuritySwitchStates()
@@ -138,7 +138,7 @@ class SettingsFragment : Fragment() {
                     bioManager.clearSecurityHardwareSettings()
                     dataStoreManager.saveMpinStatus(false)
                     syncSecuritySwitchStates()
-                    toast("Secure MPIN & Biometric Credentials Cleared")
+                    toast("Secure MPIN & Biometrics Disabled.")
                 }
             }
         }

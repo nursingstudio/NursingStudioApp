@@ -78,6 +78,8 @@ class ForgotPasswordBottomSheet : BottomSheetDialogFragment() {
             override fun afterTextChanged(s: android.text.Editable?) {}
         })
 
+        AppSettings.setPushEffect(binding.btnResetPassword)
+
         binding.btnResetPassword.setOnClickListener {
             val email = binding.etForgotEmail.text.toString().trim()
             handlePasswordResetFlow(email)
