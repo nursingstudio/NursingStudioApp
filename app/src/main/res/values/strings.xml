@@ -281,6 +281,15 @@
     <string name="submit_pin">Submit PIN</string>
     <string name="enable_secure_access">Enable Secure Access</string>
     <string name="enable_biometric_login">Enable Biometric Login</string>
+    <string name="free_account">Free Account</string>
+    <string name="label">Label</string>
+    <string name="value">Value</string>
+    <string name="share_this_app">Share this App</string>
+    <string name="quick_follow">Quick Follow</string>
+    <string name="our_social_media">Our Social Media</string>
+    <string name="my_subscription">My Subscription</string>
+    <string name="home">Home</string>
+    <string name="application_preferences">Application Preferences</string>
 
 
 </resources>

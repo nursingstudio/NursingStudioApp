@@ -1,28 +1,40 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:baselineAligned="false"
+    android:fitsSystemWindows="false"
+    android:gravity="center_vertical"
     android:orientation="horizontal"
-    android:paddingVertical="10dp">
+    android:paddingStart="16dp"
+    android:paddingTop="12dp"
+    android:paddingEnd="16dp"
+    android:paddingBottom="12dp"
+    tools:ignore="EdgeToEdge">
 
     <TextView
         android:id="@+id/tvLabel"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:text="Label"
-        android:textColor="#888888"
-        android:textSize="14sp" />
+        android:fontFamily="sans-serif"
+        android:text="@string/label"
+        android:textColor="@color/text_secondary"
+        android:textSize="14sp"
+        tools:ignore="EdgeToEdge" />
 
     <TextView
         android:id="@+id/tvValue"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_weight="1.5"
+        android:layout_weight="1.8"
+        android:fontFamily="sans-serif-medium"
         android:gravity="end"
-        android:text="Value"
-        android:textColor="#333333"
+        android:text="@string/value"
+        android:textColor="@color/brand_blue"
         android:textSize="15sp"
-        android:textStyle="bold" />
+        android:textStyle="bold"
+        tools:ignore="EdgeToEdge" />
 
 </LinearLayout>

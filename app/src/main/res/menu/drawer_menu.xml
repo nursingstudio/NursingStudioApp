@@ -1,28 +1,44 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <item
-        android:id="@+id/nav_subscription"
-        android:title="My Subscription" />
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/nav_subscription"
+            android:icon="@drawable/ic_workspace_premium"
+            android:title="@string/my_subscription" />
 
-    <item
-        android:id="@+id/nav_notice"
-        android:title="Notice Board" />
+        <item
+            android:id="@+id/nav_notice"
+            android:icon="@drawable/ic_campaign"
+            android:title="@string/notice_board" />
+    </group>
 
-    <item
-        android:id="@+id/nav_social_dialog"
-        android:title="Quick Follow" />
+    <item android:title="@string/our_social_media">
+        <menu>
+            <item
+                android:id="@+id/nav_social_dialog"
+                android:icon="@drawable/ic_group_add"
+                android:title="@string/quick_follow" />
 
-    <item
-        android:id="@+id/nav_social_fragment"
-        android:title="Our Social Media" />
+            <item
+                android:id="@+id/nav_social_fragment"
+                android:icon="@drawable/ic_public"
+                android:title="@string/our_social_media" />
+        </menu>
+    </item>
 
-    <item
-        android:id="@+id/nav_share"
-        android:title="Share this App" />
+    <item android:title="@string/application_preferences">
+        <menu>
+            <item
+                android:id="@+id/nav_share"
+                android:icon="@drawable/ic_share"
+                android:title="@string/share_this_app" />
 
-    <item
-        android:id="@+id/nav_settings"
-        android:title="Settings" />
+            <item
+                android:id="@+id/nav_settings"
+                android:icon="@drawable/ic_settings"
+                android:title="@string/settings" />
+        </menu>
+    </item>
 
 </menu>

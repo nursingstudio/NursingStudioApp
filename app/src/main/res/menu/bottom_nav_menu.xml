@@ -1,29 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android">
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
         android:id="@+id/nav_home"
         android:icon="@drawable/ic_home_24"
-        android:title="Home" />
+        android:title="@string/home"
+        app:showAsAction="ifRoom" />
 
     <item
         android:id="@+id/nav_quiz"
         android:icon="@drawable/ic_test_series_24"
-        android:title="Test Series" />
+        android:title="@string/test_series"
+        app:showAsAction="ifRoom" />
 
     <item
         android:id="@+id/nav_pdf"
         android:icon="@drawable/ic_pdf_24"
-        android:title="PDFs" />
+        android:title="@string/pdfs"
+        app:showAsAction="ifRoom" />
 
     <item
         android:id="@+id/nav_video"
         android:icon="@drawable/ic_video_24"
-        android:title="Videos" />
+        android:title="@string/videos"
+        app:showAsAction="ifRoom" />
 
     <item
         android:id="@+id/nav_profile"
         android:icon="@drawable/ic_person_24"
-        android:title="@string/title_profile" />
+        android:title="@string/title_profile"
+        app:showAsAction="ifRoom" />
 
 </menu>
