@@ -290,6 +290,7 @@
     <string name="my_subscription">My Subscription</string>
     <string name="home">Home</string>
     <string name="application_preferences">Application Preferences</string>
+    <string name="use_secure_method_to_unlock_application_session">Use secure method to unlock application session</string>
 
 
 </resources>

@@ -175,26 +175,57 @@ class MainActivity : BaseActivity() { // ✅ ⭐ 2026 GOLD STANDARD: Extends Bas
         sp.edit { putInt(key, sp.getInt(key, 0) + 1) }
     }
 
+    // 🚀 2026 Enterprise Gold-Standard Stream Synchronizer Engine Pipeline
     private fun observeUserData() {
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
+                // Channel 1: Real-time Profile Identity Ingestion Layer
                 launch {
                     dataStoreManager.userName.collect { name ->
-                        headerBinding.tvHeaderName.text = name ?: "Scholar"
+                        headerBinding.tvHeaderName.text = if (!name.isNullOrBlank()) name else "Scholar"
                     }
                 }
+
+                // Channel 2: Communications Payload Telemetry Sync
                 launch {
                     dataStoreManager.userMobile.collect { mobile ->
-                        headerBinding.tvHeaderMobile.text = mobile ?: ""
+                        headerBinding.tvHeaderMobile.text = if (!mobile.isNullOrBlank()) mobile else "No Mobile Linked"
                     }
                 }
+
+                // Channel 3: Modern Image Fallback Pipeline Engine
+               /* launch {
+                    // Assuming dataStoreManager exposes your uploaded profile image URI string path channel
+                    dataStoreManager.userProfileUri?.collect { profileUriString ->
+                        if (!profileUriString.isNullOrBlank()) {
+                            headerBinding.imgHeaderProfile.setImageURI(profileUriString.toUri())
+                        } else {
+                            // 🚀 FIXED: Fallback immediately to official application workspace branding logo token
+                            headerBinding.imgHeaderProfile.setImageResource(R.drawable.ic_login_logo)
+                        }
+                    }
+                } */
+
+                // Channel 4: Architectural Subscriptions Status Multi-State Evaluation
+                // Channel 4: Architectural Subscriptions Status Multi-State Evaluation
                 launch {
                     dataStoreManager.subscriptionType.collect { type ->
-                        headerBinding.tvDrawerSubscription.text = getString(R.string.plan, type)
-                        headerBinding.tvDrawerSubscription.setTextColor(
-                            if (type == "Premium") getColor(R.color.brand_saffron)
-                            else getColor(android.R.color.white)
-                        )
+                        val processType = type.ifBlank { "Free" }
+
+                        // Direct explicit text assignments mapping
+                        headerBinding.tvDrawerSubscription.text = processType.uppercase(java.util.Locale.ROOT)
+
+                        // 🚀 FIXED: Dynamic Vector Background Tinting Engine
+                        // Instead of targeting non-existent parent card frames, we dynamically mutate
+                        // the direct TextView background and text color tokens, eliminating all contrast trap risks.
+                        if (processType == "Premium") {
+                            headerBinding.tvDrawerSubscription.backgroundTintList = getColorStateList(R.color.saffron_light)
+                            headerBinding.tvDrawerSubscription.setTextColor(getColor(R.color.brand_saffron_dark))
+                        } else {
+                            // High contrast configuration mapping for standard fallback account plans
+                            headerBinding.tvDrawerSubscription.backgroundTintList = getColorStateList(android.R.color.darker_gray)
+                            headerBinding.tvDrawerSubscription.setTextColor(getColor(android.R.color.white))
+                        }
                     }
                 }
             }

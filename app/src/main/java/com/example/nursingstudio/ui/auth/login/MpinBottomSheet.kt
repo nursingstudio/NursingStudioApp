@@ -142,13 +142,23 @@ class MpinBottomSheet(
         }
 
         binding.btnUseBiometrics.setOnClickListener {
-            dismiss()
-            onBiometricRequest()
+            // 🚀 FIXED: Clean dismiss sequence without breaking lifecycle communication pipelines
+            if (isAdded && !isStateSaved) {
+                dismissAllowingStateLoss()
+                // Delayed callback routing ensures the layout host fragment view re-gains window focus safely
+                binding.root.postDelayed({
+                    onBiometricRequest.invoke()
+                }, 150)
+            }
         }
 
         binding.btnForgotMpin.setOnClickListener {
-            dismiss()
-            onForgotMpinRequested.invoke()
+            if (isAdded && !isStateSaved) {
+                dismissAllowingStateLoss()
+                binding.root.postDelayed({
+                    onForgotMpinRequested.invoke()
+                }, 150)
+            }
         }
     }
 

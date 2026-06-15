@@ -108,29 +108,59 @@ class LoginFragment : Fragment() {
         AppSettings.setPushEffect(binding.btnLoginAction)
     }
 
+    // 🚀 2026 Gold-Standard Deterministic Session Engine Split
     private fun checkAdaptiveSessionState() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 if (isAdaptiveUiOverridden) return@repeatOnLifecycle
 
+                // CRITICAL FIXED: Prevent sheets inflation stack blast if any sheet fragment is currently attached or open
+                if (isAnyBottomSheetVisible()) return@repeatOnLifecycle
+
                 val isMpinConfigured = dataStoreManager.isMpinSet.firstOrNull() ?: false
                 val cachedName = dataStoreManager.userName.firstOrNull() ?: "User"
 
                 if (isMpinConfigured) {
+                    // Switch interface configuration structure seamlessly
                     binding.layoutDefaultForm.visibility = View.GONE
                     binding.layoutAdaptiveMpinForm.visibility = View.VISIBLE
                     binding.tvWelcomeUser.text = getString(R.string.welcome_back, cachedName)
 
-                    if (bioSettingsManager.isBiometricAuthActive() &&
-                        biometricHelper.checkBiometricAvailability() == BiometricManager.BIOMETRIC_SUCCESS) {
-                        showBiometricPrompt()
+                    // 🚀 FIXED: STOPPED AUTOMATIC POPUP ACCIDENTAL LOOPS.
+                    // Instead of force prompting raw system sheets, we cleanly set up the buttons UI visibility triggers,
+                    // allowing the user absolute freedom of option sequence selection as per 2026 UI standards.
+                    val isBiometricActive = bioSettingsManager.isBiometricAuthActive() &&
+                            biometricHelper.checkBiometricAvailability() == BiometricManager.BIOMETRIC_SUCCESS
+
+                    // Dynamically alter layout button properties based on biometric registration status mapping
+                    binding.btnFingerprintTrigger.isVisible = isBiometricActive
+                    binding.btnFaceUnlockTrigger.isVisible = isBiometricActive
+
+                    // Informative subtitle logic configuration binding
+                    binding.tvMpinSubtitlePrompt.text = if (isBiometricActive) {
+                        "Choose your secure method below to proceed"
+                    } else {
+                        "Use secure 4-Digit MPIN to proceed"
                     }
+
                 } else {
+                    // User has no custom keys configured - Fallback directly to email form layout structures
                     binding.layoutDefaultForm.visibility = View.VISIBLE
                     binding.layoutAdaptiveMpinForm.visibility = View.GONE
                 }
             }
         }
+    }
+
+    // 🚀 FIXED: Global Fragment Stack Interceptor mapping to prevent background lifecycle duplicate sheets explosion
+    private fun isAnyBottomSheetVisible(): Boolean {
+        val forgotSheet = childFragmentManager.findFragmentByTag("ForgotPasswordSheet")
+        val mpinSheet = childFragmentManager.findFragmentByTag("MpinSheet")
+        val forgotMpin = childFragmentManager.findFragmentByTag("ForgotMpinBottomSheet")
+
+        return (forgotSheet != null && forgotSheet.isAdded) ||
+                (mpinSheet != null && mpinSheet.isAdded) ||
+                (forgotMpin != null && forgotMpin.isAdded)
     }
 
     private fun isUserLocked(email: String): Boolean {
@@ -476,15 +506,17 @@ class LoginFragment : Fragment() {
         binding.tilPassword.isErrorEnabled = false
     }
 
+    // 🚀 FIXED: Restructured Sheet launchers bounded behind safe single-instance tag check validation bounds
     private fun showForgotPasswordSheet() {
+        if (isAnyBottomSheetVisible()) return
         val bottomSheet = ForgotPasswordBottomSheet()
         bottomSheet.show(childFragmentManager, "ForgotPasswordSheet")
     }
 
     private fun showBiometricPrompt() {
         biometricHelper.triggerAuthentication(
-            title = "Secure Biometric Login",
-            subtitle = "Scan Fingerprint or Face for Secure Login.",
+            title = "Secure Biometrics Login",
+            subtitle = "Scan Fingerprint or use Face ID for Secure Login.",
             onSuccess = { _ ->
                 val savedEmail = bioSettingsManager.getSavedEmail()
                 val savedPassword = bioSettingsManager.getSavedPass()
@@ -502,6 +534,7 @@ class LoginFragment : Fragment() {
     }
 
     private fun showMpinBottomSheet() {
+        if (isAnyBottomSheetVisible()) return
         val mpinSheet = MpinBottomSheet(
             onMpinSuccess = { email, pass ->
                 if (!email.isNullOrEmpty() && !pass.isNullOrEmpty()) {
@@ -511,6 +544,7 @@ class LoginFragment : Fragment() {
                 }
             },
             onBiometricRequest = {
+                // Manual explicit user redirect interaction channel
                 showBiometricPrompt()
             },
             onForgotMpinRequested = {
@@ -518,7 +552,6 @@ class LoginFragment : Fragment() {
                 val forgotSheet = ForgotMpinBottomSheet(
                     runtimePasswordFallback = currentInputtedPass,
                     onResetVerified = {
-                        // 🚀 FIXED: Routed the verification stream back to the global material dialog pipeline
                         showLocalMpinSetupDialog()
                     }
                 )
