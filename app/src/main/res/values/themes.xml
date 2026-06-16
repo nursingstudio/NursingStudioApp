@@ -141,5 +141,30 @@
         <item name="cornerSize">50%</item>
     </style>
 
+    <!-- 🚀 GOLD STANDARD FIX: Inheriting from Material3 TextAppearance explicitly to bypass AAPT linkage crashes -->
+    <style name="Widget.App.TextView.SettingsCategoryHeader" parent="android:Widget.TextView">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginTop">16dp</item>
+        <item name="android:layout_marginBottom">6dp</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:letterSpacing">0.04</item>
+    </style>
+
+    <style name="Widget.App.SettingsRowContainer" parent="">
+        <item name="android:paddingHorizontal">16dp</item>
+        <item name="android:paddingVertical">14dp</item>
+        <item name="android:minHeight">56dp</item>
+        <item name="android:gravity">center_vertical</item>
+    </style>
+
+    <style name="Widget.App.ActionRowRippleStyle" parent="">
+        <item name="android:clickable">true</item>
+        <item name="android:focusable">true</item>
+        <item name="android:background">?android:attr/selectableItemBackground</item>
+    </style>
+
 
 </resources>
