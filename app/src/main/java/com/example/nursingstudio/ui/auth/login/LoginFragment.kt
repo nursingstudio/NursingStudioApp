@@ -106,6 +106,10 @@ class LoginFragment : Fragment() {
         binding.tvAppTagline.alpha = 0f
         binding.tvAppTagline.animate().alpha(0.85f).setDuration(1000).start()
         AppSettings.setPushEffect(binding.btnLoginAction)
+
+        // 🚀 2026 UX Standard: Push-down feedback layer mapped across brand secure methods card buttons
+        AppSettings.setPushEffect(binding.btnMpinBoxTrigger)
+        AppSettings.setPushEffect(binding.btnBiometricBoxTrigger)
     }
 
     // 🚀 2026 Gold-Standard Deterministic Session Engine Split
@@ -133,8 +137,7 @@ class LoginFragment : Fragment() {
                             biometricHelper.checkBiometricAvailability() == BiometricManager.BIOMETRIC_SUCCESS
 
                     // Dynamically alter layout button properties based on biometric registration status mapping
-                    binding.btnFingerprintTrigger.isVisible = isBiometricActive
-                    binding.btnFaceUnlockTrigger.isVisible = isBiometricActive
+                    binding.btnBiometricBoxTrigger.isVisible = isBiometricActive
 
                     // Informative subtitle logic configuration binding
                     binding.tvMpinSubtitlePrompt.text = if (isBiometricActive) {
@@ -326,9 +329,16 @@ class LoginFragment : Fragment() {
             forgotMpinSheet.show(childFragmentManager, "ForgotMpinBottomSheet")
         }
 
-        binding.btnFingerprintTrigger.setOnClickListener { showBiometricPrompt() }
-        binding.btnFaceUnlockTrigger.setOnClickListener { showBiometricPrompt() }
-        binding.layoutActiveDots.setOnClickListener { showMpinBottomSheet() }
+        // 🚀 2026 INDUSTRY GOLD STANDARD: Modernized Symmetric Box Keypad Integration Channels
+        binding.btnMpinBoxTrigger.setOnClickListener {
+            AppSettings.triggerVibration(requireContext(), 25)
+            showMpinBottomSheet()
+        }
+
+        binding.btnBiometricBoxTrigger.setOnClickListener {
+            AppSettings.triggerVibration(requireContext(), 25)
+            showBiometricPrompt()
+        }
     }
 
     private fun showLocalMpinSetupDialog() {

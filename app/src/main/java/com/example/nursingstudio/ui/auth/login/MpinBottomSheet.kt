@@ -141,23 +141,33 @@ class MpinBottomSheet(
             }
         }
 
+        // 🚀 CRITICAL FIX: Inverted execution pipeline order to resolve Asynchronous Lifecycle Race Condition.
+        // Callback routines are invoked BEFORE component dismissal to ensure context reference safety.
         binding.btnUseBiometrics.setOnClickListener {
-            // 🚀 FIXED: Clean dismiss sequence without breaking lifecycle communication pipelines
-            if (isAdded && !isStateSaved) {
-                dismissAllowingStateLoss()
-                // Delayed callback routing ensures the layout host fragment view re-gains window focus safely
-                binding.root.postDelayed({
-                    onBiometricRequest.invoke()
-                }, 150)
+            if (isAdded) {
+                // Step 1: Capture the function reference and safely invoke on host context
+                onBiometricRequest.invoke()
+
+                // Step 2: Post the structural dismiss event to the main loop safely
+                binding.root.post {
+                    if (isAdded && !isStateSaved) {
+                        dismissAllowingStateLoss()
+                    }
+                }
             }
         }
 
         binding.btnForgotMpin.setOnClickListener {
-            if (isAdded && !isStateSaved) {
-                dismissAllowingStateLoss()
-                binding.root.postDelayed({
-                    onForgotMpinRequested.invoke()
-                }, 150)
+            if (isAdded) {
+                // Step 1: Trigger external route execution before context detachment
+                onForgotMpinRequested.invoke()
+
+                // Step 2: Smooth cleanup execution sequence without losing asynchronous focus
+                binding.root.post {
+                    if (isAdded && !isStateSaved) {
+                        dismissAllowingStateLoss()
+                    }
+                }
             }
         }
     }
