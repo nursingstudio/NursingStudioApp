@@ -304,6 +304,26 @@
     <string name="youtube_icon">Youtube Icon</string>
     <string name="youtube_preview_showcase">YouTube Preview Showcase</string>
     <string name="whatsapp_stream_preview">WhatsApp Stream Preview</string>
+    <string name="enable_notifications_for_alerts">Please enable notifications for alerts. 🔔</string>
+    <string name="use_secure_4_digit_mpin_to_proceed">Use secure 4-Digit MPIN to proceed</string>
+    <string name="no_profile_found">No profile found. Redirecting to Register…</string>
+    <string name="yt_channel_handle">https://youtube.com/@NursingStudio2026</string>
+    <string name="wa_channel_handle">https://whatsapp.com/channel/0029Vb6Sjdq6BIEapKtNUE2L</string>
+    <string name="enter_new_mpin">Enter New 4-Digit MPIN</string>
+    <string name="reset_secure_mpin">Reset Secure MPIN</string>
+    <string name="save_mpin">Save MPIN</string>
+    <string name="cancel">Cancel</string>
+    <string name="mpin_requires_exactly_4_digits">MPIN requires exactly 4 digits</string>
+    <string name="secure_mpin_updated_successfully">Secure MPIN updated successfully! 🔒</string>
+    <string name="secure_biometrics_login">Secure Biometrics Login</string>
+    <string name="scan_fingerprint_for_secure_login">Scan Fingerprint or use Face ID for Secure Login.</string>
+    <string name="nursing_registered_yes">Yes ✅</string>
+    <string name="nursing_registered_no">No ❌</string>
+    <string name="verified">Verified ✅</string>
+    <string name="not_verified">Not Verified ❌</string>
+    <string name="verify_now">Verify Now</string>
+    <string name="premium">PREMIUM</string>
+    <string name="free">FREE</string>
 
 
 </resources>

@@ -218,13 +218,15 @@ class MainActivity : BaseActivity() { // ✅ ⭐ 2026 GOLD STANDARD: Extends Bas
                         // 🚀 FIXED: Dynamic Vector Background Tinting Engine
                         // Instead of targeting non-existent parent card frames, we dynamically mutate
                         // the direct TextView background and text color tokens, eliminating all contrast trap risks.
-                        if (processType == "Premium") {
-                            headerBinding.tvDrawerSubscription.backgroundTintList = getColorStateList(R.color.saffron_light)
+                        // 🚀 2026 GOLD STANDARD: Dynamic Stroke & Text Synergy Mapping Engine
+                        if (processType.equals("Premium", ignoreCase = true)) {
+                            headerBinding.tvDrawerSubscription.text = getString(R.string.premium)
+                            headerBinding.tvDrawerSubscription.backgroundTintList = getColorStateList(R.color.brand_saffron_dark)
                             headerBinding.tvDrawerSubscription.setTextColor(getColor(R.color.brand_saffron_dark))
                         } else {
-                            // High contrast configuration mapping for standard fallback account plans
-                            headerBinding.tvDrawerSubscription.backgroundTintList = getColorStateList(android.R.color.darker_gray)
-                            headerBinding.tvDrawerSubscription.setTextColor(getColor(android.R.color.white))
+                            headerBinding.tvDrawerSubscription.text = getString(R.string.free)
+                            headerBinding.tvDrawerSubscription.backgroundTintList = getColorStateList(R.color.brand_blue)
+                            headerBinding.tvDrawerSubscription.setTextColor(getColor(R.color.brand_blue))
                         }
                     }
                 }

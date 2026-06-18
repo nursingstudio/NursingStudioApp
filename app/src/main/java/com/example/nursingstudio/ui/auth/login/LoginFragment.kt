@@ -65,7 +65,7 @@ class LoginFragment : Fragment() {
         androidx.activity.result.contract.ActivityResultContracts.RequestPermission()
     ) { isGranted ->
         if (!isGranted) {
-            toast("Please enable notifications for alerts 🔔")
+            toast(getString(R.string.enable_notifications_for_alerts))
         }
     }
 
@@ -144,9 +144,9 @@ class LoginFragment : Fragment() {
 
                     // Informative subtitle logic configuration binding
                     binding.tvMpinSubtitlePrompt.text = if (isBiometricActive) {
-                        "Choose your secure method below to proceed"
+                        getString(R.string.choose_your_secure_method_below_to_proceed)
                     } else {
-                        "Use secure 4-Digit MPIN to proceed"
+                        getString(R.string.use_secure_4_digit_mpin_to_proceed)
                     }
 
                 } else {
@@ -249,7 +249,7 @@ class LoginFragment : Fragment() {
                             proceedToHome()
                         }
                         is LoginViewModel.LoginState.NoProfile -> {
-                            toast("No profile found. Redirecting to Register...")
+                            toast(getString(R.string.no_profile_found))
                             binding.root.postDelayed({
                                 if (isAdded) (activity as? AuthActivity)?.showRegister()
                             }, 1000)
@@ -358,7 +358,7 @@ class LoginFragment : Fragment() {
             AppSettings.triggerVibration(requireContext(), 20)
             val intent = Intent(
                 Intent.ACTION_VIEW,
-                "https://youtube.com/@NursingStudio2026".toUri())
+                getString(R.string.yt_channel_handle).toUri())
             startActivity(intent)
         }
 
@@ -366,7 +366,7 @@ class LoginFragment : Fragment() {
             AppSettings.triggerVibration(requireContext(), 20)
             val intent = Intent(
                 Intent.ACTION_VIEW,
-                "https://whatsapp.com/channel/0029Vb6Sjdq6BIEapKtNUE2L".toUri())
+                getString(R.string.wa_channel_handle).toUri())
             startActivity(intent)
         }
 
@@ -416,7 +416,7 @@ class LoginFragment : Fragment() {
             inputType = InputType.TYPE_CLASS_NUMBER
             transformationMethod = PasswordTransformationMethod.getInstance()
             filters = arrayOf(InputFilter.LengthFilter(4))
-            hint = "Enter New 4-Digit MPIN"
+            hint = getString(R.string.enter_new_mpin)
             textSize = 16f
             textAlignment = View.TEXT_ALIGNMENT_CENTER
         }
@@ -436,12 +436,12 @@ class LoginFragment : Fragment() {
 
         // 🚀 2026 Human-Centric Master Alert Dialog Configuration System
         val dialog = MaterialAlertDialogBuilder(requireContext(), R.style.MaterialAlertDialog_Rounded)
-            .setTitle("Reset Secure MPIN")
+            .setTitle(getString(R.string.reset_secure_mpin))
             .setMessage(getString(R.string.mpin_reset_dialog_msg))
             .setView(containerFrame)
             .setCancelable(false)
-            .setPositiveButton("Save MPIN", null)
-            .setNegativeButton("Cancel", null)
+            .setPositiveButton(getString(R.string.save_mpin), null)
+            .setNegativeButton(getString(R.string.cancel), null)
             .create()
 
         dialog.show()
@@ -459,7 +459,7 @@ class LoginFragment : Fragment() {
             when {
                 mpin.length != 4 -> {
                     textInputLayout.isErrorEnabled = true
-                    textInputLayout.error = "MPIN requires exactly 4 digits"
+                    textInputLayout.error = getString(R.string.mpin_requires_exactly_4_digits)
                     // Globally verified enterprise security feedback trigger
                     AppSettings.triggerErrorEffect(requireContext(), textInputLayout)
                 }
@@ -473,7 +473,7 @@ class LoginFragment : Fragment() {
                     viewLifecycleOwner.lifecycleScope.launch {
                         bioSettingsManager.saveMPIN(mpin)
                         dataStoreManager.saveMpinStatus(true)
-                        toast("Security MPIN updated successfully! 🔒")
+                        toast(getString(R.string.secure_mpin_updated_successfully))
                         dialog.dismiss()
                         checkAdaptiveSessionState()
                     }
@@ -567,8 +567,8 @@ class LoginFragment : Fragment() {
 
     private fun showBiometricPrompt() {
         biometricHelper.triggerAuthentication(
-            title = "Secure Biometrics Login",
-            subtitle = "Scan Fingerprint or use Face ID for Secure Login.",
+            title = getString(R.string.secure_biometrics_login),
+            subtitle = getString(R.string.scan_fingerprint_for_secure_login),
             onSuccess = { _ ->
                 val savedEmail = bioSettingsManager.getSavedEmail()
                 val savedPassword = bioSettingsManager.getSavedPass()
