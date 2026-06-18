@@ -22,4 +22,7 @@
     <color name="black">#000000</color>
     <color name="overlay_black">#B3000000</color>
     <color name="progress_track">#E2E8F0</color>
+
+    <color name="brand_youtube_red">#FF0000</color>
+    <color name="brand_whatsapp_green">#25D366</color>
 </resources>

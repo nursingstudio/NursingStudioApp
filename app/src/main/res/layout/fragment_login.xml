@@ -10,14 +10,13 @@
         android:id="@+id/imgLogo"
         android:layout_width="140dp"
         android:layout_height="140dp"
-        android:layout_marginTop="70dp"
+        android:layout_marginTop="40dp"
         android:contentDescription="@string/nursing_studio_logo"
         android:scaleType="centerInside"
         android:src="@drawable/ic_login_logo"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:ignore="ImageContrastCheck" />
+        app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
         android:id="@+id/tvAppTitle"
@@ -53,7 +52,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="24dp"
-        android:layout_marginTop="28dp"
+        android:layout_marginTop="20dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/tvAppTagline">
@@ -61,13 +60,13 @@
         <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:padding="24dp">
+            android:padding="20dp">
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/layoutDefaultForm"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:visibility="visible">
+                android:visibility="gone">
 
                 <com.google.android.material.textfield.TextInputLayout
                     android:id="@+id/tilEmail"
@@ -75,16 +74,13 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:hint="@string/hint_email"
-                    app:errorEnabled="false"
                     app:startIconDrawable="@drawable/ic_email"
                     app:layout_constraintTop_toTopOf="parent">
-
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/etEmail"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:inputType="textEmailAddress"
-                        tools:ignore="TextContrastCheck" />
+                        android:inputType="textEmailAddress" />
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <com.google.android.material.textfield.TextInputLayout
@@ -94,11 +90,9 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="16dp"
                     android:hint="@string/hint_password"
-                    app:errorEnabled="false"
                     app:passwordToggleEnabled="true"
                     app:startIconDrawable="@drawable/ic_lock"
                     app:layout_constraintTop_toBottomOf="@id/tilEmail">
-
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/etPassword"
                         android:layout_width="match_parent"
@@ -111,7 +105,7 @@
                     style="@style/Widget.Material3.Button"
                     android:layout_width="match_parent"
                     android:layout_height="56dp"
-                    android:layout_marginTop="24dp"
+                    android:layout_marginTop="20dp"
                     android:text="@string/btn_login"
                     android:textSize="16sp"
                     android:textStyle="bold"
@@ -121,26 +115,21 @@
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp"
-                    app:layout_constraintBottom_toBottomOf="parent"
+                    android:layout_marginTop="14dp"
                     app:layout_constraintTop_toBottomOf="@id/btnLoginAction">
-
                     <TextView
                         android:id="@+id/tvForgotPassword"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:padding="4dp"
                         android:text="@string/label_forgot_password"
                         android:textColor="@color/brand_saffron_dark"
                         android:textStyle="bold"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent" />
-
                     <TextView
                         android:id="@+id/tvGoRegister"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:padding="4dp"
                         android:text="@string/label_go_register"
                         android:textColor="@color/text_secondary"
                         android:textStyle="bold"
@@ -153,20 +142,19 @@
                 android:id="@+id/layoutAdaptiveMpinForm"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:visibility="gone"
-                tools:visibility="visible">
+                android:visibility="visible">
 
                 <TextView
                     android:id="@+id/tvWelcomeUser"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/welcome_back_user"
                     android:textColor="@color/brand_blue"
                     android:textSize="18sp"
                     android:textStyle="bold"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
+                    app:layout_constraintTop_toTopOf="parent"
+                    tools:text="@string/welcome_back_user" />
 
                 <TextView
                     android:id="@+id/tvMpinSubtitlePrompt"
@@ -175,78 +163,46 @@
                     android:layout_marginTop="6dp"
                     android:layout_marginHorizontal="16dp"
                     android:gravity="center"
-                    android:fontFamily="sans-serif"
                     android:alpha="0.80"
-                    android:text="@string/choose_your_secure_method_below_to_proceed"
                     android:textColor="@color/brand_saffron_dark"
                     android:textSize="13sp"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/tvWelcomeUser" />
+                    app:layout_constraintTop_toBottomOf="@id/tvWelcomeUser"
+                    tools:text="@string/choose_your_secure_method_below_to_proceed" />
 
                 <LinearLayout
                     android:id="@+id/layoutSecureMethodsContainer"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="24dp"
+                    android:layout_height="60dp"
+                    android:layout_marginTop="20dp"
                     android:orientation="horizontal"
                     android:weightSum="2"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@id/tvMpinSubtitlePrompt">
 
                     <com.google.android.material.card.MaterialCardView
                         android:id="@+id/btnMpinBoxTrigger"
                         style="@style/Widget.Material3.CardView.CustomGlobalBorder"
                         android:layout_width="0dp"
-                        android:layout_height="72dp"
+                        android:layout_height="match_parent"
                         android:layout_marginEnd="8dp"
                         android:layout_weight="1"
                         android:clickable="true"
                         android:focusable="true"
                         android:foreground="?attr/selectableItemBackground"
                         app:cardBackgroundColor="@color/surface_card"
-                        app:cardCornerRadius="14dp"
+                        app:cardCornerRadius="12dp"
                         app:strokeWidth="1.5dp"
                         app:strokeColor="@color/brand_blue">
-
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:gravity="center"
                             android:orientation="horizontal">
-
-                            <ImageView
-                                android:id="@+id/dot1"
-                                android:layout_width="12dp"
-                                android:layout_height="12dp"
-                                android:layout_margin="5dp"
-                                android:contentDescription="@string/mpin_dot"
-                                android:src="@drawable/mpin_dot_empty" />
-
-                            <ImageView
-                                android:id="@+id/dot2"
-                                android:layout_width="12dp"
-                                android:layout_height="12dp"
-                                android:layout_margin="5dp"
-                                android:contentDescription="@string/mpin_dot"
-                                android:src="@drawable/mpin_dot_empty" />
-
-                            <ImageView
-                                android:id="@+id/dot3"
-                                android:layout_width="12dp"
-                                android:layout_height="12dp"
-                                android:layout_margin="5dp"
-                                android:contentDescription="@string/mpin_dot"
-                                android:src="@drawable/mpin_dot_empty" />
-
-                            <ImageView
-                                android:id="@+id/dot4"
-                                android:layout_width="12dp"
-                                android:layout_height="12dp"
-                                android:layout_margin="5dp"
-                                android:contentDescription="@string/mpin_dot"
-                                android:src="@drawable/mpin_dot_empty" />
+                            <ImageView android:id="@+id/dot1" android:layout_width="10dp" android:layout_height="10dp" android:layout_margin="5dp" android:contentDescription="@string/dot" android:src="@drawable/mpin_dot_empty"/>
+                            <ImageView android:id="@+id/dot2" android:layout_width="10dp" android:layout_height="10dp" android:layout_margin="5dp" android:contentDescription="@string/dot" android:src="@drawable/mpin_dot_empty"/>
+                            <ImageView android:id="@+id/dot3" android:layout_width="10dp" android:layout_height="10dp" android:layout_margin="5dp" android:contentDescription="@string/dot" android:src="@drawable/mpin_dot_empty"/>
+                            <ImageView android:id="@+id/dot4" android:layout_width="10dp" android:layout_height="10dp" android:layout_margin="5dp" android:contentDescription="@string/dot" android:src="@drawable/mpin_dot_empty"/>
                         </LinearLayout>
                     </com.google.android.material.card.MaterialCardView>
 
@@ -254,58 +210,52 @@
                         android:id="@+id/btnBiometricBoxTrigger"
                         style="@style/Widget.Material3.CardView.CustomGlobalBorder"
                         android:layout_width="0dp"
-                        android:layout_height="72dp"
+                        android:layout_height="match_parent"
                         android:layout_marginStart="8dp"
                         android:layout_weight="1"
                         android:clickable="true"
                         android:focusable="true"
                         android:foreground="?attr/selectableItemBackground"
                         app:cardBackgroundColor="@color/surface_card"
-                        app:cardCornerRadius="14dp"
+                        app:cardCornerRadius="12dp"
                         app:strokeWidth="1.5dp"
                         app:strokeColor="@color/brand_saffron_dark">
-
                         <FrameLayout
                             android:layout_width="match_parent"
                             android:layout_height="match_parent">
-
                             <ImageView
                                 android:id="@+id/imgCombinedBiometrics"
-                                android:layout_width="38dp"
-                                android:layout_height="38dp"
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
                                 android:layout_gravity="center"
+                                android:padding="10dp"
                                 android:contentDescription="@string/biometrics"
-                                android:scaleType="centerInside"
+                                android:scaleType="fitCenter"
                                 android:src="@drawable/ic_combined_biometrics"
-                                app:tint="@color/brand_saffron_dark" />
+                                app:tint="@color/brand_blue" />
                         </FrameLayout>
                     </com.google.android.material.card.MaterialCardView>
-
                 </LinearLayout>
 
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="28dp"
+                    android:layout_marginTop="20dp"
                     app:layout_constraintTop_toBottomOf="@id/layoutSecureMethodsContainer"
                     app:layout_constraintBottom_toBottomOf="parent">
-
                     <TextView
                         android:id="@+id/tvForgotMpinAction"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:padding="4dp"
                         android:text="@string/forgot_mpin"
                         android:textColor="@color/brand_saffron_dark"
                         android:textStyle="bold"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent" />
-
                     <TextView
                         android:id="@+id/tvDifferentUser"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:padding="4dp"
                         android:text="@string/different_user"
                         android:textColor="@color/brand_blue"
                         android:textStyle="bold"
@@ -313,18 +263,167 @@
                         app:layout_constraintTop_toTopOf="parent" />
                 </androidx.constraintlayout.widget.ConstraintLayout>
             </androidx.constraintlayout.widget.ConstraintLayout>
-
         </FrameLayout>
+    </com.google.android.material.card.MaterialCardView>
+
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/cardPromoAdsContainer"
+        style="@style/Widget.Material3.CardView.CustomGlobalBorder"
+        android:layout_width="0dp"
+        android:layout_height="170dp"
+        android:layout_marginHorizontal="24dp"
+        app:cardBackgroundColor="@color/surface_card"
+        app:cardCornerRadius="16dp"
+        app:strokeWidth="1.5dp"
+        app:strokeColor="@color/medical_teal"
+        app:layout_constraintBottom_toTopOf="@id/tvSecuredBy"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/loginCardView"
+        app:layout_constraintVertical_bias="0.40">
+
+        <ViewFlipper
+            android:id="@+id/adViewFlipper"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:animateFirstView="true">
+
+            <LinearLayout
+                android:id="@+id/layoutYoutubeAdClick"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:paddingHorizontal="14dp"
+                    android:paddingTop="10dp"
+                    android:paddingBottom="8dp"
+                    android:background="@color/app_background">
+
+                    <ImageView
+                        android:layout_width="28dp"
+                        android:layout_height="28dp"
+                        android:contentDescription="@string/youtube_icon"
+                        android:src="@drawable/ic_youtube" />
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginStart="10dp"
+                        android:orientation="vertical">
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/subscribe_our_youtube_channel"
+                            android:textColor="@color/brand_blue"
+                            android:textSize="13sp"
+                            android:textStyle="bold" />
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/nursingstudio2026_yt_handle"
+                            android:textColor="@color/brand_saffron_dark"
+                            android:textSize="11sp" />
+                    </LinearLayout>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/subscribe_now"
+                        android:textStyle="bold|italic"
+                        android:textColor="@color/brand_youtube_red"
+                        android:textSize="12sp" />
+                </LinearLayout>
+
+                <ImageView
+                    android:layout_width="match_parent"
+                    android:layout_height="105dp"
+                    android:contentDescription="@string/youtube_preview_showcase"
+                    android:scaleType="fitXY"
+                    android:src="@drawable/yt_snap" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/layoutWhatsappAdClick"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:paddingHorizontal="14dp"
+                    android:paddingTop="10dp"
+                    android:paddingBottom="8dp"
+                    android:background="@color/app_background">
+
+                    <ImageView
+                        android:layout_width="28dp"
+                        android:layout_height="28dp"
+                        android:contentDescription="@string/whatsapp_icon"
+                        android:src="@drawable/ic_whatsapp" />
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginStart="10dp"
+                        android:orientation="vertical">
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/join_our_whatsapp_channel"
+                            android:textColor="@color/brand_blue"
+                            android:textSize="13sp"
+                            android:textStyle="bold" />
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/get_instant_updates"
+                            android:textColor="@color/brand_saffron_dark"
+                            android:textSize="11sp" />
+                    </LinearLayout>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/follow"
+                        android:textStyle="bold|italic"
+                        android:textColor="@color/brand_whatsapp_green"
+                        android:textSize="12sp" />
+                </LinearLayout>
+
+                <ImageView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:scaleType="fitXY"
+                    android:src="@drawable/wa_snap"
+                    android:contentDescription="@string/whatsapp_stream_preview" />
+            </LinearLayout>
+        </ViewFlipper>
     </com.google.android.material.card.MaterialCardView>
 
     <TextView
         android:id="@+id/tvSecuredBy"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="52dp"
+        android:layout_marginBottom="24dp"
         android:text="@string/secured_by"
         android:textColor="@color/text_muted"
-        android:textSize="13sp"
+        android:textSize="12sp"
         android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -335,16 +434,12 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@color/overlay_black"
-        android:clickable="true"
         android:elevation="24dp"
-        android:focusable="true"
         android:visibility="gone">
-
         <ProgressBar
             android:layout_width="54dp"
             android:layout_height="54dp"
             android:layout_centerInParent="true"
             android:indeterminateTint="@color/brand_saffron_dark" />
     </RelativeLayout>
-
 </androidx.constraintlayout.widget.ConstraintLayout>

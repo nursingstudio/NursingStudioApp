@@ -292,6 +292,18 @@
     <string name="application_preferences">Application Preferences</string>
     <string name="use_secure_method_to_unlock_application_session">Use secure method to unlock application session</string>
     <string name="choose_your_secure_method_below_to_proceed">Choose your secure method below to proceed.</string>
+    <string name="dot">Dot</string>
+    <string name="slide_show">Slide Show</string>
+    <string name="subscribe_our_youtube_channel">Subscribe Our YouTube Channel</string>
+    <string name="nursingstudio2026_yt_handle">\@NursingStudio2026</string>
+    <string name="subscribe_now">Subscribe Now</string>
+    <string name="join_our_whatsapp_channel">Join Our WhatsApp Channel</string>
+    <string name="get_instant_updates">Get Instant Updates</string>
+    <string name="follow">Follow</string>
+    <string name="whatsapp_icon">WhatsApp Icon</string>
+    <string name="youtube_icon">Youtube Icon</string>
+    <string name="youtube_preview_showcase">YouTube Preview Showcase</string>
+    <string name="whatsapp_stream_preview">WhatsApp Stream Preview</string>
 
 
 </resources>

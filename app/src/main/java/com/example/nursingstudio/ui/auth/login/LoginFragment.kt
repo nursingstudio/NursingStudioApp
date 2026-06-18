@@ -39,6 +39,7 @@ import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import java.util.Locale
 import kotlin.time.Duration.Companion.milliseconds
+import androidx.core.net.toUri
 
 @AndroidEntryPoint
 class LoginFragment : Fragment() {
@@ -96,6 +97,8 @@ class LoginFragment : Fragment() {
         setupClickListeners()
         setupTextWatchers()
         observeViewModel()
+        // 🚀 LINE EXPANSION: Initialize the 2026 High-Fidelity Auto-Rotating Brand Ad Engine
+        startPromotionalAdsRotationEngine()
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             requestNotificationPermissionLauncher.launch(android.Manifest.permission.POST_NOTIFICATIONS)
@@ -338,6 +341,45 @@ class LoginFragment : Fragment() {
         binding.btnBiometricBoxTrigger.setOnClickListener {
             AppSettings.triggerVibration(requireContext(), 25)
             showBiometricPrompt()
+        }
+    }
+
+    /**
+     * 🚀 2026 INDUSTRY GOLD STANDARD: Safe Lifecycle-Aware Infinite Ad Flip Loop Engine.
+     * Prevents context thread leak vectors and automatically switches with smooth hardware transitions.
+     */
+    private fun startPromotionalAdsRotationEngine() {
+        // Configure standard Material slide enterprise animations programmatically
+        binding.adViewFlipper.setInAnimation(requireContext(), android.R.anim.slide_in_left)
+        binding.adViewFlipper.setOutAnimation(requireContext(), android.R.anim.slide_out_right)
+
+        // Set Click Redirect Interactions Channel Hooks for YouTube & WhatsApp Channel Handles
+        binding.layoutYoutubeAdClick.setOnClickListener {
+            AppSettings.triggerVibration(requireContext(), 20)
+            val intent = Intent(
+                Intent.ACTION_VIEW,
+                "https://youtube.com/@NursingStudio2026".toUri())
+            startActivity(intent)
+        }
+
+        binding.layoutWhatsappAdClick.setOnClickListener {
+            AppSettings.triggerVibration(requireContext(), 20)
+            val intent = Intent(
+                Intent.ACTION_VIEW,
+                "https://whatsapp.com/channel/0029Vb6Sjdq6BIEapKtNUE2L".toUri())
+            startActivity(intent)
+        }
+
+        // Asynchronous Loop Thread Runner bound to lifecycle state limits
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
+                while (true) {
+                    kotlinx.coroutines.delay(3000.milliseconds) // Perfect 3-Seconds Auto-Transition interval
+                    if (_binding != null) {
+                        binding.adViewFlipper.showNext()
+                    }
+                }
+            }
         }
     }
 
