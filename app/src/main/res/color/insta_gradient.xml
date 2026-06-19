@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 🚀 2026 Gold Standard - Premium Multi-Color Brand Gradient -->
+<gradient xmlns:android="http://schemas.android.com/apk/res/android"
+    android:startX="0"
+    android:startY="24"
+    android:endX="24"
+    android:endY="0"
+    android:type="linear">
+    <!-- Instagram Trademark Palette Mapping -->
+    <item android:color="#405DE6" android:offset="0.0" /> <!-- Royal Blue -->
+    <item android:color="#833AB4" android:offset="0.25" /> <!-- Purple -->
+    <item android:color="#E1306C" android:offset="0.5" /> <!-- Pink/Magenta -->
+    <item android:color="#F77737" android:offset="0.75" /> <!-- Orange/Saffron -->
+    <item android:color="#FCAF45" android:offset="1.0" /> <!-- Yellow -->
+</gradient>

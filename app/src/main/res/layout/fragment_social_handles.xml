@@ -18,7 +18,7 @@
             android:text="@string/stay_connected"
             android:textSize="22sp"
             android:textStyle="bold"
-            android:textColor="@color/text_primary"
+            android:textColor="@color/brand_saffron_dark"
             android:layout_marginBottom="4dp" />
 
         <TextView
@@ -26,7 +26,7 @@
             android:layout_height="wrap_content"
             android:text="@string/follow_nursing_studio"
             android:textSize="14sp"
-            android:textColor="@color/text_secondary"
+            android:textColor="@color/brand_blue"
             android:layout_marginBottom="16dp" />
 
         <!-- YOUTUBE -->

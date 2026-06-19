@@ -17,7 +17,7 @@
             android:text="@string/online_test_series"
             android:textSize="24sp"
             android:textStyle="bold"
-            android:textColor="@color/text_primary" />
+            android:textColor="@color/brand_blue" />
 
         <TextView
             android:layout_width="wrap_content"
@@ -55,7 +55,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/_100_questions_90_minutes"
-                    android:textColor="#E0E0E0"
+                    android:textColor="@color/white"
                     android:textSize="12sp" />
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
@@ -81,7 +81,7 @@
                     android:orientation="vertical"
                     android:padding="16dp">
                     <TextView
-                        android:text="Subject-wise"
+                        android:text="@string/subject_wise"
                         android:textStyle="bold"
                         android:textColor="@color/text_primary"
                         android:layout_width="wrap_content"
@@ -104,7 +104,7 @@
                     android:orientation="vertical"
                     android:padding="16dp">
                     <TextView
-                        android:text="Topic-wise"
+                        android:text="@string/topic_wise"
                         android:textStyle="bold"
                         android:textColor="@color/text_primary"
                         android:layout_width="wrap_content"
@@ -126,7 +126,7 @@
                 android:layout_height="wrap_content"
                 android:padding="16dp">
                 <TextView
-                    android:text="Previous Year Question Papers"
+                    android:text="@string/previous_year_question_papers"
                     android:textStyle="bold"
                     android:textColor="@color/text_primary"
                     android:layout_width="wrap_content"

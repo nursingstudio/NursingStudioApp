@@ -18,7 +18,7 @@
             android:text="@string/video_library"
             android:textSize="20sp"
             android:textStyle="bold"
-            android:textColor="@color/text_primary"
+            android:textColor="@color/brand_saffron_dark"
             android:layout_marginBottom="4dp" />
 
         <TextView
@@ -67,7 +67,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Important Videos"
+                        android:text="@string/important_videos"
                         android:textSize="16sp"
                         android:textStyle="bold"
                         android:textColor="@color/text_primary" />
@@ -75,7 +75,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="High-yield topics explained visually."
+                        android:text="@string/high_yield_topics_explained_visually"
                         android:textSize="13sp"
                         android:textColor="@color/text_secondary" />
                 </LinearLayout>
@@ -107,7 +107,7 @@
                     android:layout_width="40dp"
                     android:layout_height="40dp"
                     android:src="@drawable/ic_video_24"
-                    android:contentDescription="Topic-wise Videos" />
+                    android:contentDescription="@string/topic_wise_videos" />
 
                 <LinearLayout
                     android:layout_width="0dp"
@@ -119,7 +119,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Topic-wise Videos"
+                        android:text="@string/topic_wise_videos"
                         android:textSize="16sp"
                         android:textStyle="bold"
                         android:textColor="@color/text_primary" />
@@ -127,7 +127,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="System-wise tutorials for easy learning."
+                        android:text="@string/system_wise_tutorials_for_easy_learning"
                         android:textSize="13sp"
                         android:textColor="@color/text_secondary" />
                 </LinearLayout>
@@ -159,7 +159,7 @@
                     android:layout_width="40dp"
                     android:layout_height="40dp"
                     android:src="@drawable/ic_video_24"
-                    android:contentDescription="Playlists" />
+                    android:contentDescription="@string/playlists" />
 
                 <LinearLayout
                     android:layout_width="0dp"
@@ -171,7 +171,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="YouTube Playlists"
+                        android:text="@string/youtube_playlists"
                         android:textSize="16sp"
                         android:textStyle="bold"
                         android:textColor="@color/text_primary" />
@@ -179,7 +179,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Watch curated video playlists."
+                        android:text="@string/watch_curated_video_playlists"
                         android:textSize="13sp"
                         android:textColor="@color/text_secondary" />
                 </LinearLayout>

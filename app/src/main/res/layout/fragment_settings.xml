@@ -451,7 +451,7 @@
                     android:textColor="@color/text_primary"
                     android:textSize="14sp"
                     app:drawableEndCompat="@drawable/ic_chevron_right"
-                    app:drawableTint="@color/brand_saffron_dark" />
+                    app:drawableTint="@color/brand_blue" />
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 

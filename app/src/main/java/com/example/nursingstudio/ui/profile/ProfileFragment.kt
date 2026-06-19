@@ -1,5 +1,6 @@
 package com.example.nursingstudio.ui.profile
 
+import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -14,6 +15,7 @@ import androidx.lifecycle.lifecycleScope
 import com.example.nursingstudio.R
 import com.example.nursingstudio.data.local.DataStoreManager
 import com.example.nursingstudio.databinding.FragmentProfileBinding
+import com.example.nursingstudio.ui.auth.AuthActivity
 import com.example.nursingstudio.utils.AppSettings
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.firebase.auth.FirebaseAuth
@@ -170,14 +172,18 @@ class ProfileFragment : Fragment() {
                 .setTitle("Confirm Logout")
                 .setMessage("Are you sure you want to terminate your current Nursing Studio learning session?")
                 .setCancelable(true)
+                // 🚀 2026 UX Standard: Terminate session without deleting MPIN keys configuration
                 .setPositiveButton("Logout") { _, _ ->
                     viewLifecycleOwner.lifecycleScope.launch {
-                        // Flush persistent state memory keys safely before exit vectors
-                        dataStoreManager.saveMpinStatus(false)
+                        // Auth token state clear only - preserve biometric credentials mapping
                         auth.signOut()
 
-                        // Terminate process mapping tree
-                        activity?.finishAffinity()
+                        // Boot user directly to fresh login screen context
+                        val intent = Intent(requireContext(), AuthActivity::class.java).apply {
+                            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                        }
+                        startActivity(intent)
+                        activity?.finish()
                     }
                 }
                 .setNegativeButton("Cancel") { dialog, _ ->

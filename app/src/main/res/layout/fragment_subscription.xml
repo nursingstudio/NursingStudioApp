@@ -13,7 +13,8 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="My Subscription"
+            android:text="@string/my_subscription"
+            android:textColor="@color/brand_blue"
             android:textSize="20sp"
             android:textStyle="bold"
             android:layout_marginBottom="12dp" />
@@ -23,7 +24,8 @@
             android:id="@+id/tvCurrentPlan"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Current plan: Free"
+            android:text="@string/current_plan_free"
+            android:textColor="@color/brand_saffron_dark"
             android:textSize="14sp"
             android:layout_marginBottom="16dp" />
 
@@ -45,21 +47,22 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Free Plan"
+                    android:text="@string/free_plan"
+                    android:textColor="@color/brand_saffron_dark"
                     android:textStyle="bold"
                     android:textSize="16sp" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="• Access basic quizzes\n• Limited PDFs &amp; videos"
+                    android:text="@string/access_basic_quizzes_n_limited_pdfs_amp_videos"
                     android:layout_marginTop="4dp" />
 
                 <Button
                     android:id="@+id/btnSelectFree"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Use Free Plan"
+                    android:text="@string/use_free_plan"
                     android:layout_marginTop="8dp" />
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
@@ -81,21 +84,22 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Premium Plan"
+                    android:text="@string/premium_plan"
+                    android:textColor="@color/brand_saffron_dark"
                     android:textStyle="bold"
                     android:textSize="16sp" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="&#8226; All quizzes unlocked&#10;&#8226; All PDFs &amp; videos&#10;&#8226; No ads (future)"
+                    android:text="@string/_8226_all_quizzes_unlocked_10_8226_all_pdfs_amp_videos_10_8226_no_ads_future"
                     android:layout_marginTop="4dp" />
 
                 <Button
                     android:id="@+id/btnSelectPremium"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Upgrade to Premium"
+                    android:text="@string/upgrade_to_premium"
                     android:layout_marginTop="8dp" />
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>

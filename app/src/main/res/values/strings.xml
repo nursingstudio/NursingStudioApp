@@ -317,13 +317,29 @@
     <string name="secure_mpin_updated_successfully">Secure MPIN updated successfully! 🔒</string>
     <string name="secure_biometrics_login">Secure Biometrics Login</string>
     <string name="scan_fingerprint_for_secure_login">Scan Fingerprint or use Face ID for Secure Login.</string>
-    <string name="nursing_registered_yes">Yes ✅</string>
-    <string name="nursing_registered_no">No ❌</string>
+    <string name="nursing_registered_yes">Nursing Registration: Yes ✅</string>
+    <string name="nursing_registered_no">Nursing Registration: No ❌</string>
     <string name="verified">Verified ✅</string>
     <string name="not_verified">Not Verified ❌</string>
     <string name="verify_now">Verify Now</string>
     <string name="premium">PREMIUM</string>
     <string name="free">FREE</string>
+    <string name="subject_wise">Subject-wise</string>
+    <string name="topic_wise">Topic-wise</string>
+    <string name="previous_year_question_papers">Previous Year Question Papers</string>
+    <string name="current_plan_free">Current plan: Free</string>
+    <string name="free_plan">Free Plan</string>
+    <string name="access_basic_quizzes_n_limited_pdfs_amp_videos"><![CDATA[• Access basic quizzes\n• Limited PDFs & videos]]></string>
+    <string name="use_free_plan">Use Free Plan</string>
+    <string name="premium_plan">Premium Plan</string>
+    <string name="_8226_all_quizzes_unlocked_10_8226_all_pdfs_amp_videos_10_8226_no_ads_future"><![CDATA[• All quizzes unlocked\n• All PDFs & videos\n• No ads (future)]]></string>
+    <string name="upgrade_to_premium">Upgrade to Premium</string>
+    <string name="high_yield_topics_explained_visually">High-yield topics explained visually.</string>
+    <string name="topic_wise_videos">Topic-wise Videos</string>
+    <string name="system_wise_tutorials_for_easy_learning">System-wise tutorials for easy learning.</string>
+    <string name="playlists">Playlists</string>
+    <string name="youtube_playlists">YouTube Playlists</string>
+    <string name="watch_curated_video_playlists">Watch curated video playlists.</string>
 
 
 </resources>

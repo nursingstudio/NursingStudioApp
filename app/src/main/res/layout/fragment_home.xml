@@ -18,7 +18,7 @@
             android:layout_height="wrap_content"
             android:textSize="22sp"
             android:textStyle="bold"
-            android:textColor="@color/text_primary"
+            android:textColor="@color/brand_blue"
             android:hint="@string/welcome"
             android:textColorHint="@color/text_secondary" />
 
@@ -48,7 +48,7 @@
                     android:text="@string/daily_motivation_title"
                     android:textStyle="bold"
                     android:textSize="16sp"
-                    android:textColor="@color/text_primary"
+                    android:textColor="@color/brand_saffron_dark"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content" />
 
@@ -68,7 +68,7 @@
             android:text="@string/quick_actions"
             android:textStyle="bold"
             android:textSize="18sp"
-            android:textColor="@color/text_primary"
+            android:textColor="@color/brand_blue"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
 
@@ -178,7 +178,7 @@
                     <ImageView
                         android:layout_width="32dp"
                         android:layout_height="32dp"
-                        android:src="@drawable/ic_video"
+                        android:src="@drawable/ic_video_24"
                         android:contentDescription="@string/videos"
                         app:tint="@color/brand_saffron_dark" />
 
@@ -247,7 +247,7 @@
                     android:text="@string/latest_update"
                     android:textStyle="bold"
                     android:textSize="16sp"
-                    android:textColor="@color/text_primary"
+                    android:textColor="@color/brand_saffron_dark"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content" />
 

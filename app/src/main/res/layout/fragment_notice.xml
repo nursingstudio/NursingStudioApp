@@ -13,6 +13,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/notice_board"
+            android:textColor="@color/brand_saffron_dark"
             android:textSize="20sp"
             android:textStyle="bold"
             android:layout_marginBottom="8dp" />
