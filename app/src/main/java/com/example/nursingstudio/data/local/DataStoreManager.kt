@@ -40,4 +40,6 @@ class DataStoreManager(private val context: Context) {
     val userMobile: Flow<String?> = context.dataStore.data.map { it[USER_MOBILE] }
     val subscriptionType: Flow<String> = context.dataStore.data.map { it[SUBSCRIPTION_TYPE] ?: "Free" }
     val isMpinSet: Flow<Boolean> = context.dataStore.data.map { it[IS_MPIN_SET] ?: false }
+    val uniqueNsId: Flow<String?> = context.dataStore.data
+        .map { preferences -> preferences[stringPreferencesKey("unique_ns_id")] }
 }

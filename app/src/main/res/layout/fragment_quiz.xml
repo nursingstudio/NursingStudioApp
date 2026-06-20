@@ -83,7 +83,7 @@
                     <TextView
                         android:text="@string/subject_wise"
                         android:textStyle="bold"
-                        android:textColor="@color/text_primary"
+                        android:textColor="@color/brand_blue"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"/>
                 </LinearLayout>
@@ -106,7 +106,7 @@
                     <TextView
                         android:text="@string/topic_wise"
                         android:textStyle="bold"
-                        android:textColor="@color/text_primary"
+                        android:textColor="@color/brand_blue"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"/>
                 </LinearLayout>
@@ -128,7 +128,7 @@
                 <TextView
                     android:text="@string/previous_year_question_papers"
                     android:textStyle="bold"
-                    android:textColor="@color/text_primary"
+                    android:textColor="@color/brand_blue"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"/>
             </LinearLayout>

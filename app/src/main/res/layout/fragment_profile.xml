@@ -180,7 +180,7 @@
                         android:id="@+id/tvNursingStatus"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:textColor="@color/text_primary"
+                        android:textColor="@color/text_secondary"
                         android:textSize="14sp"
                         android:textStyle="bold"
                         tools:text="Nursing Registered: Yes" />

@@ -207,7 +207,6 @@ class MainActivity : BaseActivity() { // ✅ ⭐ 2026 GOLD STANDARD: Extends Bas
                 } */
 
                 // Channel 4: Architectural Subscriptions Status Multi-State Evaluation
-                // Channel 4: Architectural Subscriptions Status Multi-State Evaluation
                 launch {
                     dataStoreManager.subscriptionType.collect { type ->
                         val processType = type.ifBlank { "Free" }
@@ -215,18 +214,24 @@ class MainActivity : BaseActivity() { // ✅ ⭐ 2026 GOLD STANDARD: Extends Bas
                         // Direct explicit text assignments mapping
                         headerBinding.tvDrawerSubscription.text = processType.uppercase(java.util.Locale.ROOT)
 
-                        // 🚀 FIXED: Dynamic Vector Background Tinting Engine
-                        // Instead of targeting non-existent parent card frames, we dynamically mutate
-                        // the direct TextView background and text color tokens, eliminating all contrast trap risks.
-                        // 🚀 2026 GOLD STANDARD: Dynamic Stroke & Text Synergy Mapping Engine
                         if (processType.equals("Premium", ignoreCase = true)) {
                             headerBinding.tvDrawerSubscription.text = getString(R.string.premium)
                             headerBinding.tvDrawerSubscription.backgroundTintList = getColorStateList(R.color.brand_saffron_dark)
-                            headerBinding.tvDrawerSubscription.setTextColor(getColor(R.color.brand_saffron_dark))
+                            headerBinding.tvDrawerSubscription.setTextColor(getColor(R.color.white))
                         } else {
                             headerBinding.tvDrawerSubscription.text = getString(R.string.free)
                             headerBinding.tvDrawerSubscription.backgroundTintList = getColorStateList(R.color.brand_blue)
-                            headerBinding.tvDrawerSubscription.setTextColor(getColor(R.color.brand_blue))
+                            headerBinding.tvDrawerSubscription.setTextColor(getColor(R.color.white))
+                        }
+                    }
+                }
+// 🚀 NEW - Channel 5: Dynamic Identity Resolution Channel (NS-ID Link)
+                launch {
+                    dataStoreManager.uniqueNsId.collect { nsId ->
+                        headerBinding.tvUniqueNsId.text = if (!nsId.isNullOrBlank()) {
+                            "NSID: $nsId"
+                        } else {
+                            "NSID: PENDING"
                         }
                     }
                 }

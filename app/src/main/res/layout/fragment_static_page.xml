@@ -17,7 +17,7 @@
             android:text="Page Title"
             android:textSize="20sp"
             android:textStyle="bold"
-            android:textColor="@color/text_primary"
+            android:textColor="@color/brand_blue"
             android:layout_marginBottom="8dp" />
 
         <TextView

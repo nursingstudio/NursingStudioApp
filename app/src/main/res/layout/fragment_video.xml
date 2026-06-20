@@ -53,6 +53,7 @@
                 <ImageView
                     android:layout_width="40dp"
                     android:layout_height="40dp"
+                    app:tint="@color/black"
                     android:contentDescription="@string/important_videos"
                     android:src="@drawable/ic_video_24">
                 </ImageView>
@@ -70,7 +71,7 @@
                         android:text="@string/important_videos"
                         android:textSize="16sp"
                         android:textStyle="bold"
-                        android:textColor="@color/text_primary" />
+                        android:textColor="@color/brand_blue" />
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -106,6 +107,7 @@
                 <ImageView
                     android:layout_width="40dp"
                     android:layout_height="40dp"
+                    app:tint="@color/black"
                     android:src="@drawable/ic_video_24"
                     android:contentDescription="@string/topic_wise_videos" />
 
@@ -122,7 +124,7 @@
                         android:text="@string/topic_wise_videos"
                         android:textSize="16sp"
                         android:textStyle="bold"
-                        android:textColor="@color/text_primary" />
+                        android:textColor="@color/brand_blue" />
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -158,6 +160,7 @@
                 <ImageView
                     android:layout_width="40dp"
                     android:layout_height="40dp"
+                    app:tint="@color/black"
                     android:src="@drawable/ic_video_24"
                     android:contentDescription="@string/playlists" />
 
@@ -174,7 +177,7 @@
                         android:text="@string/youtube_playlists"
                         android:textSize="16sp"
                         android:textStyle="bold"
-                        android:textColor="@color/text_primary" />
+                        android:textColor="@color/brand_blue" />
 
                     <TextView
                         android:layout_width="wrap_content"
