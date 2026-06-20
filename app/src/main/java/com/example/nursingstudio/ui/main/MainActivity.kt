@@ -74,6 +74,9 @@ class MainActivity : BaseActivity() { // ✅ ⭐ 2026 GOLD STANDARD: Extends Bas
         // 4. Data Sync & Observation (Modern Approach)
         viewModel.syncUserData(currentUser.uid)
         observeUserData()
+
+        // 🚀 2026 Eager Framework Trigger: Initialize Shared Profile Stream early in background heap
+        androidx.lifecycle.ViewModelProvider(this)[com.example.nursingstudio.ui.profile.ProfileViewModel::class.java]
     }
 
     private fun setupHeader() {
@@ -217,11 +220,11 @@ class MainActivity : BaseActivity() { // ✅ ⭐ 2026 GOLD STANDARD: Extends Bas
                         if (processType.equals("Premium", ignoreCase = true)) {
                             headerBinding.tvDrawerSubscription.text = getString(R.string.premium)
                             headerBinding.tvDrawerSubscription.backgroundTintList = getColorStateList(R.color.brand_saffron_dark)
-                            headerBinding.tvDrawerSubscription.setTextColor(getColor(R.color.white))
+                            headerBinding.tvDrawerSubscription.setTextColor(getColor(R.color.brand_saffron_dark))
                         } else {
                             headerBinding.tvDrawerSubscription.text = getString(R.string.free)
                             headerBinding.tvDrawerSubscription.backgroundTintList = getColorStateList(R.color.brand_blue)
-                            headerBinding.tvDrawerSubscription.setTextColor(getColor(R.color.white))
+                            headerBinding.tvDrawerSubscription.setTextColor(getColor(R.color.brand_blue))
                         }
                     }
                 }
@@ -229,9 +232,9 @@ class MainActivity : BaseActivity() { // ✅ ⭐ 2026 GOLD STANDARD: Extends Bas
                 launch {
                     dataStoreManager.uniqueNsId.collect { nsId ->
                         headerBinding.tvUniqueNsId.text = if (!nsId.isNullOrBlank()) {
-                            "NSID: $nsId"
+                            nsId // Displays the direct global string synchronized value
                         } else {
-                            "NSID: PENDING"
+                            "NS-2026-PENDING"
                         }
                     }
                 }

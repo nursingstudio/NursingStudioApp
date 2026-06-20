@@ -15,12 +15,21 @@ class DataStoreManager(private val context: Context) {
         val USER_MOBILE = stringPreferencesKey("user_mobile")
         val SUBSCRIPTION_TYPE = stringPreferencesKey("subscription_type")
         val IS_MPIN_SET = booleanPreferencesKey("is_mpin_set")
+        // 🚀 2026 GOLD STANDARD: Centralized Key Token Mapping
+        val UNIQUE_NS_ID = stringPreferencesKey("unique_ns_id")
     }
 
     suspend fun saveUser(name: String, mobile: String) {
         context.dataStore.edit { prefs ->
             prefs[USER_NAME] = name
             prefs[USER_MOBILE] = mobile
+        }
+    }
+
+    // 🚀 NEW: Type-Safe Identity Resolution Persistent Logic
+    suspend fun saveUniqueNsId(nsId: String) {
+        context.dataStore.edit { prefs ->
+            prefs[UNIQUE_NS_ID] = nsId
         }
     }
 
@@ -40,6 +49,7 @@ class DataStoreManager(private val context: Context) {
     val userMobile: Flow<String?> = context.dataStore.data.map { it[USER_MOBILE] }
     val subscriptionType: Flow<String> = context.dataStore.data.map { it[SUBSCRIPTION_TYPE] ?: "Free" }
     val isMpinSet: Flow<Boolean> = context.dataStore.data.map { it[IS_MPIN_SET] ?: false }
-    val uniqueNsId: Flow<String?> = context.dataStore.data
-        .map { preferences -> preferences[stringPreferencesKey("unique_ns_id")] }
+
+    // 🚀 FIXED: Unified Dynamic Identity Resolution Stream Flow Token
+    val uniqueNsId: Flow<String?> = context.dataStore.data.map { it[UNIQUE_NS_ID] }
 }

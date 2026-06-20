@@ -143,14 +143,16 @@ class HomeFragment : Fragment() {
     private fun showProfessionalBiometricDialog() {
         val dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_biometric_prompt, null)
 
+        // 🚀 2026 Material 3 Design Standard: Optimized Symmetrical Window Geometry Matrix
         biometricDialog = MaterialAlertDialogBuilder(requireContext(), R.style.MaterialAlertDialog_Rounded)
             .setView(dialogView)
             .setCancelable(false)
             .create()
 
         biometricDialog?.setOnShowListener {
-            val width = (resources.displayMetrics.widthPixels * 0.92).toInt()
-            biometricDialog?.window?.setLayout(width, ViewGroup.LayoutParams.WRAP_CONTENT)
+            // Optimized multiplier down to 0.84 to give tight padding aspect ratio over trimmed content text
+            val standardWidthBounds = (resources.displayMetrics.widthPixels * 0.84).toInt()
+            biometricDialog?.window?.setLayout(standardWidthBounds, ViewGroup.LayoutParams.WRAP_CONTENT)
         }
 
         dialogView.findViewById<View>(R.id.btnSetupNow).setOnClickListener {

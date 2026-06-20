@@ -25,8 +25,12 @@ class AuthRepository @Inject constructor(
         Result.failure(e)
     }
 
-    // 🚀 FIXED & SANITIZED: Decoupled Object Parsing with Google Server Timestamp injection
+    // 🚀 FIXED & SANITIZED: 2026 Enterprise Identity Generation & Synchronization Pipeline
     suspend fun saveUserData(uid: String, user: com.example.nursingstudio.data.model.User): Result<Void?> = try {
+
+        // 🚀 Step 1: Generate high-scalability unique token identifier at server registration edge
+        val targetNsId = com.example.nursingstudio.utils.IdGenerator.generateSecureNsId()
+
         val userWriteMap = hashMapOf(
             "uid" to uid,
             "fullName" to user.fullName,
@@ -46,6 +50,11 @@ class AuthRepository @Inject constructor(
             "regState" to user.regState,
             "regNumber" to user.regNumber,
             "isNursingRegistered" to user.isNursingRegistered,
+
+            // 🚀 Step 2: Inject the generated unique ID directly inside cloud system payload matrix
+            "uniqueNsId" to targetNsId,
+            "subscriptionType" to "Free", // Default layout fallback subscription model
+
             // 🔥 SERVER CLOCK ENFORCEMENT: Enforces absolute data consistency over user settings alterations
             "createdAt" to FieldValue.serverTimestamp()
         )
@@ -72,7 +81,6 @@ class AuthRepository @Inject constructor(
     }
 
     fun isUserLoggedIn(): Boolean = auth.currentUser != null
-    fun getCurrentUid(): String? = auth.currentUser?.uid
 
     fun signOut() {
         auth.signOut()
