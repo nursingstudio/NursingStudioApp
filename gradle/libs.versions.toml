@@ -5,6 +5,7 @@ biometric = "1.2.0-alpha05"
 ccp = "2.7.3"
 circleimageview = "3.1.0"
 coil = "2.7.0"
+core = "13.0.0"
 coreSplashscreen = "1.2.0"
 datastorePreferences = "1.2.1"
 firebaseAnalytics = "23.0.0"
@@ -50,6 +51,7 @@ app-update-ktx = { module = "com.google.android.play:app-update-ktx", version.re
 ccp = { module = "com.hbb20:ccp", version.ref = "ccp" }
 circleimageview = { module = "de.hdodenhof:circleimageview", version.ref = "circleimageview" }
 coil = { module = "io.coil-kt:coil", version.ref = "coil" }
+core = { module = "com.pierfrancescosoffritti.androidyoutubeplayer:core", version.ref = "core" }
 firebase-analytics = { module = "com.google.firebase:firebase-analytics", version.ref = "firebaseAnalytics" }
 firebase-appcheck-debug = { module = "com.google.firebase:firebase-appcheck-debug" }
 firebase-appcheck-playintegrity = { module = "com.google.firebase:firebase-appcheck-playintegrity" }

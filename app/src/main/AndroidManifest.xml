@@ -47,6 +47,12 @@
             android:exported="true"
             android:windowSoftInputMode="adjustResize" />
 
+        <activity
+            android:name=".ui.features.media.VideoPlayerActivity"
+            android:configChanges="orientation|screenSize|screenLayout|smallestScreenSize|keyboardHidden"
+            android:exported="false"
+            android:theme="@style/Theme.NursingStudio" />
+
     </application>
 
 </manifest>

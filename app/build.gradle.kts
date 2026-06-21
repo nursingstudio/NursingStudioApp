@@ -136,6 +136,9 @@ dependencies {
     implementation(libs.firebase.appcheck.ktx)
     implementation(libs.google.firebase.appcheck.ktx)
 
+    // 🚀 2026 Android Player Engine Component Standard
+    implementation(libs.core)
+
     // ✅ HILT + KSP (Modern 2026 Standard)
     implementation(libs.hilt.android)
     ksp(libs.hilt.android.compiler)
