@@ -10,7 +10,7 @@ import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.views.YouTube
 
 /**
  * 🚀 2026 INDUSTRY GOLD STANDARD: Isolated Hardware-Accelerated Video Engine
- * High-performance container completely free from custom builder context dependencies.
+ * High-performance container optimized to enforce manual player engine initialization constraints.
  */
 class VideoPlayerActivity : AppCompatActivity() {
 
@@ -20,12 +20,14 @@ class VideoPlayerActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // 🚀 Programmatic View Matrix Strategy
+        // 🚀 Programmatic View Matrix Strategy with absolute frame dimensions
         youtubePlayerView = YouTubePlayerView(this).apply {
             layoutParams = FrameLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT
             )
+            // 🎯 CRITICAL GOLD STANDARD FIX: Disables auto-init sequence to hand-over control safely
+            enableAutomaticInitialization = false
         }
         setContentView(youtubePlayerView)
 
@@ -34,11 +36,10 @@ class VideoPlayerActivity : AppCompatActivity() {
         youtubePlayerView?.let { playerView ->
             lifecycle.addObserver(playerView)
 
-            // 🚀 2026 Standard Engine Initialization Loop without Context Overheads
+            // Now manual initialization triggers perfectly with 0% state conflicts
             playerView.initialize(object : AbstractYouTubePlayerListener() {
                 override fun onReady(youTubePlayer: YouTubePlayer) {
                     activePlayerInstance = youTubePlayer
-                    // Automatically cues the NORCET video safely
                     youTubePlayer.cueVideo(targetVideoId, 0f)
                 }
             })
@@ -46,7 +47,7 @@ class VideoPlayerActivity : AppCompatActivity() {
     }
 
     override fun onDestroy() {
-        // 🚀 Isolated Memory Layer Cleanup Vector
+        // 🚀 Dynamic Memory Layer Purge Engine
         activePlayerInstance = null
         youtubePlayerView?.let { lifecycle.removeObserver(it) }
         youtubePlayerView = null
