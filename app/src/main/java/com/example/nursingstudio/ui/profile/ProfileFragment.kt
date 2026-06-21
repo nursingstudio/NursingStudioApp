@@ -113,18 +113,32 @@ class ProfileFragment : Fragment() {
 
                 setupRow(binding.rowAddress.root, getString(R.string.label_address), fullAddressCompiled)
 
-                // 🚀 3. ADAPTIVE NURSING REGISTRATION METRICS DATA LAYOUT
-                val nursingRegStatus = data["nursingRegStatus"]?.toString() ?: "No"
-                if (nursingRegStatus.equals("Yes", ignoreCase = true)) {
+                // 🚀 2026 GOLD STANDARD: Multi-Type Matrix Parsing Engine (Handles Boolean, String, and key fallbacks)
+                val rawRegStatus = data["nursingRegStatus"] ?: data["nursingRegistered"] ?: data["isRegistered"]
+
+                val isNursingRegistered = when (rawRegStatus) {
+                    is Boolean -> rawRegStatus
+                    is String -> rawRegStatus.equals("Yes", ignoreCase = true) || rawRegStatus.equals("true", ignoreCase = true)
+                    else -> false
+                }
+
+                if (isNursingRegistered) {
+                    // Force text and append structural green verification styling icon
                     binding.tvNursingStatus.text = getString(R.string.nursing_registered_yes)
+                    binding.tvNursingStatus.setTextColor(ContextCompat.getColor(requireContext(), R.color.medical_teal))
 
                     binding.rowNursingState.root.visibility = View.VISIBLE
                     binding.rowNursingNo.root.visibility = View.VISIBLE
 
-                    setupRow(binding.rowNursingState.root, "Registered State", data["nursingState"])
-                    setupRow(binding.rowNursingNo.root, "Registration No", data["nursingRegNo"])
+                    // Safe fallback lookups for registration data node elements
+                    val stateRegistered = data["nursingState"] ?: data["regState"] ?: "-"
+                    val registrationNumber = data["nursingRegNo"] ?: data["regNo"] ?: "-"
+
+                    setupRow(binding.rowNursingState.root, "Registered State", stateRegistered)
+                    setupRow(binding.rowNursingNo.root, "Registration No", registrationNumber)
                 } else {
                     binding.tvNursingStatus.text = getString(R.string.nursing_registered_no)
+                    binding.tvNursingStatus.setTextColor(Color.RED)
                     binding.rowNursingState.root.visibility = View.GONE
                     binding.rowNursingNo.root.visibility = View.GONE
                 }
