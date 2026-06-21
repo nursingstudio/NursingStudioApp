@@ -151,7 +151,7 @@ class HomeFragment : Fragment() {
 
         biometricDialog?.setOnShowListener {
             // Optimized multiplier down to 0.84 to give tight padding aspect ratio over trimmed content text
-            val standardWidthBounds = (resources.displayMetrics.widthPixels * 0.84).toInt()
+            val standardWidthBounds = (resources.displayMetrics.widthPixels * 0.86).toInt()
             biometricDialog?.window?.setLayout(standardWidthBounds, ViewGroup.LayoutParams.WRAP_CONTENT)
         }
 
