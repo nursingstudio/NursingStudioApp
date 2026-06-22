@@ -62,7 +62,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
         android:background="@drawable/bg_subscription_badge_token"
-        android:fontFamily="sans-serif-bold"
+        android:fontFamily="sans-serif"
         android:gravity="center"
         android:includeFontPadding="false"
         android:letterSpacing="0.04"

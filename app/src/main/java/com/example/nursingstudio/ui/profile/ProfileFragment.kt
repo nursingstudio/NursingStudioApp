@@ -128,7 +128,7 @@ class ProfileFragment : Fragment() {
 
                     // Exact Firestore key mappings for your nested items
                     val stateRegistered = data["regState"] ?: data["nursingState"] ?: "-"
-                    val registrationNumber = data["regNo"] ?: data["nursingRegNo"] ?: "-"
+                    val registrationNumber = data["regNumber"] ?: data["nursingRegNo"] ?: "-"
 
                     setupRow(binding.rowNursingState.root, "Registered State", stateRegistered)
                     setupRow(binding.rowNursingNo.root, "Registration No", registrationNumber)
