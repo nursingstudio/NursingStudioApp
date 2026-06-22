@@ -138,6 +138,12 @@ dependencies {
 
     // 🚀 2026 Android Player Engine Component Standard
     implementation(libs.core)
+    // 🚀 2026 TOP-TIER ENGINE: Advanced High-Performance Image Cropping Framework
+    implementation(libs.ucrop)
+    // 🚀 2026 WORLD-CLASS CACHING IMAGE ENGINE: Glide Implementation
+    implementation(libs.glide)
+    annotationProcessor(libs.compiler)
+
 
     // ✅ HILT + KSP (Modern 2026 Standard)
     implementation(libs.hilt.android)

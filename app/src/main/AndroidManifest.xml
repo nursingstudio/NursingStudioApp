@@ -53,6 +53,11 @@
             android:exported="false"
             android:theme="@style/Theme.NursingStudio" />
 
+        <activity
+            android:name="com.yalantis.ucrop.UCropActivity"
+            android:configChanges="orientation|screenSize|screenLayout|smallestScreenSize"
+            android:theme="@style/Theme.NursingStudio"/>
+
     </application>
 
 </manifest>

@@ -2,16 +2,22 @@ package com.example.nursingstudio.ui.profile
 
 import android.content.Intent
 import android.graphics.Color
+import android.net.Uri
 import android.os.Bundle
+import android.os.Environment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
+import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
+import com.bumptech.glide.Glide
 import com.example.nursingstudio.R
 import com.example.nursingstudio.data.local.DataStoreManager
 import com.example.nursingstudio.databinding.FragmentProfileBinding
@@ -19,18 +25,19 @@ import com.example.nursingstudio.ui.auth.AuthActivity
 import com.example.nursingstudio.utils.AppSettings
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.firebase.auth.FirebaseAuth
+import com.yalantis.ucrop.UCrop
 import kotlinx.coroutines.launch
+import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Calendar
+import java.util.Date
 import java.util.Locale
 
 /**
- * 🚀 2026 INDUSTRY GOLD STANDARD: Zero-Latency Hot-Cached Profile Pipeline
- * Implements activity-scoped pre-fetching engine for instant view rendering state updates.
+ * 🚀 2026 INDUSTRY GOLD STANDARD: Clean Zero-Latency Isolated Image Sandbox
  */
 class ProfileFragment : Fragment() {
 
-    // 🚀 FIXED: Upgraded scope to activityViewModels for absolute instant zero-lag data display
     private val viewModel: ProfileViewModel by activityViewModels()
     private val auth = FirebaseAuth.getInstance()
 
@@ -38,6 +45,31 @@ class ProfileFragment : Fragment() {
     private val binding get() = _binding!!
 
     private lateinit var dataStoreManager: DataStoreManager
+    private var temporaryCameraUri: Uri? = null
+
+    private val galleryLauncher = registerForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
+        uri?.let { launchUCropEngine(it) }
+    }
+
+    private val cameraLauncher = registerForActivityResult(ActivityResultContracts.TakePicture()) { success ->
+        if (success) {
+            temporaryCameraUri?.let { launchUCropEngine(it) }
+        }
+    }
+
+    // 🚀 FIXED: Precise structural assignment mapping for nested Intent data layers
+    private val cropLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        val resultCode = result.resultCode
+        val dataIntent = result.data
+
+        if (resultCode == android.app.Activity.RESULT_OK && dataIntent != null) {
+            val finalCroppedUri = UCrop.getOutput(dataIntent)
+            finalCroppedUri?.let { viewModel.uploadProfileImage(it) }
+        } else if (resultCode == UCrop.RESULT_ERROR && dataIntent != null) {
+            val cropError = UCrop.getError(dataIntent)
+            Toast.makeText(context, "Crop Engine Error: ${cropError?.localizedMessage}", Toast.LENGTH_SHORT).show()
+        }
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -51,12 +83,9 @@ class ProfileFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
         setupInitialTactileUI()
         observeProfileDataStream()
         setupInteractiveClickListeners()
-
-        // 🚀 CRITICAL REFACTOR: Removed raw trigger line because initialization occurs eagerly in shared background memory heap
     }
 
     private fun setupInitialTactileUI() {
@@ -65,44 +94,50 @@ class ProfileFragment : Fragment() {
     }
 
     private fun observeProfileDataStream() {
+        viewModel.uploadProgress.observe(viewLifecycleOwner) { isUploading ->
+            binding.layoutProfileAvatarContainer.alpha = if (isUploading) 0.5f else 1.0f
+            binding.layoutProfileAvatarContainer.isEnabled = !isUploading
+        }
+
         viewModel.userData.observe(viewLifecycleOwner) { dataMap ->
             dataMap?.let { data ->
 
-                // 1. Core Identity Component Updates via Type-Safe ViewBinding
+                val profileUrl = data["profileImageUrl"]?.toString() ?: ""
+                if (profileUrl.isNotEmpty()) {
+                    Glide.with(this)
+                        .load(profileUrl)
+                        .placeholder(R.drawable.ic_login_logo)
+                        .error(R.drawable.ic_login_logo)
+                        .into(binding.imgHeaderProfile)
+                }
+
                 val fullName = data["fullName"]?.toString() ?: "Scholar Student"
                 val emailStr = data["email"]?.toString() ?: auth.currentUser?.email ?: "-"
 
                 binding.tvName.text = fullName
                 binding.tvEmail.text = emailStr
 
-                // 🚀 FIXED: Synchronized Multi-State Identifier Parser Engine
                 val uniqueNsId = data["uniqueNsId"]?.toString() ?: "NS-2026-PENDING"
                 binding.tvUniqueNsId.text = uniqueNsId
 
-                // Real-time asynchronous dynamic push synchronization to cache
                 viewLifecycleOwner.lifecycleScope.launch {
                     if (uniqueNsId != "NS-2026-PENDING") {
                         dataStoreManager.saveUniqueNsId(uniqueNsId)
                     }
                 }
 
-                // 🚀 LIVE EMAIL VERIFICATION BADGE CONTROLLER STATE
                 evaluateEmailVerificationState()
 
-                // 2. Personal Information Card Rows Mapping Strategy
                 setupRow(binding.rowGender.root, getString(R.string.label_gender), data["gender"])
-
                 val dobString = data["dob"]?.toString() ?: ""
                 val computedAgeSuffix = if (dobString.isNotEmpty()) calculateAge(dobString) else ""
                 setupRow(binding.rowDob.root, getString(R.string.label_dob), "$dobString $computedAgeSuffix".trim())
-
                 setupRow(binding.rowMarital.root, getString(R.string.label_marital), data["maritalStatus"])
                 setupRow(binding.rowReligion.root, getString(R.string.label_religion), data["religion"])
                 setupRow(binding.rowMobile.root, getString(R.string.label_mobile), data["mobile"])
                 setupRow(binding.rowEducation.root, getString(R.string.label_education), data["education"])
                 setupRow(binding.rowOccupation.root, getString(R.string.label_occupation), data["occupation"])
 
-                // Address Construction String Assembler Pipeline
                 val fullAddressCompiled = buildString {
                     append(data["address"]?.toString() ?: "")
                     data["district"]?.toString()?.takeIf { it.isNotEmpty() }?.let { append(", $it") }
@@ -110,33 +145,22 @@ class ProfileFragment : Fragment() {
                     data["country"]?.toString()?.takeIf { it.isNotEmpty() }?.let { append(", $it") }
                     data["pincode"]?.toString()?.takeIf { it.isNotEmpty() }?.let { append(" - $it") }
                 }.ifEmpty { "-" }
-
                 setupRow(binding.rowAddress.root, getString(R.string.label_address), fullAddressCompiled)
 
-                // 🚀 2026 INDUSTRY GOLD STANDARD: Direct Explicit Boolean Mapping Engine
-                // Safely extracts the true boolean type straight from the Firestore layout channel
                 val isNursingRegistered = data["isNursingRegistered"] as? Boolean ?: false
-
                 if (isNursingRegistered) {
-                    // Force text change and inject active state styling natively
                     binding.tvNursingStatus.text = getString(R.string.nursing_registered_yes)
                     binding.tvNursingStatus.setTextColor(ContextCompat.getColor(requireContext(), R.color.medical_teal))
-
-                    // Un-hide the state layout and registration card components
                     binding.rowNursingState.root.visibility = View.VISIBLE
                     binding.rowNursingNo.root.visibility = View.VISIBLE
 
-                    // Exact Firestore key mappings for your nested items
                     val stateRegistered = data["regState"] ?: data["nursingState"] ?: "-"
                     val registrationNumber = data["regNumber"] ?: data["nursingRegNo"] ?: "-"
-
                     setupRow(binding.rowNursingState.root, "Registered State", stateRegistered)
                     setupRow(binding.rowNursingNo.root, "Registration No", registrationNumber)
                 } else {
-                    // Fallback state if boolean is false or null
                     binding.tvNursingStatus.text = getString(R.string.nursing_registered_no)
                     binding.tvNursingStatus.setTextColor(Color.RED)
-
                     binding.rowNursingState.root.visibility = View.GONE
                     binding.rowNursingNo.root.visibility = View.GONE
                 }
@@ -147,6 +171,53 @@ class ProfileFragment : Fragment() {
     private fun setupRow(rowView: View, label: String, value: Any?) {
         rowView.findViewById<TextView>(R.id.tvLabel).text = label
         rowView.findViewById<TextView>(R.id.tvValue).text = value?.toString() ?: "-"
+    }
+
+    private fun launchUCropEngine(sourceUri: Uri) {
+        val destinationFileName = "NS_Crop_${System.currentTimeMillis()}.jpg"
+        val destinationUri = Uri.fromFile(File(requireContext().cacheDir, destinationFileName))
+
+        val premiumOptions = UCrop.Options().apply {
+            setCompressionQuality(85)
+            setToolbarColor(ContextCompat.getColor(requireContext(), R.color.brand_blue))
+            setStatusBarColor(ContextCompat.getColor(requireContext(), R.color.brand_blue))
+            setActiveControlsWidgetColor(ContextCompat.getColor(requireContext(), R.color.brand_saffron_dark))
+            setHideBottomControls(false)
+            setFreeStyleCropEnabled(false)
+        }
+
+        val uCropIntent = UCrop.of(sourceUri, destinationUri)
+            .withAspectRatio(1f, 1f)
+            .withMaxResultSize(720, 720)
+            .withOptions(premiumOptions)
+            .getIntent(requireContext())
+
+        cropLauncher.launch(uCropIntent)
+    }
+
+    private fun createTemporaryCameraFileUri(): Uri {
+        val timestamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
+        val storageDir = requireContext().getExternalFilesDir(Environment.DIRECTORY_PICTURES)
+        val tempFile = File.createTempFile("NS_Capture_${timestamp}_", ".jpg", storageDir)
+        return FileProvider.getUriForFile(requireContext(), "${requireContext().packageName}.fileprovider", tempFile)
+    }
+
+    private fun showMediaSelectionBottomSheet() {
+        val options = arrayOf("Take Photo with Camera", "Select from Gallery", "Cancel")
+        MaterialAlertDialogBuilder(requireContext(), R.style.MaterialAlertDialog_Rounded)
+            .setTitle("Update Profile Image")
+            .setItems(options) { dialog, which ->
+                when (which) {
+                    0 -> {
+                        temporaryCameraUri = createTemporaryCameraFileUri()
+                        cameraLauncher.launch(temporaryCameraUri!!)
+                    }
+                    1 -> {
+                        galleryLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+                    }
+                    else -> dialog.dismiss()
+                }
+            }.show()
     }
 
     private fun evaluateEmailVerificationState() {
@@ -164,15 +235,13 @@ class ProfileFragment : Fragment() {
 
     private fun setupInteractiveClickListeners() {
         binding.layoutProfileAvatarContainer.setOnClickListener {
-            Toast.makeText(context, "Opening Camera Hardware Profile Scanner Launcher...", Toast.LENGTH_SHORT).show()
+            showMediaSelectionBottomSheet()
         }
 
         binding.btnVerifyNowAction.setOnClickListener {
             auth.currentUser?.sendEmailVerification()?.addOnCompleteListener { task ->
                 if (task.isSuccessful) {
-                    Toast.makeText(context, "Verification email dispatched successfully! ✉️ Check your inbox.", Toast.LENGTH_LONG).show()
-                } else {
-                    Toast.makeText(context, "Mailer lookup error: ${task.exception?.localizedMessage}", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, "Verification email dispatched!", Toast.LENGTH_SHORT).show()
                 }
             }
         }
@@ -180,7 +249,7 @@ class ProfileFragment : Fragment() {
         binding.btnLogout.setOnClickListener {
             MaterialAlertDialogBuilder(requireContext(), R.style.MaterialAlertDialog_Rounded)
                 .setTitle("Confirm Logout")
-                .setMessage("Are you sure you want to terminate your current Nursing Studio learning session?")
+                .setMessage("Are you sure you want to terminate your current session?")
                 .setCancelable(true)
                 .setPositiveButton("Logout") { _, _ ->
                     viewLifecycleOwner.lifecycleScope.launch {
@@ -192,9 +261,7 @@ class ProfileFragment : Fragment() {
                         activity?.finish()
                     }
                 }
-                .setNegativeButton("Cancel") { dialog, _ ->
-                    dialog.dismiss()
-                }
+                .setNegativeButton("Cancel") { dialog, _ -> dialog.dismiss() }
                 .show()
         }
     }
