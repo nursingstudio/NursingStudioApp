@@ -66,7 +66,10 @@
         <activity
             android:name="com.yalantis.ucrop.UCropActivity"
             android:configChanges="orientation|screenSize|screenLayout|smallestScreenSize"
-            android:theme="@style/Theme.NursingStudio"/>
+            android:screenOrientation="fullSensor"
+            android:theme="@style/Theme.NursingStudio"
+            android:windowSoftInputMode="stateAlwaysHidden" />
+
 
     </application>
 

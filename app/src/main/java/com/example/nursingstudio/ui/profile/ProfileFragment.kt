@@ -193,29 +193,22 @@ class ProfileFragment : Fragment() {
      * 🚀 2026 INDUSTRY GOLD STANDARD: Safe Immersive Window Layout Sandbox
      * Strictly forces full layout compression inside system navigation bar grids to ensure 100% clickability.
      */
+    /**
+     * 🚀 2026 INDUSTRY GOLD STANDARD: Optimized Isolated Media Safe Launcher
+     */
     private fun launchUCropEngine(sourceUri: Uri) {
         val destinationFileName = "NS_Crop_${System.currentTimeMillis()}.jpg"
         val destinationUri = Uri.fromFile(File(requireContext().cacheDir, destinationFileName))
 
         val premiumOptions = UCrop.Options().apply {
             setCompressionQuality(85)
-
-            // 🎨 System & Brand Layout Theme Matrix Alignment
             setToolbarColor(ContextCompat.getColor(requireContext(), R.color.brand_blue))
             setStatusBarColor(ContextCompat.getColor(requireContext(), R.color.brand_blue))
             setActiveControlsWidgetColor(ContextCompat.getColor(requireContext(), R.color.brand_saffron_dark))
 
-            // 🛠️ FIX EDGE-TO-EDGE OVERLAP: Force controls to squeeze inside window margins
+            // Explicit framework compression bounds configuration
             setHideBottomControls(false)
             setFreeStyleCropEnabled(false)
-
-            // 🔒 2026 Strict Explicit Inset Bounds Flags Override
-            this.optionBundle.putBoolean("com.yalantis.ucrop.ImmersiveActivity", false)
-            this.optionBundle.putInt("com.yalantis.ucrop.UcropRootViewBackgroundColor", Color.BLACK)
-
-            // Forces native uCrop Activity window to draw inside system navigation bars safely
-            this.optionBundle.putBoolean("com.yalantis.ucrop.XxxImmersiveActivity", false)
-            this.optionBundle.putBoolean("com.yalantis.ucrop.UcropStatusControlsWidgetVisible", true)
         }
 
         val uCropIntent = UCrop.of(sourceUri, destinationUri)
