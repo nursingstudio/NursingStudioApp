@@ -196,19 +196,28 @@ class ProfileFragment : Fragment() {
     /**
      * 🚀 2026 INDUSTRY GOLD STANDARD: Optimized Isolated Media Safe Launcher
      */
+    /**
+     * 🚀 2026 INDUSTRY GOLD STANDARD: Safe Screen Padding Isolation Engine
+     * Completely maps layout bounds to prevent overlay artifacts.
+     */
     private fun launchUCropEngine(sourceUri: Uri) {
         val destinationFileName = "NS_Crop_${System.currentTimeMillis()}.jpg"
         val destinationUri = Uri.fromFile(File(requireContext().cacheDir, destinationFileName))
 
         val premiumOptions = UCrop.Options().apply {
             setCompressionQuality(85)
+
+            // System Layout UI Framework Palette Match
             setToolbarColor(ContextCompat.getColor(requireContext(), R.color.brand_blue))
             setStatusBarColor(ContextCompat.getColor(requireContext(), R.color.brand_blue))
             setActiveControlsWidgetColor(ContextCompat.getColor(requireContext(), R.color.brand_saffron_dark))
 
-            // Explicit framework compression bounds configuration
+            // 🛠️ Structural Fix: Force display controllers to keep dynamic boundaries alive
             setHideBottomControls(false)
             setFreeStyleCropEnabled(false)
+
+            // Explicit flags configurations block
+            this.optionBundle.putBoolean("com.yalantis.ucrop.ImmersiveActivity", false)
         }
 
         val uCropIntent = UCrop.of(sourceUri, destinationUri)

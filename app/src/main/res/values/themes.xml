@@ -168,5 +168,12 @@
         <item name="android:background">?android:attr/selectableItemBackground</item>
     </style>
 
+    <style name="UCropEngineCustomTheme" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="android:windowFullscreen">false</item>
+    <item name="android:windowContentOverlay">@null</item>
+    <item name="android:fitsSystemWindows">true</item>
+    <item name="android:windowDrawsSystemBarBackgrounds">true</item>
+</style>
+
 
 </resources>
