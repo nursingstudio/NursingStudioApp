@@ -61,6 +61,10 @@ class ProfileViewModel : ViewModel() {
                         val currentMap = _userData.value?.toMutableMap() ?: mutableMapOf()
                         currentMap["profileImageUrl"] = downloadUri.toString()
                         _userData.value = currentMap
+
+                        // 🚀 RESOLVED WARNING & FORCE REFRESH: Re-syncing database network states instantly
+                        forceRefreshProfile()
+
                         _uploadProgress.value = false
                     }?.addOnFailureListener { firestoreEx ->
                         _error.value = "Firestore Link Update Error: ${firestoreEx.localizedMessage}"

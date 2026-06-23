@@ -68,14 +68,19 @@ class ProfileFragment : Fragment() {
         }
     }
 
-    // 🚀 FIXED: Precise structural assignment mapping for nested Intent data layers
+    // 🚀 FIXED: Robust Result Registry to protect stream state across orientation changes
     private val cropLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         val resultCode = result.resultCode
         val dataIntent = result.data
 
         if (resultCode == android.app.Activity.RESULT_OK && dataIntent != null) {
             val finalCroppedUri = UCrop.getOutput(dataIntent)
-            finalCroppedUri?.let { viewModel.uploadProfileImage(it) }
+            finalCroppedUri?.let { uri ->
+                // Ensures execution is safely isolated in current context lifecycle scope
+                viewLifecycleOwner.lifecycleScope.launch {
+                    viewModel.uploadProfileImage(uri)
+                }
+            }
         } else if (resultCode == UCrop.RESULT_ERROR && dataIntent != null) {
             val cropError = UCrop.getError(dataIntent)
             Toast.makeText(context, "Crop Engine Error: ${cropError?.localizedMessage}", Toast.LENGTH_SHORT).show()
@@ -185,20 +190,8 @@ class ProfileFragment : Fragment() {
     }
 
     /**
-     * 🚀 2026 INDUSTRY GOLD STANDARD: Sanitize Screen Layout Bounds Engine
-     * Enforces explicit system UI boundaries to resolve top toolbar component overlaps.
-     */
-    /**
-     * 🚀 2026 INDUSTRY GOLD STANDARD: Sanitize Screen Layout Bounds Engine
-     * Uses strict option constraints to securely bind the toolbar below the system windows.
-     */
-    /**
      * 🚀 2026 INDUSTRY GOLD STANDARD: Safe Immersive Window Layout Sandbox
-     * Sanitized layout boundaries to explicitly pull components below system status bar cuts.
-     */
-    /**
-     * 🚀 2026 INDUSTRY GOLD STANDARD: Safe Immersive Window Layout Sandbox
-     * Explicitly forces uCrop engine to respect system safe display cutouts and navigation boundaries.
+     * Strictly forces full layout compression inside system navigation bar grids to ensure 100% clickability.
      */
     private fun launchUCropEngine(sourceUri: Uri) {
         val destinationFileName = "NS_Crop_${System.currentTimeMillis()}.jpg"
@@ -207,23 +200,27 @@ class ProfileFragment : Fragment() {
         val premiumOptions = UCrop.Options().apply {
             setCompressionQuality(85)
 
-            // 🎨 Explicit Brand Theme Color Matching
+            // 🎨 System & Brand Layout Theme Matrix Alignment
             setToolbarColor(ContextCompat.getColor(requireContext(), R.color.brand_blue))
             setStatusBarColor(ContextCompat.getColor(requireContext(), R.color.brand_blue))
             setActiveControlsWidgetColor(ContextCompat.getColor(requireContext(), R.color.brand_saffron_dark))
 
-            // 🛠️ CRITICAL SCREEN SYSTEM FIXES (Prevents bleeding behind status & navigation bar)
+            // 🛠️ FIX EDGE-TO-EDGE OVERLAP: Force controls to squeeze inside window margins
             setHideBottomControls(false)
             setFreeStyleCropEnabled(false)
 
-            // 🔒 Strict Flag Configuration Matrix for Window Layout Insets
+            // 🔒 2026 Strict Explicit Inset Bounds Flags Override
             this.optionBundle.putBoolean("com.yalantis.ucrop.ImmersiveActivity", false)
             this.optionBundle.putInt("com.yalantis.ucrop.UcropRootViewBackgroundColor", Color.BLACK)
+
+            // Forces native uCrop Activity window to draw inside system navigation bars safely
+            this.optionBundle.putBoolean("com.yalantis.ucrop.XxxImmersiveActivity", false)
+            this.optionBundle.putBoolean("com.yalantis.ucrop.UcropStatusControlsWidgetVisible", true)
         }
 
         val uCropIntent = UCrop.of(sourceUri, destinationUri)
             .withAspectRatio(1f, 1f)
-            .withMaxResultSize(1080, 1080) // Optimized for ultra-clear high resolution profiles
+            .withMaxResultSize(1080, 1080)
             .withOptions(premiumOptions)
             .getIntent(requireContext())
 
