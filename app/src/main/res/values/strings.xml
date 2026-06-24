@@ -340,6 +340,9 @@
     <string name="playlists">Playlists</string>
     <string name="youtube_playlists">YouTube Playlists</string>
     <string name="watch_curated_video_playlists">Watch curated video playlists.</string>
+    <string name="ai_search">AI Search</string>
+    <string name="ask_anything_about_nursing_ai_guided">Ask anything about Nursing (AI Guided)...</string>
+    <string name="ai_verified">AI Verified</string>
 
 
 </resources>

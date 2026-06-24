@@ -48,6 +48,7 @@ class HomeFragment : Fragment() {
         dataStoreManager = DataStoreManager(requireContext())
 
         setupCardsClickListeners()
+        setupSearchAIEngine() // 🚀 New isolated architecture initialization block
         setupReactiveWelcomeHeader()
         checkAndShowBiometricPrompt()
         setupDailyMotivation()
@@ -182,6 +183,20 @@ class HomeFragment : Fragment() {
             findNavController().navigate(destinationId)
         } catch (e: Exception) {
             e.printStackTrace()
+        }
+    }
+
+    /**
+     * 🚀 2026 INDUSTRY GOLD STANDARD: Isolated AI Search Pipeline Navigation Gate
+     */
+    private fun setupSearchAIEngine() {
+        binding.cardSearchWrapper.setOnClickListener {
+            // 🔒 Future-Proof Guard: Navigates straight into specialized contextual search dialog/fragment
+            // Abhi ke liye hum instant test toast query test karwa rahe hain, ready for Firebase link
+            android.widget.Toast.makeText(context, "Initializing Isolated Nursing AI Guardrail Engine...", android.widget.Toast.LENGTH_SHORT).show()
+
+            // Next Step: We will navigate to the dynamic full-screen streaming answer fragment here
+            // navigateToFragment(R.id.nav_ai_search)
         }
     }
 

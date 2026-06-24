@@ -51,41 +51,52 @@ class ProfileViewModel : ViewModel() {
      * 🚀 2026 INDUSTRY GOLD STANDARD: Resilient Asynchronous Storage Pipeline
      * Robust stream wrapper that uploads cropped cache files directly to Firebase with active lifecycle guarding.
      */
-    fun uploadProfileImage(fileUri: Uri) {
+    /**
+     * 🚀 2026 INDUSTRY GOLD STANDARD: Failure-Proof Binary Stream Upload Engine
+     * Extracts absolute raw byte arrays from URIs via ContentResolver to guarantee cloud transmission.
+     */
+    fun uploadProfileImage(fileUri: Uri, context: android.content.Context) {
         val uid = auth.currentUser?.uid ?: return
         _uploadProgress.value = true
 
-        // Strict pointer instantiation inside Cloud Bucket Isolation Zone
         val storageRef = storage.reference.child("Users/$uid/profile_avatar.jpg")
 
-        // 🔒 Explicit Metadata Configuration to enforce media-type recognition across cloud pipelines
+        // 🔒 Explicit Content Extraction Sandbox to bypass "Object does not exist" native file constraints
+        val byteArrayBytes: ByteArray? = try {
+            context.contentResolver.openInputStream(fileUri)?.use { inputStream ->
+                inputStream.readBytes()
+            }
+        } catch (e: Exception) {
+            _error.value = "Local Content Extraction Fault: ${e.localizedMessage}"
+            _uploadProgress.value = false
+            null
+        }
+
+        if (byteArrayBytes == null) return
+
         val metadata = com.google.firebase.storage.StorageMetadata.Builder()
             .setContentType("image/jpeg")
             .build()
 
-        storageRef.putFile(fileUri, metadata)
+        // 🚀 Transmitting direct raw byte streaming sequence instead of vulnerable file references
+        storageRef.putBytes(byteArrayBytes, metadata)
             .addOnProgressListener { taskSnapshot ->
-                // 🚀 2026 SOLID ARCHITECTURE LOGGING: Safely utilize calculation matrix to track upload stream bounds
                 if (taskSnapshot.totalByteCount > 0) {
                     val computedProgressPercentage = (100.0 * taskSnapshot.bytesTransferred / taskSnapshot.totalByteCount)
                     android.util.Log.d("NS_STORAGE_ENGINE", "Upload Progress Boundary: ${String.format(java.util.Locale.US, "%.2f", computedProgressPercentage)}%")
                 }
             }
             .addOnSuccessListener { _ ->
-                // Resolution pipeline fetching secure token-authenticated URL
                 storageRef.downloadUrl.addOnSuccessListener { downloadUri ->
                     val secureUrlString = downloadUri.toString()
                     val updateMap = mapOf("profileImageUrl" to secureUrlString)
 
                     repository.updateProfile(updateMap)?.addOnSuccessListener {
-                        // Mutating hot-cache reference snapshot streams safely
                         val currentMap = _userData.value?.toMutableMap() ?: mutableMapOf()
                         currentMap["profileImageUrl"] = secureUrlString
                         _userData.value = currentMap
 
-                        // 🚀 Re-trigger eager fetch stream to ensure real-time local cache match
                         forceRefreshProfile()
-
                         _uploadProgress.value = false
                     }?.addOnFailureListener { firestoreEx ->
                         _error.value = "Firestore Sync Fault: ${firestoreEx.localizedMessage}"

@@ -76,9 +76,9 @@ class ProfileFragment : Fragment() {
         if (resultCode == android.app.Activity.RESULT_OK && dataIntent != null) {
             val finalCroppedUri = UCrop.getOutput(dataIntent)
             finalCroppedUri?.let { uri ->
-                // Ensures execution is safely isolated in current context lifecycle scope
+                // 🚀 FIXED: Securely pass layout environment context to initialize the stream extraction
                 viewLifecycleOwner.lifecycleScope.launch {
-                    viewModel.uploadProfileImage(uri)
+                    viewModel.uploadProfileImage(uri, requireContext())
                 }
             }
         } else if (resultCode == UCrop.RESULT_ERROR && dataIntent != null) {
