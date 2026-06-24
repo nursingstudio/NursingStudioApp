@@ -102,6 +102,13 @@ class ProfileFragment : Fragment() {
         setupInitialTactileUI()
         observeProfileDataStream()
         setupInteractiveClickListeners()
+
+        // 🚀 2026 Architecture Guard: Real-time network failure observation pool
+        viewModel.error.observe(viewLifecycleOwner) { errorMessage ->
+            if (!errorMessage.isNullOrEmpty()) {
+                Toast.makeText(context, "Cloud Core Sync Warning: $errorMessage", Toast.LENGTH_LONG).show()
+            }
+        }
     }
 
     private fun setupInitialTactileUI() {
