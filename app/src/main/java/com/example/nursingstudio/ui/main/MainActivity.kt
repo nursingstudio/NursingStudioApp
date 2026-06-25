@@ -37,8 +37,9 @@ class MainActivity : BaseActivity() { // ✅ ⭐ 2026 GOLD STANDARD: Extends Bas
     private lateinit var navController: NavController
     private lateinit var viewModel: MainViewModel
     private lateinit var dataStoreManager: DataStoreManager
-
     private val auth = FirebaseAuth.getInstance()
+
+    private lateinit var profileViewModel: com.example.nursingstudio.ui.profile.ProfileViewModel
 
     companion object {
         private const val URL_YOUTUBE  = "https://youtube.com/@NursingStudio2026"
@@ -75,8 +76,8 @@ class MainActivity : BaseActivity() { // ✅ ⭐ 2026 GOLD STANDARD: Extends Bas
         viewModel.syncUserData(currentUser.uid)
         observeUserData()
 
-        // 🚀 2026 Eager Framework Trigger: Initialize Shared Profile Stream early in background heap
-        androidx.lifecycle.ViewModelProvider(this)[com.example.nursingstudio.ui.profile.ProfileViewModel::class.java]
+        // Initialize Shared Profile Engine inside Activity scope
+        profileViewModel = androidx.lifecycle.ViewModelProvider(this)[com.example.nursingstudio.ui.profile.ProfileViewModel::class.java]
     }
 
     private fun setupHeader() {
@@ -196,18 +197,24 @@ class MainActivity : BaseActivity() { // ✅ ⭐ 2026 GOLD STANDARD: Extends Bas
                     }
                 }
 
-                // Channel 3: Modern Image Fallback Pipeline Engine
-               /* launch {
-                    // Assuming dataStoreManager exposes your uploaded profile image URI string path channel
-                    dataStoreManager.userProfileUri?.collect { profileUriString ->
-                        if (!profileUriString.isNullOrBlank()) {
-                            headerBinding.imgHeaderProfile.setImageURI(profileUriString.toUri())
-                        } else {
-                            // 🚀 FIXED: Fallback immediately to official application workspace branding logo token
-                            headerBinding.imgHeaderProfile.setImageResource(R.drawable.ic_login_logo)
+                // Channel 3: Modern Image Fallback Pipeline Engine (Real-time Mirroring Layer)
+                launch {
+                    profileViewModel.userData.observe(this@MainActivity) { dataMap ->
+                        dataMap?.let { data ->
+                            val profileUrl = data["profileImageUrl"]?.toString() ?: ""
+                            if (profileUrl.isNotBlank()) {
+                                com.bumptech.glide.Glide.with(this@MainActivity)
+                                    .load(profileUrl)
+                                    .placeholder(R.drawable.ic_login_logo)
+                                    .error(R.drawable.ic_login_logo)
+                                    .circleCrop() // 2026 Premium Design UI feel
+                                    .into(headerBinding.imgHeaderProfile)
+                            } else {
+                                headerBinding.imgHeaderProfile.setImageResource(R.drawable.ic_login_logo)
+                            }
                         }
                     }
-                } */
+                }
 
                 // Channel 4: Architectural Subscriptions Status Multi-State Evaluation
                 launch {

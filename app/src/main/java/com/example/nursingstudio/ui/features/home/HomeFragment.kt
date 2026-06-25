@@ -17,7 +17,10 @@ import com.example.nursingstudio.data.local.DataStoreManager
 import com.example.nursingstudio.databinding.FragmentHomeBinding
 import com.example.nursingstudio.utils.ProgressManager
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.google.firebase.app
+import com.google.firebase.Firebase
+import com.google.firebase.vertexai.type.content
+import com.google.firebase.vertexai.type.generationConfig
+import com.google.firebase.vertexai.vertexAI
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
@@ -189,13 +192,12 @@ class HomeFragment : Fragment() {
 
     /**
      * 🚀 2026 INDUSTRY GOLD STANDARD: Vertex AI Immersive Guardrailed Search Pipeline
-     * Fully resolves parent root inflation context and explicit vertex instance bindings.
+     * Fully isolates inference engines inside secure local content blocks with failure-proof casting.
      */
     private fun setupSearchAIEngine() {
         binding.cardSearchWrapper.setOnClickListener {
             val bottomSheetDialog = com.google.android.material.bottomsheet.BottomSheetDialog(requireContext())
 
-            // 🔒 FIXED: Resolved layout parameter calculations by passing explicit container view boundaries instead of null
             val containerViewGroup = activity?.findViewById<ViewGroup>(android.R.id.content)
             val sheetView = layoutInflater.inflate(R.layout.layout_ai_search_sheet, containerViewGroup, false)
             bottomSheetDialog.setContentView(sheetView)
@@ -204,7 +206,6 @@ class HomeFragment : Fragment() {
             val etQuery = sheetView.findViewById<com.google.android.material.textfield.TextInputEditText>(R.id.etAiQueryField)
             val btnSubmit = sheetView.findViewById<com.google.android.material.floatingactionbutton.FloatingActionButton>(R.id.fabSubmitQuery)
 
-            // 🔒 INITIALIZING BACKEND COGNITIVE ENGINE WITH IMMUTABLE GUARDRAILS
             val systemInstruction = """
                 You are the Elite AI Faculty of Nursing Studio app. 
                 You must strictly answer queries related ONLY to nursing profession, medical procedures, pharmacology, and anatomy. 
@@ -213,16 +214,13 @@ class HomeFragment : Fragment() {
                 Always maintain a high-level, encouraging, professional tone for nursing students.
             """.trimIndent()
 
-            // 🚀 2026 FIXED: Failure-Proof Package Path resolution using explicit Firebase SDK references
-            val firebaseAppInstance = com.google.firebase.Firebase.app
-            val vertexAIInstance = com.google.firebase.vertexai.FirebaseVertexAI.getInstance(firebaseAppInstance)
-
-            val generativeModel = vertexAIInstance.generativeModel(
+            // 🚀 FIXED: Standardized direct extension accessor framework
+            val generativeModel = Firebase.vertexAI.generativeModel(
                 modelName = "gemini-1.5-flash",
-                generationConfig = com.google.firebase.vertexai.type.generationConfig {
-                    temperature = 0.2f // Low temperature ensures hyper-focused strict professional answers
+                generationConfig = generationConfig {
+                    temperature = 0.2f
                 },
-                systemInstruction = com.google.firebase.vertexai.type.content { text(systemInstruction) }
+                systemInstruction = content { text(systemInstruction) }
             )
 
             btnSubmit.setOnClickListener {
@@ -232,16 +230,22 @@ class HomeFragment : Fragment() {
                 tvOutput.text = getString(R.string.nursing_studio_ai_faculty_is_thinking)
                 etQuery.text?.clear()
 
-                // Triggering full asynchronous non-blocking stream pipeline via lifecycle scope
+                // 🚀 2026 INDUSTRY GOLD STANDARD: Non-blocking Thread Engine with Placeholder Localization
                 viewLifecycleOwner.lifecycleScope.launch {
                     try {
                         val response = generativeModel.generateContent(rawQueryText)
                         tvOutput.text = response.text ?: "No clear response generated. Try phrasing medical terms."
                     } catch (e: Exception) {
                         e.printStackTrace()
+
+                        // 🔒 FIXED: Eliminated raw string concatenation by leveraging rigid multi-placeholder formatting parameters
+                        val errorHeadingText = getString(R.string.cloud_core_connection_error_ensure_you_completed_step_1_and_step_2_perfectly)
+                        val exceptionMessageStr = e.localizedMessage ?: "Unknown Runtime Connection Fault"
+
                         tvOutput.text = getString(
-                            R.string.cloud_core_connection_error_ensure_you_completed_step_1_and_step_2_perfectly,
-                            e.localizedMessage
+                            R.string.ai_network_stream_error_template,
+                            errorHeadingText,
+                            exceptionMessageStr
                         )
                     }
                 }

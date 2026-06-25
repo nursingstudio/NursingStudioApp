@@ -341,17 +341,18 @@
     <string name="youtube_playlists">YouTube Playlists</string>
     <string name="watch_curated_video_playlists">Watch curated video playlists.</string>
     <string name="ai_search">AI Search</string>
-    <string name="ask_anything_about_nursing_ai_guided">Ask anything about Nursing (AI Guided)...</string>
+    <string name="ask_anything_about_nursing_ai_guided">Ask anything about Nursing (AI Guided)…</string>
     <string name="ai_verified">AI Verified</string>
     <string name="nursing_studio_ai_copilot">Nursing Studio AI Copilot</string>
     <string name="strictly_guided_nursing_professional_assistance_system_powered_by_nursing_studio">Strictly guided nursing professional assistance system powered by Nursing Studio.</string>
-    <string name="waiting_for_your_professional_nursing_query">Waiting for your professional nursing query ...</string>
-    <string name="ask_anything_related_to_nursing">Ask anything related to nursing...</string>
+    <string name="waiting_for_your_professional_nursing_query">Waiting for your professional nursing query …</string>
+    <string name="ask_anything_related_to_nursing">Ask anything related to nursing…</string>
     <string name="submit_search_query">Submit Search Query</string>
-    <string name="analyzing_query_constraints_inside_nursing_domains">Analyzing query constraints inside nursing domains...</string>
+    <string name="analyzing_query_constraints_inside_nursing_domains">Analyzing query constraints inside nursing domains…</string>
     <string name="security_lock_buffer_nursing_studio_ai_engine_is_restricted_exclusively_to_nursing_professional_domains_questions_regarding_generic_technology_computing_or_unrelated_sciences_are_dropped_automatically_to_preserve_elite_domain_compliance">⚠️ SECURITY LOCK BUFFER:\n\nNursing Studio AI Engine is restricted exclusively to Nursing Professional domains. Questions regarding generic technology, computing, or unrelated sciences are dropped automatically to preserve elite domain compliance.</string>
     <string name="verified_scholar_query_processing_system_responses_for_system_connection_layer_ready_google_vertex_ai_core_initialization_verified_ready_to_pass_final_backend_data_dynamic_response_structures_safely">🧬 VERIFIED SCHOLAR QUERY:\n\nProcessing system responses for: \"%1$s\".\n\n[System Connection Layer Ready: Google Vertex AI Core initialization verified. Ready to pass final backend data dynamic response structures safely!]</string>
-    <string name="nursing_studio_ai_faculty_is_thinking">Nursing Studio AI Faculty is thinking...</string>
+    <string name="nursing_studio_ai_faculty_is_thinking">Nursing Studio AI Faculty is thinking…</string>
+    <string name="ai_network_stream_error_template">%1$s: %2$s</string>
     <string name="cloud_core_connection_error_ensure_you_completed_step_1_and_step_2_perfectly">Cloud Core Connection Error: %1$s\n\n[Ensure you completed Step 1 and Step 2 perfectly!]</string>
 
 
