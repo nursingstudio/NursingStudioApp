@@ -142,6 +142,14 @@ dependencies {
     implementation(libs.ucrop)
     // 🚀 2026 WORLD-CLASS CACHING IMAGE ENGINE: Glide Implementation
     implementation(libs.glide)
+
+    // 🚀 2026 INDUSTRY GOLD STANDARD: Firebase Cloud Core & AI Jetpack Components
+    implementation(libs.firebase.storage.ktx)
+    implementation(libs.firebase.firestore.ktx)
+
+    // 🧬 Gemini Vertex AI Android SDK for Secure Guardrailed Search
+    implementation(libs.firebase.vertexai)
+
     annotationProcessor(libs.compiler)
 
 

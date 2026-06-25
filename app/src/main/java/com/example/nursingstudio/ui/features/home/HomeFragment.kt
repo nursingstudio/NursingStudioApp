@@ -17,6 +17,7 @@ import com.example.nursingstudio.data.local.DataStoreManager
 import com.example.nursingstudio.databinding.FragmentHomeBinding
 import com.example.nursingstudio.utils.ProgressManager
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.firebase.app
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
@@ -187,16 +188,66 @@ class HomeFragment : Fragment() {
     }
 
     /**
-     * 🚀 2026 INDUSTRY GOLD STANDARD: Isolated AI Search Pipeline Navigation Gate
+     * 🚀 2026 INDUSTRY GOLD STANDARD: Vertex AI Immersive Guardrailed Search Pipeline
+     * Fully resolves parent root inflation context and explicit vertex instance bindings.
      */
     private fun setupSearchAIEngine() {
         binding.cardSearchWrapper.setOnClickListener {
-            // 🔒 Future-Proof Guard: Navigates straight into specialized contextual search dialog/fragment
-            // Abhi ke liye hum instant test toast query test karwa rahe hain, ready for Firebase link
-            android.widget.Toast.makeText(context, "Initializing Isolated Nursing AI Guardrail Engine...", android.widget.Toast.LENGTH_SHORT).show()
+            val bottomSheetDialog = com.google.android.material.bottomsheet.BottomSheetDialog(requireContext())
 
-            // Next Step: We will navigate to the dynamic full-screen streaming answer fragment here
-            // navigateToFragment(R.id.nav_ai_search)
+            // 🔒 FIXED: Resolved layout parameter calculations by passing explicit container view boundaries instead of null
+            val containerViewGroup = activity?.findViewById<ViewGroup>(android.R.id.content)
+            val sheetView = layoutInflater.inflate(R.layout.layout_ai_search_sheet, containerViewGroup, false)
+            bottomSheetDialog.setContentView(sheetView)
+
+            val tvOutput = sheetView.findViewById<android.widget.TextView>(R.id.tvAiTerminalOutput)
+            val etQuery = sheetView.findViewById<com.google.android.material.textfield.TextInputEditText>(R.id.etAiQueryField)
+            val btnSubmit = sheetView.findViewById<com.google.android.material.floatingactionbutton.FloatingActionButton>(R.id.fabSubmitQuery)
+
+            // 🔒 INITIALIZING BACKEND COGNITIVE ENGINE WITH IMMUTABLE GUARDRAILS
+            val systemInstruction = """
+                You are the Elite AI Faculty of Nursing Studio app. 
+                You must strictly answer queries related ONLY to nursing profession, medical procedures, pharmacology, and anatomy. 
+                If a user asks an out-of-scope question (e.g., 'how to code', 'best cars', 'politics', 'movies'), you must politely decline by saying:
+                "Nursing Studio AI Engine is restricted exclusively to Nursing Professional domains. I cannot answer out-of-scope queries."
+                Always maintain a high-level, encouraging, professional tone for nursing students.
+            """.trimIndent()
+
+            // 🚀 2026 FIXED: Failure-Proof Package Path resolution using explicit Firebase SDK references
+            val firebaseAppInstance = com.google.firebase.Firebase.app
+            val vertexAIInstance = com.google.firebase.vertexai.FirebaseVertexAI.getInstance(firebaseAppInstance)
+
+            val generativeModel = vertexAIInstance.generativeModel(
+                modelName = "gemini-1.5-flash",
+                generationConfig = com.google.firebase.vertexai.type.generationConfig {
+                    temperature = 0.2f // Low temperature ensures hyper-focused strict professional answers
+                },
+                systemInstruction = com.google.firebase.vertexai.type.content { text(systemInstruction) }
+            )
+
+            btnSubmit.setOnClickListener {
+                val rawQueryText = etQuery.text?.toString()?.trim() ?: ""
+                if (rawQueryText.isEmpty()) return@setOnClickListener
+
+                tvOutput.text = getString(R.string.nursing_studio_ai_faculty_is_thinking)
+                etQuery.text?.clear()
+
+                // Triggering full asynchronous non-blocking stream pipeline via lifecycle scope
+                viewLifecycleOwner.lifecycleScope.launch {
+                    try {
+                        val response = generativeModel.generateContent(rawQueryText)
+                        tvOutput.text = response.text ?: "No clear response generated. Try phrasing medical terms."
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                        tvOutput.text = getString(
+                            R.string.cloud_core_connection_error_ensure_you_completed_step_1_and_step_2_perfectly,
+                            e.localizedMessage
+                        )
+                    }
+                }
+            }
+
+            bottomSheetDialog.show()
         }
     }
 

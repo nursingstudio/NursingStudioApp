@@ -11,6 +11,9 @@ coreSplashscreen = "1.2.0"
 datastorePreferences = "1.2.1"
 firebaseAnalytics = "23.0.0"
 firebaseCrashlytics = "20.0.4"
+firebaseFirestoreKtx = "25.1.4"
+firebaseStorageKtx = "21.0.2"
+firebaseVertexai = "16.5.0"
 fragmentKtx = "1.8.9"
 glide = "5.0.7"
 hiltAndroid = "2.59.2"
@@ -63,7 +66,10 @@ firebase-auth = { module = "com.google.firebase:firebase-auth" }
 firebase-crashlytics = { module = "com.google.firebase:firebase-crashlytics", version.ref = "firebaseCrashlytics" }
 firebase-database = { module = "com.google.firebase:firebase-database" }
 firebase-firestore = { module = "com.google.firebase:firebase-firestore" }
+firebase-firestore-ktx = { module = "com.google.firebase:firebase-firestore-ktx", version.ref = "firebaseFirestoreKtx" }
 firebase-storage = { module = "com.google.firebase:firebase-storage" }
+firebase-storage-ktx = { module = "com.google.firebase:firebase-storage-ktx", version.ref = "firebaseStorageKtx" }
+firebase-vertexai = { module = "com.google.firebase:firebase-vertexai", version.ref = "firebaseVertexai" }
 glide = { module = "com.github.bumptech.glide:glide", version.ref = "glide" }
 google-firebase-appcheck-ktx = { module = "com.google.firebase:firebase-appcheck-ktx" }
 hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hiltAndroid" }
