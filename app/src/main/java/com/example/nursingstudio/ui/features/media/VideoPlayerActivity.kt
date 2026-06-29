@@ -3,6 +3,7 @@ package com.example.nursingstudio.ui.features.media
 import android.os.Bundle
 import android.view.View
 import androidx.annotation.OptIn
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.net.toUri
 import androidx.core.view.ViewCompat
@@ -12,8 +13,10 @@ import androidx.core.view.WindowInsetsControllerCompat
 import androidx.media3.common.MediaItem
 import androidx.media3.common.PlaybackParameters
 import androidx.media3.common.Player
+import androidx.media3.common.TrackSelectionOverride
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
+import com.example.nursingstudio.R
 import com.example.nursingstudio.databinding.ActivityVideoPlayerBinding
 
 @OptIn(UnstableApi::class)
@@ -54,10 +57,10 @@ class VideoPlayerActivity : AppCompatActivity() {
         val streamUrl = intent.getStringExtra("VIDEO_URL") ?: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
         initializeStreamingEngine(streamUrl)
 
-        // 🚀 FIXED: Utilizing changePlaybackSpeed feature to eradicate lint warnings
-        binding.btnSpeedNormal.setOnClickListener { changePlaybackSpeed(1.0f) }
-        binding.btnSpeedFast.setOnClickListener { changePlaybackSpeed(1.5f) }
-        binding.btnSpeedSuperFast.setOnClickListener { changePlaybackSpeed(2.0f) }
+        // 🚀 2026 GOLD STANDARD: Dynamic Hardware Quality Track Dialog Hub
+        binding.btnVideoQuality.setOnClickListener {
+            showQualitySelectionDialog()
+        }
     }
 
     private fun initializeStreamingEngine(url: String) {
@@ -83,6 +86,53 @@ class VideoPlayerActivity : AppCompatActivity() {
 
     fun changePlaybackSpeed(speed: Float) {
         exoPlayer?.playbackParameters = PlaybackParameters(speed)
+    }
+
+    private fun showQualitySelectionDialog() {
+        val player = exoPlayer ?: return
+        val currentTracks = player.currentTracks
+        val videoOptions = mutableListOf<Pair<String, TrackSelectionOverride>>()
+
+        // Loop through internal adaptive streaming tracks (HLS/Dash/MP4 bitrates)
+        for (trackGroup in currentTracks.groups) {
+            if (trackGroup.type == androidx.media3.common.C.TRACK_TYPE_VIDEO) {
+                for (i in 0 until trackGroup.length) {
+                    if (trackGroup.isTrackSupported(i)) {
+                        val format = trackGroup.getTrackFormat(i)
+                        val height = format.height
+                        if (height > 0) {
+                            val label = "${height}p"
+                            val override = TrackSelectionOverride(trackGroup.mediaTrackGroup, i)
+                            videoOptions.add(Pair(label, override))
+                        }
+                    }
+                }
+            }
+        }
+
+        // Generate dynamic dialog list up to 2026 UX guidelines
+        val labels = arrayOf("Auto (Adaptive)") + videoOptions.map { it.first }.toTypedArray()
+
+        AlertDialog.Builder(this)
+            .setTitle("Select Video Quality")
+            .setItems(labels) { _, which ->
+                if (which == 0) {
+                    // Reset to Auto Adaptive Bitrate Streaming
+                    player.trackSelectionParameters = player.trackSelectionParameters
+                        .buildUpon()
+                        .clearOverridesOfType(androidx.media3.common.C.TRACK_TYPE_VIDEO)
+                        .build()
+                    binding.btnVideoQuality.text = getString(R.string.qualityauto)
+                } else {
+                    // Lock specific resolution profile securely
+                    val selectedOption = videoOptions[which - 1]
+                    player.trackSelectionParameters = player.trackSelectionParameters
+                        .buildUpon()
+                        .setOverrideForType(selectedOption.second)
+                        .build()
+                    binding.btnVideoQuality.text = getString(R.string.quality, selectedOption.first)
+                }
+            }.show()
     }
 
     override fun onPause() {

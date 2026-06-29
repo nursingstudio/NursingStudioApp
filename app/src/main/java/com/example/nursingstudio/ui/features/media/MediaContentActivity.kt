@@ -60,9 +60,11 @@ class MediaContentActivity : AppCompatActivity() {
                     }
                 }
             }
-            .addOnFailureListener { _ ->
+            .addOnFailureListener { e ->
                 binding.loadingBar.visibility = View.GONE
-                Toast.makeText(this, "Network cloud fetch fault occurred", Toast.LENGTH_SHORT).show()
+                // 🚀 2026 Gold Standard: Advanced Error Telemetry Log for strict architectural tracing
+                android.util.Log.e("FIRESTORE_FAULT", "Fail reason: ${e.localizedMessage}")
+                Toast.makeText(this, "Cloud Sync Error: Ensure collections exist and rules are published.", Toast.LENGTH_LONG).show()
             }
     }
 }

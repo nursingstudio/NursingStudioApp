@@ -359,6 +359,9 @@
     <string name="_2_0x">2.0x</string>
     <string name="nursing_lecture_standard_title_slot">Nursing Lecture Standard Title Slot</string>
     <string name="menu">menu</string>
+    <string name="quality_auto">Quality (Auto)</string>
+    <string name="quality">Quality (%1$s)</string>
+    <string name="qualityauto">Quality (Auto)</string>
 
 
 </resources>

@@ -28,28 +28,13 @@
         android:fitsSystemWindows="true">
 
         <Button
-            android:id="@+id/btnSpeedNormal"
+            android:id="@+id/btnVideoQuality"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/_1_0x"
+            android:text="@string/quality_auto"
             style="@style/Widget.Material3.Button.TextButton"
-            android:textColor="@android:color/white" />
-
-        <Button
-            android:id="@+id/btnSpeedFast"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/_1_5x"
-            style="@style/Widget.Material3.Button.TextButton"
-            android:textColor="@android:color/white" />
-
-        <Button
-            android:id="@+id/btnSpeedSuperFast"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/_2_0x"
-            style="@style/Widget.Material3.Button.TextButton"
-            android:textColor="@android:color/white" />
+            android:textColor="#FFEB3B"
+            android:textStyle="bold" />
     </LinearLayout>
 
     <ProgressBar
