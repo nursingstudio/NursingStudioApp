@@ -214,9 +214,9 @@ class HomeFragment : Fragment() {
                 Always maintain a high-level, encouraging, professional tone for nursing students.
             """.trimIndent()
 
-            // 🚀 FIXED: Standardized direct extension accessor framework
+            // 🚀 FIXED: Upgraded to 2026 Next-Gen Gemini 2.5 Flash Production Engine Pipeline
             val generativeModel = Firebase.vertexAI.generativeModel(
-                modelName = "gemini-1.5-flash",
+                modelName = "gemini-2.5-flash", // ✅ 2026 INDUSTRY GOLD STANDARD UPGRADE
                 generationConfig = generationConfig {
                     temperature = 0.2f
                 },

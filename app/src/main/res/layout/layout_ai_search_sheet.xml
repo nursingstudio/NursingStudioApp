@@ -27,31 +27,6 @@
         android:textColor="@color/text_secondary"
         android:layout_marginTop="2dp" />
 
-    <com.google.android.material.card.MaterialCardView
-        android:layout_width="match_parent"
-        android:layout_height="200dp"
-        android:layout_marginTop="16dp"
-        app:cardCornerRadius="16dp"
-        app:cardElevation="0dp"
-        app:strokeWidth="1dp"
-        app:strokeColor="@color/brand_blue">
-
-        <ScrollView
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:padding="12dp">
-
-            <TextView
-                android:id="@+id/tvAiTerminalOutput"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/waiting_for_your_professional_nursing_query"
-                android:textColor="@color/text_primary"
-                android:textSize="14sp"
-                android:lineSpacingMultiplier="1.2" />
-        </ScrollView>
-    </com.google.android.material.card.MaterialCardView>
-
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -90,4 +65,29 @@
             app:backgroundTint="@color/brand_blue"
             app:tint="@android:color/white" />
     </LinearLayout>
+
+    <com.google.android.material.card.MaterialCardView
+        android:layout_width="match_parent"
+        android:layout_height="220dp"
+        android:layout_marginTop="16dp"
+        app:cardCornerRadius="16dp"
+        app:cardElevation="0dp"
+        app:strokeWidth="1dp"
+        app:strokeColor="@color/brand_blue">
+
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:padding="12dp">
+
+            <TextView
+                android:id="@+id/tvAiTerminalOutput"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/waiting_for_your_professional_nursing_query"
+                android:textColor="@color/text_primary"
+                android:textSize="14sp"
+                android:lineSpacingMultiplier="1.2" />
+        </ScrollView>
+    </com.google.android.material.card.MaterialCardView>
 </LinearLayout>
