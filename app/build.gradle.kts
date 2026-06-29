@@ -82,6 +82,7 @@ dependencies {
     implementation(libs.androidx.appcompat)
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
+    implementation(libs.androidx.pdf.viewer.fragment)
     implementation(libs.material)
     implementation(libs.androidx.core.splashscreen)
     implementation(libs.lottie)
@@ -149,6 +150,14 @@ dependencies {
 
     // 🧬 Gemini Vertex AI Android SDK for Secure Guardrailed Search
     implementation(libs.firebase.vertexai)
+
+    // 🚀 2026 World-Class Media3 & Firestore Engines
+    implementation(libs.google.firebase.firestore.ktx)
+    implementation(libs.androidx.media3.exoplayer) // Latest 2026 Stable
+    implementation(libs.androidx.media3.ui)
+
+    // 🚀 2026 Jetpack Production PDF Viewer Core Engine
+    implementation(libs.androidx.pdf.viewer)
 
     annotationProcessor(libs.compiler)
 

@@ -1,53 +1,61 @@
 package com.example.nursingstudio.ui.features.media
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.fragment.app.Fragment
-import com.example.nursingstudio.R
-import com.google.android.material.card.MaterialCardView
+import com.example.nursingstudio.databinding.FragmentPdfBinding
 
 class PdfFragment : Fragment() {
+
+    // 🚀 FIXED: Dropped slow findViewById and replaced with clean pre-compiled ViewBinding structures
+    private var _binding: FragmentPdfBinding? = null
+    private val binding get() = _binding!!
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        return inflater.inflate(R.layout.fragment_pdf, container, false)
+    ): View {
+        _binding = FragmentPdfBinding.inflate(inflater, container, false)
+        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        setupPdfLibraryClickListeners()
+    }
 
-        val cardImportant = view.findViewById<MaterialCardView>(R.id.cardImportantPdf)
-        val cardTopic = view.findViewById<MaterialCardView>(R.id.cardTopicPdf)
-        val cardPapers = view.findViewById<MaterialCardView>(R.id.cardPaperPdf)
-
-        cardImportant.setOnClickListener {
-            Toast.makeText(
-                requireContext(),
-                "Important PDFs section coming soon (next phase).",
-                Toast.LENGTH_SHORT
-            ).show()
+    private fun setupPdfLibraryClickListeners() {
+        binding.cardImportantPdf.setOnClickListener {
+            val intent = Intent(requireContext(), MediaContentActivity::class.java).apply {
+                putExtra("TARGET_TYPE", "PDF")
+                putExtra("TARGET_CATEGORY", "Important")
+            }
+            startActivity(intent)
         }
 
-        cardTopic.setOnClickListener {
-            Toast.makeText(
-                requireContext(),
-                "Topic-wise notes PDFs coming soon.",
-                Toast.LENGTH_SHORT
-            ).show()
+        binding.cardTopicPdf.setOnClickListener {
+            val intent = Intent(requireContext(), MediaContentActivity::class.java).apply {
+                putExtra("TARGET_TYPE", "PDF")
+                putExtra("TARGET_CATEGORY", "Topic-wise")
+            }
+            startActivity(intent)
         }
 
-        cardPapers.setOnClickListener {
-            Toast.makeText(
-                requireContext(),
-                "Previous year papers PDFs coming soon.",
-                Toast.LENGTH_SHORT
-            ).show()
+        binding.cardPaperPdf.setOnClickListener {
+            val intent = Intent(requireContext(), MediaContentActivity::class.java).apply {
+                putExtra("TARGET_TYPE", "PDF")
+                putExtra("TARGET_CATEGORY", "Papers")
+            }
+            startActivity(intent)
         }
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 }

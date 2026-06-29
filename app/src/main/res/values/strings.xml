@@ -354,6 +354,11 @@
     <string name="nursing_studio_ai_faculty_is_thinking">Nursing Studio AI Faculty is thinking…</string>
     <string name="ai_network_stream_error_template">%1$s: %2$s</string>
     <string name="cloud_core_connection_error_ensure_you_completed_step_1_and_step_2_perfectly">Cloud Core Connection Error: %1$s\n\n[Ensure you completed Step 1 and Step 2 perfectly!]</string>
+    <string name="_1_0x">1.0x</string>
+    <string name="_1_5x">1.5x</string>
+    <string name="_2_0x">2.0x</string>
+    <string name="nursing_lecture_standard_title_slot">Nursing Lecture Standard Title Slot</string>
+    <string name="menu">menu</string>
 
 
 </resources>
