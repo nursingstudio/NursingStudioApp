@@ -86,4 +86,26 @@
             app:exitAnim="@anim/slide_out_right" />
     </fragment>
 
+    <fragment
+        android:id="@+id/nav_media_content"
+        android:name="com.example.nursingstudio.ui.features.media.MediaContentFragment"
+        android:label="Media Content">
+        <action
+            android:id="@+id/action_media_to_pdf"
+            app:destination="@+id/nav_pdf_viewer" />
+        <action
+            android:id="@+id/action_media_to_video"
+            app:destination="@+id/nav_video_player" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/nav_pdf_viewer"
+        android:name="com.example.nursingstudio.ui.features.media.PdfViewerFragment"
+        android:label="PDF Viewer" />
+
+    <fragment
+        android:id="@+id/nav_video_player"
+        android:name="com.example.nursingstudio.ui.features.media.VideoPlayerFragment"
+        android:label="Video Player" />
+
 </navigation>

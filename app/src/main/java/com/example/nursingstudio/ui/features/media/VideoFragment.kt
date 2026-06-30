@@ -29,7 +29,7 @@ class VideoFragment : Fragment() {
 
     private fun setupVideoLibraryClickListeners() {
         binding.cardImportantVideo.setOnClickListener {
-            val intent = Intent(requireContext(), MediaContentActivity::class.java).apply {
+            val intent = Intent(requireContext(), MediaContentFragment::class.java).apply {
                 putExtra("TARGET_TYPE", "VIDEO")
                 putExtra("TARGET_CATEGORY", "Important")
             }
@@ -37,7 +37,7 @@ class VideoFragment : Fragment() {
         }
 
         binding.cardTopicVideo.setOnClickListener {
-            val intent = Intent(requireContext(), MediaContentActivity::class.java).apply {
+            val intent = Intent(requireContext(), MediaContentFragment::class.java).apply {
                 putExtra("TARGET_TYPE", "VIDEO")
                 putExtra("TARGET_CATEGORY", "Topic-wise")
             }
@@ -45,7 +45,7 @@ class VideoFragment : Fragment() {
         }
 
         binding.cardPlaylistVideo.setOnClickListener {
-            val intent = Intent(requireContext(), MediaContentActivity::class.java).apply {
+            val intent = Intent(requireContext(), MediaContentFragment::class.java).apply {
                 putExtra("TARGET_TYPE", "VIDEO")
                 putExtra("TARGET_CATEGORY", "Playlists")
             }

@@ -13,25 +13,22 @@
         app:show_timeout="4000"
         app:use_controller="true" />
 
-    <!-- Speed controls container with increased margins and padding to resolve "covered by System UI" render issues in previews.
-         Note: At runtime, VideoPlayerActivity.kt applies dynamic window insets to this view. -->
     <LinearLayout
         android:id="@+id/speedControlsLayout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="top|end"
-        android:layout_marginTop="48dp"
-        android:layout_marginEnd="24dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="16dp"
         android:orientation="horizontal"
         android:background="#80000000"
-        android:padding="8dp"
-        android:fitsSystemWindows="true">
+        android:padding="4dp">
 
         <Button
             android:id="@+id/btnVideoQuality"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/quality_auto"
+            android:text="@string/quality"
             style="@style/Widget.Material3.Button.TextButton"
             android:textColor="#FFEB3B"
             android:textStyle="bold" />

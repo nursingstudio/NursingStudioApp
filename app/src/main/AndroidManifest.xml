@@ -47,12 +47,6 @@
             android:exported="true"
             android:windowSoftInputMode="adjustResize" />
 
-        <activity
-            android:name=".ui.features.media.VideoPlayerActivity"
-            android:configChanges="orientation|screenSize|layoutDirection|screenLayout|smallestScreenSize|keyboardHidden"
-            android:exported="false"
-            android:theme="@style/Theme.NursingStudio" />
-
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.fileprovider"
@@ -68,11 +62,6 @@
             android:configChanges="orientation|screenSize|screenLayout|smallestScreenSize"
             android:theme="@style/UCropEngineCustomTheme"
             android:windowSoftInputMode="stateAlwaysHidden" />
-
-        <activity android:name=".ui.features.media.MediaContentActivity"
-            android:exported="false"/>
-        <activity android:name=".ui.features.media.PdfViewerActivity"
-            android:exported="false"/>
 
 
     </application>

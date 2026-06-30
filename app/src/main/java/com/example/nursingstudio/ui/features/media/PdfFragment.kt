@@ -30,7 +30,7 @@ class PdfFragment : Fragment() {
 
     private fun setupPdfLibraryClickListeners() {
         binding.cardImportantPdf.setOnClickListener {
-            val intent = Intent(requireContext(), MediaContentActivity::class.java).apply {
+            val intent = Intent(requireContext(), MediaContentFragment::class.java).apply {
                 putExtra("TARGET_TYPE", "PDF")
                 putExtra("TARGET_CATEGORY", "Important")
             }
@@ -38,7 +38,7 @@ class PdfFragment : Fragment() {
         }
 
         binding.cardTopicPdf.setOnClickListener {
-            val intent = Intent(requireContext(), MediaContentActivity::class.java).apply {
+            val intent = Intent(requireContext(), MediaContentFragment::class.java).apply {
                 putExtra("TARGET_TYPE", "PDF")
                 putExtra("TARGET_CATEGORY", "Topic-wise")
             }
@@ -46,7 +46,7 @@ class PdfFragment : Fragment() {
         }
 
         binding.cardPaperPdf.setOnClickListener {
-            val intent = Intent(requireContext(), MediaContentActivity::class.java).apply {
+            val intent = Intent(requireContext(), MediaContentFragment::class.java).apply {
                 putExtra("TARGET_TYPE", "PDF")
                 putExtra("TARGET_CATEGORY", "Papers")
             }
