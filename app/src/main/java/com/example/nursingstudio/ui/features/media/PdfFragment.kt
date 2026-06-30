@@ -1,11 +1,11 @@
 package com.example.nursingstudio.ui.features.media
 
-import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import com.example.nursingstudio.R
 import com.example.nursingstudio.databinding.FragmentPdfBinding
 
 class PdfFragment : Fragment() {
@@ -30,27 +30,45 @@ class PdfFragment : Fragment() {
 
     private fun setupPdfLibraryClickListeners() {
         binding.cardImportantPdf.setOnClickListener {
-            val intent = Intent(requireContext(), MediaContentFragment::class.java).apply {
-                putExtra("TARGET_TYPE", "PDF")
-                putExtra("TARGET_CATEGORY", "Important")
+            // 🚀 2026 GOLD STANDARD: Safe Navigation args transaction over unified shell
+            val bundle = Bundle().apply {
+                putString("TARGET_TYPE", "PDF")
+                putString("TARGET_CATEGORY", "Important")
             }
-            startActivity(intent)
+
+            // 🚀 2026 INDUSTRY GOLD STANDARD: Context-safe explicit fragment navigation controller invoke
+            androidx.navigation.fragment.NavHostFragment.findNavController(this).navigate(
+                R.id.nav_media_content,
+                bundle
+            )
         }
 
         binding.cardTopicPdf.setOnClickListener {
-            val intent = Intent(requireContext(), MediaContentFragment::class.java).apply {
-                putExtra("TARGET_TYPE", "PDF")
-                putExtra("TARGET_CATEGORY", "Topic-wise")
+            // 🚀 2026 GOLD STANDARD: Safe Navigation args transaction over unified shell
+            val bundle = Bundle().apply {
+                putString("TARGET_TYPE", "PDF")
+                putString("TARGET_CATEGORY", "Topic-wise")
             }
-            startActivity(intent)
+
+// 🚀 2026 INDUSTRY GOLD STANDARD: Context-safe explicit fragment navigation controller invoke
+            androidx.navigation.fragment.NavHostFragment.findNavController(this).navigate(
+                R.id.nav_media_content,
+                bundle
+            )
         }
 
         binding.cardPaperPdf.setOnClickListener {
-            val intent = Intent(requireContext(), MediaContentFragment::class.java).apply {
-                putExtra("TARGET_TYPE", "PDF")
-                putExtra("TARGET_CATEGORY", "Papers")
+            // 🚀 2026 GOLD STANDARD: Safe Navigation args transaction over unified shell
+            val bundle = Bundle().apply {
+                putString("TARGET_TYPE", "PDF")
+                putString("TARGET_CATEGORY", "Papers")
             }
-            startActivity(intent)
+
+// 🚀 2026 INDUSTRY GOLD STANDARD: Context-safe explicit fragment navigation controller invoke
+            androidx.navigation.fragment.NavHostFragment.findNavController(this).navigate(
+                R.id.nav_media_content,
+                bundle
+            )
         }
     }
 
