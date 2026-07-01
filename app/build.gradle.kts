@@ -155,6 +155,8 @@ dependencies {
     implementation(libs.google.firebase.firestore.ktx)
     implementation(libs.androidx.media3.exoplayer) // Latest 2026 Stable
     implementation(libs.androidx.media3.ui)
+    // 🚀 2026 INDUSTRY GOLD STANDARD: Core Engine Layer for Protected YouTube Streams
+    implementation(libs.core.v1210)
 
     // 🚀 2026 Jetpack Production PDF Viewer Core Engine
     implementation(libs.androidx.pdf.viewer)

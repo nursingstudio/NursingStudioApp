@@ -10,13 +10,13 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.nursingstudio.R
 import com.example.nursingstudio.data.model.MediaItemModel
-import com.example.nursingstudio.databinding.ActivityMediaContentBinding
+import com.example.nursingstudio.databinding.FragmentMediaContentBinding // ✅ FIX: Correct layout mapping
 import com.google.firebase.firestore.FirebaseFirestore
 
-// 🚀 2026 INDUSTRY GOLD STANDARD: Migrated from Activity to Fragment to preserve Main Toolbar & BottomNav layout shell
+// 🚀 2026 INDUSTRY GOLD STANDARD: Clean Embedded Architecture Type-Safe Layout Container
 class MediaContentFragment : Fragment() {
 
-    private var _binding: ActivityMediaContentBinding? = null
+    private var _binding: FragmentMediaContentBinding? = null
     private val binding get() = _binding!!
     private val firestore = FirebaseFirestore.getInstance()
 
@@ -24,7 +24,8 @@ class MediaContentFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        _binding = ActivityMediaContentBinding.inflate(inflater, container, false)
+        // ✅ FIX: Inflation type matched with correct view hierarchy
+        _binding = FragmentMediaContentBinding.inflate(inflater, container, false)
         return binding.root
     }
 
@@ -60,12 +61,14 @@ class MediaContentFragment : Fragment() {
                 binding.loadingBar.visibility = View.GONE
                 binding.rvMediaContent.visibility = View.VISIBLE
 
+                // 🚀 Location: Inside rvMediaContent.adapter instantiation
                 binding.rvMediaContent.adapter = ContentAdapter(list) { selectedItem ->
                     val bundle = Bundle().apply {
                         putString("CONTENT_URL", selectedItem.fileUrl)
+                        // Future-proof payload logic mapping
+                        putString("VIDEO_TYPE", if (selectedItem.fileUrl.contains("youtube") || selectedItem.fileUrl.length <= 12) "FREE" else "PAID")
                     }
 
-                    // 🚀 Jetpack Dynamic Nav Component redirection mapping over same host viewport
                     if (selectedItem.type == "PDF") {
                         findNavController().navigate(R.id.action_media_to_pdf, bundle)
                     } else {

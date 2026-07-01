@@ -9,9 +9,37 @@
         android:id="@+id/playerView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:visibility="gone"
         app:resize_mode="fit"
         app:show_timeout="4000"
         app:use_controller="true" />
+
+    <com.pierfrancescosoffritti.androidyoutubeplayer.core.player.views.YouTubePlayerView
+        android:id="@+id/youtubePlayerView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:visibility="gone"
+        app:enableAutomaticInitialization="false" />
+
+    <View
+        android:id="@+id/youtubeOverlayShield"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@android:color/transparent"
+        android:clickable="true"
+        android:focusable="true"
+        android:visibility="gone" />
+
+    <TextView
+        android:id="@+id/tvDynamicWatermark"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="#26FFFFFF"
+        android:textSize="14sp"
+        android:textStyle="bold"
+        android:visibility="gone"
+        android:text="@string/user_nursingstudio_com_9999999999" />
 
     <LinearLayout
         android:id="@+id/speedControlsLayout"

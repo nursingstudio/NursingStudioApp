@@ -362,6 +362,8 @@
     <string name="quality_auto">Quality (Auto)</string>
     <string name="quality">Quality (%1$s)</string>
     <string name="qualityauto">Quality (Auto)</string>
+    <string name="user_nursingstudio_com_9999999999">user@nursingstudio.com | 9999999999</string>
+    <string name="nursingstudent_studio_com_2026_secure_node">nursingstudent@studio.com | 2026_SECURE_NODE</string>
 
 
 </resources>

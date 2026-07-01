@@ -9,7 +9,7 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.example.nursingstudio.R
-import com.example.nursingstudio.databinding.ActivityPdfViewerBinding
+import com.example.nursingstudio.databinding.FragmentPdfViewerBinding
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -20,14 +20,14 @@ import java.net.URL
 // 🚀 2026 INDUSTRY GOLD STANDARD: Converted from AppCompatActivity to pure Fragment lifecycle stream
 class PdfViewerFragment : Fragment() {
 
-    private var _binding: ActivityPdfViewerBinding? = null
+    private var _binding: FragmentPdfViewerBinding? = null
     private val binding get() = _binding!!
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        _binding = ActivityPdfViewerBinding.inflate(inflater, container, false)
+        _binding = FragmentPdfViewerBinding.inflate(inflater, container, false)
         return binding.root
     }
 
