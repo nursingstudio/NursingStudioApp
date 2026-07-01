@@ -1,11 +1,11 @@
 package com.example.nursingstudio.ui.features.media
 
-import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import com.example.nursingstudio.R
 import com.example.nursingstudio.databinding.FragmentVideoBinding
 
 class VideoFragment : Fragment() {
@@ -29,27 +29,40 @@ class VideoFragment : Fragment() {
 
     private fun setupVideoLibraryClickListeners() {
         binding.cardImportantVideo.setOnClickListener {
-            val intent = Intent(requireContext(), MediaContentFragment::class.java).apply {
-                putExtra("TARGET_TYPE", "VIDEO")
-                putExtra("TARGET_CATEGORY", "Important")
+            // 🚀 2026 INDUSTRY GOLD STANDARD: Safe Key-Value Bundle Infrastructure
+            val bundle = Bundle().apply {
+                putString("TARGET_TYPE", "VIDEO")
+                putString("TARGET_CATEGORY", "Important")
             }
-            startActivity(intent)
+            // 🚀 2026 INDUSTRY GOLD STANDARD: Context-safe explicit fragment navigation controller invoke
+            androidx.navigation.fragment.NavHostFragment.findNavController(this).navigate(
+                R.id.nav_media_content,
+                bundle
+            )
         }
 
         binding.cardTopicVideo.setOnClickListener {
-            val intent = Intent(requireContext(), MediaContentFragment::class.java).apply {
-                putExtra("TARGET_TYPE", "VIDEO")
-                putExtra("TARGET_CATEGORY", "Topic-wise")
+            val bundle = Bundle().apply {
+                putString("TARGET_TYPE", "VIDEO")
+                putString("TARGET_CATEGORY", "Topic-wise")
             }
-            startActivity(intent)
+            // 🚀 2026 INDUSTRY GOLD STANDARD: Context-safe explicit fragment navigation controller invoke
+            androidx.navigation.fragment.NavHostFragment.findNavController(this).navigate(
+                R.id.nav_media_content,
+                bundle
+            )
         }
 
         binding.cardPlaylistVideo.setOnClickListener {
-            val intent = Intent(requireContext(), MediaContentFragment::class.java).apply {
-                putExtra("TARGET_TYPE", "VIDEO")
-                putExtra("TARGET_CATEGORY", "Playlists")
+            val bundle = Bundle().apply {
+                putString("TARGET_TYPE", "VIDEO")
+                putString("TARGET_CATEGORY", "Playlists")
             }
-            startActivity(intent)
+            // 🚀 2026 INDUSTRY GOLD STANDARD: Context-safe explicit fragment navigation controller invoke
+            androidx.navigation.fragment.NavHostFragment.findNavController(this).navigate(
+                R.id.nav_media_content,
+                bundle
+            )
         }
     }
 
