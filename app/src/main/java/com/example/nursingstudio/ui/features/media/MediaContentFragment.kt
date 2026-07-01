@@ -48,12 +48,18 @@ class MediaContentFragment : Fragment() {
             .whereEqualTo("category", category)
             .get()
             .addOnSuccessListener { result ->
+                // 🚀 Location: Inside fetchDataFromFirestoreCloud -> addOnSuccessListener Loop
                 val list = mutableListOf<MediaItemModel>()
                 for (doc in result) {
                     val id = doc.getString("id") ?: ""
                     val title = doc.getString("title") ?: ""
                     val fileUrl = if (type == "PDF") doc.getString("pdfUrl") ?: "" else doc.getString("videoUrl") ?: ""
-                    list.add(MediaItemModel(id, title, fileUrl, type))
+
+                    // 🧬 2026 Safe-Extraction Strategy: Extract new structural node flags dynamically
+                    val videoType = doc.getString("videoType") ?: "FREE"
+                    val streamType = doc.getString("streamType") ?: "RECORDED"
+
+                    list.add(MediaItemModel(id, title, fileUrl, type, videoType, streamType))
                 }
 
                 if (_binding == null) return@addOnSuccessListener
@@ -61,12 +67,12 @@ class MediaContentFragment : Fragment() {
                 binding.loadingBar.visibility = View.GONE
                 binding.rvMediaContent.visibility = View.VISIBLE
 
-                // 🚀 Location: Inside rvMediaContent.adapter instantiation
+                // 🚀 Location: Inside rvMediaContent.adapter instantiation inside click lambda
                 binding.rvMediaContent.adapter = ContentAdapter(list) { selectedItem ->
                     val bundle = Bundle().apply {
                         putString("CONTENT_URL", selectedItem.fileUrl)
-                        // Future-proof payload logic mapping
-                        putString("VIDEO_TYPE", if (selectedItem.fileUrl.contains("youtube") || selectedItem.fileUrl.length <= 12) "FREE" else "PAID")
+                        putString("VIDEO_TYPE", selectedItem.videoType)   // ✅ Now reading direct from Firestore node
+                        putString("STREAM_TYPE", selectedItem.streamType) // ✅ Passing Stream architecture info
                     }
 
                     if (selectedItem.type == "PDF") {
