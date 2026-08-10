@@ -255,7 +255,7 @@
     <string name="online_test_series">Online Test Series</string>
     <string name="boost_your_preparation_with_real_time_analysis">Boost your preparation with real-time analysis.</string>
     <string name="full_syllabus_mock_test">Full Syllabus Mock Test</string>
-    <string name="_100_questions_90_minutes">100 Questions | 90 Minutes</string>
+    <string name="_100_questions_100_minutes">100 Questions | 100 Minutes</string>
     <string name="plan">Plan: %1$s</string>
     <string name="welcome_back_user">Welcome Back User</string>
     <string name="different_user">Different User?</string>
@@ -364,6 +364,16 @@
     <string name="qualityauto">Quality (Auto)</string>
     <string name="user_nursingstudio_com_9999999999">user@nursingstudio.com | 9999999999</string>
     <string name="nursingstudent_studio_com_2026_secure_node">nursingstudent@studio.com | 2026_SECURE_NODE</string>
+    <string name="norcet_grand_test">NORCET Grand Test</string>
+    <string name="subject_anatomy">Subject: Anatomy</string>
+    <string name="_00_00">00:00</string>
+    <string name="previous">Previous</string>
+    <string name="_1_of_100">1 of 100</string>
+    <string name="next">Next</string>
+    <string name="nursing_studio_ai_engine_is_restricted_exclusively_to_nursing_professional_domains_i_cannot_answer_out_of_scope_queries">⚠️ Nursing Studio AI Engine is restricted exclusively to Nursing Professional domains. I cannot answer out-of-scope queries.</string>
+    <string name="network_connection_fault">Network connection fault: %1$s</string>
+    <string name="of">%1$d of %2$d</string>
+    <string name="quiz_question_format">%1$d. %2$s</string>
 
 
 </resources>

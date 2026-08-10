@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.core.widget.NestedScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://tools.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true"
+    android:background="@color/app_background">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="16dp">
+
+        <!-- Question Text Card Container -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardQuestion"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            app:cardBackgroundColor="@color/surface_card"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="2dp"
+            app:strokeColor="@color/brand_saffron_dark"
+            app:strokeWidth="1dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <!-- Question Text -->
+                <TextView
+                    android:id="@+id/tvQuestionText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/text_primary"
+                    android:textSize="16sp"
+                    android:fontFamily="sans-serif-medium"
+                    android:lineSpacingExtra="4dp"
+                    tools:text="Which organelle is known as the powerhouse of the cell?" />
+
+                <!-- Image Media Container (Visible for IMAGE questions) -->
+                <com.google.android.material.imageview.ShapeableImageView
+                    android:id="@+id/ivQuestionImage"
+                    android:layout_width="match_parent"
+                    android:layout_height="200dp"
+                    android:layout_marginTop="12dp"
+                    android:scaleType="centerCrop"
+                    android:visibility="gone"
+                    app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.Corner.Medium"
+                    tools:visibility="visible"
+                    tools:src="@tools:sample/backgrounds/scenic" />
+
+                <!-- Media3 Video Player Container (Visible for VIDEO questions) -->
+                <androidx.media3.ui.PlayerView
+                    android:id="@+id/pvQuestionVideo"
+                    android:layout_width="match_parent"
+                    android:layout_height="200dp"
+                    android:layout_marginTop="12dp"
+                    android:visibility="gone"
+                    app:use_controller="true"
+                    app:resize_mode="fit"
+                    tools:visibility="gone" />
+
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Options Container Matrix -->
+        <LinearLayout
+            android:id="@+id/optionsContainer"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:orientation="vertical"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/cardQuestion">
+
+            <!-- Option A Card -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardOptionA"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="10dp"
+                android:clickable="true"
+                android:focusable="true"
+                app:cardBackgroundColor="@color/surface_card"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="1dp"
+                app:strokeColor="@color/brand_saffron_dark"
+                app:strokeWidth="1dp">
+
+                <TextView
+                    android:id="@+id/tvOptionA"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="14dp"
+                    android:textColor="@color/text_primary"
+                    android:textSize="14sp"
+                    tools:text="Opt A: Mitochondria" />
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Option B Card -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardOptionB"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="10dp"
+                android:clickable="true"
+                android:focusable="true"
+                app:cardBackgroundColor="@color/surface_card"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="1dp"
+                app:strokeColor="@color/brand_saffron_dark"
+                app:strokeWidth="1dp">
+
+                <TextView
+                    android:id="@+id/tvOptionB"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="14dp"
+                    android:textColor="@color/text_primary"
+                    android:textSize="14sp"
+                    tools:text="Opt B: Ribosome" />
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Option C Card -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardOptionC"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="10dp"
+                android:clickable="true"
+                android:focusable="true"
+                app:cardBackgroundColor="@color/surface_card"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="1dp"
+                app:strokeColor="@color/brand_saffron_dark"
+                app:strokeWidth="1dp">
+
+                <TextView
+                    android:id="@+id/tvOptionC"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="14dp"
+                    android:textColor="@color/text_primary"
+                    android:textSize="14sp"
+                    tools:text="Opt C: Lysosome" />
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Option D Card -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardOptionD"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="10dp"
+                android:clickable="true"
+                android:focusable="true"
+                app:cardBackgroundColor="@color/surface_card"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="1dp"
+                app:strokeColor="@color/brand_saffron_dark"
+                app:strokeWidth="1dp">
+
+                <TextView
+                    android:id="@+id/tvOptionD"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="14dp"
+                    android:textColor="@color/text_primary"
+                    android:textSize="14sp"
+                    tools:text="Opt D: Golgi Apparatus" />
+            </com.google.android.material.card.MaterialCardView>
+
+        </LinearLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.core.widget.NestedScrollView>

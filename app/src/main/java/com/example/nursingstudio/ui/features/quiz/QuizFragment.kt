@@ -22,13 +22,11 @@ class QuizFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // Binding Material Cards
         val cardFull = view.findViewById<MaterialCardView>(R.id.cardFullSyllabus)
         val cardSubject = view.findViewById<MaterialCardView>(R.id.cardSubjectWise)
         val cardTopic = view.findViewById<MaterialCardView>(R.id.cardTopicWise)
         val cardPrev = view.findViewById<MaterialCardView>(R.id.cardPreviousYear)
 
-        // Set Click Listeners (In par click hote hi sound aayega)
         cardFull.setOnClickListener { handleCategoryClick("Full Syllabus Mock Test") }
         cardSubject.setOnClickListener { handleCategoryClick("Subject-wise Test") }
         cardTopic.setOnClickListener { handleCategoryClick("Topic-wise Practice") }
@@ -36,10 +34,14 @@ class QuizFragment : Fragment() {
     }
 
     private fun handleCategoryClick(title: String) {
-        playFeedbackSound() // User click karega toh app "Sound" karegi (ping sound)
+        playFeedbackSound()
         Toast.makeText(requireContext(), "Opening $title...", Toast.LENGTH_SHORT).show()
 
-        // Future: Yahan se TestActivity khulega
+        // Fragment Transaction to open QuizEngineFragment
+        parentFragmentManager.beginTransaction()
+            .replace(R.id.nav_host_fragment, QuizEngineFragment()) // Make sure container ID matches your Activity XML container
+            .addToBackStack(null)
+            .commit()
     }
 
     private fun playFeedbackSound() {

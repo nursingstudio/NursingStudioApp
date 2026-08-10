@@ -148,9 +148,6 @@ dependencies {
     implementation(libs.firebase.storage.ktx)
     implementation(libs.firebase.firestore.ktx)
 
-    // 🧬 Gemini Vertex AI Android SDK for Secure Guardrailed Search
-    implementation(libs.firebase.vertexai)
-
     // 🚀 2026 World-Class Media3 & Firestore Engines
     implementation(libs.google.firebase.firestore.ktx)
     implementation(libs.androidx.media3.exoplayer) // Latest 2026 Stable
