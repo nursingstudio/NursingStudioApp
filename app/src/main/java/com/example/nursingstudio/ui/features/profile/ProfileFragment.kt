@@ -1,6 +1,9 @@
-package com.example.nursingstudio.ui.profile
+package com.example.nursingstudio.ui.features.profile
 
+import android.Manifest
+import android.app.Activity
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
@@ -20,8 +23,9 @@ import androidx.lifecycle.lifecycleScope
 import com.bumptech.glide.Glide
 import com.example.nursingstudio.R
 import com.example.nursingstudio.data.local.DataStoreManager
+import com.example.nursingstudio.data.model.User
 import com.example.nursingstudio.databinding.FragmentProfileBinding
-import com.example.nursingstudio.ui.auth.AuthActivity
+import com.example.nursingstudio.ui.features.auth.AuthActivity
 import com.example.nursingstudio.utils.AppSettings
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.firebase.auth.FirebaseAuth
@@ -33,9 +37,12 @@ import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 
+import dagger.hilt.android.AndroidEntryPoint
+
 /**
  * 🚀 2026 INDUSTRY GOLD STANDARD: Clean Zero-Latency Isolated Image Sandbox
  */
+@AndroidEntryPoint
 class ProfileFragment : Fragment() {
 
     private val viewModel: ProfileViewModel by activityViewModels()
@@ -73,7 +80,7 @@ class ProfileFragment : Fragment() {
         val resultCode = result.resultCode
         val dataIntent = result.data
 
-        if (resultCode == android.app.Activity.RESULT_OK && dataIntent != null) {
+        if (resultCode == Activity.RESULT_OK && dataIntent != null) {
             val finalCroppedUri = UCrop.getOutput(dataIntent)
             finalCroppedUri?.let { uri ->
                 // 🚀 FIXED: Securely pass layout environment context to initialize the stream extraction
@@ -122,10 +129,10 @@ class ProfileFragment : Fragment() {
             binding.layoutProfileAvatarContainer.isEnabled = !isUploading
         }
 
-        viewModel.userData.observe(viewLifecycleOwner) { dataMap ->
-            dataMap?.let { data ->
+        viewModel.userData.observe(viewLifecycleOwner) { user ->
+            user?.let { data ->
 
-                val profileUrl = data["profileImageUrl"]?.toString() ?: ""
+                val profileUrl = data.profileImageUrl ?: ""
                 if (profileUrl.isNotEmpty()) {
                     Glide.with(this)
                         .load(profileUrl)
@@ -134,13 +141,13 @@ class ProfileFragment : Fragment() {
                         .into(binding.imgHeaderProfile)
                 }
 
-                val fullName = data["fullName"]?.toString() ?: "Scholar Student"
-                val emailStr = data["email"]?.toString() ?: auth.currentUser?.email ?: "-"
+                val fullName = data.fullName.ifEmpty { "Scholar Student" }
+                val emailStr = data.email.ifEmpty { auth.currentUser?.email ?: "-" }
 
                 binding.tvName.text = fullName
                 binding.tvEmail.text = emailStr
 
-                val uniqueNsId = data["uniqueNsId"]?.toString() ?: "NS-2026-PENDING"
+                val uniqueNsId = data.uniqueNsId ?: "NS-2026-PENDING"
                 binding.tvUniqueNsId.text = uniqueNsId
 
                 viewLifecycleOwner.lifecycleScope.launch {
@@ -151,34 +158,34 @@ class ProfileFragment : Fragment() {
 
                 evaluateEmailVerificationState()
 
-                setupRow(binding.rowGender.root, getString(R.string.label_gender), data["gender"])
-                val dobString = data["dob"]?.toString() ?: ""
+                setupRow(binding.rowGender.root, getString(R.string.label_gender), data.gender)
+                val dobString = data.dob
                 val computedAgeSuffix = if (dobString.isNotEmpty()) calculateAge(dobString) else ""
                 setupRow(binding.rowDob.root, getString(R.string.label_dob), "$dobString $computedAgeSuffix".trim())
-                setupRow(binding.rowMarital.root, getString(R.string.label_marital), data["maritalStatus"])
-                setupRow(binding.rowReligion.root, getString(R.string.label_religion), data["religion"])
-                setupRow(binding.rowMobile.root, getString(R.string.label_mobile), data["mobile"])
-                setupRow(binding.rowEducation.root, getString(R.string.label_education), data["education"])
-                setupRow(binding.rowOccupation.root, getString(R.string.label_occupation), data["occupation"])
+                setupRow(binding.rowMarital.root, getString(R.string.label_marital), data.maritalStatus)
+                setupRow(binding.rowReligion.root, getString(R.string.label_religion), data.religion)
+                setupRow(binding.rowMobile.root, getString(R.string.label_mobile), data.mobile)
+                setupRow(binding.rowEducation.root, getString(R.string.label_education), data.education)
+                setupRow(binding.rowOccupation.root, getString(R.string.label_occupation), data.occupation)
 
                 val fullAddressCompiled = buildString {
-                    append(data["address"]?.toString() ?: "")
-                    data["district"]?.toString()?.takeIf { it.isNotEmpty() }?.let { append(", $it") }
-                    data["state"]?.toString()?.takeIf { it.isNotEmpty() }?.let { append(", $it") }
-                    data["country"]?.toString()?.takeIf { it.isNotEmpty() }?.let { append(", $it") }
-                    data["pincode"]?.toString()?.takeIf { it.isNotEmpty() }?.let { append(" - $it") }
+                    append(data.address)
+                    data.district.takeIf { it.isNotEmpty() }?.let { append(", $it") }
+                    data.state.takeIf { it.isNotEmpty() }?.let { append(", $it") }
+                    data.country.takeIf { it.isNotEmpty() }?.let { append(", $it") }
+                    data.pincode.takeIf { it.isNotEmpty() }?.let { append(" - $it") }
                 }.ifEmpty { "-" }
                 setupRow(binding.rowAddress.root, getString(R.string.label_address), fullAddressCompiled)
 
-                val isNursingRegistered = data["isNursingRegistered"] as? Boolean ?: false
+                val isNursingRegistered = data.isNursingRegistered ?: false
                 if (isNursingRegistered) {
                     binding.tvNursingStatus.text = getString(R.string.nursing_registered_yes)
                     binding.tvNursingStatus.setTextColor(ContextCompat.getColor(requireContext(), R.color.medical_teal))
                     binding.rowNursingState.root.visibility = View.VISIBLE
                     binding.rowNursingNo.root.visibility = View.VISIBLE
 
-                    val stateRegistered = data["regState"] ?: data["nursingState"] ?: "-"
-                    val registrationNumber = data["regNumber"] ?: data["nursingRegNo"] ?: "-"
+                    val stateRegistered = data.regState ?: data.nursingState ?: "-"
+                    val registrationNumber = data.regNumber ?: data.nursingRegNo ?: "-"
                     setupRow(binding.rowNursingState.root, "Registered State", stateRegistered)
                     setupRow(binding.rowNursingNo.root, "Registration No", registrationNumber)
                 } else {
@@ -259,8 +266,8 @@ class ProfileFragment : Fragment() {
                 when (which) {
                     0 -> {
                         // 🔒 2026 Clean Runtime Guard Enforcement
-                        val cameraPermission = android.Manifest.permission.CAMERA
-                        if (ContextCompat.checkSelfPermission(requireContext(), cameraPermission) == android.content.pm.PackageManager.PERMISSION_GRANTED) {
+                        val cameraPermission = Manifest.permission.CAMERA
+                        if (ContextCompat.checkSelfPermission(requireContext(), cameraPermission) == PackageManager.PERMISSION_GRANTED) {
                             triggerCameraCaptureWorkflow()
                         } else {
                             requestCameraPermissionLauncher.launch(cameraPermission)

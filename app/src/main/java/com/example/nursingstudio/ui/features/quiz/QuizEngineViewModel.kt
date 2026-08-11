@@ -4,13 +4,17 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.nursingstudio.data.model.QuestionItem
 import com.example.nursingstudio.data.model.QuizMetadata
-import com.example.nursingstudio.data.repository.QuizRepository
+import com.example.nursingstudio.data.model.QuizResultData
+import com.example.nursingstudio.domain.usecase.GetQuizUseCase
+import com.example.nursingstudio.domain.usecase.SubmitQuizResultUseCase
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
 
 sealed interface QuizEngineUiState {
@@ -21,11 +25,13 @@ sealed interface QuizEngineUiState {
         val currentQuestionIndex: Int = 0
     ) : QuizEngineUiState
     data class Error(val message: String) : QuizEngineUiState
-    data class Completed(val totalQuestions: Int, val correctAnswers: Int, val scorePercentage: Float) : QuizEngineUiState
+    data class Completed(val resultData: QuizResultData) : QuizEngineUiState
 }
 
-class QuizEngineViewModel(
-    private val repository: QuizRepository = QuizRepository()
+@HiltViewModel
+class QuizEngineViewModel @Inject constructor(
+    private val getQuizUseCase: GetQuizUseCase,
+    private val submitQuizResultUseCase: SubmitQuizResultUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<QuizEngineUiState>(QuizEngineUiState.Loading)
@@ -40,23 +46,20 @@ class QuizEngineViewModel(
         viewModelScope.launch {
             _uiState.value = QuizEngineUiState.Loading
 
-            val metaResult = repository.getQuizMetadata(quizId)
-            val questionsResult = repository.getQuizQuestions(quizId)
-
-            if (metaResult.isSuccess && questionsResult.isSuccess) {
-                val metadata = metaResult.getOrThrow()
-                val questions = questionsResult.getOrThrow()
-
-                _uiState.value = QuizEngineUiState.Success(
-                    metadata = metadata,
-                    questions = questions,
-                    currentQuestionIndex = 0
-                )
-
-                startTimer(metadata.totalDurationMinutes * 60L)
-            } else {
-                _uiState.value = QuizEngineUiState.Error("Failed to load quiz content. Please check network.")
-            }
+            getQuizUseCase(quizId)
+                .onSuccess { bundle ->
+                    _uiState.value = QuizEngineUiState.Success(
+                        metadata = bundle.metadata,
+                        questions = bundle.questions,
+                        currentQuestionIndex = 0
+                    )
+                    startTimer(bundle.metadata.totalDurationMinutes * 60L)
+                }
+                .onFailure { exception ->
+                    _uiState.value = QuizEngineUiState.Error(
+                        exception.localizedMessage ?: "Failed to load quiz content."
+                    )
+                }
         }
     }
 
@@ -88,19 +91,47 @@ class QuizEngineViewModel(
         val currentState = _uiState.value
         if (currentState is QuizEngineUiState.Success) {
             var correctCount = 0
+            var incorrectCount = 0
+            var unattemptedCount = 0
+
             currentState.questions.forEach { q ->
-                if (q.selectedOptionIndex == q.correctOptionIndex && q.correctOptionIndex != -1) {
-                    correctCount++
+                when (q.selectedOptionIndex) {
+                    -1 -> unattemptedCount++
+                    q.correctOptionIndex -> correctCount++
+                    else -> incorrectCount++
                 }
             }
-            val total = currentState.questions.size
-            val percentage = if (total > 0) (correctCount.toFloat() / total) * 100 else 0f
 
-            _uiState.value = QuizEngineUiState.Completed(
-                totalQuestions = total,
+            val totalQuestions = currentState.questions.size
+            val attemptedCount = correctCount + incorrectCount
+            val totalMarks = totalQuestions * 1.0
+            val rawScore = (correctCount * 1.0) - (incorrectCount * 0.25)
+            val finalScore = if (rawScore < 0) 0.0 else rawScore
+            val percentage = if (totalMarks > 0) ((finalScore / totalMarks) * 100).toFloat() else 0f
+            val timeTakenSec = (currentState.metadata.totalDurationMinutes * 60L) - _remainingSeconds.value
+
+            val resultPayload = QuizResultData(
+                quizId = currentState.metadata.quizId,
+                totalQuestions = totalQuestions,
+                attemptedQuestions = attemptedCount,
+                unattemptedQuestions = unattemptedCount,
                 correctAnswers = correctCount,
-                scorePercentage = percentage
+                incorrectAnswers = incorrectCount,
+                totalPossibleMarks = totalMarks,
+                finalScore = finalScore,
+                scorePercentage = percentage,
+                isPassed = percentage >= 50.0f,
+                totalDurationSeconds = currentState.metadata.totalDurationMinutes * 60L,
+                timeTakenSeconds = timeTakenSec,
+                globalRank = 1,
+                totalParticipants = 100
             )
+
+            viewModelScope.launch {
+                submitQuizResultUseCase(resultPayload)
+            }
+
+            _uiState.value = QuizEngineUiState.Completed(resultData = resultPayload)
         }
     }
 

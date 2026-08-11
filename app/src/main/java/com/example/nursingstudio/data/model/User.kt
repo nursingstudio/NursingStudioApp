@@ -22,6 +22,10 @@ data class User(
     val isNursingRegistered: Boolean? = null,
     val regState: String? = null,
     val regNumber: String? = null,
+    val nursingState: String? = null,
+    val nursingRegNo: String? = null,
+    val profileImageUrl: String? = null,
+    val uniqueNsId: String? = null,
     // 🚀 2026 Gold Standard: Architecture-safe nullable timestamp container
     val createdAt: Timestamp? = null
 )

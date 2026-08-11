@@ -215,7 +215,7 @@ class HomeFragment : Fragment() {
         binding.cardSearchWrapper.setOnClickListener {
             val bottomSheetDialog = BottomSheetDialog(requireContext())
             val containerViewGroup = activity?.findViewById<ViewGroup>(android.R.id.content)
-            val sheetView = layoutInflater.inflate(R.layout.layout_ai_search_sheet, containerViewGroup, false)
+            val sheetView = layoutInflater.inflate(R.layout.bottom_sheet_ai_search, containerViewGroup, false)
             bottomSheetDialog.setContentView(sheetView)
 
             val tvOutput = sheetView.findViewById<TextView>(R.id.tvAiTerminalOutput)

@@ -1,8 +1,11 @@
-package com.example.nursingstudio.ui.auth.register
+package com.example.nursingstudio.ui.features.auth.register
 
 import android.content.Context
 import android.content.Intent
 import android.graphics.Color
+import android.graphics.Rect
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
 import android.os.Bundle
 import android.os.SystemClock
 import android.text.Editable
@@ -34,7 +37,7 @@ import com.example.nursingstudio.data.model.User
 import com.example.nursingstudio.databinding.FragmentRegisterBinding
 import com.example.nursingstudio.databinding.LayoutPolicyBottomSheetBinding
 import com.example.nursingstudio.domain.validation.RegisterValidator
-import com.example.nursingstudio.ui.main.MainActivity
+import com.example.nursingstudio.ui.features.main.MainActivity
 import com.example.nursingstudio.utils.AppSettings
 import com.example.nursingstudio.utils.BiometricSettingsManager
 import com.google.android.material.bottomsheet.BottomSheetDialog
@@ -307,7 +310,7 @@ class RegisterFragment : Fragment() {
         }
 
         view.post {
-            val rect = android.graphics.Rect()
+            val rect = Rect()
             view.getDrawingRect(rect)
             binding.registrationScrollView.offsetDescendantRectToMyCoords(view, rect)
             view.requestFocus()
@@ -548,11 +551,11 @@ class RegisterFragment : Fragment() {
     }
 
     private fun isNetworkAvailable(): Boolean {
-        val connectivityManager = requireContext().getSystemService(Context.CONNECTIVITY_SERVICE) as android.net.ConnectivityManager
+        val connectivityManager = requireContext().getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
         val capabilities = connectivityManager.getNetworkCapabilities(connectivityManager.activeNetwork)
         return capabilities != null && (
-                capabilities.hasTransport(android.net.NetworkCapabilities.TRANSPORT_WIFI) ||
-                        capabilities.hasTransport(android.net.NetworkCapabilities.TRANSPORT_CELLULAR)
+                capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) ||
+                        capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)
                 )
     }
 

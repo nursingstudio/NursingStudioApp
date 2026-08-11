@@ -8,9 +8,9 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class QuizRepository @Inject constructor() {
-
-    private val firestore: FirebaseFirestore by lazy { FirebaseFirestore.getInstance() }
+class QuizRepository @Inject constructor(
+    private val firestore: FirebaseFirestore
+) {
 
     suspend fun getQuizMetadata(quizId: String): Result<QuizMetadata> {
         return try {

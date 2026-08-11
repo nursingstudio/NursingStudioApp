@@ -1,4 +1,4 @@
-package com.example.nursingstudio.ui.splash
+package com.example.nursingstudio.ui.features.splash
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope

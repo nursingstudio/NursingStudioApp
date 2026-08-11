@@ -10,9 +10,11 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import androidx.navigation.fragment.findNavController
 import androidx.viewpager2.widget.ViewPager2
 import com.example.nursingstudio.R
 import com.example.nursingstudio.databinding.FragmentQuizEngineBinding
+import com.example.nursingstudio.utils.safeNavigate
 import kotlinx.coroutines.launch
 import java.util.Locale
 
@@ -36,12 +38,13 @@ class QuizEngineFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        val quizId = arguments?.getString("quiz_id") ?: "quiz_norcet_2026_01"
+
         setupAdapter()
         setupNavigationControls()
         observeViewModel()
 
-        // Trigger loading for default test
-        viewModel.loadQuiz("quiz_norcet_2026_01")
+        viewModel.loadQuiz(quizId)
     }
 
     private fun setupAdapter() {
@@ -99,11 +102,17 @@ class QuizEngineFragment : Fragment() {
                                 Toast.makeText(requireContext(), state.message, Toast.LENGTH_LONG).show()
                             }
                             is QuizEngineUiState.Completed -> {
-                                Toast.makeText(
-                                    requireContext(),
-                                    "Test Completed! Score: ${state.correctAnswers}/${state.totalQuestions} (${state.scorePercentage.toInt()}%)",
-                                    Toast.LENGTH_LONG
-                                ).show()
+                                // 🚀 2026 Standard: Navigate to Result Bottom Sheet using Safe Navigation
+                                val bundle = Bundle().apply {
+                                    putInt("correct_answers", state.resultData.correctAnswers)
+                                    putInt("total_questions", state.resultData.totalQuestions)
+                                    putFloat("score_percentage", state.resultData.scorePercentage)
+                                }
+                                findNavController().safeNavigate(
+                                    currentDestinationId = R.id.nav_quiz_engine,
+                                    actionId = R.id.action_quizEngine_to_resultFragment,
+                                    args = bundle
+                                )
                             }
                         }
                     }

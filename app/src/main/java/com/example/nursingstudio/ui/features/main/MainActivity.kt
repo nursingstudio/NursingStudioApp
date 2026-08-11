@@ -1,4 +1,4 @@
-package com.example.nursingstudio.ui.main
+package com.example.nursingstudio.ui.features.main
 
 import android.content.Intent
 import android.os.Bundle
@@ -7,6 +7,7 @@ import androidx.core.content.edit
 import androidx.core.net.toUri
 import androidx.core.view.GravityCompat
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.NavController
@@ -15,19 +16,23 @@ import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.NavigationUI
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
+import com.bumptech.glide.Glide
 import com.example.nursingstudio.R
 import com.example.nursingstudio.data.local.DataStoreManager
 import com.example.nursingstudio.data.model.SocialItem
+import com.example.nursingstudio.data.model.User
 import com.example.nursingstudio.databinding.ActivityMainBinding
 import com.example.nursingstudio.databinding.DrawerHeaderBinding
-import com.example.nursingstudio.ui.auth.AuthActivity
+import com.example.nursingstudio.ui.features.auth.AuthActivity
 import com.example.nursingstudio.ui.base.BaseActivity
 import com.example.nursingstudio.ui.features.social.SocialAdapter
+import com.example.nursingstudio.ui.features.profile.ProfileViewModel
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
+import java.util.Locale
 
 @AndroidEntryPoint
 class MainActivity : BaseActivity() { // ✅ ⭐ 2026 GOLD STANDARD: Extends BaseActivity for unbreakable live runtime security checks
@@ -39,7 +44,7 @@ class MainActivity : BaseActivity() { // ✅ ⭐ 2026 GOLD STANDARD: Extends Bas
     private lateinit var dataStoreManager: DataStoreManager
     private val auth = FirebaseAuth.getInstance()
 
-    private lateinit var profileViewModel: com.example.nursingstudio.ui.profile.ProfileViewModel
+    private lateinit var profileViewModel: ProfileViewModel
 
     companion object {
         private const val URL_YOUTUBE  = "https://youtube.com/@NursingStudio2026"
@@ -77,7 +82,7 @@ class MainActivity : BaseActivity() { // ✅ ⭐ 2026 GOLD STANDARD: Extends Bas
         observeUserData()
 
         // Initialize Shared Profile Engine inside Activity scope
-        profileViewModel = androidx.lifecycle.ViewModelProvider(this)[com.example.nursingstudio.ui.profile.ProfileViewModel::class.java]
+        profileViewModel = ViewModelProvider(this)[ProfileViewModel::class.java]
     }
 
     private fun setupHeader() {
@@ -199,11 +204,11 @@ class MainActivity : BaseActivity() { // ✅ ⭐ 2026 GOLD STANDARD: Extends Bas
 
                 // Channel 3: Modern Image Fallback Pipeline Engine (Real-time Mirroring Layer)
                 launch {
-                    profileViewModel.userData.observe(this@MainActivity) { dataMap ->
-                        dataMap?.let { data ->
-                            val profileUrl = data["profileImageUrl"]?.toString() ?: ""
+                    profileViewModel.userData.observe(this@MainActivity) { user ->
+                        user?.let { data ->
+                            val profileUrl = data.profileImageUrl ?: ""
                             if (profileUrl.isNotBlank()) {
-                                com.bumptech.glide.Glide.with(this@MainActivity)
+                                Glide.with(this@MainActivity)
                                     .load(profileUrl)
                                     .placeholder(R.drawable.ic_login_logo)
                                     .error(R.drawable.ic_login_logo)
@@ -222,7 +227,7 @@ class MainActivity : BaseActivity() { // ✅ ⭐ 2026 GOLD STANDARD: Extends Bas
                         val processType = type.ifBlank { "Free" }
 
                         // Direct explicit text assignments mapping
-                        headerBinding.tvDrawerSubscription.text = processType.uppercase(java.util.Locale.ROOT)
+                        headerBinding.tvDrawerSubscription.text = processType.uppercase(Locale.ROOT)
 
                         if (processType.equals("Premium", ignoreCase = true)) {
                             headerBinding.tvDrawerSubscription.text = getString(R.string.premium)

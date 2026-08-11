@@ -1,4 +1,4 @@
-package com.example.nursingstudio.ui.auth.login
+package com.example.nursingstudio.ui.features.auth.login
 
 import android.os.Bundle
 import android.text.Editable
@@ -7,7 +7,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.example.nursingstudio.R
-import com.example.nursingstudio.databinding.LayoutForgotMpinBinding
+import com.example.nursingstudio.databinding.BottomSheetForgotMpinBinding
 import com.example.nursingstudio.utils.AppSettings
 import com.example.nursingstudio.utils.BiometricSettingsManager
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
@@ -17,7 +17,7 @@ class ForgotMpinBottomSheet(
     private val onResetVerified: () -> Unit
 ) : BottomSheetDialogFragment() {
 
-    private var _binding: LayoutForgotMpinBinding? = null
+    private var _binding: BottomSheetForgotMpinBinding? = null
     private val binding get() = _binding!!
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -26,7 +26,7 @@ class ForgotMpinBottomSheet(
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
-        _binding = LayoutForgotMpinBinding.inflate(inflater, container, false)
+        _binding = BottomSheetForgotMpinBinding.inflate(inflater, container, false)
         return binding.root
     }
 

@@ -1,32 +1,38 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <!-- Hardware Feature Flags -->
     <uses-feature android:name="android.hardware.camera" android:required="false" />
     <uses-feature android:name="android.hardware.telephony" android:required="false" />
     <uses-feature android:name="android.hardware.fingerprint" android:required="false" />
 
+    <!-- Core Network & System Permissions -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.USE_BIOMETRIC" />
 
+    <!-- Media & Storage Permissions -->
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.READ_MEDIA_VISUAL_USER_SELECTED" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32" />
 
+    <!-- Notification Permission for Android 13+ -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <application
         android:name=".NursingStudioApp"
+        android:allowBackup="false"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.NursingStudio">
 
+        <!-- 🚀 Splash Screen Activity (Launcher Entry Point) -->
         <activity
-            android:name=".ui.splash.SplashActivity"
+            android:name=".ui.features.splash.SplashActivity"
             android:exported="true"
             android:theme="@style/Theme.NursingStudio.Splash">
             <intent-filter>
@@ -35,18 +41,28 @@
             </intent-filter>
         </activity>
 
+        <!-- Authentication Activity -->
         <activity
-            android:name=".ui.auth.AuthActivity"
+            android:name=".ui.features.auth.AuthActivity"
             android:exported="false"
             android:theme="@style/Theme.NursingStudio"
             android:windowSoftInputMode="adjustResize"
             android:configChanges="orientation|screenSize|keyboardHidden" />
 
+        <!-- Main Dashboard Activity (Secured) -->
         <activity
-            android:name=".ui.main.MainActivity"
-            android:exported="true"
+            android:name=".ui.features.main.MainActivity"
+            android:exported="false"
             android:windowSoftInputMode="adjustResize" />
 
+        <!-- UCrop Image Cropping Engine -->
+        <activity
+            android:name="com.yalantis.ucrop.UCropActivity"
+            android:configChanges="orientation|screenSize|screenLayout|smallestScreenSize"
+            android:theme="@style/UCropEngineCustomTheme"
+            android:windowSoftInputMode="stateAlwaysHidden" />
+
+        <!-- Secure File Provider for Camera/Storage Sharing -->
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.fileprovider"
@@ -56,13 +72,6 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/provider_paths" />
         </provider>
-
-        <activity
-            android:name="com.yalantis.ucrop.UCropActivity"
-            android:configChanges="orientation|screenSize|screenLayout|smallestScreenSize"
-            android:theme="@style/UCropEngineCustomTheme"
-            android:windowSoftInputMode="stateAlwaysHidden" />
-
 
     </application>
 

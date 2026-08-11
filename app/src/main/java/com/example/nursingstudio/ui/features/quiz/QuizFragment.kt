@@ -8,40 +8,61 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
 import com.example.nursingstudio.R
-import com.google.android.material.card.MaterialCardView
+import com.example.nursingstudio.databinding.FragmentQuizBinding
+import com.example.nursingstudio.utils.safeNavigate
 
 class QuizFragment : Fragment() {
 
+    private var _binding: FragmentQuizBinding? = null
+    private val binding get() = _binding!!
+
     private var mediaPlayer: MediaPlayer? = null
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        return inflater.inflate(R.layout.fragment_quiz, container, false)
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
+        _binding = FragmentQuizBinding.inflate(inflater, container, false)
+        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val cardFull = view.findViewById<MaterialCardView>(R.id.cardFullSyllabus)
-        val cardSubject = view.findViewById<MaterialCardView>(R.id.cardSubjectWise)
-        val cardTopic = view.findViewById<MaterialCardView>(R.id.cardTopicWise)
-        val cardPrev = view.findViewById<MaterialCardView>(R.id.cardPreviousYear)
-
-        cardFull.setOnClickListener { handleCategoryClick("Full Syllabus Mock Test") }
-        cardSubject.setOnClickListener { handleCategoryClick("Subject-wise Test") }
-        cardTopic.setOnClickListener { handleCategoryClick("Topic-wise Practice") }
-        cardPrev.setOnClickListener { handleCategoryClick("Previous Year Papers") }
+        setupCategoryClickListeners()
     }
 
-    private fun handleCategoryClick(title: String) {
+    private fun setupCategoryClickListeners() {
+        binding.cardFullSyllabus.setOnClickListener {
+            handleCategoryClick("Full Syllabus Mock Test", "quiz_full_syllabus_2026")
+        }
+        binding.cardSubjectWise.setOnClickListener {
+            handleCategoryClick("Subject-wise Test", "quiz_subject_wise_2026")
+        }
+        binding.cardTopicWise.setOnClickListener {
+            handleCategoryClick("Topic-wise Practice", "quiz_topic_wise_2026")
+        }
+        binding.cardPreviousYear.setOnClickListener {
+            handleCategoryClick("Previous Year Papers", "quiz_norcet_2026_01")
+        }
+    }
+
+    private fun handleCategoryClick(title: String, quizId: String) {
         playFeedbackSound()
         Toast.makeText(requireContext(), "Opening $title...", Toast.LENGTH_SHORT).show()
 
-        // Fragment Transaction to open QuizEngineFragment
-        parentFragmentManager.beginTransaction()
-            .replace(R.id.nav_host_fragment, QuizEngineFragment()) // Make sure container ID matches your Activity XML container
-            .addToBackStack(null)
-            .commit()
+        // 🚀 2026 Gold Standard: Safe Navigation via Navigation Component
+        val args = Bundle().apply {
+            putString("quiz_id", quizId)
+        }
+        findNavController().safeNavigate(
+            currentDestinationId = R.id.nav_quiz,
+            actionId = R.id.action_nav_quiz_to_nav_quiz_engine,
+            args = args
+        )
     }
 
     private fun playFeedbackSound() {
@@ -49,7 +70,10 @@ class QuizFragment : Fragment() {
         if (sp.getBoolean("enable_quiz_sound", true)) {
             mediaPlayer?.release()
             mediaPlayer = MediaPlayer.create(requireContext(), R.raw.test_ping)
-            mediaPlayer?.setOnCompletionListener { it.release() }
+            mediaPlayer?.setOnCompletionListener {
+                it.release()
+                mediaPlayer = null
+            }
             mediaPlayer?.start()
         }
     }
@@ -57,5 +81,7 @@ class QuizFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         mediaPlayer?.release()
+        mediaPlayer = null
+        _binding = null
     }
 }

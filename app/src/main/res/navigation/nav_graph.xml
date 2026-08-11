@@ -14,7 +14,13 @@
     <fragment
         android:id="@+id/nav_quiz"
         android:name="com.example.nursingstudio.ui.features.quiz.QuizFragment"
-        android:label="Quiz" />
+        android:label="Quiz">
+        <action
+            android:id="@+id/action_nav_quiz_to_nav_quiz_engine"
+            app:destination="@id/nav_quiz_engine"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left" />
+    </fragment>
 
     <fragment
         android:id="@+id/nav_pdf"
@@ -34,8 +40,9 @@
 
     <fragment
         android:id="@+id/nav_profile"
-        android:name="com.example.nursingstudio.ui.profile.ProfileFragment"
-        android:label="My Profile" />
+        android:name="com.example.nursingstudio.ui.features.profile.ProfileFragment"
+        android:label="My Profile"
+        tools:layout="@layout/fragment_profile" />
 
     <fragment
         android:id="@+id/nav_subscription"
@@ -65,7 +72,7 @@
     <!-- Login Fragment -->
     <fragment
         android:id="@+id/nav_login"
-        android:name="com.example.nursingstudio.ui.auth.login.LoginFragment"
+        android:name="com.example.nursingstudio.ui.features.auth.login.LoginFragment"
         android:label="Login"
         tools:layout="@layout/fragment_login">
         <!-- Action to Register -->
@@ -79,7 +86,7 @@
     <!-- Register Fragment -->
     <fragment
         android:id="@+id/nav_register"
-        android:name="com.example.nursingstudio.ui.auth.register.RegisterFragment"
+        android:name="com.example.nursingstudio.ui.features.auth.register.RegisterFragment"
         android:label="Create Account"
         tools:layout="@layout/fragment_register">
         <!-- 🚀 Gold Standard Action: Redirecting back to Login -->
@@ -113,5 +120,30 @@
         android:id="@+id/nav_video_player"
         android:name="com.example.nursingstudio.ui.features.media.VideoPlayerFragment"
         android:label="Video Player" />
+
+    <!-- Quiz Engine Destination -->
+    <fragment
+        android:id="@+id/nav_quiz_engine"
+        android:name="com.example.nursingstudio.ui.features.quiz.QuizEngineFragment"
+        android:label="Quiz Engine"
+        tools:layout="@layout/fragment_quiz_engine">
+        <action
+            android:id="@+id/action_quizEngine_to_resultFragment"
+            app:destination="@id/nav_quiz_result"
+            app:popUpTo="@id/nav_quiz_engine"
+            app:popUpToInclusive="true"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left" />
+    </fragment>
+
+    <!-- Quiz Result Destination -->
+    <fragment
+        android:id="@+id/nav_quiz_result"
+        android:name="com.example.nursingstudio.ui.features.quiz.QuizResultBottomSheetFragment"
+        android:label="Quiz Result"
+        tools:layout="@layout/fragment_quiz_result_bottom_sheet" />
+
+    <!-- Action from main Quiz List to Quiz Engine -->
+    <!-- Note: nav_quiz fragment tag ke inside ye action replace/add karein -->
 
 </navigation>

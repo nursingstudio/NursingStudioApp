@@ -1,7 +1,11 @@
-package com.example.nursingstudio.ui.auth.login
+package com.example.nursingstudio.ui.features.auth.login
 
+import android.Manifest
 import android.content.Context
+import android.content.DialogInterface
 import android.content.Intent
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
 import android.os.Build
 import android.os.Bundle
 import android.text.Editable
@@ -10,11 +14,14 @@ import android.text.InputType
 import android.text.TextWatcher
 import android.text.method.PasswordTransformationMethod
 import android.util.Patterns
+import android.view.ContextThemeWrapper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
+import android.widget.FrameLayout
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.biometric.BiometricManager
 import androidx.core.content.edit
 import androidx.core.view.isVisible
@@ -27,8 +34,8 @@ import androidx.lifecycle.withResumed
 import com.example.nursingstudio.R
 import com.example.nursingstudio.data.local.DataStoreManager
 import com.example.nursingstudio.databinding.FragmentLoginBinding
-import com.example.nursingstudio.ui.auth.AuthActivity
-import com.example.nursingstudio.ui.main.MainActivity
+import com.example.nursingstudio.ui.features.auth.AuthActivity
+import com.example.nursingstudio.ui.features.main.MainActivity
 import com.example.nursingstudio.utils.AppSettings
 import com.example.nursingstudio.utils.BiometricAuthHelper
 import com.example.nursingstudio.utils.BiometricSettingsManager
@@ -40,6 +47,9 @@ import kotlinx.coroutines.launch
 import java.util.Locale
 import kotlin.time.Duration.Companion.milliseconds
 import androidx.core.net.toUri
+import com.google.android.material.textfield.TextInputEditText
+import com.google.android.material.textfield.TextInputLayout
+import kotlinx.coroutines.delay
 
 @AndroidEntryPoint
 class LoginFragment : Fragment() {
@@ -62,7 +72,7 @@ class LoginFragment : Fragment() {
     private var securityLockTickerJob: Job? = null
 
     private val requestNotificationPermissionLauncher = registerForActivityResult(
-        androidx.activity.result.contract.ActivityResultContracts.RequestPermission()
+        ActivityResultContracts.RequestPermission()
     ) { isGranted ->
         if (!isGranted) {
             toast(getString(R.string.enable_notifications_for_alerts))
@@ -72,7 +82,7 @@ class LoginFragment : Fragment() {
     override fun onResume() {
         super.onResume()
         viewLifecycleOwner.lifecycleScope.launch {
-            kotlinx.coroutines.delay(200.milliseconds)
+            delay(200.milliseconds)
             if (_binding != null) {
                 binding.etEmail.clearFocus()
                 binding.etPassword.clearFocus()
@@ -101,7 +111,7 @@ class LoginFragment : Fragment() {
         startPromotionalAdsRotationEngine()
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            requestNotificationPermissionLauncher.launch(android.Manifest.permission.POST_NOTIFICATIONS)
+            requestNotificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
         }
     }
 
@@ -215,7 +225,7 @@ class LoginFragment : Fragment() {
                     while (isUserLocked(email)) {
                         val currentTimeLeft = getRemainingLockTime(email)
                         binding.tilEmail.error = "Account locked! Try after $currentTimeLeft"
-                        kotlinx.coroutines.delay(1000.milliseconds)
+                        delay(1000.milliseconds)
                     }
                     binding.tilEmail.isErrorEnabled = false
                     binding.tilEmail.error = null
@@ -374,7 +384,7 @@ class LoginFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
                 while (true) {
-                    kotlinx.coroutines.delay(3000.milliseconds) // Perfect 3-Seconds Auto-Transition interval
+                    delay(3000.milliseconds) // Perfect 3-Seconds Auto-Transition interval
                     if (_binding != null) {
                         binding.adViewFlipper.showNext()
                     }
@@ -385,7 +395,7 @@ class LoginFragment : Fragment() {
 
     private fun showLocalMpinSetupDialog() {
         // 🚀 2026 UI Architecture: Programmatically structured clean layout encapsulation frame using device density metrics
-        val containerFrame = android.widget.FrameLayout(requireContext()).apply {
+        val containerFrame = FrameLayout(requireContext()).apply {
             val paddingHorizontal = (24 * resources.displayMetrics.density).toInt()
             val paddingTop = (12 * resources.displayMetrics.density).toInt()
             setPadding(paddingHorizontal, paddingTop, paddingHorizontal, 0)
@@ -394,25 +404,25 @@ class LoginFragment : Fragment() {
 
         // 🚀 FIXED: Routed ContextThemeWrapper straight into your Centralized Custom Global XML Style Profile
         // This eliminates all manual cursor tint hacks, text colors, error boundaries, and selection pointer issues completely
-        val styledContext = android.view.ContextThemeWrapper(
+        val styledContext = ContextThemeWrapper(
             requireContext(),
             R.style.Widget_Material3_TextInputLayout_OutlinedBox_CustomGlobal
         )
 
-        val textInputLayout = com.google.android.material.textfield.TextInputLayout(
+        val textInputLayout = TextInputLayout(
             styledContext,
             null,
             com.google.android.material.R.attr.textInputStyle
         ).apply {
-            layoutParams = android.widget.FrameLayout.LayoutParams(
-                android.widget.FrameLayout.LayoutParams.MATCH_PARENT,
-                android.widget.FrameLayout.LayoutParams.WRAP_CONTENT
+            layoutParams = FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.MATCH_PARENT,
+                FrameLayout.LayoutParams.WRAP_CONTENT
             )
             // Enforce password visibility icons natively backed by your central system parameters
-            endIconMode = com.google.android.material.textfield.TextInputLayout.END_ICON_PASSWORD_TOGGLE
+            endIconMode = TextInputLayout.END_ICON_PASSWORD_TOGGLE
         }
 
-        val etMpin = com.google.android.material.textfield.TextInputEditText(textInputLayout.context).apply {
+        val etMpin = TextInputEditText(textInputLayout.context).apply {
             inputType = InputType.TYPE_CLASS_NUMBER
             transformationMethod = PasswordTransformationMethod.getInstance()
             filters = arrayOf(InputFilter.LengthFilter(4))
@@ -450,7 +460,7 @@ class LoginFragment : Fragment() {
         val metricsWidth = (resources.displayMetrics.widthPixels * 0.92).toInt()
         dialog.window?.setLayout(metricsWidth, ViewGroup.LayoutParams.WRAP_CONTENT)
 
-        dialog.getButton(android.content.DialogInterface.BUTTON_POSITIVE).setOnClickListener {
+        dialog.getButton(DialogInterface.BUTTON_POSITIVE).setOnClickListener {
             val mpin = etMpin.text.toString().trim()
 
             // 🚀 FIXED: Resolved references by binding accurately to your class initialized variable token layer 'bioSettingsManager'
@@ -614,10 +624,10 @@ class LoginFragment : Fragment() {
     }
 
     private fun isNetworkAvailable(): Boolean {
-        val connectivityManager = requireContext().getSystemService(Context.CONNECTIVITY_SERVICE) as android.net.ConnectivityManager
+        val connectivityManager = requireContext().getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
         val network = connectivityManager.activeNetwork ?: return false
         val capabilities = connectivityManager.getNetworkCapabilities(network) ?: return false
-        return capabilities.hasCapability(android.net.NetworkCapabilities.NET_CAPABILITY_INTERNET)
+        return capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
     }
 
     override fun onDestroyView() {

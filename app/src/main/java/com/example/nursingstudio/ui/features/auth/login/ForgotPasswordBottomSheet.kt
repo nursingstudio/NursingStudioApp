@@ -1,15 +1,20 @@
-package com.example.nursingstudio.ui.auth.login
+package com.example.nursingstudio.ui.features.auth.login
 
 import android.content.Context
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.util.Patterns
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
-import com.example.nursingstudio.ui.auth.AuthActivity
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import com.example.nursingstudio.ui.features.auth.AuthActivity
 import com.example.nursingstudio.R
 import com.example.nursingstudio.databinding.LayoutForgotPasswordBinding
 import com.example.nursingstudio.utils.AppSettings
@@ -52,10 +57,10 @@ class ForgotPasswordBottomSheet : BottomSheetDialogFragment() {
         behavior.state = BottomSheetBehavior.STATE_EXPANDED
 
         // 🚀 2026 Fluid Keyboard Alignment: Pure programmatic calculation layout padding bounds
-        androidx.core.view.ViewCompat.setOnApplyWindowInsetsListener(bottomSheet) { _, insets ->
-            val imeVisible = insets.isVisible(androidx.core.view.WindowInsetsCompat.Type.ime())
-            val imeHeight = insets.getInsets(androidx.core.view.WindowInsetsCompat.Type.ime()).bottom
-            val systemBarsHeight = insets.getInsets(androidx.core.view.WindowInsetsCompat.Type.systemBars()).bottom
+        ViewCompat.setOnApplyWindowInsetsListener(bottomSheet) { _, insets ->
+            val imeVisible = insets.isVisible(WindowInsetsCompat.Type.ime())
+            val imeHeight = insets.getInsets(WindowInsetsCompat.Type.ime()).bottom
+            val systemBarsHeight = insets.getInsets(WindowInsetsCompat.Type.systemBars()).bottom
 
             _binding?.let { b ->
                 val targetPadding = if (imeVisible) (imeHeight - systemBarsHeight).coerceAtLeast(0) else 0
@@ -69,13 +74,13 @@ class ForgotPasswordBottomSheet : BottomSheetDialogFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        binding.etForgotEmail.addTextChangedListener(object : android.text.TextWatcher {
+        binding.etForgotEmail.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                 binding.tilForgotEmail.error = null
                 binding.tilForgotEmail.isErrorEnabled = false
             }
-            override fun afterTextChanged(s: android.text.Editable?) {}
+            override fun afterTextChanged(s: Editable?) {}
         })
 
         AppSettings.setPushEffect(binding.btnResetPassword)
@@ -89,8 +94,8 @@ class ForgotPasswordBottomSheet : BottomSheetDialogFragment() {
     private fun handlePasswordResetFlow(email: String) {
         val currentWindow = dialog?.window
         if (currentWindow != null) {
-            androidx.core.view.WindowCompat.getInsetsController(currentWindow, binding.root).apply {
-                hide(androidx.core.view.WindowInsetsCompat.Type.ime())
+            WindowCompat.getInsetsController(currentWindow, binding.root).apply {
+                hide(WindowInsetsCompat.Type.ime())
             }
         }
 

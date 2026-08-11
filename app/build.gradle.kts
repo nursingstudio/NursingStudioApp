@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
+    id("kotlin-parcelize")
     id("com.google.gms.google-services")
     id("com.google.firebase.crashlytics")
     id("com.google.devtools.ksp")
@@ -41,10 +42,8 @@ android {
         }
     }
 
-    // ✅ FIXED 2026 HIERARCHY SCOPING: Brought inside correct receiver scope to solve Red Error completely
     buildTypes {
         getByName("release") {
-            // ✅ FIXED 2026 COMPLIANCE: Suppressed local credential verification warning safely for Play Store review pipelines
             //noinspection AppBundleCredentials
             signingConfig = signingConfigs.getByName("releaseTest")
 
@@ -65,13 +64,13 @@ android {
         }
     }
 
+    // 🚀 CRITICAL FOR 2026 AGP BUILD CONFIG GENERATION
     buildFeatures {
         viewBinding = true
         buildConfig = true
     }
 }
 
-// ⭐ 2026 KSP OPTIMIZATION ENGINE: Redirects sources into standard layout directories
 ksp {
     arg("correctErrorTypes", "true")
 }
@@ -86,12 +85,10 @@ dependencies {
     implementation(libs.material)
     implementation(libs.androidx.core.splashscreen)
     implementation(libs.lottie)
-    implementation(libs.coil) // 2026 Best for Image Loading
+    implementation(libs.coil)
 
-    // 2. ⭐ THE GOLD STANDARD: Single Firebase BoM Control
+    // 2. Firebase BoM Control
     implementation(platform(libs.firebase.bom))
-
-    // Sabhi Firebase Services (Bina version ke)
     implementation(libs.firebase.auth)
     implementation(libs.firebase.firestore)
     implementation(libs.firebase.database)
@@ -126,51 +123,54 @@ dependencies {
     implementation(libs.androidx.compose.ui.graphics)
     implementation(libs.androidx.compose.material3)
 
-    // Jetpack DataStore (SharedPreferences ka replacement)
+    // 7. Jetpack DataStore (SharedPreferences ka replacement)
     implementation(libs.androidx.datastore.preferences)
 
-    // Others
+    // 8. Retrofit & OkHttp (2026 Gold Standard Networking Stack)
+    implementation(libs.retrofit)
+    implementation(libs.converter.gson)
+    implementation(libs.okhttp)
+    implementation(libs.logging.interceptor)
+
+    // 9. Media & PDF Utilities
     implementation(libs.androidx.fragment.ktx)
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.compose.ui.tooling.preview)
-    implementation(libs.firebase.appcheck.ktx)
-    implementation(libs.google.firebase.appcheck.ktx)
-
-    // 🚀 2026 Android Player Engine Component Standard
     implementation(libs.core)
-    // 🚀 2026 TOP-TIER ENGINE: Advanced High-Performance Image Cropping Framework
     implementation(libs.ucrop)
-    // 🚀 2026 WORLD-CLASS CACHING IMAGE ENGINE: Glide Implementation
     implementation(libs.glide)
-
-    // 🚀 2026 INDUSTRY GOLD STANDARD: Firebase Cloud Core & AI Jetpack Components
-    implementation(libs.firebase.storage.ktx)
-    implementation(libs.firebase.firestore.ktx)
-
-    // 🚀 2026 World-Class Media3 & Firestore Engines
-    implementation(libs.google.firebase.firestore.ktx)
-    implementation(libs.androidx.media3.exoplayer) // Latest 2026 Stable
+    implementation(libs.androidx.media3.exoplayer)
     implementation(libs.androidx.media3.ui)
-    // 🚀 2026 INDUSTRY GOLD STANDARD: Core Engine Layer for Protected YouTube Streams
-    implementation(libs.core.v1210)
-
-    // 🚀 2026 Jetpack Production PDF Viewer Core Engine
     implementation(libs.androidx.pdf.viewer)
 
-    annotationProcessor(libs.compiler)
-
-
-    // ✅ HILT + KSP (Modern 2026 Standard)
+    // 10. Dependency Injection (Hilt + KSP)
     implementation(libs.hilt.android)
     ksp(libs.hilt.android.compiler)
 
-    // Debug tools
+    // 11. Debug tools
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
 
-    // 7. Testing
+    // 12. Testing
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+
+    // 13. Others
+    implementation(libs.firebase.appcheck.ktx)
+    implementation(libs.google.firebase.appcheck.ktx)
+
+    // 14. Firebase Cloud Core & AI Jetpack Components
+    implementation(libs.firebase.storage.ktx)
+    implementation(libs.firebase.firestore.ktx)
+
+    // 15. Firestore Engines
+    implementation(libs.google.firebase.firestore.ktx)
+
+    // 16. Core Engine Layer for Protected YouTube Streams
+    implementation(libs.core.v1210)
+
+    annotationProcessor(libs.compiler)
+
 }

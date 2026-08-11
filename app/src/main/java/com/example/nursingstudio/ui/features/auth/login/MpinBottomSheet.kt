@@ -1,4 +1,4 @@
-package com.example.nursingstudio.ui.auth.login
+package com.example.nursingstudio.ui.features.auth.login
 
 import android.os.Bundle
 import android.view.LayoutInflater

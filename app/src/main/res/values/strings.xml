@@ -374,6 +374,11 @@
     <string name="network_connection_fault">Network connection fault: %1$s</string>
     <string name="of">%1$d of %2$d</string>
     <string name="quiz_question_format">%1$d. %2$s</string>
+    <string name="review_answers">Review Answers</string>
+    <string name="global_rank">Global Rank</string>
+    <string name="time_taken">Time Taken</string>
+    <string name="performance_overview">Performance Overview</string>
+    <string name="retake_test">Retake Test</string>
 
 
 </resources>

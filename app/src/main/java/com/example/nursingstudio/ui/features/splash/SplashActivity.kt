@@ -1,4 +1,4 @@
-package com.example.nursingstudio.ui.splash
+package com.example.nursingstudio.ui.features.splash
 
 import android.content.Intent
 import android.os.Build
@@ -13,8 +13,8 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.airbnb.lottie.LottieAnimationView
 import com.example.nursingstudio.R
-import com.example.nursingstudio.ui.auth.AuthActivity
-import com.example.nursingstudio.ui.main.MainActivity
+import com.example.nursingstudio.ui.features.auth.AuthActivity
+import com.example.nursingstudio.ui.features.main.MainActivity
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch

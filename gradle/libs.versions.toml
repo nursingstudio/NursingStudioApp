@@ -6,6 +6,7 @@ ccp = "2.7.3"
 circleimageview = "3.1.0"
 coil = "2.7.0"
 compiler = "5.0.7"
+converterGson = "3.0.0"
 core = "13.0.0"
 coreSplashscreen = "1.2.0"
 coreVersion = "12.1.0"
@@ -28,6 +29,7 @@ espressoCore = "3.7.0"
 appcompat = "1.7.1"
 kotlinxCoroutinesPlayServices = "1.10.2"
 lifecycleViewmodelKtx = "2.10.0"
+loggingInterceptor = "5.4.0"
 lottie = "6.7.1"
 material = "1.13.0"
 activity = "1.12.4"
@@ -39,9 +41,11 @@ activityCompose = "1.12.4"
 composeBom = "2026.02.01"
 media3Ui = "1.10.1"
 navigationUiKtx = "2.9.7"
+okhttp = "5.4.0"
 pdfViewer = "1.0.0-alpha18"
 playServicesAuth = "21.5.1"
 playServicesAuthApiPhone = "18.3.0"
+retrofit = "3.0.0"
 securityCrypto = "1.1.0"
 ucrop = "2.2.8"
 pdfViewerFragment = "1.0.0-alpha18"
@@ -65,6 +69,7 @@ ccp = { module = "com.hbb20:ccp", version.ref = "ccp" }
 circleimageview = { module = "de.hdodenhof:circleimageview", version.ref = "circleimageview" }
 coil = { module = "io.coil-kt:coil", version.ref = "coil" }
 compiler = { module = "com.github.bumptech.glide:compiler", version.ref = "compiler" }
+converter-gson = { module = "com.squareup.retrofit2:converter-gson", version.ref = "converterGson" }
 core = { module = "com.pierfrancescosoffritti.androidyoutubeplayer:core", version.ref = "core" }
 core-v1210 = { module = "com.pierfrancescosoffritti.androidyoutubeplayer:core", version.ref = "coreVersion" }
 firebase-analytics = { module = "com.google.firebase:firebase-analytics", version.ref = "firebaseAnalytics" }
@@ -89,6 +94,7 @@ androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "j
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
 kotlinx-coroutines-play-services = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-play-services", version.ref = "kotlinxCoroutinesPlayServices" }
+logging-interceptor = { module = "com.squareup.okhttp3:logging-interceptor", version.ref = "loggingInterceptor" }
 lottie = { module = "com.airbnb.android:lottie", version.ref = "lottie" }
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 androidx-activity = { group = "androidx.activity", name = "activity", version.ref = "activity" }
@@ -105,8 +111,10 @@ androidx-compose-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-te
 androidx-compose-material3 = { group = "androidx.compose.material3", name = "material3" }
 firebase-appcheck-ktx = { group = "com.google.firebase", name = "firebase-appcheck-ktx", version.ref = "firebaseAppCheck" }
 firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebaseBom" }
+okhttp = { module = "com.squareup.okhttp3:okhttp", version.ref = "okhttp" }
 play-services-auth = { module = "com.google.android.gms:play-services-auth", version.ref = "playServicesAuth" }
 play-services-auth-api-phone = { module = "com.google.android.gms:play-services-auth-api-phone", version.ref = "playServicesAuthApiPhone" }
+retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit" }
 ucrop = { module = "com.github.yalantis:ucrop", version.ref = "ucrop" }
 androidx-pdf-viewer-fragment = { group = "androidx.pdf", name = "pdf-viewer-fragment", version.ref = "pdfViewerFragment" }
 

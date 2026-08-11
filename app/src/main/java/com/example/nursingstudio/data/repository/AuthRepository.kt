@@ -1,11 +1,14 @@
 package com.example.nursingstudio.data.repository
 
 import android.content.Context
+import com.example.nursingstudio.data.local.DataStoreManager
+import com.example.nursingstudio.data.model.User
 import com.example.nursingstudio.utils.AppSettings
-import com.google.firebase.auth.FirebaseAuth
+import com.example.nursingstudio.utils.IdGenerator
 import com.google.firebase.auth.AuthResult
-import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FieldValue
+import com.google.firebase.firestore.FirebaseFirestore
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
@@ -15,9 +18,9 @@ import javax.inject.Singleton
 class AuthRepository @Inject constructor(
     @param:ApplicationContext private val context: Context,
     private val auth: FirebaseAuth,
-    private val db: FirebaseFirestore
+    private val db: FirebaseFirestore,
+    private val dataStoreManager: DataStoreManager
 ) {
-    // 🚀 2026 Standard: Clean Result Wrapper for Authentication Pipeline
     suspend fun createUser(email: String, pass: String): Result<AuthResult> = try {
         val result = auth.createUserWithEmailAndPassword(email, pass).await()
         Result.success(result)
@@ -25,11 +28,8 @@ class AuthRepository @Inject constructor(
         Result.failure(e)
     }
 
-    // 🚀 FIXED & SANITIZED: 2026 Enterprise Identity Generation & Synchronization Pipeline
-    suspend fun saveUserData(uid: String, user: com.example.nursingstudio.data.model.User): Result<Void?> = try {
-
-        // 🚀 Step 1: Generate high-scalability unique token identifier at server registration edge
-        val targetNsId = com.example.nursingstudio.utils.IdGenerator.generateSecureNsId()
+    suspend fun saveUserData(uid: String, user: User): Result<Void?> = try {
+        val targetNsId = IdGenerator.generateSecureNsId()
 
         val userWriteMap = hashMapOf(
             "uid" to uid,
@@ -50,22 +50,19 @@ class AuthRepository @Inject constructor(
             "regState" to user.regState,
             "regNumber" to user.regNumber,
             "isNursingRegistered" to user.isNursingRegistered,
-
-            // 🚀 Step 2: Inject the generated unique ID directly inside cloud system payload matrix
             "uniqueNsId" to targetNsId,
-            "subscriptionType" to "Free", // Default layout fallback subscription model
-
-            // 🔥 SERVER CLOCK ENFORCEMENT: Enforces absolute data consistency over user settings alterations
+            "subscriptionType" to "Free",
             "createdAt" to FieldValue.serverTimestamp()
         )
 
         val result = db.collection("Users").document(uid).set(userWriteMap).await()
+        dataStoreManager.saveUniqueNsId(targetNsId)
+        dataStoreManager.saveUser(user.fullName, user.mobile)
         Result.success(result)
     } catch (e: Exception) {
         Result.failure(e)
     }
 
-    // 🚀 2026 Core Flow: Email Session Verification Check
     suspend fun signInWithEmail(email: String, pass: String): Result<AuthResult> = try {
         val result = auth.signInWithEmailAndPassword(email, pass).await()
         Result.success(result)

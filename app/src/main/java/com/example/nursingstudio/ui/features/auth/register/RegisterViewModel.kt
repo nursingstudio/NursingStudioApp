@@ -1,4 +1,4 @@
-package com.example.nursingstudio.ui.auth.register
+package com.example.nursingstudio.ui.features.auth.register
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope

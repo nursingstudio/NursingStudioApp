@@ -1,4 +1,4 @@
-package com.example.nursingstudio.ui.auth
+package com.example.nursingstudio.ui.features.auth
 
 import android.annotation.SuppressLint
 import android.content.pm.ApplicationInfo
@@ -7,8 +7,8 @@ import android.util.Base64
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import com.example.nursingstudio.R
-import com.example.nursingstudio.ui.auth.login.LoginFragment
-import com.example.nursingstudio.ui.auth.register.RegisterFragment
+import com.example.nursingstudio.ui.features.auth.login.LoginFragment
+import com.example.nursingstudio.ui.features.auth.register.RegisterFragment
 import com.example.nursingstudio.ui.base.BaseActivity
 import com.google.android.play.core.appupdate.AppUpdateManagerFactory
 import com.google.android.play.core.appupdate.AppUpdateOptions
