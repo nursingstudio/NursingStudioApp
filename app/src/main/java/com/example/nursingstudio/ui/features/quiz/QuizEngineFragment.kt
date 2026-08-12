@@ -58,7 +58,7 @@ class QuizEngineFragment : Fragment() {
         binding.quizViewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
             override fun onPageSelected(position: Int) {
                 super.onPageSelected(position)
-                updateProgressCounter(position + 1, quizAdapter.itemCount)
+                updateProgressCounter(position, quizAdapter.itemCount)
             }
         })
     }
@@ -80,6 +80,19 @@ class QuizEngineFragment : Fragment() {
                 viewModel.submitQuiz()
             }
         }
+
+        binding.btnQuestionPalette.setOnClickListener {
+            val totalQuestions = quizAdapter.itemCount
+            val currentPos = binding.quizViewPager.currentItem
+            val paletteBottomSheet = QuestionPaletteBottomSheet.newInstance(
+                totalQuestions = totalQuestions,
+                currentPosition = currentPos
+            ) { selectedIndex ->
+                // Direct jump using 0-based index
+                binding.quizViewPager.setCurrentItem(selectedIndex, true)
+            }
+            paletteBottomSheet.show(childFragmentManager, "QuestionPaletteBottomSheet")
+        }
     }
 
     private fun observeViewModel() {
@@ -88,15 +101,13 @@ class QuizEngineFragment : Fragment() {
                 launch {
                     viewModel.uiState.collect { state ->
                         when (state) {
-                            is QuizEngineUiState.Loading -> {
-                                // Handled via progress indicator
-                            }
+                            is QuizEngineUiState.Loading -> { }
                             is QuizEngineUiState.Success -> {
                                 binding.tvQuizTitle.text = state.metadata.title
                                 binding.tvSubjectTag.text = state.metadata.subject
                                 quizAdapter.submitList(state.questions)
                                 updateProgressCounter(
-                                    binding.quizViewPager.currentItem + 1,
+                                    binding.quizViewPager.currentItem,
                                     state.questions.size
                                 )
                             }
@@ -130,9 +141,15 @@ class QuizEngineFragment : Fragment() {
         }
     }
 
-    private fun updateProgressCounter(current: Int, total: Int) {
-        binding.tvQuestionProgressCounter.text = getString(R.string.of, current, total)
-        binding.btnNextQuestion.text = if (current == total) "Submit" else "Next"
+    /**
+     * Correct zero-index to display translation:
+     * currentZeroIndex = 0 displays as 1 of N
+     * Clicking question #14 passes zero-index 13 to ViewPager2
+     */
+    private fun updateProgressCounter(currentZeroIndex: Int, total: Int) {
+        val displayIndex = if (total > 0) currentZeroIndex + 1 else 0
+        binding.tvQuestionProgressCounter.text = getString(R.string.of, displayIndex, total)
+        binding.btnNextQuestion.text = if (displayIndex == total && total > 0) "Submit" else "Next"
     }
 
     override fun onDestroyView() {

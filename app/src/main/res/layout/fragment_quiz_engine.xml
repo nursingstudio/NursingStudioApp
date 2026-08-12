@@ -8,7 +8,7 @@
     android:background="@color/app_background"
     tools:context=".ui.features.quiz.QuizEngineFragment">
 
-    <!-- 🚀 2026 GOLD STANDARD: Header Card with Saffron Brand Stroke -->
+    <!-- Header Card -->
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/headerCard"
         android:layout_width="0dp"
@@ -26,7 +26,7 @@
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:padding="16dp">
+            android:padding="12dp">
 
             <TextView
                 android:id="@+id/tvQuizTitle"
@@ -36,16 +36,16 @@
                 android:text="@string/norcet_grand_test"
                 android:textColor="@color/text_primary"
                 android:fontFamily="sans-serif-medium"
-                android:textSize="16sp"
+                android:textSize="15sp"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toStartOf="@+id/timerContainer"
+                app:layout_constraintEnd_toStartOf="@+id/rightControlsContainer"
                 app:layout_constraintTop_toTopOf="parent" />
 
             <TextView
                 android:id="@+id/tvSubjectTag"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
+                android:layout_marginTop="2dp"
                 android:text="@string/subject_anatomy"
                 android:textColor="@color/text_secondary"
                 android:textSize="12sp"
@@ -53,31 +53,50 @@
                 app:layout_constraintTop_toBottomOf="@id/tvQuizTitle" />
 
             <LinearLayout
-                android:id="@+id/timerContainer"
+                android:id="@+id/rightControlsContainer"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
-                android:background="@color/saffron_light"
-                android:paddingHorizontal="12dp"
-                android:paddingVertical="6dp"
+                android:gravity="center_vertical"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent">
 
-                <TextView
-                    android:id="@+id/tvTimerClock"
+                <!-- Palette Button -->
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnQuestionPalette"
+                    style="@style/Widget.Material3.Button.IconButton"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:layout_marginEnd="8dp"
+                    app:icon="@drawable/ic_grid_palette"
+                    app:iconTint="@color/brand_saffron_dark" />
+
+                <!-- Timer -->
+                <LinearLayout
+                    android:id="@+id/timerContainer"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/_00_00"
-                    android:textColor="@color/error_red"
-                    android:fontFamily="sans-serif-bold"
-                    android:textSize="16sp" />
+                    android:background="@color/saffron_light"
+                    android:paddingHorizontal="10dp"
+                    android:paddingVertical="6dp">
+
+                    <TextView
+                        android:id="@+id/tvTimerClock"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/_00_00"
+                        android:textColor="@color/error_red"
+                        android:fontFamily="sans-serif-bold"
+                        android:textSize="15sp" />
+                </LinearLayout>
+
             </LinearLayout>
 
         </androidx.constraintlayout.widget.ConstraintLayout>
     </com.google.android.material.card.MaterialCardView>
 
-    <!-- Questions ViewPager2 Engine Container -->
+    <!-- Questions ViewPager2 Engine -->
     <androidx.viewpager2.widget.ViewPager2
         android:id="@+id/quizViewPager"
         android:layout_width="match_parent"
@@ -96,7 +115,6 @@
         android:elevation="8dp"
         app:layout_constraintBottom_toBottomOf="parent">
 
-        <!-- 🚀 2026 GOLD STANDARD: Outlined Button with Brand Saffron Border & Matching Accent Text -->
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnPreviousQuestion"
             style="@style/Widget.Material3.Button.OutlinedButton"

@@ -379,6 +379,12 @@
     <string name="time_taken">Time Taken</string>
     <string name="performance_overview">Performance Overview</string>
     <string name="retake_test">Retake Test</string>
+    <string name="question_palette">Question Palette</string>
+    <string name="answered">Answered</string>
+    <string name="skipped">Skipped</string>
+    <string name="unanswered">Unanswered</string>
+    <string name="marked_for_review">Marked for Review</string>
+    <string name="test_status">Test Status</string>
 
 
 </resources>

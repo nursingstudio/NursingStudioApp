@@ -25,4 +25,12 @@
 
     <color name="brand_youtube_red">#FF0000</color>
     <color name="brand_whatsapp_green">#25D366</color>
+
+    <!-- 2026 Gold Standard Question Palette Status Colors -->
+    <color name="palette_answered">#22C55E</color>     <!-- 🟢 Answered / Attempted (Green) -->
+    <color name="palette_skipped">#4B5563</color>      <!-- 🔘 Skipped (Dark Gray) -->
+    <color name="palette_unanswered">#FFFFFF</color>   <!-- ⚪ Unanswered / Unattempted (White) -->
+    <color name="palette_unanswered_border">#D1D5DB</color>
+    <color name="palette_review">#8B5CF6</color>      <!-- 🟣 Marked for Review (Purple) -->
+
 </resources>
