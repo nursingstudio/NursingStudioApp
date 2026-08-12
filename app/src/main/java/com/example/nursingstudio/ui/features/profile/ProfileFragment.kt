@@ -23,21 +23,19 @@ import androidx.lifecycle.lifecycleScope
 import com.bumptech.glide.Glide
 import com.example.nursingstudio.R
 import com.example.nursingstudio.data.local.DataStoreManager
-import com.example.nursingstudio.data.model.User
 import com.example.nursingstudio.databinding.FragmentProfileBinding
 import com.example.nursingstudio.ui.features.auth.AuthActivity
 import com.example.nursingstudio.utils.AppSettings
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.firebase.auth.FirebaseAuth
 import com.yalantis.ucrop.UCrop
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
-
-import dagger.hilt.android.AndroidEntryPoint
 
 /**
  * 🚀 2026 INDUSTRY GOLD STANDARD: Clean Zero-Latency Isolated Image Sandbox
@@ -110,7 +108,11 @@ class ProfileFragment : Fragment() {
         observeProfileDataStream()
         setupInteractiveClickListeners()
 
-        // 🚀 2026 Architecture Guard: Real-time network failure observation pool
+        // Re-trigger fetch if user data was not loaded previously
+        if (viewModel.userData.value == null) {
+            viewModel.fetchProfile(forceRefresh = true)
+        }
+
         viewModel.error.observe(viewLifecycleOwner) { errorMessage ->
             if (!errorMessage.isNullOrEmpty()) {
                 Toast.makeText(context, "Cloud Core Sync Warning: $errorMessage", Toast.LENGTH_LONG).show()

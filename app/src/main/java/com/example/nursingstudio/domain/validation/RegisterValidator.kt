@@ -91,10 +91,10 @@ object RegisterValidator {
             // ==========================================
             user.isNursingRegistered == null -> ValidationResult.Error("Please select Nursing Registration status", "is_reg")
 
-            (user.isNursingRegistered && user.regState.isNullOrBlank()) ->
+            (user.isNursingRegistered == true && user.regState.isNullOrBlank()) ->
                 ValidationResult.Error("Registration State required", "reg_state")
 
-            (user.isNursingRegistered && user.regNumber.isNullOrBlank()) ->
+            (user.isNursingRegistered == true && user.regNumber.isNullOrBlank()) ->
                 ValidationResult.Error("Registration Number required", "reg_no")
 
             // ==========================================

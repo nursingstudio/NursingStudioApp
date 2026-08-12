@@ -20,11 +20,19 @@ class ProfileRepository @Inject constructor(
     suspend fun getUserProfile(): Result<User?> = try {
         val uid = currentUserId ?: throw Exception("User is not authenticated")
         val snapshot = db.collection("Users").document(uid).get().await()
-        val user = snapshot.toObject(User::class.java)
+
+        if (!snapshot.exists()) {
+            throw Exception("User profile document does not exist in Firestore")
+        }
+
+        val user = snapshot.toObject(User::class.java) ?: User(uid = uid, email = auth.currentUser?.email ?: "")
 
         // 🚀 2026 Offline-First Caching Strategy using DataStoreManager
-        user?.let {
-            dataStoreManager.saveUser(it.fullName, it.mobile)
+        dataStoreManager.saveUser(user.fullName, user.mobile)
+        user.uniqueNsId?.let { id ->
+            if (id.isNotEmpty() && id != "NS-2026-PENDING") {
+                dataStoreManager.saveUniqueNsId(id)
+            }
         }
 
         Result.success(user)
