@@ -15,10 +15,10 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.seconds
 
 sealed interface QuizEngineUiState {
-    object Loading : QuizEngineUiState
+    data object Loading : QuizEngineUiState
     data class Success(
         val metadata: QuizMetadata,
         val questions: List<QuestionItem>,
@@ -68,7 +68,7 @@ class QuizEngineViewModel @Inject constructor(
         _remainingSeconds.value = totalSeconds
         timerJob = viewModelScope.launch {
             while (_remainingSeconds.value > 0) {
-                delay(1000L.milliseconds)
+                delay(1.seconds)
                 _remainingSeconds.value -= 1
             }
             submitQuiz()

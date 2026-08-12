@@ -10,45 +10,54 @@
 -allowaccessmodification
 
 # -------------------------------------------------------------------------
-# 1. FIXED FIREBASE SPECIFIC KEEP RULES (No Broad Wildcards Warning)
+# 1. ANNOTATION & METADATA PRESERVATION
 # -------------------------------------------------------------------------
 -keepattributes *Annotation*, Signature, InnerClasses, EnclosingMethod
 
-# Target only components that utilize specific serializable properties
+# -------------------------------------------------------------------------
+# 2. FIREBASE & DATA MODELS (Targeted Member Keep Rules)
+# -------------------------------------------------------------------------
 -keepclassmembers class * {
     @com.google.firebase.database.PropertyName <fields>;
     @com.google.firebase.firestore.PropertyName <fields>;
 }
 
-# Dynamic Model Classes Safeguard (Protects Firestore JSON deserialization architecture)
+# Preserve serialization fields for app data models
 -keepclassmembers class com.example.nursingstudio.data.model.** {
     <fields>;
-    <methods>;
+    public <init>(...);
 }
 
 # -------------------------------------------------------------------------
-# 2. FIXED ANDROIDX & MATERIAL UI SPECIFIC KEEP RULES (Warnings Fully Resolved)
+# 3. ANDROIDX, VIEWS & BINDING
 # -------------------------------------------------------------------------
-# Instead of keeping whole library packages, we only safeguard layout reflections
 -keepclassmembers class * extends android.view.View {
     public <init>(android.content.Context);
     public <init>(android.content.Context, android.util.AttributeSet);
     public <init>(android.content.Context, android.util.AttributeSet, int);
-    public void set*(...);
 }
 
 -keep public class * extends androidx.fragment.app.Fragment
 -keep public class * extends android.app.Activity
--dontwarn androidx.**
--dontwarn com.google.firebase.**
 
-# -------------------------------------------------------------------------
-# 3. VIEW BINDING HARDENING
-# -------------------------------------------------------------------------
 -keep class com.example.nursingstudio.databinding.** { *; }
 
 # -------------------------------------------------------------------------
-# 4. LOG STRIPPING FOR INFRASTRUCTURE SECURITY
+# 4. HILT & VIEWMODEL REFLECTION (Scoped to Annotations & Constructors)
+# -------------------------------------------------------------------------
+# Keep constructors for ViewModels so default and custom factories can instantiate them
+-keepclassmembers class * extends androidx.lifecycle.ViewModel {
+    public <init>(...);
+}
+
+# Keep constructors annotated with @Inject or @HiltViewModel specifically
+-keepclassmembers class * {
+    @javax.inject.Inject <init>(...);
+    @dagger.hilt.android.lifecycle.HiltViewModel <init>(...);
+}
+
+# -------------------------------------------------------------------------
+# 5. LOG STRIPPING FOR INFRASTRUCTURE SECURITY & PERFORMANCE
 # -------------------------------------------------------------------------
 -assumenosideeffects class android.util.Log {
     public static *** d(...);
@@ -57,3 +66,6 @@
     public static *** w(...);
     public static *** e(...);
 }
+
+-dontwarn androidx.**
+-dontwarn com.google.firebase.**

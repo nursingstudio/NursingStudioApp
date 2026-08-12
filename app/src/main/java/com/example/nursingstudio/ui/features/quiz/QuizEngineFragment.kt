@@ -15,9 +15,11 @@ import androidx.viewpager2.widget.ViewPager2
 import com.example.nursingstudio.R
 import com.example.nursingstudio.databinding.FragmentQuizEngineBinding
 import com.example.nursingstudio.utils.safeNavigate
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import java.util.Locale
 
+@AndroidEntryPoint
 class QuizEngineFragment : Fragment() {
 
     private var _binding: FragmentQuizEngineBinding? = null
@@ -87,7 +89,7 @@ class QuizEngineFragment : Fragment() {
                     viewModel.uiState.collect { state ->
                         when (state) {
                             is QuizEngineUiState.Loading -> {
-                                // Handled via loading progress
+                                // Handled via progress indicator
                             }
                             is QuizEngineUiState.Success -> {
                                 binding.tvQuizTitle.text = state.metadata.title
@@ -102,7 +104,6 @@ class QuizEngineFragment : Fragment() {
                                 Toast.makeText(requireContext(), state.message, Toast.LENGTH_LONG).show()
                             }
                             is QuizEngineUiState.Completed -> {
-                                // 🚀 2026 Standard: Navigate to Result Bottom Sheet using Safe Navigation
                                 val bundle = Bundle().apply {
                                     putInt("correct_answers", state.resultData.correctAnswers)
                                     putInt("total_questions", state.resultData.totalQuestions)
