@@ -181,7 +181,7 @@
                     <ImageView
                         android:layout_width="32dp"
                         android:layout_height="32dp"
-                        android:src="@drawable/ic_pdf"
+                        android:src="@drawable/ic_pdf_24"
                         android:contentDescription="@string/pdfs"
                         app:tint="@color/brand_saffron_dark" />
 
@@ -259,7 +259,7 @@
                     <ImageView
                         android:layout_width="32dp"
                         android:layout_height="32dp"
-                        android:src="@drawable/ic_progress"
+                        android:src="@drawable/ic_test_series_24"
                         android:contentDescription="@string/progress"
                         app:tint="@color/brand_saffron_dark" />
 
