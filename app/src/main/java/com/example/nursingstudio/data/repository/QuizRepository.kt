@@ -2,6 +2,7 @@ package com.example.nursingstudio.data.repository
 
 import com.example.nursingstudio.data.model.QuestionItem
 import com.example.nursingstudio.data.model.QuizMetadata
+import com.example.nursingstudio.data.model.QuizTestItem
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
@@ -11,6 +12,29 @@ import javax.inject.Singleton
 class QuizRepository @Inject constructor(
     private val firestore: FirebaseFirestore
 ) {
+
+    /**
+     * Fetches test series list by category ID for TestListFragment
+     */
+    suspend fun getTestsByCategory(categoryId: String): Result<List<QuizTestItem>> = runCatching {
+        val querySnapshot = firestore.collection("quizzes")
+            .whereEqualTo("categoryId", categoryId)
+            .get()
+            .await()
+
+        querySnapshot.documents.map { doc ->
+            QuizTestItem(
+                testId = doc.getString("quizId") ?: doc.id,
+                title = doc.getString("title") ?: "NORCET Test",
+                categoryId = categoryId,
+                totalQuestions = doc.getLong("totalQuestions")?.toInt() ?: 0,
+                durationMinutes = doc.getLong("totalDurationMinutes")?.toInt() ?: 60,
+                isLocked = doc.getBoolean("isLocked") ?: false,
+                isAttempted = false,
+                userScore = "--"
+            )
+        }
+    }
 
     /**
      * Fetches Quiz Metadata by business 'quizId' field
@@ -25,7 +49,6 @@ class QuizRepository @Inject constructor(
         val document = if (!querySnapshot.isEmpty) {
             querySnapshot.documents.first()
         } else {
-            // Fallback check for 'tests' collection
             val testSnapshot = firestore.collection("tests")
                 .whereEqualTo("quizId", quizId)
                 .limit(1)

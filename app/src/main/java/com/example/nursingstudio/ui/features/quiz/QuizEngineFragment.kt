@@ -10,11 +10,9 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import androidx.navigation.fragment.findNavController
 import androidx.viewpager2.widget.ViewPager2
 import com.example.nursingstudio.R
 import com.example.nursingstudio.databinding.FragmentQuizEngineBinding
-import com.example.nursingstudio.utils.safeNavigate
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import java.util.Locale
@@ -82,13 +80,12 @@ class QuizEngineFragment : Fragment() {
         }
 
         binding.btnQuestionPalette.setOnClickListener {
-            val totalQuestions = quizAdapter.itemCount
             val currentPos = binding.quizViewPager.currentItem
+            val paletteItems = viewModel.getPaletteItems(currentPos)
+
             val paletteBottomSheet = QuestionPaletteBottomSheet.newInstance(
-                totalQuestions = totalQuestions,
-                currentPosition = currentPos
+                paletteItems = paletteItems
             ) { selectedIndex ->
-                // Direct jump using 0-based index
                 binding.quizViewPager.setCurrentItem(selectedIndex, true)
             }
             paletteBottomSheet.show(childFragmentManager, "QuestionPaletteBottomSheet")
@@ -115,16 +112,18 @@ class QuizEngineFragment : Fragment() {
                                 Toast.makeText(requireContext(), state.message, Toast.LENGTH_LONG).show()
                             }
                             is QuizEngineUiState.Completed -> {
-                                val bundle = Bundle().apply {
-                                    putInt("correct_answers", state.resultData.correctAnswers)
-                                    putInt("total_questions", state.resultData.totalQuestions)
-                                    putFloat("score_percentage", state.resultData.scorePercentage)
-                                }
-                                findNavController().safeNavigate(
-                                    currentDestinationId = R.id.nav_quiz_engine,
-                                    actionId = R.id.action_quizEngine_to_resultFragment,
-                                    args = bundle
+                                // Show Result BottomSheet directly using 2026 Parcelable pattern
+                                val resultSheet = QuizResultBottomSheetFragment.newInstance(
+                                    resultData = state.resultData,
+                                    onRetake = {
+                                        val quizId = arguments?.getString("quiz_id") ?: "quiz_norcet_2026_01"
+                                        viewModel.loadQuiz(quizId)
+                                    },
+                                    onReview = {
+                                        // Remain in engine to review answers
+                                    }
                                 )
+                                resultSheet.show(childFragmentManager, "QuizResultBottomSheetFragment")
                             }
                         }
                     }
@@ -141,11 +140,6 @@ class QuizEngineFragment : Fragment() {
         }
     }
 
-    /**
-     * Correct zero-index to display translation:
-     * currentZeroIndex = 0 displays as 1 of N
-     * Clicking question #14 passes zero-index 13 to ViewPager2
-     */
     private fun updateProgressCounter(currentZeroIndex: Int, total: Int) {
         val displayIndex = if (total > 0) currentZeroIndex + 1 else 0
         binding.tvQuestionProgressCounter.text = getString(R.string.of, displayIndex, total)

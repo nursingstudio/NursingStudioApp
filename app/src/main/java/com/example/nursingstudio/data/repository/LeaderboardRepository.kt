@@ -16,14 +16,17 @@ class LeaderboardRepository @Inject constructor(
     private val firestore: FirebaseFirestore
 ) {
 
+    /**
+     * Submits student score to Firestore with precise type mapping
+     */
     suspend fun submitQuizScore(resultData: QuizResultData): Result<Unit> {
         return try {
             val entry = LeaderboardEntry(
                 userId = resultData.userId.ifEmpty { "user_${System.currentTimeMillis()}" },
                 userName = resultData.userName.ifEmpty { "Nursing Student" },
-                finalScore = resultData.finalScore,
-                totalPossibleMarks = resultData.totalPossibleMarks,
-                timeTakenSeconds = resultData.timeTakenSeconds,
+                finalScore = resultData.finalScore.toDouble(),
+                totalPossibleMarks = resultData.totalPossibleMarks.toDouble(),
+                timeTakenSeconds = resultData.timeTakenSeconds.toLong(),
                 accuracyPercentage = resultData.scorePercentage,
                 submittedAt = System.currentTimeMillis()
             )
@@ -41,6 +44,9 @@ class LeaderboardRepository @Inject constructor(
         }
     }
 
+    /**
+     * Streams real-time leaderboard entries ordered by score (descending) and time (ascending)
+     */
     fun getRealTimeLeaderboard(quizId: String, limit: Long = 50): Flow<Result<List<LeaderboardEntry>>> = callbackFlow {
         val query = firestore.collection("quizzes")
             .document(quizId)

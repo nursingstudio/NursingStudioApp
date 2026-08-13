@@ -1,12 +1,12 @@
 package com.example.nursingstudio.ui.features.quiz
 
+import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.GridLayoutManager
 import com.example.nursingstudio.data.model.QuestionPaletteItem
-import com.example.nursingstudio.data.model.QuestionStatus
 import com.example.nursingstudio.databinding.BottomSheetQuestionPaletteBinding
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 
@@ -29,8 +29,12 @@ class QuestionPaletteBottomSheet : BottomSheetDialogFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val totalQuestions = arguments?.getInt(ARG_TOTAL_QUESTIONS, 0) ?: 0
-        val currentPosition = arguments?.getInt(ARG_CURRENT_POSITION, 0) ?: 0
+        val paletteItems = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            arguments?.getParcelableArrayList(ARG_PALETTE_ITEMS, QuestionPaletteItem::class.java)
+        } else {
+            @Suppress("DEPRECATION")
+            arguments?.getParcelableArrayList(ARG_PALETTE_ITEMS)
+        } ?: emptyList()
 
         val paletteAdapter = QuestionPaletteAdapter { selectedIndex ->
             onQuestionSelectedListener?.invoke(selectedIndex)
@@ -42,17 +46,7 @@ class QuestionPaletteBottomSheet : BottomSheetDialogFragment() {
             adapter = paletteAdapter
         }
 
-        // Generate Palette Items (Using exact 0-based to 1-based mapping)
-        val paletteList = (0 until totalQuestions).map { index ->
-            QuestionPaletteItem(
-                questionIndex = index,
-                displayIndex = index + 1,
-                status = QuestionStatus.UNANSWERED, // Dynamic binding from ViewModel state
-                isCurrent = (index == currentPosition)
-            )
-        }
-
-        paletteAdapter.submitList(paletteList)
+        paletteAdapter.submitList(paletteItems)
     }
 
     fun setOnQuestionSelectedListener(listener: (Int) -> Unit) {
@@ -65,18 +59,15 @@ class QuestionPaletteBottomSheet : BottomSheetDialogFragment() {
     }
 
     companion object {
-        private const val ARG_TOTAL_QUESTIONS = "arg_total_questions"
-        private const val ARG_CURRENT_POSITION = "arg_current_position"
+        private const val ARG_PALETTE_ITEMS = "arg_palette_items"
 
         fun newInstance(
-            totalQuestions: Int,
-            currentPosition: Int,
+            paletteItems: List<QuestionPaletteItem>,
             onQuestionSelected: (Int) -> Unit
         ): QuestionPaletteBottomSheet {
             val fragment = QuestionPaletteBottomSheet()
             fragment.arguments = Bundle().apply {
-                putInt(ARG_TOTAL_QUESTIONS, totalQuestions)
-                putInt(ARG_CURRENT_POSITION, currentPosition)
+                putParcelableArrayList(ARG_PALETTE_ITEMS, ArrayList(paletteItems))
             }
             fragment.setOnQuestionSelectedListener(onQuestionSelected)
             return fragment

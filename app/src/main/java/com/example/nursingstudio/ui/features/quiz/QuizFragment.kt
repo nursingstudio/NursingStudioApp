@@ -12,8 +12,6 @@ import com.example.nursingstudio.utils.safeNavigate
 
 /**
  * 🚀 2026 Gold Standard Quiz Selection Fragment
- * - Zero-leak ViewBinding pattern
- * - Direct, safe Navigation Component flow
  */
 class QuizFragment : Fragment() {
 
@@ -36,26 +34,26 @@ class QuizFragment : Fragment() {
 
     private fun setupCategoryClickListeners() {
         binding.cardFullSyllabus.setOnClickListener {
-            handleCategoryClick("quiz_full_syllabus_2026")
+            handleCategoryClick("category_full_syllabus")
         }
         binding.cardSubjectWise.setOnClickListener {
-            handleCategoryClick("quiz_subject_wise_2026")
+            handleCategoryClick("category_subject_wise")
         }
         binding.cardTopicWise.setOnClickListener {
-            handleCategoryClick("quiz_topic_wise_2026")
+            handleCategoryClick("category_topic_wise")
         }
         binding.cardPreviousYear.setOnClickListener {
-            handleCategoryClick("quiz_norcet_2026_01")
+            handleCategoryClick("category_pyq")
         }
     }
 
-    private fun handleCategoryClick(quizId: String) {
+    private fun handleCategoryClick(categoryId: String) {
         val args = Bundle().apply {
-            putString("quiz_id", quizId)
+            putString("category_id", categoryId)
         }
         findNavController().safeNavigate(
             currentDestinationId = R.id.nav_quiz,
-            actionId = R.id.action_nav_quiz_to_nav_quiz_engine,
+            actionId = R.id.action_nav_quiz_to_nav_test_list,
             args = args
         )
     }

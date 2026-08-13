@@ -11,12 +11,31 @@
         android:label="Home"
         tools:layout="@layout/fragment_home" />
 
+    <!-- Quiz Category Fragment -->
     <fragment
         android:id="@+id/nav_quiz"
         android:name="com.example.nursingstudio.ui.features.quiz.QuizFragment"
-        android:label="Quiz">
+        android:label="Quiz Categories">
         <action
-            android:id="@+id/action_nav_quiz_to_nav_quiz_engine"
+            android:id="@+id/action_nav_quiz_to_nav_test_list"
+            app:destination="@id/nav_test_list"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
+    </fragment>
+
+    <!-- Test Series List Destination -->
+    <fragment
+        android:id="@+id/nav_test_list"
+        android:name="com.example.nursingstudio.ui.features.quiz.TestListFragment"
+        android:label="Available Tests"
+        tools:layout="@layout/item_test">
+        <argument
+            android:name="category_id"
+            app:argType="string" />
+        <action
+            android:id="@+id/action_nav_test_list_to_nav_quiz_engine"
             app:destination="@id/nav_quiz_engine"
             app:enterAnim="@anim/slide_in_right"
             app:exitAnim="@anim/slide_out_left" />

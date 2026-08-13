@@ -33,6 +33,14 @@ class QuizQuestionAdapter(
         holder.bind(getItem(position))
     }
 
+    override fun onBindViewHolder(holder: QuestionViewHolder, position: Int, payloads: MutableList<Any>) {
+        if (payloads.isNotEmpty() && payloads[0] == PAYLOAD_OPTION_CHANGED) {
+            holder.updateOptionSelectionStates(getItem(position).selectedOptionIndex)
+        } else {
+            super.onBindViewHolder(holder, position, payloads)
+        }
+    }
+
     override fun onViewRecycled(holder: QuestionViewHolder) {
         super.onViewRecycled(holder)
         holder.releasePlayer()
@@ -47,21 +55,18 @@ class QuizQuestionAdapter(
         fun bind(item: QuestionItem) {
             val context = binding.root.context
 
-            // Fixed Lint Warning: Using localized string format resource
             binding.tvQuestionText.text = context.getString(
                 R.string.quiz_question_format,
                 item.questionIndex,
                 item.questionText
             )
 
-            // Handle Dynamic Media Content with Optimized Memory Pipeline
             when (item.mediaType.uppercase()) {
                 "IMAGE" -> {
                     binding.ivQuestionImage.visibility = View.VISIBLE
                     binding.pvQuestionVideo.visibility = View.GONE
                     releasePlayer()
 
-                    // Fixed Unresolved Reference & Added Disk Caching
                     Glide.with(context)
                         .load(item.mediaUrl)
                         .diskCacheStrategy(DiskCacheStrategy.ALL)
@@ -81,29 +86,29 @@ class QuizQuestionAdapter(
                 }
             }
 
-            // Bind Options Text
             val options = item.options
             binding.tvOptionA.text = options.getOrNull(0) ?: ""
             binding.tvOptionB.text = options.getOrNull(1) ?: ""
             binding.tvOptionC.text = options.getOrNull(2) ?: ""
             binding.tvOptionD.text = options.getOrNull(3) ?: ""
 
-            // Highlight Selected State
             updateOptionSelectionStates(item.selectedOptionIndex)
 
-            // Setup Click Listeners
-            binding.cardOptionA.setOnClickListener { onOptionClick(item.questionIndex - 1, 0) }
-            binding.cardOptionB.setOnClickListener { onOptionClick(item.questionIndex - 1, 1) }
-            binding.cardOptionC.setOnClickListener { onOptionClick(item.questionIndex - 1, 2) }
-            binding.cardOptionD.setOnClickListener { onOptionClick(item.questionIndex - 1, 3) }
+            // Fixed: Pass exact adapter binding position safely
+            binding.cardOptionA.setOnClickListener { onOptionClick(bindingAdapterPosition, 0) }
+            binding.cardOptionB.setOnClickListener { onOptionClick(bindingAdapterPosition, 1) }
+            binding.cardOptionC.setOnClickListener { onOptionClick(bindingAdapterPosition, 2) }
+            binding.cardOptionD.setOnClickListener { onOptionClick(bindingAdapterPosition, 3) }
         }
 
-        private fun onOptionClick(questionPos: Int, optionIndex: Int) {
-            updateOptionSelectionStates(optionIndex)
-            onOptionSelected(questionPos, optionIndex)
+        private fun onOptionClick(adapterPos: Int, optionIndex: Int) {
+            if (adapterPos != RecyclerView.NO_POSITION) {
+                updateOptionSelectionStates(optionIndex)
+                onOptionSelected(adapterPos, optionIndex)
+            }
         }
 
-        private fun updateOptionSelectionStates(selectedIndex: Int) {
+        fun updateOptionSelectionStates(selectedIndex: Int) {
             val context = binding.root.context
             val selectedColor = ContextCompat.getColor(context, R.color.brand_saffron)
             val defaultColor = ContextCompat.getColor(context, R.color.border_grey)
@@ -157,5 +162,19 @@ class QuizQuestionAdapter(
         override fun areContentsTheSame(oldItem: QuestionItem, newItem: QuestionItem): Boolean {
             return oldItem == newItem
         }
+
+        override fun getChangePayload(oldItem: QuestionItem, newItem: QuestionItem): Any? {
+            return if (oldItem.selectedOptionIndex != newItem.selectedOptionIndex &&
+                oldItem.questionText == newItem.questionText &&
+                oldItem.mediaUrl == newItem.mediaUrl) {
+                PAYLOAD_OPTION_CHANGED
+            } else {
+                super.getChangePayload(oldItem, newItem)
+            }
+        }
+    }
+
+    companion object {
+        private const val PAYLOAD_OPTION_CHANGED = "PAYLOAD_OPTION_CHANGED"
     }
 }
