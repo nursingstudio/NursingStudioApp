@@ -54,7 +54,7 @@
                     android:layout_width="40dp"
                     android:layout_height="40dp"
                     app:tint="@color/black"
-                    android:src="@drawable/ic_pdf"
+                    android:src="@drawable/ic_pdf_24"
                     android:contentDescription="@string/important_pdfs" />
 
                 <LinearLayout
@@ -107,7 +107,7 @@
                     android:layout_width="40dp"
                     android:layout_height="40dp"
                     app:tint="@color/black"
-                    android:src="@drawable/ic_pdf"
+                    android:src="@drawable/ic_pdf_24"
                     android:contentDescription="@string/topic_wise_pdfs" />
 
                 <LinearLayout
@@ -160,7 +160,7 @@
                     android:layout_width="40dp"
                     android:layout_height="40dp"
                     app:tint="@color/black"
-                    android:src="@drawable/ic_pdf"
+                    android:src="@drawable/ic_pdf_24"
                     android:contentDescription="@string/question_papers" />
 
                 <LinearLayout

@@ -76,13 +76,24 @@ class TestListFragment : Fragment() {
                     when (state) {
                         is TestListUiState.Loading -> {
                             binding.progressBar.visibility = View.VISIBLE
+                            binding.layoutEmptyState.visibility = View.GONE
+                            binding.rvTestList.visibility = View.GONE
                         }
                         is TestListUiState.Success -> {
                             binding.progressBar.visibility = View.GONE
-                            testListAdapter.submitList(state.tests)
+                            if (state.tests.isEmpty()) {
+                                binding.layoutEmptyState.visibility = View.VISIBLE
+                                binding.rvTestList.visibility = View.GONE
+                            } else {
+                                binding.layoutEmptyState.visibility = View.GONE
+                                binding.rvTestList.visibility = View.VISIBLE
+                                testListAdapter.submitList(state.tests)
+                            }
                         }
                         is TestListUiState.Error -> {
                             binding.progressBar.visibility = View.GONE
+                            binding.layoutEmptyState.visibility = View.VISIBLE
+                            binding.rvTestList.visibility = View.GONE
                             Toast.makeText(requireContext(), state.message, Toast.LENGTH_LONG).show()
                         }
                     }

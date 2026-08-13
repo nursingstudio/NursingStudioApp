@@ -386,6 +386,9 @@
     <string name="marked_for_review">Marked for Review</string>
     <string name="test_status">Test Status</string>
     <string name="test_details_format">%1$d Questions • %2$d Mins</string>
+    <string name="no_tests_found">No Tests Found</string>
+    <string name="no_tests_available_yet">No Tests Available Yet</string>
+    <string name="we_are_uploading_norcet_series_soon">We are uploading NORCET test series for this category.\nPlease check back soon!</string>
 
 
 </resources>
