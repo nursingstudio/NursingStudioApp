@@ -3,6 +3,8 @@ package com.example.nursingstudio.domain.usecase
 import com.example.nursingstudio.data.model.QuestionItem
 import com.example.nursingstudio.data.model.QuizMetadata
 import com.example.nursingstudio.data.repository.QuizRepository
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import javax.inject.Inject
 
 data class QuizDataBundle(
@@ -10,14 +12,22 @@ data class QuizDataBundle(
     val questions: List<QuestionItem>
 )
 
+/**
+ * 🚀 2026 Gold Standard Domain UseCase
+ * Encapsulates quiz fetching with parallel execution for speed and battery optimization.
+ */
 class GetQuizUseCase @Inject constructor(
     private val quizRepository: QuizRepository
 ) {
-    suspend operator fun invoke(quizId: String): Result<QuizDataBundle> {
-        val metaResult = quizRepository.getQuizMetadata(quizId)
-        val questionsResult = quizRepository.getQuizQuestions(quizId)
+    suspend operator fun invoke(quizId: String): Result<QuizDataBundle> = coroutineScope {
+        // Execute calls concurrently to reduce total waiting time
+        val metaDeferred = async { quizRepository.getQuizMetadata(quizId) }
+        val questionsDeferred = async { quizRepository.getQuizQuestions(quizId) }
 
-        return if (metaResult.isSuccess && questionsResult.isSuccess) {
+        val metaResult = metaDeferred.await()
+        val questionsResult = questionsDeferred.await()
+
+        if (metaResult.isSuccess && questionsResult.isSuccess) {
             Result.success(
                 QuizDataBundle(
                     metadata = metaResult.getOrThrow(),

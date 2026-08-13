@@ -12,34 +12,96 @@ class QuizRepository @Inject constructor(
     private val firestore: FirebaseFirestore
 ) {
 
-    suspend fun getQuizMetadata(quizId: String): Result<QuizMetadata> {
-        return try {
-            val snapshot = firestore.collection("quizzes")
-                .document(quizId)
+    /**
+     * Fetches Quiz Metadata by business 'quizId' field
+     */
+    suspend fun getQuizMetadata(quizId: String): Result<QuizMetadata> = runCatching {
+        val querySnapshot = firestore.collection("quizzes")
+            .whereEqualTo("quizId", quizId)
+            .limit(1)
+            .get()
+            .await()
+
+        val document = if (!querySnapshot.isEmpty) {
+            querySnapshot.documents.first()
+        } else {
+            // Fallback check for 'tests' collection
+            val testSnapshot = firestore.collection("tests")
+                .whereEqualTo("quizId", quizId)
+                .limit(1)
                 .get()
                 .await()
 
-            val metadata = snapshot.toObject(QuizMetadata::class.java)
-                ?: throw Exception("Quiz metadata not found")
-            Result.success(metadata)
-        } catch (e: Exception) {
-            Result.failure(e)
+            if (!testSnapshot.isEmpty) {
+                testSnapshot.documents.first()
+            } else {
+                throw IllegalStateException("Quiz metadata not found for ID: $quizId")
+            }
+        }
+
+        QuizMetadata(
+            quizId = document.getString("quizId") ?: quizId,
+            title = document.getString("title") ?: "NORCET Test",
+            subject = document.getString("subject") ?: "General",
+            totalQuestions = document.getLong("totalQuestions")?.toInt() ?: 0,
+            totalDurationMinutes = document.getLong("totalDurationMinutes")?.toInt() ?: 60
+        )
+    }
+
+    /**
+     * Fetches Questions list from subcollection using parent 'quizId'
+     */
+    suspend fun getQuizQuestions(quizId: String): Result<List<QuestionItem>> = runCatching {
+        val querySnapshot = firestore.collection("quizzes")
+            .whereEqualTo("quizId", quizId)
+            .limit(1)
+            .get()
+            .await()
+
+        val parentDocument = if (!querySnapshot.isEmpty) {
+            querySnapshot.documents.first()
+        } else {
+            firestore.collection("tests")
+                .whereEqualTo("quizId", quizId)
+                .limit(1)
+                .get()
+                .await()
+                .documents
+                .firstOrNull() ?: throw IllegalStateException("Parent quiz document not found.")
+        }
+
+        val questionsSnapshot = parentDocument.reference.collection("questions")
+            .orderBy("questionIndex")
+            .get()
+            .await()
+
+        questionsSnapshot.documents.mapNotNull { doc ->
+            val optionsList = when (val optionsRaw = doc.get("options")) {
+                is List<*> -> optionsRaw.map { it.toString() }
+                is String -> optionsRaw.removeSurrounding("[", "]")
+                    .split(",")
+                    .map { it.trim().removeSurrounding("\"") }
+                else -> emptyList()
+            }
+
+            QuestionItem(
+                questionId = doc.getString("questionId") ?: doc.id,
+                questionIndex = doc.getLong("questionIndex")?.toInt() ?: 1,
+                questionText = doc.getString("questionText") ?: "",
+                mediaType = doc.getString("mediaType") ?: "NONE",
+                mediaUrl = doc.getString("mediaUrl") ?: "",
+                options = optionsList,
+                selectedOptionIndex = -1
+            )
         }
     }
 
-    suspend fun getQuizQuestions(quizId: String): Result<List<QuestionItem>> {
-        return try {
-            val snapshot = firestore.collection("quizzes")
-                .document(quizId)
-                .collection("questions")
-                .orderBy("questionIndex")
-                .get()
-                .await()
-
-            val questions = snapshot.toObjects(QuestionItem::class.java)
-            Result.success(questions)
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
+    /**
+     * Unified fetch method for UI callers expecting Pair
+     */
+    suspend fun fetchQuizMetadataAndQuestions(quizId: String): Pair<QuizMetadata, List<QuestionItem>> {
+        val metadata = getQuizMetadata(quizId).getOrThrow()
+        val questions = getQuizQuestions(quizId).getOrThrow()
+        return Pair(metadata, questions)
     }
 }
