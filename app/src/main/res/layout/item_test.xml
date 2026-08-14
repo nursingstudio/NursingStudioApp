@@ -10,7 +10,7 @@
     app:cardBackgroundColor="@color/surface_card"
     app:cardCornerRadius="16dp"
     app:cardElevation="2dp"
-    app:strokeColor="@color/border_grey"
+    app:strokeColor="@color/brand_saffron_dark"
     app:strokeWidth="1dp">
 
     <androidx.constraintlayout.widget.ConstraintLayout

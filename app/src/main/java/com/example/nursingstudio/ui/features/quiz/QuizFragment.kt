@@ -42,6 +42,12 @@ class QuizFragment : Fragment() {
         binding.cardTopicWise.setOnClickListener {
             handleCategoryClick("category_topic_wise")
         }
+        binding.cardGKMathReasoning.setOnClickListener {
+            handleCategoryClick("category_gk_math_reasoning")
+        }
+        binding.cardHindiEnglish.setOnClickListener {
+            handleCategoryClick("category_hindi_english")
+        }
         binding.cardPreviousYear.setOnClickListener {
             handleCategoryClick("category_pyq")
         }

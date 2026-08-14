@@ -146,7 +146,7 @@
                     <ImageView
                         android:layout_width="32dp"
                         android:layout_height="32dp"
-                        android:src="@drawable/ic_quiz"
+                        android:src="@drawable/ic_test_series_24"
                         android:contentDescription="@string/test_series"
                         app:tint="@color/brand_saffron_dark" />
 
@@ -259,7 +259,7 @@
                     <ImageView
                         android:layout_width="32dp"
                         android:layout_height="32dp"
-                        android:src="@drawable/ic_test_series_24"
+                        android:src="@drawable/ic_quiz"
                         android:contentDescription="@string/progress"
                         app:tint="@color/brand_saffron_dark" />
 

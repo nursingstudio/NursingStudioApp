@@ -389,6 +389,10 @@
     <string name="no_tests_found">No Tests Found</string>
     <string name="no_tests_available_yet">No Tests Available Yet</string>
     <string name="we_are_uploading_norcet_series_soon">We are uploading NORCET test series for this category.\nPlease check back soon!</string>
+    <string name="test_instructions">Test Instructions</string>
+    <string name="i_am_ready_to_begin">I am ready to begin</string>
+    <string name="gk_math_reasoning">GK, Math, Reasoning</string>
+    <string name="hindi_english">Hindi, English</string>
 
 
 </resources>
