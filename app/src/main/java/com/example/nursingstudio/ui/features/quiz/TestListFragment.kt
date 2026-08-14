@@ -45,17 +45,24 @@ class TestListFragment : Fragment() {
             viewModel.fetchTestsForCategory(categoryId)
         } else {
             binding.tvEmptyMessage.text = "Category ID missing"
-            binding.tvEmptyMessage.isVisible = true
+            binding.layoutEmptyState.isVisible = true
         }
     }
 
     private fun setupRecyclerView() {
         adapter = TestListAdapter { selectedTest ->
             if (selectedTest.isLocked && !selectedTest.isFree) {
-                Toast.makeText(requireContext(), "This test is locked. Purchase subscription to unlock.", Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    requireContext(),
+                    "This test is locked. Purchase subscription to unlock.",
+                    Toast.LENGTH_SHORT
+                ).show()
             } else {
-                Toast.makeText(requireContext(), "Opening Instructions for: ${selectedTest.title}", Toast.LENGTH_SHORT).show()
-                // Next step: Open Instructions Fragment here
+                Toast.makeText(
+                    requireContext(),
+                    "Opening Test: ${selectedTest.title}",
+                    Toast.LENGTH_SHORT
+                ).show()
             }
         }
         binding.rvTestList.adapter = adapter
@@ -69,19 +76,19 @@ class TestListFragment : Fragment() {
                         is TestListUiState.Loading -> {
                             binding.progressBar.isVisible = true
                             binding.rvTestList.isVisible = false
-                            binding.tvEmptyMessage.isVisible = false
+                            binding.layoutEmptyState.isVisible = false
                         }
                         is TestListUiState.Success -> {
                             binding.progressBar.isVisible = false
                             binding.rvTestList.isVisible = true
-                            binding.tvEmptyMessage.isVisible = false
+                            binding.layoutEmptyState.isVisible = false
                             adapter.submitList(state.tests)
                         }
                         is TestListUiState.Error -> {
                             binding.progressBar.isVisible = false
                             binding.rvTestList.isVisible = false
                             binding.tvEmptyMessage.text = state.message
-                            binding.tvEmptyMessage.isVisible = true
+                            binding.layoutEmptyState.isVisible = true
                         }
                     }
                 }
