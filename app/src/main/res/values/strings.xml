@@ -393,6 +393,9 @@
     <string name="i_am_ready_to_begin">I am ready to begin</string>
     <string name="gk_math_reasoning">GK, Math, Reasoning</string>
     <string name="hindi_english">Hindi, English</string>
+    <string name="full_syllabus_mock_test_1">Full Syllabus Mock Test 1</string>
+    <string name="_100_questions_100_mins">100 Questions • 100 Minutes</string>
+    <string name="lock_status">Lock Status</string>
 
 
 </resources>

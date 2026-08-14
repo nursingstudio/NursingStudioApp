@@ -29,11 +29,12 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
+        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
         tools:listitem="@layout/item_test" />
 
     <!-- 🚀 2026 Empty State Container (Prevents Blank Screen) -->
     <LinearLayout
-        android:id="@+id/layoutEmptyState"
+        android:id="@+id/tvEmptyMessage"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:gravity="center"
