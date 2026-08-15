@@ -26,14 +26,6 @@ class QuizRepository @Inject constructor(
                 shortCategory.replace("_", "")
             )
 
-            // Robust Fallback Aliases for Full Syllabus & GK Math Reasoning
-            if (shortCategory.contains("full")) {
-                categoryVariants.addAll(listOf("full_syllabus", "full_syllabus_mock", "full", "full_mock"))
-            }
-            if (shortCategory.contains("gk") || shortCategory.contains("reasoning")) {
-                categoryVariants.addAll(listOf("gk_math_reasoning", "gk_math", "gk", "reasoning", "gk_maths_reasoning"))
-            }
-
             // Firestore whereIn accepts max 10 elements
             val queryList = categoryVariants.toList().take(10)
 
