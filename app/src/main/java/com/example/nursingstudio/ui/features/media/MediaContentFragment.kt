@@ -42,24 +42,44 @@ class MediaContentFragment : Fragment() {
     }
 
     private fun fetchDataFromFirestoreCloud(type: String, category: String) {
-        val collectionName = if (type == "PDF") "pdfs" else "videos"
+        val collectionName = if (type.equals("PDF", ignoreCase = true)) "pdfs" else "videos"
 
         firestore.collection(collectionName)
             .whereEqualTo("category", category)
             .get()
             .addOnSuccessListener { result ->
-                // 🚀 Location: Inside fetchDataFromFirestoreCloud -> addOnSuccessListener Loop
                 val list = mutableListOf<MediaItemModel>()
                 for (doc in result) {
-                    val id = doc.getString("id") ?: ""
+                    val id = doc.id
                     val title = doc.getString("title") ?: ""
-                    val fileUrl = if (type == "PDF") doc.getString("pdfUrl") ?: "" else doc.getString("videoUrl") ?: ""
+                    val fileUrl = if (type.equals("PDF", ignoreCase = true)) {
+                        doc.getString("pdfUrl") ?: doc.getString("fileUrl") ?: ""
+                    } else {
+                        doc.getString("videoUrl") ?: doc.getString("fileUrl") ?: ""
+                    }
 
-                    // 🧬 2026 Safe-Extraction Strategy: Extract new structural node flags dynamically
-                    val videoType = doc.getString("videoType") ?: "FREE"
+                    // 🔐 2026 Multi-Key Extraction Strategy (Checks pdfType, videoType, accessType, batchType)
+                    val rawAccessType = doc.getString("accessType")
+                        ?: doc.getString("pdfType")
+                        ?: doc.getString("videoType")
+                        ?: doc.getString("batchType")
+                        ?: if (doc.getBoolean("isLocked") == true || doc.getBoolean("isFree") == false) "PAID" else "FREE"
+
                     val streamType = doc.getString("streamType") ?: "RECORDED"
 
-                    list.add(MediaItemModel(id, title, fileUrl, type, videoType, streamType))
+                    list.add(
+                        MediaItemModel(
+                            id = id,
+                            title = title,
+                            fileUrl = fileUrl,
+                            type = type,
+                            accessType = rawAccessType,
+                            videoType = rawAccessType,
+                            pdfType = rawAccessType,
+                            batchType = rawAccessType,
+                            streamType = streamType
+                        )
+                    )
                 }
 
                 if (_binding == null) return@addOnSuccessListener
@@ -67,20 +87,17 @@ class MediaContentFragment : Fragment() {
                 binding.loadingBar.visibility = View.GONE
                 binding.rvMediaContent.visibility = View.VISIBLE
 
-                // 🚀 Location: Inside rvMediaContent.adapter instantiation inside click lambda
                 binding.rvMediaContent.adapter = ContentAdapter(list) { selectedItem ->
                     if (selectedItem.computedIsLocked) {
-                        // 🔒 Paid Content Premium Gate Alert
                         Toast.makeText(
                             requireContext(),
                             "This content is locked. Purchase premium subscription to unlock.",
                             Toast.LENGTH_SHORT
                         ).show()
                     } else {
-                        // 🔓 Free Content Navigation Handler
                         val bundle = Bundle().apply {
                             putString("CONTENT_URL", selectedItem.fileUrl)
-                            putString("VIDEO_TYPE", selectedItem.videoType)
+                            putString("VIDEO_TYPE", selectedItem.accessType)
                             putString("STREAM_TYPE", selectedItem.streamType)
                         }
 
