@@ -3,7 +3,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/app_background">
+    android:background="@color/app_background"
+    android:fillViewport="true">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -11,184 +12,225 @@
         android:orientation="vertical"
         android:padding="16dp">
 
+        <!-- Screen Header -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/online_test_series"
+            android:textColor="@color/brand_blue"
             android:textSize="24sp"
-            android:textStyle="bold"
-            android:textColor="@color/brand_blue" />
+            android:textStyle="bold" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="20dp"
             android:text="@string/boost_your_preparation_with_real_time_analysis"
-            android:textSize="14sp"
             android:textColor="@color/text_secondary"
-            android:layout_marginBottom="20dp" />
+            android:textSize="14sp" />
 
+        <!-- 1. Full Syllabus Mock Test (Hero Card - Solid Background with Subtitle) -->
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/cardFullSyllabus"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
+            android:layout_marginBottom="14dp"
             app:cardCornerRadius="16dp"
-            app:cardElevation="6dp"
+            app:cardElevation="4dp"
             app:strokeWidth="0dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="@drawable/bg_home_card"
-                android:orientation="vertical"
-                android:padding="20dp">
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:padding="16dp">
 
-                <TextView
-                    android:layout_width="wrap_content"
+                <ImageView
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:contentDescription="@string/full_syllabus_mock_test"
+                    android:src="@drawable/ic_test_series_24"
+                    app:tint="@color/white" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@string/full_syllabus_mock_test"
+                    android:layout_marginStart="14dp"
+                    android:orientation="vertical">
 
-                    android:textSize="20sp"
-                    android:textStyle="bold"
-                    android:textColor="@android:color/white" />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/full_syllabus_mock_test"
+                        android:textColor="@android:color/white"
+                        android:textSize="18sp"
+                        android:textStyle="bold" />
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/_100_questions_100_minutes"
-                    android:textColor="@color/white"
-                    android:textSize="12sp" />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:text="@string/_100_questions_100_minutes"
+                        android:textColor="@color/white"
+                        android:textSize="12sp" />
+                </LinearLayout>
             </LinearLayout>
+
         </com.google.android.material.card.MaterialCardView>
 
+        <!-- Row 1: Subject Wise & Topic Wise -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:baselineAligned="false">
+            android:layout_marginBottom="12dp"
+            android:baselineAligned="false"
+            android:orientation="horizontal">
 
+            <!-- 2. Subject Wise Card -->
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/cardSubjectWise"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_marginEnd="6dp"
                 android:layout_weight="1"
-                android:layout_marginEnd="8dp"
                 app:cardCornerRadius="12dp"
-                app:cardElevation="3dp">
+                app:cardElevation="2dp"
+                app:strokeColor="@color/brand_saffron_dark"
+                app:strokeWidth="1.5dp">
 
-                <LinearLayout
+                <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="16dp">
-                    <TextView
-                        android:text="@string/subject_wise"
-                        android:textStyle="bold"
-                        android:textColor="@color/brand_blue"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"/>
-                </LinearLayout>
+                    android:drawablePadding="10dp"
+                    android:gravity="center_vertical"
+                    android:padding="14dp"
+                    android:text="@string/subject_wise"
+                    android:textColor="@color/brand_blue"
+                    android:textSize="15sp"
+                    android:textStyle="bold"
+                    app:drawableStartCompat="@drawable/ic_test_series_24"
+                    app:drawableTint="@color/brand_blue" />
+
             </com.google.android.material.card.MaterialCardView>
 
+            <!-- 3. Topic Wise Card -->
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/cardTopicWise"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_marginStart="6dp"
                 android:layout_weight="1"
-                android:layout_marginStart="8dp"
                 app:cardCornerRadius="12dp"
-                app:cardElevation="3dp">
+                app:cardElevation="2dp"
+                app:strokeColor="@color/brand_saffron_dark"
+                app:strokeWidth="1.5dp">
 
-                <LinearLayout
+                <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="16dp">
-                    <TextView
-                        android:text="@string/topic_wise"
-                        android:textStyle="bold"
-                        android:textColor="@color/brand_blue"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"/>
-                </LinearLayout>
+                    android:drawablePadding="10dp"
+                    android:gravity="center_vertical"
+                    android:padding="14dp"
+                    android:text="@string/topic_wise"
+                    android:textColor="@color/brand_blue"
+                    android:textSize="15sp"
+                    android:textStyle="bold"
+                    app:drawableStartCompat="@drawable/ic_test_series_24"
+                    app:drawableTint="@color/brand_blue" />
+
             </com.google.android.material.card.MaterialCardView>
+
         </LinearLayout>
 
+        <!-- Row 2: GK, Math & Reasoning & Hindi/English -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_marginTop="16dp"
+            android:layout_marginBottom="12dp"
             android:baselineAligned="false"
-            app:cardCornerRadius="12dp"
-            app:cardElevation="3dp">
+            android:orientation="horizontal">
 
+            <!-- 4. GK, Math & Reasoning Card -->
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/cardGKMathReasoning"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_marginEnd="6dp"
                 android:layout_weight="1"
-                android:layout_marginEnd="8dp"
                 app:cardCornerRadius="12dp"
-                app:cardElevation="3dp">
+                app:cardElevation="2dp"
+                app:strokeColor="@color/brand_saffron_dark"
+                app:strokeWidth="1.5dp">
 
-                <LinearLayout
+                <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="16dp">
-                    <TextView
-                        android:text="@string/gk_math_reasoning"
-                        android:textStyle="bold"
-                        android:textColor="@color/brand_blue"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"/>
-                </LinearLayout>
+                    android:drawablePadding="10dp"
+                    android:gravity="center_vertical"
+                    android:padding="14dp"
+                    android:text="@string/gk_math_reasoning"
+                    android:textColor="@color/brand_blue"
+                    android:textSize="14sp"
+                    android:textStyle="bold"
+                    app:drawableStartCompat="@drawable/ic_test_series_24"
+                    app:drawableTint="@color/brand_blue" />
+
             </com.google.android.material.card.MaterialCardView>
 
+            <!-- 5. Hindi & English Card -->
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/cardHindiEnglish"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_marginStart="6dp"
                 android:layout_weight="1"
-                android:layout_marginStart="8dp"
                 app:cardCornerRadius="12dp"
-                app:cardElevation="3dp">
+                app:cardElevation="2dp"
+                app:strokeColor="@color/brand_saffron_dark"
+                app:strokeWidth="1.5dp">
 
-                <LinearLayout
+                <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="16dp">
-                    <TextView
-                        android:text="@string/hindi_english"
-                        android:textStyle="bold"
-                        android:textColor="@color/brand_blue"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"/>
-                </LinearLayout>
+                    android:drawablePadding="10dp"
+                    android:gravity="center_vertical"
+                    android:padding="14dp"
+                    android:text="@string/hindi_english"
+                    android:textColor="@color/brand_blue"
+                    android:textSize="14sp"
+                    android:textStyle="bold"
+                    app:drawableStartCompat="@drawable/ic_test_series_24"
+                    app:drawableTint="@color/brand_blue" />
+
             </com.google.android.material.card.MaterialCardView>
+
         </LinearLayout>
 
+        <!-- 6. Previous Year Question Papers (Full Width Card) -->
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/cardPreviousYear"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
             app:cardCornerRadius="12dp"
-            app:cardElevation="3dp">
+            app:cardElevation="2dp"
+            app:strokeColor="@color/brand_saffron_dark"
+            app:strokeWidth="1.5dp">
 
-            <LinearLayout
+            <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:padding="16dp">
-                <TextView
-                    android:text="@string/previous_year_question_papers"
-                    android:textStyle="bold"
-                    android:textColor="@color/brand_blue"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"/>
-            </LinearLayout>
+                android:drawablePadding="12dp"
+                android:gravity="center_vertical"
+                android:padding="14dp"
+                android:text="@string/previous_year_question_papers"
+                android:textColor="@color/brand_blue"
+                android:textSize="15sp"
+                android:textStyle="bold"
+                app:drawableStartCompat="@drawable/ic_test_series_24"
+                app:drawableTint="@color/brand_blue" />
+
         </com.google.android.material.card.MaterialCardView>
 
     </LinearLayout>

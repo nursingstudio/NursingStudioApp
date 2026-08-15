@@ -12,9 +12,18 @@ data class TestItem(
     val title: String = "",
     val categoryId: String = "",
     val seriesName: String = "",
-    val totalDurationMinutes: Int = 60,
+    val description: String = "",
+    val timePerQuestionSeconds: Int = 60,
+    val totalDurationMinutes: Int = 100,
     val totalQuestions: Int = 100,
-    val batchType: String = "FREE",
+    val batchType: String = "FREE", // "FREE" or "PAID"
     @field:JvmField val isLocked: Boolean = false,
     @field:JvmField val isFree: Boolean = true
-)
+) {
+    /**
+     * 🔐 2026 Gold Standard Computed Property
+     * Ensures tests with batchType "PAID" are strictly locked regardless of default boolean fallbacks.
+     */
+    val computedIsLocked: Boolean
+        get() = isLocked || batchType.equals("PAID", ignoreCase = true) || !isFree
+}

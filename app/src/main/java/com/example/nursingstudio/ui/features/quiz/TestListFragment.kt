@@ -11,6 +11,7 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import com.example.nursingstudio.R
 import com.example.nursingstudio.databinding.FragmentTestListBinding
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
@@ -44,14 +45,14 @@ class TestListFragment : Fragment() {
         if (categoryId.isNotEmpty()) {
             viewModel.fetchTestsForCategory(categoryId)
         } else {
-            binding.tvEmptyMessage.text = "Category ID missing"
+            binding.tvEmptyMessage.text = getString(R.string.category_id_missing)
             binding.layoutEmptyState.isVisible = true
         }
     }
 
     private fun setupRecyclerView() {
         adapter = TestListAdapter { selectedTest ->
-            if (selectedTest.isLocked && !selectedTest.isFree) {
+            if (selectedTest.computedIsLocked) {
                 Toast.makeText(
                     requireContext(),
                     "This test is locked. Purchase subscription to unlock.",

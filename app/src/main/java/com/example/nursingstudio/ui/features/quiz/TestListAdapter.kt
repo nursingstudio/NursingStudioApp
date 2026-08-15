@@ -31,13 +31,17 @@ class TestListAdapter(
 
         fun bind(item: TestItem) {
             binding.tvTestTitle.text = item.title
-            binding.tvTestSubtitle.text = "${item.totalQuestions} Questions • ${item.totalDurationMinutes} Mins"
+            binding.tvTestSubtitle.text = binding.root.context.getString(
+                R.string.questions_mins,
+                item.totalQuestions,
+                item.totalDurationMinutes
+            )
 
-            // Handle Dynamic Lock/Unlock Drawables
-            if (item.isFree || !item.isLocked) {
-                binding.ivLockStatus.setImageResource(R.drawable.ic_lock_open)
-            } else {
+            // 🔐 Fixed Dynamic Lock/Unlock Icon Logic
+            if (item.computedIsLocked) {
                 binding.ivLockStatus.setImageResource(R.drawable.ic_lock)
+            } else {
+                binding.ivLockStatus.setImageResource(R.drawable.ic_lock_open)
             }
 
             binding.root.setOnClickListener {

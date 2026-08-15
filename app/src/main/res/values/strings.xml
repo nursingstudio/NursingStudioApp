@@ -396,6 +396,8 @@
     <string name="full_syllabus_mock_test_1">Full Syllabus Mock Test 1</string>
     <string name="_100_questions_100_mins">100 Questions • 100 Minutes</string>
     <string name="lock_status">Lock Status</string>
+    <string name="category_id_missing">Category ID missing</string>
+    <string name="questions_mins">%1$d Questions • %2$d Mins</string>
 
 
 </resources>
