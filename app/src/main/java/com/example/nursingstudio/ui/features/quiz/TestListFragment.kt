@@ -11,6 +11,7 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import androidx.navigation.fragment.findNavController
 import com.example.nursingstudio.R
 import com.example.nursingstudio.databinding.FragmentTestListBinding
 import dagger.hilt.android.AndroidEntryPoint
@@ -53,17 +54,22 @@ class TestListFragment : Fragment() {
     private fun setupRecyclerView() {
         adapter = TestListAdapter { selectedTest ->
             if (selectedTest.computedIsLocked) {
+                // 🔒 Premium Content Gate Toast
                 Toast.makeText(
                     requireContext(),
-                    "This test is locked. Purchase subscription to unlock.",
+                    "This test is locked. Purchase premium subscription to unlock.",
                     Toast.LENGTH_SHORT
                 ).show()
             } else {
-                Toast.makeText(
-                    requireContext(),
-                    "Opening Test: ${selectedTest.title}",
-                    Toast.LENGTH_SHORT
-                ).show()
+                // 🔓 Navigating to Quiz Instructions Fragment with Correct Properties
+                val bundle = Bundle().apply {
+                    putString("testId", selectedTest.testId) // Fixed: using testId explicitly
+                    putString("title", selectedTest.title)
+                }
+                findNavController().navigate(
+                    R.id.action_testListFragment_to_quizInstructionsFragment,
+                    bundle
+                )
             }
         }
         binding.rvTestList.adapter = adapter

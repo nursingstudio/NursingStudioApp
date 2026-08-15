@@ -21,6 +21,12 @@ data class TestItem(
     @field:JvmField val isFree: Boolean = true
 ) {
     /**
+     * 🆔 Backward & Forward Compatible ID Alias
+     */
+    val id: String
+        get() = testId
+
+    /**
      * 🔐 2026 Gold Standard Computed Property
      * Ensures tests with batchType "PAID" are strictly locked regardless of default boolean fallbacks.
      */
