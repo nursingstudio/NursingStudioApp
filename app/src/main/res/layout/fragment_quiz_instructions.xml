@@ -5,8 +5,9 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:padding="20dp"
-    android:background="#F8FAFC">
+    android:background="@color/app_background">
 
+    <!-- 1. Header Title -->
     <TextView
         android:id="@+id/tvInstructionTitle"
         android:layout_width="match_parent"
@@ -14,8 +15,9 @@
         android:text="@string/test_instructions"
         android:textSize="22sp"
         android:textStyle="bold"
-        android:textColor="#0F172A" />
+        android:textColor="@color/brand_blue" />
 
+    <!-- 2. Scrollable Instructions Card -->
     <com.google.android.material.card.MaterialCardView
         android:layout_width="match_parent"
         android:layout_height="0dp"
@@ -25,9 +27,11 @@
         app:cardElevation="2dp">
 
         <ScrollView
+            android:id="@+id/scrollViewInstructions"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:padding="16dp">
+            android:padding="16dp"
+            android:fillViewport="true">
 
             <TextView
                 android:id="@+id/tvInstructionsContent"
@@ -35,17 +39,35 @@
                 android:layout_height="wrap_content"
                 android:textSize="15sp"
                 android:lineSpacingExtra="4dp"
-                android:textColor="#334155" />
+                android:textColor="@color/text_primary" />
         </ScrollView>
     </com.google.android.material.card.MaterialCardView>
 
+    <!-- 3. Agreement Checkbox (Disabled initially) -->
+    <com.google.android.material.checkbox.MaterialCheckBox
+        android:id="@+id/cbAgreeTerms"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:enabled="false"
+        android:text="@string/test_consent"
+        android:textColor="@color/medical_teal"
+        android:textSize="14sp"
+        app:buttonTint="@color/medical_teal"/>
+
+    <!-- 4. Action Button (Centered Horizontally) -->
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btnStartQuiz"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="56dp"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="12dp"
+        android:layout_gravity="center_horizontal"
+        android:paddingHorizontal="24dp"
+        android:enabled="false"
         android:text="@string/i_am_ready_to_begin"
         android:textSize="16sp"
+        android:textColor="@color/app_background"
+        android:backgroundTint="@color/brand_saffron_dark"
         app:cornerRadius="12dp" />
 
 </LinearLayout>
