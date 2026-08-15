@@ -52,6 +52,8 @@
 
     <string name="quiz_default_instructions">
         <![CDATA[
+        <font color="#FF0000"><b><i>GENERAL INSTRUCTIONS</i></b></font><br><br>
+
         <font color="#D97706"><b>1. GENERAL PRACTICE DISCLAIMER</b></font><br>
         This test series is designed exclusively for self-assessment and educational practice. Attempting this test does not guarantee job placement or official recruitment selection.<br><br>
 
@@ -75,7 +77,7 @@
         • <font color="#16A34A"><b>GREEN:</b></font> Answered Questions<br>
         • <font color="#DC2626"><b>RED:</b></font> Unanswered / Viewed Questions<br>
         • <font color="#7C3AED"><b>VIOLET:</b></font> Marked for Review<br>
-        • <font color="#64748B"><b>WHITE / GREY:</b></font> Unvisited Questions<br><br>
+        • <font color="#64748B"><b>GRAY:</b></font> Unvisited Questions<br><br>
 
         <font color="#D97706"><b>7. NAVIGATION & ANSWER SAVING RULES</b></font><br>
         • You can tap any question number on the grid to jump directly to it.<br>
