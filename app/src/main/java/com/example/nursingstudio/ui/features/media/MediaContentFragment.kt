@@ -69,16 +69,26 @@ class MediaContentFragment : Fragment() {
 
                 // 🚀 Location: Inside rvMediaContent.adapter instantiation inside click lambda
                 binding.rvMediaContent.adapter = ContentAdapter(list) { selectedItem ->
-                    val bundle = Bundle().apply {
-                        putString("CONTENT_URL", selectedItem.fileUrl)
-                        putString("VIDEO_TYPE", selectedItem.videoType)   // ✅ Now reading direct from Firestore node
-                        putString("STREAM_TYPE", selectedItem.streamType) // ✅ Passing Stream architecture info
-                    }
-
-                    if (selectedItem.type == "PDF") {
-                        findNavController().navigate(R.id.action_media_to_pdf, bundle)
+                    if (selectedItem.computedIsLocked) {
+                        // 🔒 Paid Content Premium Gate Alert
+                        Toast.makeText(
+                            requireContext(),
+                            "This content is locked. Purchase premium subscription to unlock.",
+                            Toast.LENGTH_SHORT
+                        ).show()
                     } else {
-                        findNavController().navigate(R.id.action_media_to_video, bundle)
+                        // 🔓 Free Content Navigation Handler
+                        val bundle = Bundle().apply {
+                            putString("CONTENT_URL", selectedItem.fileUrl)
+                            putString("VIDEO_TYPE", selectedItem.videoType)
+                            putString("STREAM_TYPE", selectedItem.streamType)
+                        }
+
+                        if (selectedItem.type.equals("PDF", ignoreCase = true)) {
+                            findNavController().navigate(R.id.action_media_to_pdf, bundle)
+                        } else {
+                            findNavController().navigate(R.id.action_media_to_video, bundle)
+                        }
                     }
                 }
             }
