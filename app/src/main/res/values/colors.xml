@@ -26,11 +26,36 @@
     <color name="brand_youtube_red">#FF0000</color>
     <color name="brand_whatsapp_green">#25D366</color>
 
-    <!-- 2026 Gold Standard Question Palette Status Colors -->
-    <color name="palette_answered">#22C55E</color>     <!-- 🟢 Answered / Attempted (Green) -->
-    <color name="palette_skipped">#4B5563</color>      <!-- 🔘 Skipped (Dark Gray) -->
-    <color name="palette_unanswered">#FFFFFF</color>   <!-- ⚪ Unanswered / Unattempted (White) -->
-    <color name="palette_unanswered_border">#D1D5DB</color>
-    <color name="palette_review">#8B5CF6</color>      <!-- 🟣 Marked for Review (Purple) -->
+    <!-- 2026 Gold Standard Quiz Engine Color Palette -->
+    <color name="palette_unvisited">#64748B</color>             <!-- Gray (Unvisited) -->
+    <color name="palette_unanswered">#DC2626</color>            <!-- Red (Unanswered) -->
+    <color name="palette_answered">#16A34A</color>              <!-- Green (Answered) -->
+    <color name="palette_review">#7C3AED</color>                <!-- Violet (Marked for Review) -->
+    <color name="palette_answered_marked">#6D28D9</color>      <!-- Deep Violet (Answered & Marked) -->
+
+    <!-- WCAG 2.1 AA Compliant Score Badge & Icon Palette -->
+    <color name="badge_positive_bg">#E6F4EA</color>        <!-- Light Green Background -->
+      <!-- High-Contrast Green Text (5.2:1 Ratio) -->
+    <color name="badge_negative_bg">#FCE8E6</color>        <!-- Light Red Background -->
+    <!-- High-Contrast Red Text (5.6:1 Ratio) -->
+    <color name="review_star_inactive">#475569</color>     <!-- High-Contrast Slate Icon (4.9:1 Ratio) -->
+
+    <!-- Badge Colors (WCAG 2.1 Compliant) -->
+    <color name="badge_positive_text">#166534</color> <!-- Updated from #15803D to pass 4.5:1 ratio -->
+
+    <color name="badge_negative_text">#C5221F</color>
+
+    <!-- Phase 4 Result & Review Colors (WCAG 2.1 AA Compliant) -->
+    <color name="result_pass_bg">#E6F4EA</color>
+    <color name="result_pass_text">#15803D</color>
+    <color name="result_fail_bg">#FCE8E6</color>
+    <color name="result_fail_text">#B91C1C</color>
+
+    <color name="option_correct_bg">#DCFCE7</color>
+    <color name="option_correct_border">#16A34A</color>
+    <color name="option_wrong_bg">#FEE2E2</color>
+    <color name="option_wrong_border">#DC2626</color>
+    <color name="option_neutral_bg">#F8FAFC</color>
+    <color name="option_neutral_border">#E2E8F0</color>
 
 </resources>

@@ -120,7 +120,6 @@
 
     <string name="quick_actions">Quick Actions</string>
 
-    <string name="test_series">Test Series</string>
     <string name="pdfs">PDFs</string>
     <string name="videos">Videos</string>
     <string name="progress">Progress</string>
@@ -409,7 +408,7 @@
     <string name="_00_00">00:00</string>
     <string name="previous">Previous</string>
     <string name="_1_of_100">1 of 100</string>
-    <string name="next">Next</string>
+    <string name="next">NEXT</string>
     <string name="nursing_studio_ai_engine_is_restricted_exclusively_to_nursing_professional_domains_i_cannot_answer_out_of_scope_queries">⚠️ Nursing Studio AI Engine is restricted exclusively to Nursing Professional domains. I cannot answer out-of-scope queries.</string>
     <string name="network_connection_fault">Network connection fault: %1$s</string>
     <string name="of">%1$d of %2$d</string>
@@ -419,7 +418,6 @@
     <string name="time_taken">Time Taken</string>
     <string name="performance_overview">Performance Overview</string>
     <string name="retake_test">Retake Test</string>
-    <string name="question_palette">Question Palette</string>
     <string name="answered">Answered</string>
     <string name="skipped">Skipped</string>
     <string name="unanswered">Unanswered</string>
@@ -439,6 +437,98 @@
     <string name="category_id_missing">Category ID missing</string>
     <string name="questions_mins">%1$d Questions • %2$d Mins</string>
     <string name="test_consent">I have read and understood all the instructions carefully.</string>
+    <string name="clear_response">Clear Response</string>
+    <string name="question_1_100">Question 1/100</string>
+
+
+        <!-- Quiz Palette Strings -->
+        <string name="question_palette">Question Palette</string>
+        <string name="answered_0">Answered (%1$d)</string>
+        <string name="unanswered_0">Unanswered (%1$d)</string>
+        <string name="marked_for_review_0">Marked for Review (%1$d)</string>
+        <string name="answered_marked_0">Answered &amp; Marked (%1$d)</string>
+        <string name="unvisited_0">Unvisited (%1$d)</string>
+
+        <!-- Quiz Engine Action Bar & Sub-Header -->
+        <string name="question_counter">Question %1$d/%2$d</string>
+        <string name="mark_for_review">Mark for Review</string>
+        <string name="marked_for_review_active">Marked for Review</string>
+        <string name="btn_previous">Previous</string>
+        <string name="btn_next">Next</string>
+        <string name="btn_submit">Submit</string>
+        <string name="btn_clear">Clear</string>
+
+        <!-- Anti-Cheat Dialog Strings -->
+        <string name="anti_cheat_warning_title">Test Warning</string>
+        <string name="anti_cheat_warning_message">Your test will be automatically submitted if you try to sneak away from the test screen again.</string>
+        <string name="btn_back_to_test">Back to Test</string>
+
+        <!-- Submission Dialog Strings -->
+        <string name="submit_test_dialog_title">Submit Test</string>
+        <string name="remaining_time">Time Remaining: %1$s</string>
+        <string name="confirm_submit_prompt">Are you sure you want to submit the test?</string>
+        <string name="total_questions_fmt">Total Questions: %1$d</string>
+
+    <!-- Sub-Header Marking Scheme Strings -->
+    <string name="positive_mark_val">+1.0</string>
+    <string name="negative_mark_val">-0.25</string>
+
+    <!-- Phase 3 Submission BottomSheet Strings -->
+    <string name="test_summary_title">Test Overview</string>
+    <string name="stat_total_questions">Total Questions</string>
+    <string name="stat_answered">Answered</string>
+    <string name="stat_unanswered">Unanswered</string>
+    <string name="stat_marked_review">Marked for Review</string>
+    <string name="time_left_label">Time Remaining: %1$s</string>
+    <string name="btn_confirm_submit">Confirm &amp; Submit</string>
+    <string name="btn_resume_test">Resume Test</string>
+    <string name="score_fmt">Score: %1$.2f</string>
+    <string name="accuracy_fmt">Accuracy: %1$.1f%%</string>
+
+
+        <string name="test_series">Test Series</string>
+        <string name="open_palette">Open Question Palette</string>
+        <string name="image_placeholder">Question Media</string>
+
+        <!-- Phase 4: Result Screen -->
+        <string name="title_quiz_result">Test Result</string>
+        <string name="score_format">%.2f / %d</string>
+        <string name="percentage_format">%.1f%%</string>
+        <string name="status_passed">PASSED</string>
+        <string name="status_failed">NEEDS IMPROVEMENT</string>
+        <string name="label_testwise_rank">Testwise Rank</string>
+        <string name="label_global_rank">Global Rank</string>
+        <string name="rank_format">%d / %d</string>
+        <string name="btn_reattempt">Re-attempt Test</string>
+        <string name="btn_review_answers">Review Answers</string>
+        <string name="label_correct">Correct (+1.0)</string>
+        <string name="label_incorrect">Incorrect (-0.25)</string>
+        <string name="label_skipped">Skipped / Reviewed</string>
+
+        <!-- Phase 4: Review Screen -->
+        <string name="title_quiz_review">Answer Key &amp; Review</string>
+        <string name="review_correct_option">Correct Answer</string>
+        <string name="review_your_answer">Your Answer (Incorrect)</string>
+        <string name="explanation_title">Explanation:</string>
+        <string name="no_explanation_available">No detailed explanation provided for this question.</string>
+
+    <!-- Phase 4 Result & Review Strings -->
+    <string name="quiz_result_title">Test Result</string>
+    <string name="your_score">Your Score</string>
+    <string name="score_ratio_fmt">%1$.2f / %2$.0f</string>
+    <string name="percentage_fmt">%1$.1f%%</string>
+    <string name="testwise_rank_title">Testwise Rank</string>
+    <string name="global_rank_title">Global Rank</string>
+    <string name="rank_fmt">%1$d / %2$d</string>
+    <string name="review_answers_title">Answer Review</string>
+    <string name="correct_answer_label">Correct Answer</string>
+    <string name="your_answer_label">Your Answer</string>
+    <string name="option_prefix_fmt">%1$s. %2$s</string>
+    <string name="review_marked_excluded_note">Excluded from score (Marked for Review)</string>
+    <string name="question_number_fmt">Question %1$d</string>
+
+
+
 
 
 </resources>

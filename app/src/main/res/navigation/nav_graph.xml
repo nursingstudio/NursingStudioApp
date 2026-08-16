@@ -71,6 +71,16 @@
             app:argType="string" />
     </fragment>
 
+    <fragment
+        android:id="@+id/quizResultFragment"
+        android:name="com.example.nursingstudio.ui.features.quiz.QuizResultFragment"
+        android:label="QuizResultFragment" />
+
+    <fragment
+        android:id="@+id/quizReviewFragment"
+        android:name="com.example.nursingstudio.ui.features.quiz.QuizReviewFragment"
+        android:label="QuizReviewFragment" />
+
     <!-- 6. Media & Study Material Destinations (Restored & Fixed) -->
     <fragment
         android:id="@+id/nav_pdf"

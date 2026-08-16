@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.drawerlayout.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/drawerLayoutQuiz"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <!-- 1. Main Viewport Content -->
+    <include
+        android:id="@+id/layoutMainQuizContent"
+        layout="@layout/layout_quiz_engine_content"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <!-- 2. Right-Side End Drawer Palette -->
+    <com.google.android.material.navigation.NavigationView
+        android:id="@+id/navigationViewPalette"
+        android:layout_width="320dp"
+        android:layout_height="match_parent"
+        android:layout_gravity="end"
+        android:background="@color/app_background">
+
+        <include
+            android:id="@+id/layoutPaletteContent"
+            layout="@layout/layout_question_palette_grid"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+    </com.google.android.material.navigation.NavigationView>
+
+</androidx.drawerlayout.widget.DrawerLayout>
