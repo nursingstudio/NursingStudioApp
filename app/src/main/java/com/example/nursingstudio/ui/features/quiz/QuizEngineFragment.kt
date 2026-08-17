@@ -1,6 +1,5 @@
 package com.example.nursingstudio.ui.features.quiz
 
-import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -10,6 +9,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
 import androidx.core.text.HtmlCompat
 import androidx.core.view.GravityCompat
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.DefaultLifecycleObserver
@@ -17,12 +17,16 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import androidx.navigation.fragment.findNavController
 import coil.load
 import com.example.nursingstudio.R
+import com.example.nursingstudio.data.model.MediaType
 import com.example.nursingstudio.data.model.QuestionStatus
+import com.example.nursingstudio.data.model.UserAnswerState
 import com.example.nursingstudio.databinding.FragmentQuizEngineBinding
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
+import java.util.Locale
 
 @AndroidEntryPoint
 class QuizEngineFragment : Fragment() {
@@ -82,19 +86,27 @@ class QuizEngineFragment : Fragment() {
         }
 
         binding.layoutMainQuizContent.btnPrevious.setOnClickListener {
-            val currIdx = viewModel.currentIndex.value
-            if (currIdx > 0) {
-                viewModel.navigateToQuestion(currIdx - 1)
+            val state = viewModel.uiState.value
+            if (state is QuizEngineState.Content && state.currentIndex > 0) {
+                viewModel.navigateToQuestion(state.currentIndex - 1)
             }
         }
 
         binding.layoutMainQuizContent.btnNext.setOnClickListener {
-            val currIdx = viewModel.currentIndex.value
-            val total = viewModel.questions.value.size
-            if (currIdx < total - 1) {
-                viewModel.navigateToQuestion(currIdx + 1)
-            } else {
-                showSubmissionConfirmationDialog()
+            val state = viewModel.uiState.value
+            if (state is QuizEngineState.Content) {
+                if (state.currentIndex < state.questions.size - 1) {
+                    viewModel.navigateToQuestion(state.currentIndex + 1)
+                } else {
+                    showSubmissionConfirmationDialog()
+                }
+            }
+        }
+
+        // Retry Action Handler for Error State Recovery
+        binding.btnRetry.setOnClickListener {
+            if (testId.isNotEmpty()) {
+                viewModel.loadQuiz(testId)
             }
         }
     }
@@ -107,52 +119,29 @@ class QuizEngineFragment : Fragment() {
         })
     }
 
-    @SuppressLint("DefaultLocale")
     private fun observeViewModel() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                launch {
-                    viewModel.questions.collect { questions ->
-                        if (questions.isNotEmpty()) {
-                            renderCurrentQuestion()
+                viewModel.uiState.collect { state ->
+                    when (state) {
+                        is QuizEngineState.Loading -> {
+                            binding.progressBar.isVisible = true
+                            binding.layoutErrorState.isVisible = false
+                            binding.drawerLayoutQuiz.isVisible = false
                         }
-                    }
-                }
-
-                launch {
-                    viewModel.currentIndex.collect { index ->
-                        renderCurrentQuestion()
-                    }
-                }
-
-                launch {
-                    viewModel.userStates.collect { states ->
-                        paletteAdapter.submitList(states)
-                        updateLegendCounters(states)
-                        updateReviewButtonState()
-                    }
-                }
-
-                launch {
-                    viewModel.remainingTimeSeconds.collect { seconds ->
-                        val minutes = seconds / 60
-                        val secs = seconds % 60
-                        binding.layoutMainQuizContent.tvTimer.text = String.format("%02d:%02d", minutes, secs)
-                    }
-                }
-
-                launch {
-                    viewModel.warningAlertTrigger.collect { trigger ->
-                        if (trigger) {
-                            showAntiCheatWarningDialog()
+                        is QuizEngineState.Content -> {
+                            binding.progressBar.isVisible = false
+                            binding.layoutErrorState.isVisible = false
+                            binding.drawerLayoutQuiz.isVisible = true
+                            renderContent(state)
                         }
-                    }
-                }
-
-                launch {
-                    viewModel.forceSubmitTrigger.collect { trigger ->
-                        if (trigger) {
-                            executeFinalSubmission()
+                        is QuizEngineState.Error -> {
+                            binding.progressBar.isVisible = false
+                            binding.drawerLayoutQuiz.isVisible = false
+                            binding.layoutErrorState.isVisible = true
+                            binding.tvErrorMessage.text = state.message.ifBlank {
+                                getString(R.string.error_quiz_generic)
+                            }
                         }
                     }
                 }
@@ -160,15 +149,25 @@ class QuizEngineFragment : Fragment() {
         }
     }
 
-    private fun renderCurrentQuestion() {
-        val questions = viewModel.questions.value
-        val currIdx = viewModel.currentIndex.value
+    private fun renderContent(state: QuizEngineState.Content) {
+        val questions = state.questions
+        val currIdx = state.currentIndex
         if (questions.isEmpty() || currIdx !in questions.indices) return
 
         val question = questions[currIdx]
-        val states = viewModel.userStates.value
-        val currentState = states.getOrNull(currIdx)
+        val currentState = state.userStates.getOrNull(currIdx)
 
+        // 1. Update Timer (Locale Explicit Fix)
+        val minutes = state.remainingTimeSeconds / 60
+        val secs = state.remainingTimeSeconds % 60
+        binding.layoutMainQuizContent.tvTimer.text = String.format(
+            Locale.getDefault(),
+            "%02d:%02d",
+            minutes,
+            secs
+        )
+
+        // 2. Update Counter and Text
         binding.layoutMainQuizContent.tvQuestionCounter.text = getString(
             R.string.question_counter,
             currIdx + 1,
@@ -180,19 +179,30 @@ class QuizEngineFragment : Fragment() {
             HtmlCompat.FROM_HTML_MODE_LEGACY
         )
 
-        if (!question.imageUrl.isNullOrEmpty()) {
-            binding.layoutMainQuizContent.frameMediaContainer.visibility = View.VISIBLE
-            binding.layoutMainQuizContent.ivQuestionImage.visibility = View.VISIBLE
-            binding.layoutMainQuizContent.playerViewQuestion.visibility = View.GONE
+        // 3. Dynamic Media Rendering
+        when (question.mediaType) {
+            MediaType.IMAGE -> {
+                binding.layoutMainQuizContent.frameMediaContainer.visibility = View.VISIBLE
+                binding.layoutMainQuizContent.ivQuestionImage.visibility = View.VISIBLE
+                binding.layoutMainQuizContent.playerViewQuestion.visibility = View.GONE
 
-            binding.layoutMainQuizContent.ivQuestionImage.load(question.imageUrl) {
-                placeholder(R.drawable.ic_placeholder_image)
-                error(R.drawable.ic_placeholder_image)
+                question.mediaUrl?.let { url ->
+                    binding.layoutMainQuizContent.ivQuestionImage.load(url) {
+                        crossfade(true)
+                    }
+                }
             }
-        } else {
-            binding.layoutMainQuizContent.frameMediaContainer.visibility = View.GONE
+            MediaType.VIDEO -> {
+                binding.layoutMainQuizContent.frameMediaContainer.visibility = View.VISIBLE
+                binding.layoutMainQuizContent.ivQuestionImage.visibility = View.GONE
+                binding.layoutMainQuizContent.playerViewQuestion.visibility = View.VISIBLE
+            }
+            MediaType.NONE -> {
+                binding.layoutMainQuizContent.frameMediaContainer.visibility = View.GONE
+            }
         }
 
+        // 4. Render Options
         binding.layoutMainQuizContent.rgOptionsContainer.removeAllViews()
         question.options.forEachIndexed { optIdx, optionText ->
             val radioButton = RadioButton(requireContext()).apply {
@@ -208,18 +218,29 @@ class QuizEngineFragment : Fragment() {
             binding.layoutMainQuizContent.rgOptionsContainer.addView(radioButton)
         }
 
+        // 5. Palette and Controls Update
+        paletteAdapter.submitList(state.userStates)
+        updateLegendCounters(state.userStates)
+        updateReviewButtonState(currentState)
+
         binding.layoutMainQuizContent.btnPrevious.isEnabled = currIdx > 0
         if (currIdx == questions.size - 1) {
             binding.layoutMainQuizContent.btnNext.text = getString(R.string.btn_submit)
         } else {
             binding.layoutMainQuizContent.btnNext.text = getString(R.string.btn_next)
         }
+
+        // 6. Handle Dialog Alerts
+        if (state.isWarningVisible) {
+            showAntiCheatWarningDialog()
+        }
+        if (state.isForceSubmitNeeded) {
+            executeFinalSubmission()
+        }
     }
 
-    private fun updateReviewButtonState() {
-        val currIdx = viewModel.currentIndex.value
-        val currentState = viewModel.userStates.value.getOrNull(currIdx) ?: return
-
+    private fun updateReviewButtonState(currentState: UserAnswerState?) {
+        if (currentState == null) return
         if (currentState.isMarkedForReview) {
             binding.layoutMainQuizContent.ivReviewStar.setColorFilter(
                 ContextCompat.getColor(requireContext(), R.color.palette_review)
@@ -239,7 +260,7 @@ class QuizEngineFragment : Fragment() {
         }
     }
 
-    private fun updateLegendCounters(states: List<com.example.nursingstudio.data.model.UserAnswerState>) {
+    private fun updateLegendCounters(states: List<UserAnswerState>) {
         val answeredCount = states.count { it.status == QuestionStatus.ANSWERED }
         val unansweredCount = states.count { it.status == QuestionStatus.UNANSWERED }
         val reviewCount = states.count { it.status == QuestionStatus.MARKED_FOR_REVIEW }
@@ -266,18 +287,50 @@ class QuizEngineFragment : Fragment() {
     }
 
     private fun showSubmissionConfirmationDialog() {
-        AlertDialog.Builder(requireContext())
-            .setTitle(getString(R.string.submit_test_dialog_title))
-            .setMessage(getString(R.string.confirm_submit_prompt))
-            .setPositiveButton(getString(R.string.btn_submit)) { _, _ ->
+        val state = viewModel.uiState.value
+        if (state !is QuizEngineState.Content) return
+
+        val total = state.questions.size
+        val answered = state.userStates.count { it.status == QuestionStatus.ANSWERED || it.status == QuestionStatus.ANSWERED_AND_MARKED }
+        val unanswered = state.userStates.count { it.status == QuestionStatus.UNANSWERED }
+        val review = state.userStates.count { it.status == QuestionStatus.MARKED_FOR_REVIEW }
+
+        val minutes = state.remainingTimeSeconds / 60
+        val secs = state.remainingTimeSeconds % 60
+        val formattedTime = String.format(Locale.getDefault(), "%02d:%02d", minutes, secs)
+
+        val bottomSheet = TestSubmitBottomSheetFragment(
+            total = total,
+            answered = answered,
+            unanswered = unanswered,
+            review = review,
+            timeFormatted = formattedTime,
+            onSubmitConfirmed = {
                 executeFinalSubmission()
             }
-            .setNegativeButton(android.R.string.cancel, null)
-            .show()
+        )
+        bottomSheet.show(childFragmentManager, "TestSubmitBottomSheet")
     }
 
     private fun executeFinalSubmission() {
-        // Triggers calculation engine & nav transition to results (Phase 3)
+        val state = viewModel.uiState.value
+        if (state !is QuizEngineState.Content) return
+
+        viewModel.calculateAndSubmitResults(
+            testId = testId
+        ) { result ->
+            val bundle = Bundle().apply {
+                putFloat("scoreObtained", result.scoreObtained.toFloat())
+                putFloat("totalMaxMarks", result.totalMaxMarks.toFloat())
+                putString("testId", result.testId)
+                putFloat("accuracyPercentage", result.accuracyPercentage.toFloat())
+            }
+
+            findNavController().navigate(
+                R.id.action_quizEngineFragment_to_quizResultFragment,
+                bundle
+            )
+        }
     }
 
     override fun onDestroyView() {

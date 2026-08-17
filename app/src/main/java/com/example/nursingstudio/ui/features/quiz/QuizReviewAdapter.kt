@@ -34,7 +34,6 @@ class QuizReviewAdapter : ListAdapter<ReviewItem, QuizReviewAdapter.ReviewViewHo
         holder.bind(getItem(position))
     }
 
-    // Static nested ViewHolder: Prevents memory leaks and removes redundant 'inner' warning
     class ReviewViewHolder(
         private val binding: ItemQuizReviewQuestionBinding
     ) : RecyclerView.ViewHolder(binding.root) {

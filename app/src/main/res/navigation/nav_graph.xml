@@ -69,19 +69,39 @@
         <argument
             android:name="testId"
             app:argType="string" />
+        <action
+            android:id="@+id/action_quizEngineFragment_to_quizResultFragment"
+            app:destination="@id/quizResultFragment"
+            app:popUpTo="@id/quizEngineFragment"
+            app:popUpToInclusive="true" />
     </fragment>
 
+    <!-- 6. Quiz Result Destination -->
     <fragment
         android:id="@+id/quizResultFragment"
         android:name="com.example.nursingstudio.ui.features.quiz.QuizResultFragment"
-        android:label="QuizResultFragment" />
+        android:label="Quiz Result">
+        <argument
+            android:name="scoreObtained"
+            app:argType="float" />
+        <argument
+            android:name="totalMaxMarks"
+            app:argType="float" />
+        <argument
+            android:name="testId"
+            app:argType="string" />
+        <argument
+            android:name="accuracyPercentage"
+            app:argType="float" />
+    </fragment>
 
+    <!-- 7. Quiz Review Destination -->
     <fragment
         android:id="@+id/quizReviewFragment"
         android:name="com.example.nursingstudio.ui.features.quiz.QuizReviewFragment"
-        android:label="QuizReviewFragment" />
+        android:label="Quiz Review" />
 
-    <!-- 6. Media & Study Material Destinations (Restored & Fixed) -->
+    <!-- 8. Media & Study Material Destinations (Restored & Fixed) -->
     <fragment
         android:id="@+id/nav_pdf"
         android:name="com.example.nursingstudio.ui.features.media.PdfFragment"

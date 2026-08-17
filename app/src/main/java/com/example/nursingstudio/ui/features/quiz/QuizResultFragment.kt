@@ -28,6 +28,7 @@ class QuizResultFragment : Fragment() {
     @Inject
     lateinit var repository: QuizRepository
 
+    // Property bound to current result state
     private var currentResult: QuizResult? = null
 
     override fun onCreateView(
@@ -42,10 +43,18 @@ class QuizResultFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val score = arguments?.getDouble("scoreObtained") ?: 0.0
-        val maxMarks = arguments?.getDouble("totalMaxMarks") ?: 100.0
+        val score = arguments?.getFloat("scoreObtained", 0f)?.toDouble() ?: 0.0
+        val maxMarks = arguments?.getFloat("totalMaxMarks", 100f)?.toDouble() ?: 100.0
         val testId = arguments?.getString("testId") ?: ""
-        val accuracy = arguments?.getDouble("accuracyPercentage") ?: 0.0
+        val accuracy = arguments?.getFloat("accuracyPercentage", 0f)?.toDouble() ?: 0.0
+
+        // Store result instance to utilize class field safely
+        currentResult = QuizResult(
+            testId = testId,
+            scoreObtained = score,
+            totalMaxMarks = maxMarks,
+            accuracyPercentage = accuracy
+        )
 
         setupScoreCard(score, maxMarks, accuracy)
         loadRanks(testId, score)

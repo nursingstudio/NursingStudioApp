@@ -446,7 +446,7 @@
         <string name="answered_0">Answered (%1$d)</string>
         <string name="unanswered_0">Unanswered (%1$d)</string>
         <string name="marked_for_review_0">Marked for Review (%1$d)</string>
-        <string name="answered_marked_0">Answered &amp; Marked (%1$d)</string>
+        <string name="answered_marked_0">Answered &amp; Marked for Review (%1$d)</string>
         <string name="unvisited_0">Unvisited (%1$d)</string>
 
         <!-- Quiz Engine Action Bar & Sub-Header -->
@@ -460,7 +460,6 @@
 
         <!-- Anti-Cheat Dialog Strings -->
         <string name="anti_cheat_warning_title">Test Warning</string>
-        <string name="anti_cheat_warning_message">Your test will be automatically submitted if you try to sneak away from the test screen again.</string>
         <string name="btn_back_to_test">Back to Test</string>
 
         <!-- Submission Dialog Strings -->
@@ -530,6 +529,17 @@
     <!-- Quiz Engine & Error Strings -->
     <string name="error_loading_questions">Failed to load test questions. Please try again.</string>
     <string name="no_questions_available">No questions available for this test.</string>
+
+
+        <string name="test_series_default_title">Test Series</string>
+        <string name="btn_clear_response">CLEAR RESPONSE</string>
+        <string name="anti_cheat_warning_message">App switching is strictly prohibited &amp; monitored during the test. Further attempts will force submit your quiz.</string>
+        <string name="error_loading_quiz">Failed to load quiz. Please try again.</string>
+
+        <!-- 🚀 Added Missing 2026 Standard Strings -->
+        <string name="locked_test_toast_msg">This test is locked. Purchase premium subscription to unlock.</string>
+    <string name="error_quiz_generic">Failed to load quiz. Please check your network connection and try again.</string>
+    <string name="btn_retry">Retry</string>
 
 
 

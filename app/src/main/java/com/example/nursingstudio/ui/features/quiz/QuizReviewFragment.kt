@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
+import com.example.nursingstudio.data.model.QuestionItem
 import com.example.nursingstudio.data.model.UserAnswerState
 import com.example.nursingstudio.databinding.FragmentQuizReviewBinding
 
@@ -36,19 +37,23 @@ class QuizReviewFragment : Fragment() {
             findNavController().navigateUp()
         }
 
-        val questions = viewModel.questions.value
-        val states = viewModel.userStates.value
+        // 🚀 2026 Gold Standard Safe State Extraction from Content State Flow
+        val currentState = viewModel.uiState.value
+        if (currentState is QuizEngineState.Content) {
+            val questions: List<QuestionItem> = currentState.questions
+            val states: List<UserAnswerState> = currentState.userStates
 
-        val reviewList = questions.mapIndexed { index, question ->
-            val userState = states.getOrNull(index) ?: UserAnswerState()
-            ReviewItem(
-                question = question,
-                userState = userState,
-                questionNumber = index + 1
-            )
+            val reviewList = questions.mapIndexed { index: Int, question: QuestionItem ->
+                val userState = states.getOrNull(index) ?: UserAnswerState()
+                ReviewItem(
+                    question = question,
+                    userState = userState,
+                    questionNumber = index + 1
+                )
+            }
+
+            reviewAdapter.submitList(reviewList)
         }
-
-        reviewAdapter.submitList(reviewList)
     }
 
     override fun onDestroyView() {

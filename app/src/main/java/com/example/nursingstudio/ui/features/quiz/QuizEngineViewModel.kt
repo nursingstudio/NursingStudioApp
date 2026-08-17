@@ -13,204 +13,232 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.seconds
+
+sealed interface QuizEngineState {
+    object Loading : QuizEngineState
+    data class Content(
+        val testTitle: String = "",
+        val questions: List<QuestionItem> = emptyList(),
+        val userStates: List<UserAnswerState> = emptyList(),
+        val currentIndex: Int = 0,
+        val remainingTimeSeconds: Long = 0L,
+        val isWarningVisible: Boolean = false,
+        val isForceSubmitNeeded: Boolean = false
+    ) : QuizEngineState
+    data class Error(val message: String) : QuizEngineState
+}
 
 @HiltViewModel
 class QuizEngineViewModel @Inject constructor(
     private val quizRepository: QuizRepository
 ) : ViewModel() {
 
-    private val _questions = MutableStateFlow<List<QuestionItem>>(emptyList())
-    val questions: StateFlow<List<QuestionItem>> = _questions.asStateFlow()
-
-    private val _userStates = MutableStateFlow<List<UserAnswerState>>(emptyList())
-    val userStates: StateFlow<List<UserAnswerState>> = _userStates.asStateFlow()
-
-    private val _currentIndex = MutableStateFlow(0)
-    val currentIndex: StateFlow<Int> = _currentIndex.asStateFlow()
-
-    private val _remainingTimeSeconds = MutableStateFlow(0L)
-    val remainingTimeSeconds: StateFlow<Long> = _remainingTimeSeconds.asStateFlow()
-
-    private val _isLoading = MutableStateFlow(true)
-    val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
+    private val _uiState = MutableStateFlow<QuizEngineState>(QuizEngineState.Loading)
+    val uiState: StateFlow<QuizEngineState> = _uiState.asStateFlow()
 
     private var strikeCount = 0
-    private val _forceSubmitTrigger = MutableStateFlow(false)
-    val forceSubmitTrigger: StateFlow<Boolean> = _forceSubmitTrigger.asStateFlow()
-
-    private val _warningAlertTrigger = MutableStateFlow(false)
-    val warningAlertTrigger: StateFlow<Boolean> = _warningAlertTrigger.asStateFlow()
-
     private var timerJob: Job? = null
 
-    fun loadQuiz(testId: String) {
+    fun loadQuiz(testId: String, testTitle: String = "Test Series", durationMinutes: Long = 60L) {
         viewModelScope.launch {
-            _isLoading.value = true
-            val result = quizRepository.getQuestionsForTest(testId)
-            result.onSuccess { loadedQuestions ->
-                _questions.value = loadedQuestions
-                if (loadedQuestions.isNotEmpty()) {
-                    val initialStates = List(loadedQuestions.size) { index ->
-                        UserAnswerState(
-                            status = if (index == 0) QuestionStatus.UNANSWERED else QuestionStatus.UNVISITED
+            _uiState.value = QuizEngineState.Loading
+            quizRepository.getQuestionsForTest(testId)
+                .onSuccess { loadedQuestions ->
+                    if (loadedQuestions.isNotEmpty()) {
+                        val initialStates = List(loadedQuestions.size) { index ->
+                            UserAnswerState(
+                                status = if (index == 0) QuestionStatus.UNANSWERED else QuestionStatus.UNVISITED
+                            )
+                        }
+                        val totalTimeSeconds = durationMinutes * 60L
+                        _uiState.value = QuizEngineState.Content(
+                            testTitle = testTitle,
+                            questions = loadedQuestions,
+                            userStates = initialStates,
+                            currentIndex = 0,
+                            remainingTimeSeconds = totalTimeSeconds
                         )
+                        startTimer(totalTimeSeconds)
+                    } else {
+                        _uiState.value = QuizEngineState.Error("No questions found for this test.")
                     }
-                    _userStates.value = initialStates
-                    val totalDurationMinutes = loadedQuestions.size
-                    startTimer(totalDurationMinutes * 60L)
-                } else {
-                    _userStates.value = emptyList()
                 }
-            }.onFailure {
-                _questions.value = emptyList()
-                _userStates.value = emptyList()
-            }
-            _isLoading.value = false
+                .onFailure { error ->
+                    _uiState.value = QuizEngineState.Error(error.localizedMessage ?: "Unknown Error")
+                }
         }
     }
 
     private fun startTimer(seconds: Long) {
         timerJob?.cancel()
-        _remainingTimeSeconds.value = seconds
         timerJob = viewModelScope.launch {
-            while (_remainingTimeSeconds.value > 0) {
-                delay(1000L.milliseconds)
-                _remainingTimeSeconds.value -= 1
+            var timeLeft = seconds
+            while (timeLeft > 0) {
+                delay(1.seconds)
+                timeLeft--
+                _uiState.update { currentState ->
+                    if (currentState is QuizEngineState.Content) {
+                        currentState.copy(remainingTimeSeconds = timeLeft)
+                    } else currentState
+                }
             }
-            _forceSubmitTrigger.value = true
+            _uiState.update { currentState ->
+                if (currentState is QuizEngineState.Content) {
+                    currentState.copy(isForceSubmitNeeded = true)
+                } else currentState
+            }
         }
     }
 
     fun selectOption(optionIndex: Int) {
-        val currIdx = _currentIndex.value
-        val currentStates = _userStates.value.toMutableList()
+        _uiState.update { state ->
+            if (state !is QuizEngineState.Content) return@update state
+            val currIdx = state.currentIndex
+            val updatedStates = state.userStates.toMutableList()
+            if (currIdx !in updatedStates.indices) return@update state
 
-        // Defensive check: prevent out of bounds crash if list is empty
-        if (currIdx !in currentStates.indices) return
+            val currentState = updatedStates[currIdx]
+            val newStatus = if (currentState.isMarkedForReview) {
+                QuestionStatus.ANSWERED_AND_MARKED
+            } else {
+                QuestionStatus.ANSWERED
+            }
 
-        val currentState = currentStates[currIdx]
-        currentState.selectedOptionIndex = optionIndex
-        currentState.status = if (currentState.isMarkedForReview) {
-            QuestionStatus.ANSWERED_AND_MARKED
-        } else {
-            QuestionStatus.ANSWERED
+            updatedStates[currIdx] = currentState.copy(
+                selectedOptionIndex = optionIndex,
+                status = newStatus
+            )
+            state.copy(userStates = updatedStates)
         }
-
-        currentStates[currIdx] = currentState
-        _userStates.value = currentStates
     }
 
     fun clearSelection() {
-        val currIdx = _currentIndex.value
-        val currentStates = _userStates.value.toMutableList()
+        _uiState.update { state ->
+            if (state !is QuizEngineState.Content) return@update state
+            val currIdx = state.currentIndex
+            val updatedStates = state.userStates.toMutableList()
+            if (currIdx !in updatedStates.indices) return@update state
 
-        if (currIdx !in currentStates.indices) return
+            val currentState = updatedStates[currIdx]
+            val newStatus = if (currentState.isMarkedForReview) {
+                QuestionStatus.MARKED_FOR_REVIEW
+            } else {
+                QuestionStatus.UNANSWERED
+            }
 
-        val currentState = currentStates[currIdx]
-        val newStatus = if (currentState.isMarkedForReview) {
-            QuestionStatus.MARKED_FOR_REVIEW
-        } else {
-            QuestionStatus.UNANSWERED
+            updatedStates[currIdx] = currentState.copy(
+                selectedOptionIndex = null,
+                status = newStatus
+            )
+            state.copy(userStates = updatedStates)
         }
-
-        // Creating an updated copy of the state object
-        currentStates[currIdx] = currentState.copy(
-            selectedOptionIndex = null,
-            status = newStatus
-        )
-
-        _userStates.value = currentStates
     }
 
     fun toggleMarkForReview() {
-        val currIdx = _currentIndex.value
-        val currentStates = _userStates.value.toMutableList()
+        _uiState.update { state ->
+            if (state !is QuizEngineState.Content) return@update state
+            val currIdx = state.currentIndex
+            val updatedStates = state.userStates.toMutableList()
+            if (currIdx !in updatedStates.indices) return@update state
 
-        // Defensive check: Fixes Crashlytics IndexOutOfBoundsException
-        if (currIdx !in currentStates.indices) return
+            val currentState = updatedStates[currIdx]
+            val newReviewStatus = !currentState.isMarkedForReview
 
-        val currentState = currentStates[currIdx]
-        val newReviewStatus = !currentState.isMarkedForReview
-        currentState.isMarkedForReview = newReviewStatus
+            val newStatus = when {
+                newReviewStatus && currentState.selectedOptionIndex != null -> QuestionStatus.ANSWERED_AND_MARKED
+                newReviewStatus -> QuestionStatus.MARKED_FOR_REVIEW
+                currentState.selectedOptionIndex != null -> QuestionStatus.ANSWERED
+                else -> QuestionStatus.UNANSWERED
+            }
 
-        currentState.status = when {
-            newReviewStatus && currentState.selectedOptionIndex != null -> QuestionStatus.ANSWERED_AND_MARKED
-            newReviewStatus -> QuestionStatus.MARKED_FOR_REVIEW
-            currentState.selectedOptionIndex != null -> QuestionStatus.ANSWERED
-            else -> QuestionStatus.UNANSWERED
+            updatedStates[currIdx] = currentState.copy(
+                isMarkedForReview = newReviewStatus,
+                status = newStatus
+            )
+            state.copy(userStates = updatedStates)
         }
-
-        currentStates[currIdx] = currentState
-        _userStates.value = currentStates
     }
 
     fun navigateToQuestion(index: Int) {
-        if (index in _questions.value.indices) {
-            val currentStates = _userStates.value.toMutableList()
-            if (index in currentStates.indices && currentStates[index].status == QuestionStatus.UNVISITED) {
-                currentStates[index] = currentStates[index].copy(status = QuestionStatus.UNANSWERED)
-                _userStates.value = currentStates
+        _uiState.update { state ->
+            if (state !is QuizEngineState.Content) return@update state
+            if (index !in state.questions.indices) return@update state
+
+            val updatedStates = state.userStates.toMutableList()
+            if (updatedStates[index].status == QuestionStatus.UNVISITED) {
+                updatedStates[index] = updatedStates[index].copy(status = QuestionStatus.UNANSWERED)
             }
-            _currentIndex.value = index
+
+            state.copy(
+                currentIndex = index,
+                userStates = updatedStates
+            )
         }
     }
 
     fun handleAppBackgrounded() {
         strikeCount++
-        if (strikeCount == 1) {
-            _warningAlertTrigger.value = true
-        } else if (strikeCount >= 2) {
-            _forceSubmitTrigger.value = true
+        _uiState.update { state ->
+            if (state !is QuizEngineState.Content) return@update state
+            if (strikeCount == 1) {
+                state.copy(isWarningVisible = true)
+            } else {
+                state.copy(isForceSubmitNeeded = true)
+            }
         }
     }
 
     fun resetWarningAlert() {
-        _warningAlertTrigger.value = false
+        _uiState.update { state ->
+            if (state !is QuizEngineState.Content) return@update state
+            state.copy(isWarningVisible = false)
+        }
     }
 
+
     fun calculateAndSubmitResults(
-        userId: String,
-        userName: String,
+        userId: String = "guest_user",
+        userName: String = "Student",
         testId: String,
-        testTitle: String,
         onComplete: (QuizResult) -> Unit
     ) {
+        val state = _uiState.value
+        if (state !is QuizEngineState.Content) return
+
         viewModelScope.launch {
-            _isLoading.value = true
-            val qList = _questions.value
-            val states = _userStates.value
+            _uiState.value = QuizEngineState.Loading
+            val qList = state.questions
+            val userStates = state.userStates
 
             var correct = 0
             var wrong = 0
             var unvisited = 0
 
             qList.forEachIndexed { idx, q ->
-                val state = states.getOrNull(idx)
-
-                if (state?.isMarkedForReview == true) {
-                    unvisited++
-                } else {
-                    when {
-                        state?.selectedOptionIndex == null -> unvisited++
-                        state.selectedOptionIndex == q.correctAnswerIndex -> correct++
-                        else -> wrong++
-                    }
+                val ansState = userStates.getOrNull(idx)
+                when {
+                    ansState == null || ansState.selectedOptionIndex == null -> unvisited++
+                    ansState.selectedOptionIndex == q.correctAnswerIndex -> correct++
+                    else -> wrong++
                 }
             }
 
             val score = (correct * 1.0) - (wrong * 0.25)
             val maxMarks = qList.size * 1.0
-            val totalAttempted = correct + wrong
-            val accuracy = if (totalAttempted > 0) (correct.toDouble() / totalAttempted) * 100.0 else 0.0
+            val attempted = correct + wrong
+            val accuracy = if (attempted > 0) (correct.toDouble() / attempted) * 100.0 else 0.0
+
+            val timeTaken = (state.questions.size * 60L) - state.remainingTimeSeconds
 
             val resultObj = QuizResult(
                 userId = userId,
                 userName = userName,
                 testId = testId,
-                testTitle = testTitle,
+                testTitle = state.testTitle,
                 totalQuestions = qList.size,
                 correctCount = correct,
                 wrongCount = wrong,
@@ -218,19 +246,19 @@ class QuizEngineViewModel @Inject constructor(
                 scoreObtained = score,
                 totalMaxMarks = maxMarks,
                 accuracyPercentage = accuracy,
-                timeTakenSeconds = 0L
+                timeTakenSeconds = if (timeTaken > 0) timeTaken else 0L
             )
 
             quizRepository.submitQuizResult(resultObj)
-            _isLoading.value = false
             onComplete(resultObj)
         }
     }
 
+    /**
+     * Resets the active test state to enable clean re-attempts without residual user state.
+     */
     fun resetTestState() {
-        val count = _questions.value.size
-        _userStates.value = List(count) { UserAnswerState() }
-        _currentIndex.value = 0
+        _uiState.value = QuizEngineState.Loading
     }
 
     override fun onCleared() {

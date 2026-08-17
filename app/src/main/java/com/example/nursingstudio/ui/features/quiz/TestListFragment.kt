@@ -54,10 +54,9 @@ class TestListFragment : Fragment() {
     private fun setupRecyclerView() {
         adapter = TestListAdapter { selectedTest ->
             if (selectedTest.computedIsLocked) {
-                // 🔒 Premium Content Gate Toast
                 Toast.makeText(
                     requireContext(),
-                    "This test is locked. Purchase premium subscription to unlock.",
+                    getString(R.string.locked_test_toast_msg),
                     Toast.LENGTH_SHORT
                 ).show()
             } else {

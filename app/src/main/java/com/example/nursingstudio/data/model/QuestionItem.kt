@@ -9,8 +9,8 @@ import androidx.annotation.Keep
 data class QuestionItem(
     val questionId: String = "",
     val questionText: String = "",
-    val imageUrl: String? = null,
-    val videoUrl: String? = null,
+    val mediaType: MediaType = MediaType.NONE,
+    val mediaUrl: String? = null,
     val options: List<String> = emptyList(),
     val correctAnswerIndex: Int = 0,
     val explanation: String = ""
