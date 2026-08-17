@@ -9,7 +9,7 @@ import androidx.annotation.Keep
 @Keep
 data class TestItem(
     val testId: String = "",
-    val title: String = "",
+    val testTitle: String = "",
     val categoryId: String = "",
     val seriesName: String = "",
     val description: String = "",

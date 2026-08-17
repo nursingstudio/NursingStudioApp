@@ -54,19 +54,15 @@ class QuizRepository @Inject constructor(
      * 🚀 2026 Gold Standard Question Collection Retrieval
      * Fetches questions for a specific test from sub-collection `quizzes/{testId}/questions`
      */
-    suspend fun getQuestionsForTest(testId: String): Result<List<QuestionItem>> {
-        return try {
-            val snapshot = firestore.collection("quizzes")
-                .document(testId)
-                .collection("questions")
-                .get()
-                .await()
+    suspend fun getQuestionsForTest(testId: String): Result<List<QuestionItem>> = runCatching {
+        // Queries quizzes/{docId}/questions subcollection
+        val querySnapshot = firestore.collection("quizzes")
+            .document(testId)
+            .collection("questions")
+            .get()
+            .await()
 
-            val questionList = snapshot.toObjects(QuestionItem::class.java)
-            Result.success(questionList)
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
+        querySnapshot.toObjects(QuestionItem::class.java)
     }
 
     /**

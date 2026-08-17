@@ -52,14 +52,21 @@ class QuizEngineViewModel @Inject constructor(
             val result = quizRepository.getQuestionsForTest(testId)
             result.onSuccess { loadedQuestions ->
                 _questions.value = loadedQuestions
-                val initialStates = List(loadedQuestions.size) { index ->
-                    UserAnswerState(
-                        status = if (index == 0) QuestionStatus.UNANSWERED else QuestionStatus.UNVISITED
-                    )
+                if (loadedQuestions.isNotEmpty()) {
+                    val initialStates = List(loadedQuestions.size) { index ->
+                        UserAnswerState(
+                            status = if (index == 0) QuestionStatus.UNANSWERED else QuestionStatus.UNVISITED
+                        )
+                    }
+                    _userStates.value = initialStates
+                    val totalDurationMinutes = loadedQuestions.size
+                    startTimer(totalDurationMinutes * 60L)
+                } else {
+                    _userStates.value = emptyList()
                 }
-                _userStates.value = initialStates
-                val totalDurationMinutes = loadedQuestions.size
-                startTimer(totalDurationMinutes * 60L)
+            }.onFailure {
+                _questions.value = emptyList()
+                _userStates.value = emptyList()
             }
             _isLoading.value = false
         }
@@ -80,8 +87,11 @@ class QuizEngineViewModel @Inject constructor(
     fun selectOption(optionIndex: Int) {
         val currIdx = _currentIndex.value
         val currentStates = _userStates.value.toMutableList()
-        val currentState = currentStates[currIdx]
 
+        // Defensive check: prevent out of bounds crash if list is empty
+        if (currIdx !in currentStates.indices) return
+
+        val currentState = currentStates[currIdx]
         currentState.selectedOptionIndex = optionIndex
         currentState.status = if (currentState.isMarkedForReview) {
             QuestionStatus.ANSWERED_AND_MARKED
@@ -96,24 +106,33 @@ class QuizEngineViewModel @Inject constructor(
     fun clearSelection() {
         val currIdx = _currentIndex.value
         val currentStates = _userStates.value.toMutableList()
-        val currentState = currentStates[currIdx]
 
-        currentState.selectedOptionIndex = null
-        currentState.status = if (currentState.isMarkedForReview) {
+        if (currIdx !in currentStates.indices) return
+
+        val currentState = currentStates[currIdx]
+        val newStatus = if (currentState.isMarkedForReview) {
             QuestionStatus.MARKED_FOR_REVIEW
         } else {
             QuestionStatus.UNANSWERED
         }
 
-        currentStates[currIdx] = currentState
+        // Creating an updated copy of the state object
+        currentStates[currIdx] = currentState.copy(
+            selectedOptionIndex = null,
+            status = newStatus
+        )
+
         _userStates.value = currentStates
     }
 
     fun toggleMarkForReview() {
         val currIdx = _currentIndex.value
         val currentStates = _userStates.value.toMutableList()
-        val currentState = currentStates[currIdx]
 
+        // Defensive check: Fixes Crashlytics IndexOutOfBoundsException
+        if (currIdx !in currentStates.indices) return
+
+        val currentState = currentStates[currIdx]
         val newReviewStatus = !currentState.isMarkedForReview
         currentState.isMarkedForReview = newReviewStatus
 
@@ -131,7 +150,7 @@ class QuizEngineViewModel @Inject constructor(
     fun navigateToQuestion(index: Int) {
         if (index in _questions.value.indices) {
             val currentStates = _userStates.value.toMutableList()
-            if (currentStates[index].status == QuestionStatus.UNVISITED) {
+            if (index in currentStates.indices && currentStates[index].status == QuestionStatus.UNVISITED) {
                 currentStates[index] = currentStates[index].copy(status = QuestionStatus.UNANSWERED)
                 _userStates.value = currentStates
             }

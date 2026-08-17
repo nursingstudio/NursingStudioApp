@@ -64,7 +64,7 @@ class TestListFragment : Fragment() {
                 // 🔓 Navigating to Quiz Instructions Fragment with Correct Properties
                 val bundle = Bundle().apply {
                     putString("testId", selectedTest.testId) // Fixed: using testId explicitly
-                    putString("title", selectedTest.title)
+                    putString("title", selectedTest.testTitle)
                 }
                 findNavController().navigate(
                     R.id.action_testListFragment_to_quizInstructionsFragment,

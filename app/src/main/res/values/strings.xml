@@ -527,6 +527,9 @@
     <string name="review_marked_excluded_note">Excluded from score (Marked for Review)</string>
     <string name="question_number_fmt">Question %1$d</string>
 
+    <!-- Quiz Engine & Error Strings -->
+    <string name="error_loading_questions">Failed to load test questions. Please try again.</string>
+    <string name="no_questions_available">No questions available for this test.</string>
 
 
 

@@ -1,5 +1,6 @@
 package com.example.nursingstudio.ui.features.quiz
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -106,6 +107,7 @@ class QuizEngineFragment : Fragment() {
         })
     }
 
+    @SuppressLint("DefaultLocale")
     private fun observeViewModel() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {

@@ -30,7 +30,7 @@ class TestListAdapter(
         RecyclerView.ViewHolder(binding.root) {
 
         fun bind(item: TestItem) {
-            binding.tvTestTitle.text = item.title
+            binding.tvTestTitle.text = item.testTitle
             binding.tvTestSubtitle.text = binding.root.context.getString(
                 R.string.questions_mins,
                 item.totalQuestions,
