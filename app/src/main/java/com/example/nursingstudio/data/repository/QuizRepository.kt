@@ -3,8 +3,8 @@ package com.example.nursingstudio.data.repository
 import com.example.nursingstudio.data.model.QuestionItem
 import com.example.nursingstudio.data.model.QuizResult
 import com.example.nursingstudio.data.model.TestItem
-import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.AggregateSource
+import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -13,7 +13,6 @@ import javax.inject.Singleton
 class QuizRepository @Inject constructor(
     private val firestore: FirebaseFirestore
 ) {
-
 
     data class RankData(
         val testRank: Int = 1,
@@ -52,33 +51,51 @@ class QuizRepository @Inject constructor(
 
     /**
      * 🚀 2026 Gold Standard Question Collection Retrieval
-     * Fetches questions for a specific test from sub-collection `quizzes/{testId}/questions`
+     * Resolves parent quiz document by field `testId`, then retrieves `questions` sub-collection.
      */
     suspend fun getQuestionsForTest(testId: String): Result<List<QuestionItem>> = runCatching {
-        // Queries quizzes/{docId}/questions subcollection
-        val querySnapshot = firestore.collection("quizzes")
-            .document(testId)
+        // 1. Locate the quiz document where field "testId" == target testId
+        val parentQuizSnapshot = firestore.collection("quizzes")
+            .whereEqualTo("testId", testId)
+            .limit(1)
+            .get()
+            .await()
+
+        if (parentQuizSnapshot.isEmpty) {
+            // Fallback: Check if testId was directly used as Document ID
+            val directSubcollection = firestore.collection("quizzes")
+                .document(testId)
+                .collection("questions")
+                .get()
+                .await()
+
+            return@runCatching directSubcollection.toObjects(QuestionItem::class.java)
+        }
+
+        // 2. Extract actual Firestore parent Document ID
+        val parentDocumentId = parentQuizSnapshot.documents.first().id
+
+        // 3. Fetch questions sub-collection using the resolved document ID
+        val questionsSnapshot = firestore.collection("quizzes")
+            .document(parentDocumentId)
             .collection("questions")
             .get()
             .await()
 
-        querySnapshot.toObjects(QuestionItem::class.java)
+        questionsSnapshot.toObjects(QuestionItem::class.java)
     }
 
     /**
-     * 🚀 2026 Gold Standard Testwise & Global Ranking Firestore Synchronization.
      * Saves result to `test_results` and updates global user aggregate leaderboard atomically.
      */
     suspend fun submitQuizResult(result: QuizResult): Result<Boolean> {
         return try {
             val batch = firestore.batch()
 
-            // 1. Save Test Submission Record
             val resultDocRef = firestore.collection("test_results").document()
             val finalResult = result.copy(resultId = resultDocRef.id)
             batch.set(resultDocRef, finalResult)
 
-            // 2. Sync Testwise Ranking Node
             val testRankRef = firestore.collection("quizzes")
                 .document(result.testId)
                 .collection("leaderboard")
@@ -94,20 +111,17 @@ class QuizRepository @Inject constructor(
             )
             batch.set(testRankRef, rankMap)
 
-            // 3. Sync Global Ranking Node
             val globalRankRef = firestore.collection("global_leaderboard")
                 .document(result.userId)
 
             batch.set(globalRankRef, rankMap)
 
-            // Commit atomic batch operations
             batch.commit().await()
             Result.success(true)
         } catch (e: Exception) {
             Result.failure(e)
         }
     }
-
 
     /**
      * 🚀 2026 Gold Standard Server-Side Aggregate Rank Calculation.
