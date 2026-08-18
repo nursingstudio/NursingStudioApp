@@ -13,6 +13,8 @@ class TestSubmitBottomSheetFragment(
     private val answered: Int,
     private val unanswered: Int,
     private val review: Int,
+    private val answeredMarked: Int,
+    private val unvisited: Int,
     private val timeFormatted: String,
     private val onSubmitConfirmed: () -> Unit
 ) : BottomSheetDialogFragment() {
@@ -36,6 +38,8 @@ class TestSubmitBottomSheetFragment(
         binding.tvStatAnsweredVal.text = answered.toString()
         binding.tvStatUnansweredVal.text = unanswered.toString()
         binding.tvStatReviewVal.text = review.toString()
+        binding.tvStatAnsweredMarkedVal.text = answeredMarked.toString()
+        binding.tvStatUnvisitedVal.text = unvisited.toString()
         binding.tvSheetTimeRemaining.text = getString(R.string.time_left_label, timeFormatted)
 
         binding.btnConfirmSubmit.setOnClickListener {

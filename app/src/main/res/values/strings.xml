@@ -541,6 +541,14 @@
     <string name="error_quiz_generic">Failed to load quiz. Please check your network connection and try again.</string>
     <string name="btn_retry">Retry</string>
 
+    <!-- Test Submit Sheet Extensions -->
+    <string name="stat_answered_marked">Answered &amp; Marked For Review</string>
+    <string name="stat_unvisited">Unvisited</string>
+    <string name="review_evaluation_warning">Note: Questions marked for review will not be evaluated in your final score.</string>
+
+        <!-- Legend & Palette Extensions -->
+        <string name="answered_marked_badge_desc">Answered and marked indicator</string>
+
 
 
 

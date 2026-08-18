@@ -291,9 +291,11 @@ class QuizEngineFragment : Fragment() {
         if (state !is QuizEngineState.Content) return
 
         val total = state.questions.size
-        val answered = state.userStates.count { it.status == QuestionStatus.ANSWERED || it.status == QuestionStatus.ANSWERED_AND_MARKED }
+        val answered = state.userStates.count { it.status == QuestionStatus.ANSWERED }
         val unanswered = state.userStates.count { it.status == QuestionStatus.UNANSWERED }
         val review = state.userStates.count { it.status == QuestionStatus.MARKED_FOR_REVIEW }
+        val answeredMarked = state.userStates.count { it.status == QuestionStatus.ANSWERED_AND_MARKED }
+        val unvisited = state.userStates.count { it.status == QuestionStatus.UNVISITED }
 
         val minutes = state.remainingTimeSeconds / 60
         val secs = state.remainingTimeSeconds % 60
@@ -304,6 +306,8 @@ class QuizEngineFragment : Fragment() {
             answered = answered,
             unanswered = unanswered,
             review = review,
+            answeredMarked = answeredMarked,
+            unvisited = unvisited,
             timeFormatted = formattedTime,
             onSubmitConfirmed = {
                 executeFinalSubmission()

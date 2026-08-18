@@ -43,7 +43,7 @@ class QuizEngineViewModel @Inject constructor(
     private var strikeCount = 0
     private var timerJob: Job? = null
 
-    fun loadQuiz(testId: String, testTitle: String = "Test Series", durationMinutes: Long = 60L) {
+    fun loadQuiz(testId: String, testTitle: String = "Test Series") {
         viewModelScope.launch {
             _uiState.value = QuizEngineState.Loading
             quizRepository.getQuestionsForTest(testId)
@@ -54,15 +54,18 @@ class QuizEngineViewModel @Inject constructor(
                                 status = if (index == 0) QuestionStatus.UNANSWERED else QuestionStatus.UNVISITED
                             )
                         }
-                        val totalTimeSeconds = durationMinutes * 60L
+
+                        // 🚀 2026 Dynamic Timer Fix: 1 Question = 1 Minute (60 Seconds) Rule
+                        val dynamicDurationSeconds = loadedQuestions.size * 60L
+
                         _uiState.value = QuizEngineState.Content(
                             testTitle = testTitle,
                             questions = loadedQuestions,
                             userStates = initialStates,
                             currentIndex = 0,
-                            remainingTimeSeconds = totalTimeSeconds
+                            remainingTimeSeconds = dynamicDurationSeconds
                         )
-                        startTimer(totalTimeSeconds)
+                        startTimer(dynamicDurationSeconds)
                     } else {
                         _uiState.value = QuizEngineState.Error("No questions found for this test.")
                     }
@@ -199,7 +202,6 @@ class QuizEngineViewModel @Inject constructor(
         }
     }
 
-
     fun calculateAndSubmitResults(
         userId: String = "guest_user",
         userName: String = "Student",
@@ -220,8 +222,13 @@ class QuizEngineViewModel @Inject constructor(
 
             qList.forEachIndexed { idx, q ->
                 val ansState = userStates.getOrNull(idx)
+
+                // 🚀 Evaluation Standard: Exclude items marked for review (MARKED_FOR_REVIEW & ANSWERED_AND_MARKED)
+                val isReview = ansState?.status == QuestionStatus.MARKED_FOR_REVIEW ||
+                        ansState?.status == QuestionStatus.ANSWERED_AND_MARKED
+
                 when {
-                    ansState == null || ansState.selectedOptionIndex == null -> unvisited++
+                    ansState == null || ansState.selectedOptionIndex == null || isReview -> unvisited++
                     ansState.selectedOptionIndex == q.correctAnswerIndex -> correct++
                     else -> wrong++
                 }
@@ -232,7 +239,8 @@ class QuizEngineViewModel @Inject constructor(
             val attempted = correct + wrong
             val accuracy = if (attempted > 0) (correct.toDouble() / attempted) * 100.0 else 0.0
 
-            val timeTaken = (state.questions.size * 60L) - state.remainingTimeSeconds
+            val allocatedTimeSeconds = state.questions.size * 60L
+            val timeTaken = allocatedTimeSeconds - state.remainingTimeSeconds
 
             val resultObj = QuizResult(
                 userId = userId,
@@ -254,9 +262,6 @@ class QuizEngineViewModel @Inject constructor(
         }
     }
 
-    /**
-     * Resets the active test state to enable clean re-attempts without residual user state.
-     */
     fun resetTestState() {
         _uiState.value = QuizEngineState.Loading
     }
