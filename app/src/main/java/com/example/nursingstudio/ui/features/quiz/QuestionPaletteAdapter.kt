@@ -3,6 +3,7 @@ package com.example.nursingstudio.ui.features.quiz
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
@@ -47,7 +48,10 @@ class QuestionPaletteAdapter(
             binding.cardPaletteItem.setCardBackgroundColor(ContextCompat.getColor(context, bgColorRes))
             binding.tvQuestionNumber.setTextColor(ContextCompat.getColor(context, textColorRes))
 
-            // 🚀 2026 Gold Standard Fix: Replaced deprecated adapterPosition with bindingAdapterPosition
+            // 🚀 Toggle Green Badge for ANSWERED_AND_MARKED status
+            binding.viewAnsweredBadge.isVisible = (state.status == QuestionStatus.ANSWERED_AND_MARKED)
+
+            // Safe position reference using bindingAdapterPosition
             binding.root.setOnClickListener {
                 val position = bindingAdapterPosition
                 if (position != RecyclerView.NO_POSITION) {
