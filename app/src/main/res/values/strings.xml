@@ -540,6 +540,8 @@
         <string name="locked_test_toast_msg">This test is locked. Purchase premium subscription to unlock.</string>
     <string name="error_quiz_generic">Failed to load quiz. Please check your network connection and try again.</string>
     <string name="btn_retry">Retry</string>
+    <string name="error_no_questions_found">No questions available for this test series.</string>
+
 
     <!-- Test Submit Sheet Extensions -->
     <string name="stat_answered_marked">Answered &amp; Marked For Review</string>

@@ -29,7 +29,7 @@ sealed interface QuizEngineState {
         val isWarningVisible: Boolean = false,
         val isForceSubmitNeeded: Boolean = false
     ) : QuizEngineState
-    data class Error(val message: String) : QuizEngineState
+    data class Error(val isNoQuestions: Boolean = false, val customMessage: String? = null) : QuizEngineState
 }
 
 @HiltViewModel
@@ -55,7 +55,6 @@ class QuizEngineViewModel @Inject constructor(
                             )
                         }
 
-                        // 🚀 2026 Dynamic Timer Fix: 1 Question = 1 Minute (60 Seconds) Rule
                         val dynamicDurationSeconds = loadedQuestions.size * 60L
 
                         _uiState.value = QuizEngineState.Content(
@@ -67,11 +66,11 @@ class QuizEngineViewModel @Inject constructor(
                         )
                         startTimer(dynamicDurationSeconds)
                     } else {
-                        _uiState.value = QuizEngineState.Error("No questions found for this test.")
+                        _uiState.value = QuizEngineState.Error(isNoQuestions = true)
                     }
                 }
                 .onFailure { error ->
-                    _uiState.value = QuizEngineState.Error(error.localizedMessage ?: "Unknown Error")
+                    _uiState.value = QuizEngineState.Error(customMessage = error.localizedMessage)
                 }
         }
     }
@@ -212,7 +211,6 @@ class QuizEngineViewModel @Inject constructor(
         if (state !is QuizEngineState.Content) return
 
         viewModelScope.launch {
-            _uiState.value = QuizEngineState.Loading
             val qList = state.questions
             val userStates = state.userStates
 
@@ -222,8 +220,6 @@ class QuizEngineViewModel @Inject constructor(
 
             qList.forEachIndexed { idx, q ->
                 val ansState = userStates.getOrNull(idx)
-
-                // 🚀 Evaluation Standard: Exclude items marked for review (MARKED_FOR_REVIEW & ANSWERED_AND_MARKED)
                 val isReview = ansState?.status == QuestionStatus.MARKED_FOR_REVIEW ||
                         ansState?.status == QuestionStatus.ANSWERED_AND_MARKED
 

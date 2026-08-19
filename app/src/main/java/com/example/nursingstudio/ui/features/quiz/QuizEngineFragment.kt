@@ -139,9 +139,13 @@ class QuizEngineFragment : Fragment() {
                             binding.progressBar.isVisible = false
                             binding.drawerLayoutQuiz.isVisible = false
                             binding.layoutErrorState.isVisible = true
-                            binding.tvErrorMessage.text = state.message.ifBlank {
-                                getString(R.string.error_quiz_generic)
+
+                            val errorMessage = when {
+                                state.isNoQuestions -> getString(R.string.error_no_questions_found)
+                                !state.customMessage.isNullOrBlank() -> state.customMessage
+                                else -> getString(R.string.error_quiz_generic)
                             }
+                            binding.tvErrorMessage.text = errorMessage
                         }
                     }
                 }
@@ -328,6 +332,7 @@ class QuizEngineFragment : Fragment() {
                 putFloat("totalMaxMarks", result.totalMaxMarks.toFloat())
                 putString("testId", result.testId)
                 putFloat("accuracyPercentage", result.accuracyPercentage.toFloat())
+                putLong("timeTakenSeconds", result.timeTakenSeconds)
             }
 
             findNavController().navigate(

@@ -7,7 +7,9 @@ import android.view.ViewGroup
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import com.example.nursingstudio.R
 import com.example.nursingstudio.data.model.QuizResult
@@ -28,7 +30,6 @@ class QuizResultFragment : Fragment() {
     @Inject
     lateinit var repository: QuizRepository
 
-    // Property bound to current result state
     private var currentResult: QuizResult? = null
 
     override fun onCreateView(
@@ -47,25 +48,37 @@ class QuizResultFragment : Fragment() {
         val maxMarks = arguments?.getFloat("totalMaxMarks", 100f)?.toDouble() ?: 100.0
         val testId = arguments?.getString("testId") ?: ""
         val accuracy = arguments?.getFloat("accuracyPercentage", 0f)?.toDouble() ?: 0.0
+        val timeTakenSeconds = arguments?.getLong("timeTakenSeconds", 0L) ?: 0L
 
-        // Store result instance to utilize class field safely
         currentResult = QuizResult(
             testId = testId,
             scoreObtained = score,
             totalMaxMarks = maxMarks,
-            accuracyPercentage = accuracy
+            accuracyPercentage = accuracy,
+            timeTakenSeconds = timeTakenSeconds
         )
 
         setupScoreCard(score, maxMarks, accuracy)
-        loadRanks(testId, score)
+        loadRanks(testId, score, timeTakenSeconds)
 
         binding.btnReattemptTest.setOnClickListener {
-            viewModel.resetTestState()
-            findNavController().popBackStack(R.id.quizEngineFragment, false)
+            val currentTestId = currentResult?.testId ?: testId
+            if (currentTestId.isNotEmpty()) {
+                viewModel.resetTestState()
+                val bundle = Bundle().apply {
+                    putString("testId", currentTestId)
+                }
+                findNavController().navigate(
+                    R.id.action_quizResultFragment_to_quizEngineFragment,
+                    bundle
+                )
+            }
         }
 
         binding.btnReviewAnswers.setOnClickListener {
-            findNavController().navigate(R.id.quizReviewFragment)
+            findNavController().navigate(
+                R.id.action_quizResultFragment_to_quizReviewFragment
+            )
         }
     }
 
@@ -83,15 +96,25 @@ class QuizResultFragment : Fragment() {
         binding.tvPassFailBadge.setTextColor(ContextCompat.getColor(requireContext(), textColorRes))
     }
 
-    private fun loadRanks(testId: String, score: Double) {
+    private fun loadRanks(testId: String, score: Double, timeTakenSeconds: Long) {
         viewLifecycleOwner.lifecycleScope.launch {
-            val rankResult = repository.fetchUserRanks(testId, score)
-            rankResult.onSuccess { rankData ->
-                binding.tvTestwiseRank.text = getString(R.string.rank_fmt, rankData.testRank, rankData.totalTestParticipants)
-                binding.tvGlobalRank.text = getString(R.string.rank_fmt, rankData.globalRank, rankData.totalGlobalUsers)
-            }.onFailure {
-                binding.tvTestwiseRank.text = getString(R.string.rank_fmt, 1, 1)
-                binding.tvGlobalRank.text = getString(R.string.rank_fmt, 1, 1)
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                val rankResult = repository.fetchUserRanks(testId, score, timeTakenSeconds)
+                rankResult.onSuccess { rankData ->
+                    binding.tvTestwiseRank.text = getString(
+                        R.string.rank_fmt,
+                        rankData.testRank,
+                        rankData.totalTestParticipants
+                    )
+                    binding.tvGlobalRank.text = getString(
+                        R.string.rank_fmt,
+                        rankData.globalRank,
+                        rankData.totalGlobalUsers
+                    )
+                }.onFailure {
+                    binding.tvTestwiseRank.text = getString(R.string.rank_fmt, 1, 1)
+                    binding.tvGlobalRank.text = getString(R.string.rank_fmt, 1, 1)
+                }
             }
         }
     }

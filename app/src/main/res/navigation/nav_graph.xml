@@ -93,6 +93,24 @@
         <argument
             android:name="accuracyPercentage"
             app:argType="float" />
+        <argument
+            android:name="timeTakenSeconds"
+            app:argType="long"
+            android:defaultValue="0L" />
+
+        <action
+            android:id="@+id/action_quizResultFragment_to_quizReviewFragment"
+            app:destination="@id/quizReviewFragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
+
+        <action
+            android:id="@+id/action_quizResultFragment_to_quizEngineFragment"
+            app:destination="@id/quizEngineFragment"
+            app:popUpTo="@id/quizResultFragment"
+            app:popUpToInclusive="true" />
     </fragment>
 
     <!-- 7. Quiz Review Destination -->
