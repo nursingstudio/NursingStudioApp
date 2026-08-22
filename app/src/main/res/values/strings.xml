@@ -51,42 +51,50 @@
 
 
     <string name="quiz_default_instructions">
-        <![CDATA[
-        <font color="#FF0000"><b><i>GENERAL INSTRUCTIONS</i></b></font><br><br>
+    <![CDATA[
+    <font color="#FF0000"><b><i>GENERAL INSTRUCTIONS</i></b></font><br><br>
 
-        <font color="#D97706"><b>1. GENERAL PRACTICE DISCLAIMER</b></font><br>
-        This test series is designed exclusively for self-assessment and educational practice. Attempting this test does not guarantee job placement or official recruitment selection.<br><br>
+    <font color="#2563EB"><b>📌 NOTICE: Please scroll down and read all instructions carefully. You must mark the consent checkbox at the bottom to begin the test.</b></font><br><br>
 
-        <font color="#D97706"><b>2. NETWORK & ENVIRONMENT PREPARATION</b></font><br>
-        This is an online examination. Please verify your mobile data or Wi-Fi stability before beginning. Switching networks during the test may interrupt synchronization.<br><br>
+    <font color="#D97706"><b>1. GENERAL PRACTICE DISCLAIMER</b></font><br>
+    This test series is designed exclusively for self-assessment and educational practice. Attempting this test does not guarantee job placement or official recruitment selection.<br><br>
 
-        <font color="#D97706"><b>3. MARKING SCHEME & QUALIFYING CUTOFF</b></font><br>
-        • <b>Correct Answer:</b> +1.0 Mark<br>
-        • <b>Incorrect Answer (Negative Marking):</b> -0.25 Marks (1/4th Penalty)<br>
-        • <b>Unattempted Questions:</b> 0.0 Marks (No penalty)<br>
-        • <b>Minimum Passing Criterion:</b> 40% overall score.<br><br>
+    <font color="#D97706"><b>2. NETWORK & ENVIRONMENT PREPARATION</b></font><br>
+    This is an online examination. Please verify your mobile data or Wi-Fi stability before beginning. Switching networks during the test may interrupt synchronization.<br><br>
 
-        <font color="#D97706"><b>4. SECURITY & ANTI-CHEATING POLICY</b></font><br>
-        Capturing screenshots, screen recording, copying questions, or utilizing unauthorized external help is strictly prohibited. Any suspicious activity will result in immediate test cancellation, account <b>PERMANENT DEBARMENT</b>, and legal action under applicable digital rights regulations.<br><br>
+    <font color="#D97706"><b>3. MARKING SCHEME & QUALIFYING CUTOFF</b></font><br>
+    • <b>Correct Answer:</b> +1.0 Mark<br>
+    • <b>Incorrect Answer (Negative Marking):</b> -0.25 Marks (1/4th Penalty)<br>
+    • <b>Unattempted Questions:</b> 0.0 Marks (No penalty)<br>
+    • <font color="#7C3AED"><b>Questions Marked for Review:</b> Questions marked for review (whether answered or unanswered) will <b>NOT</b> be considered for final scoring/evaluation.</font><br>
+    • <b>Minimum Passing Criterion:</b> 40% overall score.<br><br>
 
-        <font color="#D97706"><b>5. TIMER & AUTO-SUBMISSION</b></font><br>
-        A live countdown timer will be visible on the top navigation bar. When the time expires, your test will be <b>AUTOMATICALLY SUBMITTED</b> with all saved responses.<br><br>
+    <font color="#D97706"><b>4. SECURITY & ANTI-CHEATING POLICY</b></font><br>
+    Capturing screenshots, screen recording, copying questions, or utilizing unauthorized external help is strictly prohibited. Any suspicious activity will result in immediate test cancellation, account <b>PERMANENT DEBARMENT</b>, and legal action under applicable digital rights regulations.<br><br>
 
-        <font color="#D97706"><b>6. QUESTION PALETTE COLOR CODES</b></font><br>
-        Navigate through the Question Grid using these status colors:<br>
-        • <font color="#16A34A"><b>GREEN:</b></font> Answered Questions<br>
-        • <font color="#DC2626"><b>RED:</b></font> Unanswered / Viewed Questions<br>
-        • <font color="#7C3AED"><b>VIOLET:</b></font> Marked for Review<br>
-        • <font color="#64748B"><b>GRAY:</b></font> Unvisited Questions<br><br>
+    <font color="#D97706"><b>5. APP MINIMIZATION & PROCTORING POLICY</b></font><br>
+    Leaving the test screen, minimizing the app, taking calls, switching to other applications, or turning off the screen is strictly tracked. You will receive <b>ONLY ONE WARNING</b> to return to the test. A second violation will lead to immediate <b>FORCED AUTO-SUBMISSION</b> and evaluation of your test as-is.<br><br>
 
-        <font color="#D97706"><b>7. NAVIGATION & ANSWER SAVING RULES</b></font><br>
-        • You can tap any question number on the grid to jump directly to it.<br>
-        • Selecting an option and tapping <b>NEXT</b> locks and records your response.<br>
-        • You may leave a question unanswered by simply skipping to another question.<br><br>
+    <font color="#D97706"><b>6. TIMER & AUTO-SUBMISSION</b></font><br>
+    A live countdown timer will be visible on the top navigation bar. When the time expires, your test will be <b>AUTOMATICALLY SUBMITTED</b> with all saved responses.<br><br>
 
-        <i>Wish you all the best for your examination!</i>
-        ]]>
-    </string>
+    <font color="#D97706"><b>7. QUESTION PALETTE COLOR CODES</b></font><br>
+    Navigate through the Question Grid using these status colors:<br>
+    • <font color="#16A34A"><b>GREEN:</b></font> Answered Questions<br>
+    • <font color="#DC2626"><b>RED:</b></font> Unanswered / Viewed Questions<br>
+    • <font color="#7C3AED"><b>VIOLET:</b></font> Marked for Review (Unanswered)<br>
+    • <font color="#7C3AED"><b>VIOLET</b> with</font> <font color="#16A34A"><b>GREEN BADGE:</b></font> Answered & Marked for Review<br>
+    • <font color="#64748B"><b>GRAY:</b></font> Unvisited Questions<br><br>
+
+    <font color="#D97706"><b>8. NAVIGATION & ANSWER SAVING RULES</b></font><br>
+    • You can tap any question number on the grid to jump directly to it.<br>
+    • Selecting an option and tapping <b>NEXT</b> locks and records your response.<br>
+    • You can use the <b>STAR ICON ⭐</b> on the top bar to mark or unmark a question for review.<br>
+    • You may leave a question unanswered by simply skipping to another question.<br><br>
+
+    <font color="#16A34A"><b><i>Wish you all the best for your examination!</i></b></font>
+    ]]>
+</string>
 
 
     <string name="title_profile">Profile</string>
