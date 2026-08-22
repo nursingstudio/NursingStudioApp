@@ -416,7 +416,7 @@
     <string name="_00_00">00:00</string>
     <string name="previous">Previous</string>
     <string name="_1_of_100">1 of 100</string>
-    <string name="next">NEXT</string>
+    <string name="next">Next</string>
     <string name="nursing_studio_ai_engine_is_restricted_exclusively_to_nursing_professional_domains_i_cannot_answer_out_of_scope_queries">⚠️ Nursing Studio AI Engine is restricted exclusively to Nursing Professional domains. I cannot answer out-of-scope queries.</string>
     <string name="network_connection_fault">Network connection fault: %1$s</string>
     <string name="of">%1$d of %2$d</string>
@@ -445,7 +445,6 @@
     <string name="category_id_missing">Category ID missing</string>
     <string name="questions_mins">%1$d Questions • %2$d Mins</string>
     <string name="test_consent">I have read and understood all the instructions carefully.</string>
-    <string name="clear_response">Clear Response</string>
     <string name="question_1_100">Question 1/100</string>
 
 
@@ -461,8 +460,6 @@
         <string name="question_counter">Question %1$d/%2$d</string>
         <string name="mark_for_review">Mark for Review</string>
         <string name="marked_for_review_active">Marked for Review</string>
-        <string name="btn_previous">Previous</string>
-        <string name="btn_next">Next</string>
         <string name="btn_submit">Submit</string>
         <string name="btn_clear">Clear</string>
 
@@ -540,7 +537,9 @@
 
 
         <string name="test_series_default_title">Test Series</string>
-        <string name="btn_clear_response">CLEAR RESPONSE</string>
+        <string name="btn_previous">PREVIOUS</string>
+        <string name="btn_next">NEXT</string>
+        <string name="btn_clear_response">Clear Response</string>
         <string name="anti_cheat_warning_message">App switching is strictly prohibited &amp; monitored during the test. Further attempts will force submit your quiz.</string>
         <string name="error_loading_quiz">Failed to load quiz. Please try again.</string>
 

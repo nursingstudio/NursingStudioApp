@@ -37,6 +37,7 @@ class QuizEngineFragment : Fragment() {
     private val viewModel: QuizEngineViewModel by viewModels()
     private lateinit var paletteAdapter: QuestionPaletteAdapter
     private var testId: String = ""
+    private var testTitle: String = ""
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -50,8 +51,9 @@ class QuizEngineFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        arguments?.let {
-            testId = it.getString("testId", "")
+        arguments?.let { args ->
+            testId = args.getString("testId", "")
+            testTitle = args.getString("title", "Test Series")
         }
 
         setupPaletteDrawer()
@@ -60,7 +62,7 @@ class QuizEngineFragment : Fragment() {
         observeViewModel()
 
         if (testId.isNotEmpty()) {
-            viewModel.loadQuiz(testId)
+            viewModel.loadQuiz(testId, testTitle)
         }
     }
 
@@ -103,10 +105,9 @@ class QuizEngineFragment : Fragment() {
             }
         }
 
-        // Retry Action Handler for Error State Recovery
         binding.btnRetry.setOnClickListener {
             if (testId.isNotEmpty()) {
-                viewModel.loadQuiz(testId)
+                viewModel.loadQuiz(testId, testTitle)
             }
         }
     }
@@ -158,10 +159,12 @@ class QuizEngineFragment : Fragment() {
         val currIdx = state.currentIndex
         if (questions.isEmpty() || currIdx !in questions.indices) return
 
+        // Dynamic Title Render Fix
+        binding.layoutMainQuizContent.tvQuizTitle.text = state.testTitle.ifEmpty { testTitle }
+
         val question = questions[currIdx]
         val currentState = state.userStates.getOrNull(currIdx)
 
-        // 1. Update Timer (Locale Explicit Fix)
         val minutes = state.remainingTimeSeconds / 60
         val secs = state.remainingTimeSeconds % 60
         binding.layoutMainQuizContent.tvTimer.text = String.format(
@@ -171,7 +174,6 @@ class QuizEngineFragment : Fragment() {
             secs
         )
 
-        // 2. Update Counter and Text
         binding.layoutMainQuizContent.tvQuestionCounter.text = getString(
             R.string.question_counter,
             currIdx + 1,
@@ -183,7 +185,6 @@ class QuizEngineFragment : Fragment() {
             HtmlCompat.FROM_HTML_MODE_LEGACY
         )
 
-        // 3. Dynamic Media Rendering
         when (question.mediaType) {
             MediaType.IMAGE -> {
                 binding.layoutMainQuizContent.frameMediaContainer.visibility = View.VISIBLE
@@ -206,7 +207,6 @@ class QuizEngineFragment : Fragment() {
             }
         }
 
-        // 4. Render Options
         binding.layoutMainQuizContent.rgOptionsContainer.removeAllViews()
         question.options.forEachIndexed { optIdx, optionText ->
             val radioButton = RadioButton(requireContext()).apply {
@@ -222,7 +222,6 @@ class QuizEngineFragment : Fragment() {
             binding.layoutMainQuizContent.rgOptionsContainer.addView(radioButton)
         }
 
-        // 5. Palette and Controls Update
         paletteAdapter.submitList(state.userStates)
         updateLegendCounters(state.userStates)
         updateReviewButtonState(currentState)
@@ -234,7 +233,6 @@ class QuizEngineFragment : Fragment() {
             binding.layoutMainQuizContent.btnNext.text = getString(R.string.btn_next)
         }
 
-        // 6. Handle Dialog Alerts
         if (state.isWarningVisible) {
             showAntiCheatWarningDialog()
         }

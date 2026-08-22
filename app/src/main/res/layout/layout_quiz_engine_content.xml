@@ -194,36 +194,48 @@
         android:layout_alignParentBottom="true"
         android:background="@color/surface_card"
         android:elevation="8dp"
-        android:gravity="center_vertical"
+        android:gravity="center"
         android:orientation="horizontal"
-        android:paddingHorizontal="12dp">
+        android:paddingHorizontal="6dp">
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnPrevious"
-            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:maxWidth="320dp"
-            android:text="@string/previous" />
+            android:paddingHorizontal="4dp"
+            android:textSize="12sp"
+            android:backgroundTint="@color/brand_saffron_dark"
+            android:text="@string/btn_previous"
+            android:textColor="@color/white"
+            app:textAllCaps="false" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnClearSelection"
-            style="@style/Widget.MaterialComponents.Button.TextButton"
-            android:layout_width="wrap_content"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_weight="1.2"
             android:layout_marginHorizontal="4dp"
-            android:text="@string/clear_response"
-            android:textColor="@color/error_red" />
+            android:paddingHorizontal="4dp"
+            android:textSize="12sp"
+            android:text="@string/btn_clear_response"
+            android:textColor="@color/brand_saffron_dark"
+            app:strokeColor="@color/brand_blue"
+            app:strokeWidth="1.5dp"
+            app:textAllCaps="false" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnNext"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:maxWidth="320dp"
+            android:paddingHorizontal="4dp"
+            android:textSize="12sp"
             android:backgroundTint="@color/brand_blue"
-            android:text="@string/next" />
+            android:text="@string/btn_next"
+            android:textColor="@color/white"
+            app:textAllCaps="false" />
     </LinearLayout>
 
 </RelativeLayout>
