@@ -1,5 +1,6 @@
 package com.example.nursingstudio.ui.features.quiz
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.nursingstudio.data.model.QuestionItem
@@ -34,8 +35,13 @@ sealed interface QuizEngineState {
 
 @HiltViewModel
 class QuizEngineViewModel @Inject constructor(
-    private val quizRepository: QuizRepository
+    private val quizRepository: QuizRepository,
+    savedStateHandle: SavedStateHandle
 ) : ViewModel() {
+
+    // Safely extract nav args directly via SavedStateHandle
+    private val navTestId: String = savedStateHandle.get<String>("testId").orEmpty()
+    private var currentTitle: String = savedStateHandle.get<String>("title").orEmpty()
 
     private val _uiState = MutableStateFlow<QuizEngineState>(QuizEngineState.Loading)
     val uiState: StateFlow<QuizEngineState> = _uiState.asStateFlow()
@@ -43,7 +49,31 @@ class QuizEngineViewModel @Inject constructor(
     private var strikeCount = 0
     private var timerJob: Job? = null
 
-    fun loadQuiz(testId: String, testTitle: String = "Test Series") {
+    init {
+        if (navTestId.isNotEmpty()) {
+            loadQuiz(navTestId, currentTitle)
+        }
+    }
+
+    fun initQuizWithArgs(testId: String, title: String) {
+        if (title.isNotBlank()) {
+            this.currentTitle = title
+        }
+        val activeTestId = testId.ifEmpty { navTestId }
+        loadQuiz(activeTestId, currentTitle)
+    }
+
+    fun resetTestState() {
+        timerJob?.cancel()
+        timerJob = null
+        strikeCount = 0
+        _uiState.value = QuizEngineState.Loading
+    }
+
+    fun loadQuiz(testId: String, testTitle: String) {
+        val resolvedTitle = testTitle.ifBlank { currentTitle }
+        this.currentTitle = resolvedTitle
+
         viewModelScope.launch {
             _uiState.value = QuizEngineState.Loading
             quizRepository.getQuestionsForTest(testId)
@@ -58,7 +88,7 @@ class QuizEngineViewModel @Inject constructor(
                         val dynamicDurationSeconds = loadedQuestions.size * 60L
 
                         _uiState.value = QuizEngineState.Content(
-                            testTitle = testTitle,
+                            testTitle = resolvedTitle,
                             questions = loadedQuestions,
                             userStates = initialStates,
                             currentIndex = 0,
@@ -204,7 +234,7 @@ class QuizEngineViewModel @Inject constructor(
     fun calculateAndSubmitResults(
         userId: String = "guest_user",
         userName: String = "Student",
-        testId: String,
+        testId: String = navTestId,
         onComplete: (QuizResult) -> Unit
     ) {
         val state = _uiState.value
@@ -256,10 +286,6 @@ class QuizEngineViewModel @Inject constructor(
             quizRepository.submitQuizResult(resultObj)
             onComplete(resultObj)
         }
-    }
-
-    fun resetTestState() {
-        _uiState.value = QuizEngineState.Loading
     }
 
     override fun onCleared() {

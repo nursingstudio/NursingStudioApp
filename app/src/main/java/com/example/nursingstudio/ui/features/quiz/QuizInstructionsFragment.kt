@@ -53,9 +53,11 @@ class QuizInstructionsFragment : Fragment() {
         }
 
         // 4. Start Quiz Action Navigation Handler
+        // 4. Start Quiz Action Navigation Handler (Passes testId AND title)
         binding.btnStartQuiz.setOnClickListener {
             val bundle = Bundle().apply {
                 putString("testId", testId)
+                putString("title", testTitle) // FIXED: Passing exact title forward
             }
             findNavController().navigate(
                 R.id.action_quizInstructionsFragment_to_quizEngineFragment,

@@ -36,8 +36,6 @@ class QuizEngineFragment : Fragment() {
 
     private val viewModel: QuizEngineViewModel by viewModels()
     private lateinit var paletteAdapter: QuestionPaletteAdapter
-    private var testId: String = ""
-    private var testTitle: String = ""
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -51,19 +49,18 @@ class QuizEngineFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        arguments?.let { args ->
-            testId = args.getString("testId", "")
-            testTitle = args.getString("title", "Test Series")
+        // Read Arguments safely and initialize
+        val testId = arguments?.getString("testId").orEmpty()
+        val title = arguments?.getString("title").orEmpty()
+
+        if (testId.isNotEmpty()) {
+            viewModel.initQuizWithArgs(testId, title)
         }
 
         setupPaletteDrawer()
         setupListeners()
         setupAntiCheatObserver()
         observeViewModel()
-
-        if (testId.isNotEmpty()) {
-            viewModel.loadQuiz(testId, testTitle)
-        }
     }
 
     private fun setupPaletteDrawer() {
@@ -106,9 +103,9 @@ class QuizEngineFragment : Fragment() {
         }
 
         binding.btnRetry.setOnClickListener {
-            if (testId.isNotEmpty()) {
-                viewModel.loadQuiz(testId, testTitle)
-            }
+            val testId = arguments?.getString("testId").orEmpty()
+            val title = arguments?.getString("title").orEmpty()
+            viewModel.initQuizWithArgs(testId, title)
         }
     }
 
@@ -159,8 +156,16 @@ class QuizEngineFragment : Fragment() {
         val currIdx = state.currentIndex
         if (questions.isEmpty() || currIdx !in questions.indices) return
 
-        // Dynamic Title Render Fix
-        binding.layoutMainQuizContent.tvQuizTitle.text = state.testTitle.ifEmpty { testTitle }
+        // Dynamic Title Bind Fix
+        // Gold Standard Dynamic Title Resolution
+        val passedTitle = arguments?.getString("title").orEmpty()
+        val displayTitle = when {
+            state.testTitle.isNotBlank() -> state.testTitle
+            passedTitle.isNotBlank() -> passedTitle
+            else -> getString(R.string.default_test_title)
+        }
+        binding.layoutMainQuizContent.tvQuizTitle.text = displayTitle
+
 
         val question = questions[currIdx]
         val currentState = state.userStates.getOrNull(currIdx)
@@ -322,9 +327,7 @@ class QuizEngineFragment : Fragment() {
         val state = viewModel.uiState.value
         if (state !is QuizEngineState.Content) return
 
-        viewModel.calculateAndSubmitResults(
-            testId = testId
-        ) { result ->
+        viewModel.calculateAndSubmitResults { result ->
             val bundle = Bundle().apply {
                 putFloat("scoreObtained", result.scoreObtained.toFloat())
                 putFloat("totalMaxMarks", result.totalMaxMarks.toFloat())

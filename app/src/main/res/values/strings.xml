@@ -446,6 +446,7 @@
     <string name="questions_mins">%1$d Questions • %2$d Mins</string>
     <string name="test_consent">I have read and understood all the instructions carefully.</string>
     <string name="question_1_100">Question 1/100</string>
+    <string name="default_test_title">Test Series</string>
 
 
         <!-- Quiz Palette Strings -->
