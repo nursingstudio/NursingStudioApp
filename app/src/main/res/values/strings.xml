@@ -559,6 +559,12 @@
         <!-- Legend & Palette Extensions -->
         <string name="answered_marked_badge_desc">Answered and marked indicator</string>
 
+    <!-- Result Screen Strings -->
+    <string name="score_percentage_label">Score %</string>
+    <string name="accuracy_label">Accuracy</string>
+    <string name="percentage_fmt_val">%.1f%%</string>
+    <string name="status_excellent">EXCELLENT</string>
+
 
 
 

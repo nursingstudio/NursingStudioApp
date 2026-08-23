@@ -83,17 +83,59 @@ class QuizResultFragment : Fragment() {
     }
 
     private fun setupScoreCard(score: Double, maxMarks: Double, accuracy: Double) {
+        // 1. Raw Score Display
         binding.tvScoreDisplay.text = getString(R.string.score_ratio_fmt, score, maxMarks)
-        binding.tvPercentageDisplay.text = getString(R.string.percentage_fmt, accuracy)
 
-        val isPassed = accuracy >= 50.0
-        val passFailText = if (isPassed) getString(R.string.status_passed) else getString(R.string.status_failed)
-        val bgColorRes = if (isPassed) R.color.result_pass_bg else R.color.result_fail_bg
-        val textColorRes = if (isPassed) R.color.result_pass_text else R.color.result_fail_text
+        // 2. Accurate Score Percentage Calculation (1 / 4 = 25.0%)
+        val scorePercentage = if (maxMarks > 0.0) {
+            ((score / maxMarks) * 100.0).coerceIn(0.0, 100.0)
+        } else {
+            0.0
+        }
+
+        binding.tvScorePercentageVal.text = getString(R.string.percentage_fmt_val, scorePercentage)
+        binding.tvAccuracyVal.text = getString(R.string.percentage_fmt_val, accuracy)
+
+        // 3. Status Badge and Color Determination (<40% = Fail, 40-74% = Pass, >=75% = Excellent)
+        val (passFailText, colorRes, bgTintRes) = when {
+            scorePercentage < 40.0 -> Triple(
+                getString(R.string.status_failed),
+                R.color.result_fail_primary,
+                R.color.result_fail_bg_tint
+            )
+            scorePercentage >= 75.0 -> Triple(
+                getString(R.string.status_excellent),
+                R.color.result_excellent_primary,
+                R.color.result_excellent_bg_tint
+            )
+            else -> Triple(
+                getString(R.string.status_passed),
+                R.color.result_pass_primary,
+                R.color.result_pass_bg_tint
+            )
+        }
+
+        // 4. Apply Badge Formatting
+        val primaryColor = ContextCompat.getColor(requireContext(), colorRes)
+        val bgTint = ContextCompat.getColor(requireContext(), bgTintRes)
 
         binding.tvPassFailBadge.text = passFailText
-        binding.tvPassFailBadge.setBackgroundColor(ContextCompat.getColor(requireContext(), bgColorRes))
-        binding.tvPassFailBadge.setTextColor(ContextCompat.getColor(requireContext(), textColorRes))
+        binding.tvPassFailBadge.setTextColor(primaryColor)
+        binding.tvPassFailBadge.setBackgroundColor(bgTint)
+
+        // 5. Apply Ring Progress & Color Tints
+        binding.progressScore.setIndicatorColor(primaryColor)
+        binding.progressScore.setProgressCompat(scorePercentage.toInt(), true)
+
+        // Accuracy Indicator Color (Green for >=70%, Saffron for 40-69%, Red for <40%)
+        val accuracyColorRes = when {
+            accuracy >= 70.0 -> R.color.result_pass_primary
+            accuracy >= 40.0 -> R.color.brand_saffron_dark
+            else -> R.color.result_fail_primary
+        }
+        val accuracyColor = ContextCompat.getColor(requireContext(), accuracyColorRes)
+        binding.progressAccuracy.setIndicatorColor(accuracyColor)
+        binding.progressAccuracy.setProgressCompat(accuracy.toInt(), true)
     }
 
     private fun loadRanks(testId: String, score: Double, timeTakenSeconds: Long) {

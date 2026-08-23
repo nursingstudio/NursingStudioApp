@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fitsSystemWindows="true"
-    android:background="@color/app_background">
+    android:background="@color/app_background"
+    android:fitsSystemWindows="true">
 
-    <!-- Header Toolbar -->
+    <!-- Top Bar Toolbar -->
     <LinearLayout
         android:id="@+id/topBarResult"
         android:layout_width="match_parent"
@@ -21,7 +21,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/quiz_result_title"
-            android:textColor="@color/text_primary"
+            android:textColor="@color/brand_blue"
             android:textSize="18sp"
             android:textStyle="bold" />
     </LinearLayout>
@@ -29,8 +29,8 @@
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@id/topBarResult"
         android:layout_above="@+id/bottomActionContainer"
+        android:layout_below="@id/topBarResult"
         android:padding="16dp">
 
         <LinearLayout
@@ -42,54 +42,137 @@
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:cardCornerRadius="12dp"
-                app:cardElevation="3dp"
-                app:cardBackgroundColor="@color/surface_card">
+                app:cardBackgroundColor="@color/surface_card"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="3dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:gravity="center_horizontal"
                     android:orientation="vertical"
-                    android:padding="24dp">
+                    android:padding="20dp">
 
+                    <!-- Pass/Fail Badge (High Contrast Accessible) -->
                     <TextView
                         android:id="@+id/tvPassFailBadge"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:background="@color/result_pass_bg"
-                        android:paddingHorizontal="16dp"
+                        android:background="@color/result_pass_bg_tint"
+                        android:paddingHorizontal="20dp"
                         android:paddingVertical="6dp"
                         android:text="@string/status_passed"
-                        android:textColor="@color/result_pass_text"
+                        android:textColor="@color/result_pass_primary"
                         android:textSize="14sp"
                         android:textStyle="bold" />
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="16dp"
-                        android:text="@string/your_score"
-                        android:textColor="@color/text_secondary"
-                        android:textSize="14sp" />
-
+                    <!-- Raw Score Text -->
                     <TextView
                         android:id="@+id/tvScoreDisplay"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
+                        android:layout_marginTop="12dp"
                         android:textColor="@color/brand_blue"
-                        android:textSize="32sp"
-                        android:textStyle="bold" />
+                        android:textSize="22sp"
+                        android:textStyle="bold"
+                        tools:text="1.00 / 4.00" />
 
-                    <TextView
-                        android:id="@+id/tvPercentageDisplay"
-                        android:layout_width="wrap_content"
+                    <!-- Circular Progress Row (Flattened Layout) -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
-                        android:textColor="@color/text_primary"
-                        android:textSize="16sp"
-                        android:textStyle="bold" />
+                        android:layout_marginTop="20dp"
+                        android:baselineAligned="false"
+                        android:gravity="center"
+                        android:orientation="horizontal">
+
+                        <!-- Circle 1: Score Percentage Container -->
+                        <RelativeLayout
+                            android:layout_width="0dp"
+                            android:layout_height="120dp"
+                            android:layout_weight="1">
+
+                            <com.google.android.material.progressindicator.CircularProgressIndicator
+                                android:id="@+id/progressScore"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_centerInParent="true"
+                                app:indicatorColor="@color/result_pass_primary"
+                                app:indicatorSize="110dp"
+                                app:trackColor="@color/progress_track_neutral"
+                                app:trackCornerRadius="8dp"
+                                app:trackThickness="10dp"
+                                tools:progress="25" />
+
+                            <LinearLayout
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_centerInParent="true"
+                                android:gravity="center"
+                                android:orientation="vertical">
+
+                                <TextView
+                                    android:id="@+id/tvScorePercentageVal"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:textColor="@color/text_primary"
+                                    android:textSize="18sp"
+                                    android:textStyle="bold"
+                                    tools:text="25.0%" />
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="@string/score_percentage_label"
+                                    android:textColor="@color/text_secondary"
+                                    android:textSize="11sp" />
+                            </LinearLayout>
+                        </RelativeLayout>
+
+                        <!-- Circle 2: Accuracy Percentage Container -->
+                        <RelativeLayout
+                            android:layout_width="0dp"
+                            android:layout_height="120dp"
+                            android:layout_weight="1">
+
+                            <com.google.android.material.progressindicator.CircularProgressIndicator
+                                android:id="@+id/progressAccuracy"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_centerInParent="true"
+                                app:indicatorColor="@color/result_pass_primary"
+                                app:indicatorSize="110dp"
+                                app:trackColor="@color/progress_track_neutral"
+                                app:trackCornerRadius="8dp"
+                                app:trackThickness="10dp"
+                                tools:progress="100" />
+
+                            <LinearLayout
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_centerInParent="true"
+                                android:gravity="center"
+                                android:orientation="vertical">
+
+                                <TextView
+                                    android:id="@+id/tvAccuracyVal"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:textColor="@color/text_primary"
+                                    android:textSize="18sp"
+                                    android:textStyle="bold"
+                                    tools:text="100.0%" />
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="@string/accuracy_label"
+                                    android:textColor="@color/text_secondary"
+                                    android:textSize="11sp" />
+                            </LinearLayout>
+                        </RelativeLayout>
+
+                    </LinearLayout>
 
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
@@ -99,16 +182,18 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
+                android:baselineAligned="false"
                 android:orientation="horizontal">
 
                 <!-- Testwise Rank -->
                 <com.google.android.material.card.MaterialCardView
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
                     android:layout_marginEnd="6dp"
-                    app:cardCornerRadius="10dp"
-                    app:cardBackgroundColor="@color/surface_card">
+                    android:layout_weight="1"
+                    app:cardBackgroundColor="@color/surface_card"
+                    app:cardCornerRadius="12dp"
+                    app:cardElevation="2dp">
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -128,9 +213,10 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="6dp"
-                            android:textColor="@color/text_primary"
-                            android:textSize="18sp"
-                            android:textStyle="bold" />
+                            android:textColor="@color/brand_blue"
+                            android:textSize="20sp"
+                            android:textStyle="bold"
+                            tools:text="1/1" />
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
 
@@ -138,10 +224,11 @@
                 <com.google.android.material.card.MaterialCardView
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
                     android:layout_marginStart="6dp"
-                    app:cardCornerRadius="10dp"
-                    app:cardBackgroundColor="@color/surface_card">
+                    android:layout_weight="1"
+                    app:cardBackgroundColor="@color/surface_card"
+                    app:cardCornerRadius="12dp"
+                    app:cardElevation="2dp">
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -161,9 +248,10 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="6dp"
-                            android:textColor="@color/text_primary"
-                            android:textSize="18sp"
-                            android:textStyle="bold" />
+                            android:textColor="@color/brand_blue"
+                            android:textSize="20sp"
+                            android:textStyle="bold"
+                            tools:text="1/1" />
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
 
@@ -172,7 +260,7 @@
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 
-    <!-- Bottom Actions Container -->
+    <!-- Bottom Actions Container with Max Width Rules -->
     <LinearLayout
         android:id="@+id/bottomActionContainer"
         android:layout_width="match_parent"
@@ -180,6 +268,7 @@
         android:layout_alignParentBottom="true"
         android:background="@color/surface_card"
         android:elevation="8dp"
+        android:gravity="center_horizontal"
         android:orientation="vertical"
         android:padding="16dp">
 
@@ -187,6 +276,7 @@
             android:id="@+id/btnReviewAnswers"
             android:layout_width="match_parent"
             android:layout_height="52dp"
+            android:maxWidth="320dp"
             android:backgroundTint="@color/brand_blue"
             android:text="@string/btn_review_answers" />
 
@@ -196,8 +286,9 @@
             android:layout_width="match_parent"
             android:layout_height="52dp"
             android:layout_marginTop="8dp"
-            app:strokeColor="@color/brand_saffron_dark"
-            android:text="@string/btn_reattempt" />
+            android:maxWidth="320dp"
+            android:text="@string/btn_reattempt"
+            app:strokeColor="@color/brand_saffron_dark" />
     </LinearLayout>
 
 </RelativeLayout>

@@ -58,4 +58,16 @@
     <color name="option_neutral_bg">#F8FAFC</color>
     <color name="option_neutral_border">#E2E8F0</color>
 
+    <!-- 2026 Gold Standard Accessible Result Colors -->
+    <color name="result_fail_primary">#C62828</color> <!-- High Contrast Red -->
+    <color name="result_fail_bg_tint">#FFEBEE</color>
+
+    <color name="result_pass_primary">#2E7D32</color> <!-- High Contrast Green (WCAG Compliant) -->
+    <color name="result_pass_bg_tint">#E8F5E9</color>
+
+    <color name="result_excellent_primary">#00838F</color> <!-- High Contrast Cyan -->
+    <color name="result_excellent_bg_tint">#E0F7FA</color>
+
+    <color name="progress_track_neutral">#E0E0E0</color>
+
 </resources>
