@@ -78,11 +78,13 @@ class QuizReviewAdapter : ListAdapter<ReviewItem, QuizReviewAdapter.ReviewViewHo
         }
     }
 
-    private object DiffCallback : DiffUtil.ItemCallback<ReviewItem>() {
-        override fun areItemsTheSame(oldItem: ReviewItem, newItem: ReviewItem): Boolean =
-            oldItem.question.questionId == newItem.question.questionId
+    companion object DiffCallback : DiffUtil.ItemCallback<ReviewItem>() {
+        override fun areItemsTheSame(oldItem: ReviewItem, newItem: ReviewItem): Boolean {
+            return oldItem.questionNumber == newItem.questionNumber
+        }
 
-        override fun areContentsTheSame(oldItem: ReviewItem, newItem: ReviewItem): Boolean =
-            oldItem == newItem
+        override fun areContentsTheSame(oldItem: ReviewItem, newItem: ReviewItem): Boolean {
+            return oldItem == newItem
+        }
     }
 }

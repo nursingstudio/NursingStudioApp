@@ -565,6 +565,10 @@
     <string name="percentage_fmt_val">%.1f%%</string>
     <string name="status_excellent">EXCELLENT</string>
 
+    <!-- Quiz Review Strings -->
+    <string name="empty_review_message">No review data found for this test.</string>
+
+
 
 
 
