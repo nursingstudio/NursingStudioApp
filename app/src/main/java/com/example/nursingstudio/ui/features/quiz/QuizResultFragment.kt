@@ -64,13 +64,15 @@ class QuizResultFragment : Fragment() {
         binding.btnReattemptTest.setOnClickListener {
             val currentTestId = currentResult?.testId ?: testId
             if (currentTestId.isNotEmpty()) {
-                viewModel.resetTestState()
-                val bundle = Bundle().apply {
-                    putString("testId", currentTestId)
-                }
+                // Trigger atomicViewModel reset and reload
+                viewModel.restartTest(currentTestId, "")
+
+                // Navigate back to engine screen safely
                 findNavController().navigate(
                     R.id.action_quizResultFragment_to_quizEngineFragment,
-                    bundle
+                    Bundle().apply {
+                        putString("testId", currentTestId)
+                    }
                 )
             }
         }

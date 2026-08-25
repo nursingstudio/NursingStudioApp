@@ -70,6 +70,17 @@ class QuizEngineViewModel @Inject constructor(
         _uiState.value = QuizEngineState.Loading
     }
 
+    /**
+     * Gold Standard 2026 Re-attempt Trigger
+     * Atomically clears previous session state and reloads questions cleanly.
+     */
+    fun restartTest(testId: String, title: String = "") {
+        resetTestState()
+        val targetTestId = testId.ifEmpty { navTestId }
+        val targetTitle = title.ifEmpty { currentTitle }
+        loadQuiz(targetTestId, targetTitle)
+    }
+
     fun loadQuiz(testId: String, testTitle: String) {
         val resolvedTitle = testTitle.ifBlank { currentTitle }
         this.currentTitle = resolvedTitle

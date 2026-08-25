@@ -17,6 +17,8 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import androidx.media3.common.MediaItem
+import androidx.media3.exoplayer.ExoPlayer
 import androidx.navigation.fragment.findNavController
 import coil.load
 import com.example.nursingstudio.R
@@ -34,10 +36,11 @@ class QuizEngineFragment : Fragment() {
     private var _binding: FragmentQuizEngineBinding? = null
     private val binding get() = _binding!!
 
-    // OLD: private val viewModel: QuizEngineViewModel by viewModels()
-// NEW (2026 Shared Flow Standard):
     private val viewModel: QuizEngineViewModel by activityViewModels()
     private lateinit var paletteAdapter: QuestionPaletteAdapter
+
+    // ExoPlayer Instance for 2026 Media3 Standard
+    private var exoPlayer: ExoPlayer? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -51,11 +54,10 @@ class QuizEngineFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // Read Arguments safely and initialize
         val testId = arguments?.getString("testId").orEmpty()
         val title = arguments?.getString("title").orEmpty()
 
-        if (testId.isNotEmpty()) {
+        if (viewModel.uiState.value is QuizEngineState.Loading && testId.isNotEmpty()) {
             viewModel.initQuizWithArgs(testId, title)
         }
 
@@ -158,8 +160,6 @@ class QuizEngineFragment : Fragment() {
         val currIdx = state.currentIndex
         if (questions.isEmpty() || currIdx !in questions.indices) return
 
-        // Dynamic Title Bind Fix
-        // Gold Standard Dynamic Title Resolution
         val passedTitle = arguments?.getString("title").orEmpty()
         val displayTitle = when {
             state.testTitle.isNotBlank() -> state.testTitle
@@ -167,7 +167,6 @@ class QuizEngineFragment : Fragment() {
             else -> getString(R.string.default_test_title)
         }
         binding.layoutMainQuizContent.tvQuizTitle.text = displayTitle
-
 
         val question = questions[currIdx]
         val currentState = state.userStates.getOrNull(currIdx)
@@ -192,27 +191,8 @@ class QuizEngineFragment : Fragment() {
             HtmlCompat.FROM_HTML_MODE_LEGACY
         )
 
-        when (question.mediaType) {
-            MediaType.IMAGE -> {
-                binding.layoutMainQuizContent.frameMediaContainer.visibility = View.VISIBLE
-                binding.layoutMainQuizContent.ivQuestionImage.visibility = View.VISIBLE
-                binding.layoutMainQuizContent.playerViewQuestion.visibility = View.GONE
-
-                question.mediaUrl?.let { url ->
-                    binding.layoutMainQuizContent.ivQuestionImage.load(url) {
-                        crossfade(true)
-                    }
-                }
-            }
-            MediaType.VIDEO -> {
-                binding.layoutMainQuizContent.frameMediaContainer.visibility = View.VISIBLE
-                binding.layoutMainQuizContent.ivQuestionImage.visibility = View.GONE
-                binding.layoutMainQuizContent.playerViewQuestion.visibility = View.VISIBLE
-            }
-            MediaType.NONE -> {
-                binding.layoutMainQuizContent.frameMediaContainer.visibility = View.GONE
-            }
-        }
+        // Modular Media Renderer Integration
+        bindMediaContent(question.mediaType, question.mediaUrl)
 
         binding.layoutMainQuizContent.rgOptionsContainer.removeAllViews()
         question.options.forEachIndexed { optIdx, optionText ->
@@ -246,6 +226,58 @@ class QuizEngineFragment : Fragment() {
         if (state.isForceSubmitNeeded) {
             executeFinalSubmission()
         }
+    }
+
+    /**
+     * Handles dynamic Image and ExoPlayer Video rendering cleanly
+     */
+    private fun bindMediaContent(mediaType: MediaType, mediaUrl: String?) {
+        val bindingContent = binding.layoutMainQuizContent
+
+        if (mediaUrl.isNullOrBlank() || mediaType == MediaType.NONE) {
+            bindingContent.frameMediaContainer.visibility = View.GONE
+            releasePlayer()
+            return
+        }
+
+        bindingContent.frameMediaContainer.visibility = View.VISIBLE
+
+        when (mediaType) {
+            MediaType.IMAGE -> {
+                bindingContent.ivQuestionImage.visibility = View.VISIBLE
+                bindingContent.playerViewQuestion.visibility = View.GONE
+                releasePlayer()
+
+                bindingContent.ivQuestionImage.load(mediaUrl) {
+                    crossfade(true)
+                }
+            }
+            MediaType.VIDEO -> {
+                bindingContent.ivQuestionImage.visibility = View.GONE
+                bindingContent.playerViewQuestion.visibility = View.VISIBLE
+
+                if (exoPlayer == null) {
+                    exoPlayer = ExoPlayer.Builder(requireContext()).build()
+                }
+
+                bindingContent.playerViewQuestion.player = exoPlayer
+
+                val mediaItem = MediaItem.fromUri(mediaUrl)
+                exoPlayer?.apply {
+                    setMediaItem(mediaItem)
+                    prepare()
+                    playWhenReady = false // Saves battery and prevents auto audio play
+                }
+            }
+        }
+    }
+
+    private fun releasePlayer() {
+        exoPlayer?.let { player ->
+            player.stop()
+            player.release()
+        }
+        exoPlayer = null
     }
 
     private fun updateReviewButtonState(currentState: UserAnswerState?) {
@@ -345,8 +377,14 @@ class QuizEngineFragment : Fragment() {
         }
     }
 
+    override fun onStop() {
+        super.onStop()
+        releasePlayer()
+    }
+
     override fun onDestroyView() {
         super.onDestroyView()
+        releasePlayer()
         _binding = null
     }
 }
