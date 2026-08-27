@@ -46,7 +46,7 @@ class QuizResultFragment : Fragment() {
 
         val score = arguments?.getFloat("scoreObtained", 0f)?.toDouble() ?: 0.0
         val maxMarks = arguments?.getFloat("totalMaxMarks", 100f)?.toDouble() ?: 100.0
-        val testId = arguments?.getString("testId") ?: ""
+        val testId = arguments?.getString("testId").orEmpty()
         val accuracy = arguments?.getFloat("accuracyPercentage", 0f)?.toDouble() ?: 0.0
         val timeTakenSeconds = arguments?.getLong("timeTakenSeconds", 0L) ?: 0L
 
@@ -64,15 +64,14 @@ class QuizResultFragment : Fragment() {
         binding.btnReattemptTest.setOnClickListener {
             val currentTestId = currentResult?.testId ?: testId
             if (currentTestId.isNotEmpty()) {
-                // Trigger atomicViewModel reset and reload
                 viewModel.restartTest(currentTestId, "")
 
-                // Navigate back to engine screen safely
+                val bundle = Bundle().apply {
+                    putString("testId", currentTestId)
+                }
                 findNavController().navigate(
                     R.id.action_quizResultFragment_to_quizEngineFragment,
-                    Bundle().apply {
-                        putString("testId", currentTestId)
-                    }
+                    bundle
                 )
             }
         }
@@ -85,10 +84,8 @@ class QuizResultFragment : Fragment() {
     }
 
     private fun setupScoreCard(score: Double, maxMarks: Double, accuracy: Double) {
-        // 1. Raw Score Display
         binding.tvScoreDisplay.text = getString(R.string.score_ratio_fmt, score, maxMarks)
 
-        // 2. Accurate Score Percentage Calculation (1 / 4 = 25.0%)
         val scorePercentage = if (maxMarks > 0.0) {
             ((score / maxMarks) * 100.0).coerceIn(0.0, 100.0)
         } else {
@@ -98,7 +95,6 @@ class QuizResultFragment : Fragment() {
         binding.tvScorePercentageVal.text = getString(R.string.percentage_fmt_val, scorePercentage)
         binding.tvAccuracyVal.text = getString(R.string.percentage_fmt_val, accuracy)
 
-        // 3. Status Badge and Color Determination (<40% = Fail, 40-74% = Pass, >=75% = Excellent)
         val (passFailText, colorRes, bgTintRes) = when {
             scorePercentage < 40.0 -> Triple(
                 getString(R.string.status_failed),
@@ -117,7 +113,6 @@ class QuizResultFragment : Fragment() {
             )
         }
 
-        // 4. Apply Badge Formatting
         val primaryColor = ContextCompat.getColor(requireContext(), colorRes)
         val bgTint = ContextCompat.getColor(requireContext(), bgTintRes)
 
@@ -125,11 +120,9 @@ class QuizResultFragment : Fragment() {
         binding.tvPassFailBadge.setTextColor(primaryColor)
         binding.tvPassFailBadge.setBackgroundColor(bgTint)
 
-        // 5. Apply Ring Progress & Color Tints
         binding.progressScore.setIndicatorColor(primaryColor)
         binding.progressScore.setProgressCompat(scorePercentage.toInt(), true)
 
-        // Accuracy Indicator Color (Green for >=70%, Saffron for 40-69%, Red for <40%)
         val accuracyColorRes = when {
             accuracy >= 70.0 -> R.color.result_pass_primary
             accuracy >= 40.0 -> R.color.brand_saffron_dark

@@ -31,10 +31,16 @@ class QuizInstructionsFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        // Reset persistent local UI state on view recreation
+        hasScrolledToBottom = false
+        binding.cbAgreeTerms.isChecked = false
+        binding.cbAgreeTerms.isEnabled = false
+        binding.btnStartQuiz.isEnabled = false
+
         // 1. Arguments Extraction (NavArgs Safe Extract)
         arguments?.let { args ->
             testId = args.getString("testId", "")
-            testTitle = args.getString("title", "Test Instructions")
+            testTitle = args.getString("title", getString(R.string.title_test_instructions))
         }
 
         if (testTitle.isNotEmpty()) {
@@ -52,12 +58,11 @@ class QuizInstructionsFragment : Fragment() {
             binding.btnStartQuiz.isEnabled = isChecked
         }
 
-        // 4. Start Quiz Action Navigation Handler
         // 4. Start Quiz Action Navigation Handler (Passes testId AND title)
         binding.btnStartQuiz.setOnClickListener {
             val bundle = Bundle().apply {
                 putString("testId", testId)
-                putString("title", testTitle) // FIXED: Passing exact title forward
+                putString("title", testTitle)
             }
             findNavController().navigate(
                 R.id.action_quizInstructionsFragment_to_quizEngineFragment,
@@ -71,14 +76,15 @@ class QuizInstructionsFragment : Fragment() {
         binding.scrollViewInstructions.viewTreeObserver.addOnGlobalLayoutListener(
             object : ViewTreeObserver.OnGlobalLayoutListener {
                 override fun onGlobalLayout() {
-                    binding.scrollViewInstructions.viewTreeObserver.removeOnGlobalLayoutListener(this)
-                    val child = binding.scrollViewInstructions.getChildAt(0)
-                    if (child != null) {
-                        val contentHeight = child.height
-                        val scrollHeight = binding.scrollViewInstructions.height
-                        if (contentHeight <= scrollHeight) {
-                            // Text fits inside container without needing to scroll
-                            unlockCheckbox()
+                    _binding?.let { safeBinding ->
+                        safeBinding.scrollViewInstructions.viewTreeObserver.removeOnGlobalLayoutListener(this)
+                        val child = safeBinding.scrollViewInstructions.getChildAt(0)
+                        if (child != null) {
+                            val contentHeight = child.height
+                            val scrollHeight = safeBinding.scrollViewInstructions.height
+                            if (contentHeight <= scrollHeight) {
+                                unlockCheckbox()
+                            }
                         }
                     }
                 }
@@ -92,7 +98,6 @@ class QuizInstructionsFragment : Fragment() {
             val child = binding.scrollViewInstructions.getChildAt(0)
             if (child != null) {
                 val diff = child.bottom - (binding.scrollViewInstructions.height + scrollY)
-                // Threshold tolerance offset of 20px
                 if (diff <= 20) {
                     unlockCheckbox()
                 }
@@ -103,13 +108,12 @@ class QuizInstructionsFragment : Fragment() {
     private fun unlockCheckbox() {
         if (!hasScrolledToBottom) {
             hasScrolledToBottom = true
-            binding.cbAgreeTerms.isEnabled = true
+            _binding?.cbAgreeTerms?.isEnabled = true
         }
     }
 
     private fun setupDefaultInstructionsText() {
         val rawHtml = getString(R.string.quiz_default_instructions)
-        // 🚀 2026 Gold Standard HTML Text Rendering for Spanned Formatting
         binding.tvInstructionsContent.text = androidx.core.text.HtmlCompat.fromHtml(
             rawHtml,
             androidx.core.text.HtmlCompat.FROM_HTML_MODE_LEGACY

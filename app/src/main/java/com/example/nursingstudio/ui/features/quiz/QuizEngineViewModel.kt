@@ -39,7 +39,6 @@ class QuizEngineViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
-    // Safely extract nav args directly via SavedStateHandle
     private val navTestId: String = savedStateHandle.get<String>("testId").orEmpty()
     private var currentTitle: String = savedStateHandle.get<String>("title").orEmpty()
 

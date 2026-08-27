@@ -18,9 +18,11 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.media3.common.MediaItem
+import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.navigation.fragment.findNavController
 import coil.load
+import coil.size.Scale
 import com.example.nursingstudio.R
 import com.example.nursingstudio.data.model.MediaType
 import com.example.nursingstudio.data.model.QuestionStatus
@@ -39,8 +41,9 @@ class QuizEngineFragment : Fragment() {
     private val viewModel: QuizEngineViewModel by activityViewModels()
     private lateinit var paletteAdapter: QuestionPaletteAdapter
 
-    // ExoPlayer Instance for 2026 Media3 Standard
     private var exoPlayer: ExoPlayer? = null
+    private var activeWarningDialog: AlertDialog? = null
+    private var currentMediaUrl: String? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -191,7 +194,7 @@ class QuizEngineFragment : Fragment() {
             HtmlCompat.FROM_HTML_MODE_LEGACY
         )
 
-        // Modular Media Renderer Integration
+        // Optimized Media Renderer
         bindMediaContent(question.mediaType, question.mediaUrl)
 
         binding.layoutMainQuizContent.rgOptionsContainer.removeAllViews()
@@ -220,16 +223,20 @@ class QuizEngineFragment : Fragment() {
             binding.layoutMainQuizContent.btnNext.text = getString(R.string.btn_next)
         }
 
+        // Single Instance Warning Dialog Fix
         if (state.isWarningVisible) {
             showAntiCheatWarningDialog()
+        } else {
+            dismissAntiCheatWarningDialog()
         }
+
         if (state.isForceSubmitNeeded) {
             executeFinalSubmission()
         }
     }
 
     /**
-     * Handles dynamic Image and ExoPlayer Video rendering cleanly
+     * 2026 Gold Standard Media Binding (Fixes Image Revisit Delay & ExoPlayer Video Stream)
      */
     private fun bindMediaContent(mediaType: MediaType, mediaUrl: String?) {
         val bindingContent = binding.layoutMainQuizContent
@@ -237,6 +244,7 @@ class QuizEngineFragment : Fragment() {
         if (mediaUrl.isNullOrBlank() || mediaType == MediaType.NONE) {
             bindingContent.frameMediaContainer.visibility = View.GONE
             releasePlayer()
+            currentMediaUrl = null
             return
         }
 
@@ -244,38 +252,49 @@ class QuizEngineFragment : Fragment() {
 
         when (mediaType) {
             MediaType.IMAGE -> {
-                bindingContent.ivQuestionImage.visibility = View.VISIBLE
-                bindingContent.playerViewQuestion.visibility = View.GONE
                 releasePlayer()
+                currentMediaUrl = mediaUrl
+                bindingContent.playerViewQuestion.visibility = View.GONE
+                bindingContent.ivQuestionImage.visibility = View.VISIBLE
 
                 bindingContent.ivQuestionImage.load(mediaUrl) {
                     crossfade(true)
+                    scale(Scale.FIT)
+                    placeholder(R.drawable.ic_placeholder_image)
+                    error(R.drawable.ic_placeholder_image)
                 }
             }
             MediaType.VIDEO -> {
                 bindingContent.ivQuestionImage.visibility = View.GONE
                 bindingContent.playerViewQuestion.visibility = View.VISIBLE
 
-                if (exoPlayer == null) {
-                    exoPlayer = ExoPlayer.Builder(requireContext()).build()
+                // Avoid re-preparing player if same video is already loaded
+                if (currentMediaUrl == mediaUrl && exoPlayer != null) return
+
+                releasePlayer()
+                currentMediaUrl = mediaUrl
+
+                val player = ExoPlayer.Builder(requireContext()).build().also {
+                    it.repeatMode = Player.REPEAT_MODE_OFF
+                    it.playWhenReady = true
                 }
 
-                bindingContent.playerViewQuestion.player = exoPlayer
+                exoPlayer = player
+                bindingContent.playerViewQuestion.player = player
 
                 val mediaItem = MediaItem.fromUri(mediaUrl)
-                exoPlayer?.apply {
-                    setMediaItem(mediaItem)
-                    prepare()
-                    playWhenReady = false // Saves battery and prevents auto audio play
-                }
+                player.setMediaItem(mediaItem)
+                player.prepare()
             }
         }
     }
 
     private fun releasePlayer() {
-        exoPlayer?.let { player ->
-            player.stop()
-            player.release()
+        binding.layoutMainQuizContent.playerViewQuestion.player = null
+        exoPlayer?.apply {
+            stop()
+            clearMediaItems()
+            release()
         }
         exoPlayer = null
     }
@@ -315,8 +334,13 @@ class QuizEngineFragment : Fragment() {
         binding.layoutPaletteContent.tvLegendUnvisited.text = getString(R.string.unvisited_0, unvisitedCount)
     }
 
+    /**
+     * Prevents multiple stacked dialogs on timer tick state emissions
+     */
     private fun showAntiCheatWarningDialog() {
-        AlertDialog.Builder(requireContext())
+        if (activeWarningDialog?.isShowing == true) return
+
+        activeWarningDialog = AlertDialog.Builder(requireContext())
             .setTitle(getString(R.string.anti_cheat_warning_title))
             .setMessage(getString(R.string.anti_cheat_warning_message))
             .setPositiveButton(getString(R.string.btn_back_to_test)) { dialog, _ ->
@@ -324,7 +348,14 @@ class QuizEngineFragment : Fragment() {
                 dialog.dismiss()
             }
             .setCancelable(false)
-            .show()
+            .create()
+
+        activeWarningDialog?.show()
+    }
+
+    private fun dismissAntiCheatWarningDialog() {
+        activeWarningDialog?.dismiss()
+        activeWarningDialog = null
     }
 
     private fun showSubmissionConfirmationDialog() {
@@ -377,6 +408,11 @@ class QuizEngineFragment : Fragment() {
         }
     }
 
+    override fun onPause() {
+        super.onPause()
+        exoPlayer?.pause()
+    }
+
     override fun onStop() {
         super.onStop()
         releasePlayer()
@@ -384,6 +420,7 @@ class QuizEngineFragment : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
+        dismissAntiCheatWarningDialog()
         releasePlayer()
         _binding = null
     }

@@ -54,6 +54,31 @@
             android:textSize="15sp"
             android:lineSpacingExtra="3dp" />
 
+        <!-- Media Container for Image/Video in Review -->
+        <FrameLayout
+            android:id="@+id/frameReviewMediaContainer"
+            android:layout_width="match_parent"
+            android:layout_height="200dp"
+            android:layout_marginTop="12dp"
+            android:visibility="gone">
+
+            <ImageView
+                android:id="@+id/ivReviewImage"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:adjustViewBounds="true"
+                android:contentDescription="@string/image_placeholder"
+                android:scaleType="fitCenter"
+                android:visibility="gone" />
+
+            <androidx.media3.ui.PlayerView
+                android:id="@+id/playerViewReview"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:visibility="gone"
+                app:use_controller="true" />
+        </FrameLayout>
+
         <!-- Container for Option Views -->
         <LinearLayout
             android:id="@+id/layoutOptionsContainer"
