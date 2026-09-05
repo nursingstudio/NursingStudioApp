@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="60dp"
+    android:height="10dp"
+    android:viewportWidth="60"
+    android:viewportHeight="10">
+
+    <!-- Dot 1 -->
+    <path
+        android:fillColor="@color/brand_saffron_dark"
+        android:pathData="M5,5m-4.5,0a4.5,4.5 0 1,1 9,0a4.5,4.5 0 1,1 -9,0" />
+
+    <!-- Dot 2 -->
+    <path
+        android:fillColor="@color/brand_saffron_dark"
+        android:pathData="M21.66,5m-4.5,0a4.5,4.5 0 1,1 9,0a4.5,4.5 0 1,1 -9,0" />
+
+    <!-- Dot 3 -->
+    <path
+        android:fillColor="@color/brand_saffron_dark"
+        android:pathData="M38.33,5m-4.5,0a4.5,4.5 0 1,1 9,0a4.5,4.5 0 1,1 -9,0" />
+
+    <!-- Dot 4 -->
+    <path
+        android:fillColor="@color/brand_saffron_dark"
+        android:pathData="M55,5m-4.5,0a4.5,4.5 0 1,1 9,0a4.5,4.5 0 1,1 -9,0" />
+</vector>

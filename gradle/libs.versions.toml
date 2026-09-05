@@ -49,6 +49,8 @@ retrofit = "3.0.0"
 securityCrypto = "1.1.0"
 ucrop = "2.2.8"
 pdfViewerFragment = "1.0.0-alpha18"
+workRuntimeKtx = "2.11.2"
+hiltCommon = "1.4.0"
 [libraries]
 androidx-biometric = { module = "androidx.biometric:biometric", version.ref = "biometric" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -117,6 +119,8 @@ play-services-auth-api-phone = { module = "com.google.android.gms:play-services-
 retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit" }
 ucrop = { module = "com.github.yalantis:ucrop", version.ref = "ucrop" }
 androidx-pdf-viewer-fragment = { group = "androidx.pdf", name = "pdf-viewer-fragment", version.ref = "pdfViewerFragment" }
+androidx-work-runtime-ktx = { group = "androidx.work", name = "work-runtime-ktx", version.ref = "workRuntimeKtx" }
+androidx-hilt-common = { group = "androidx.hilt", name = "hilt-common", version.ref = "hiltCommon" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

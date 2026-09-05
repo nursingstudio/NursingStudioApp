@@ -23,7 +23,10 @@ import android.widget.FrameLayout
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.biometric.BiometricManager
+import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.content.edit
+import androidx.core.net.toUri
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -31,6 +34,12 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.lifecycle.withResumed
+import androidx.work.Constraints
+import androidx.work.ExistingPeriodicWorkPolicy
+import androidx.work.NetworkType
+import androidx.work.PeriodicWorkRequestBuilder
+import androidx.work.WorkManager
+import coil.load
 import com.example.nursingstudio.R
 import com.example.nursingstudio.data.local.DataStoreManager
 import com.example.nursingstudio.databinding.FragmentLoginBinding
@@ -39,17 +48,18 @@ import com.example.nursingstudio.ui.features.main.MainActivity
 import com.example.nursingstudio.utils.AppSettings
 import com.example.nursingstudio.utils.BiometricAuthHelper
 import com.example.nursingstudio.utils.BiometricSettingsManager
+import com.example.nursingstudio.workers.DataSyncWorker
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.textfield.TextInputEditText
+import com.google.android.material.textfield.TextInputLayout
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import java.util.Locale
+import java.util.concurrent.TimeUnit
 import kotlin.time.Duration.Companion.milliseconds
-import androidx.core.net.toUri
-import com.google.android.material.textfield.TextInputEditText
-import com.google.android.material.textfield.TextInputLayout
-import kotlinx.coroutines.delay
 
 @AndroidEntryPoint
 class LoginFragment : Fragment() {
@@ -57,6 +67,7 @@ class LoginFragment : Fragment() {
     companion object {
         private const val MAX_ATTEMPTS = 3
         private const val LOCK_TIME_HOURS = 6
+        private const val SYNC_WORK_NAME = "NursingStudioPeriodicSync"
     }
 
     private var _binding: FragmentLoginBinding? = null
@@ -68,7 +79,6 @@ class LoginFragment : Fragment() {
     private lateinit var biometricHelper: BiometricAuthHelper
 
     private var isAdaptiveUiOverridden = false
-    // 🚀 FIXED: Dynamic verification tracker container to cleanly kill the ticker loop anytime fragment context transitions
     private var securityLockTickerJob: Job? = null
 
     private val requestNotificationPermissionLauncher = registerForActivityResult(
@@ -107,8 +117,8 @@ class LoginFragment : Fragment() {
         setupClickListeners()
         setupTextWatchers()
         observeViewModel()
-        // 🚀 LINE EXPANSION: Initialize the 2026 High-Fidelity Auto-Rotating Brand Ad Engine
         startPromotionalAdsRotationEngine()
+        schedulePeriodicBackgroundSync()
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             requestNotificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
@@ -120,39 +130,53 @@ class LoginFragment : Fragment() {
         binding.tvAppTagline.animate().alpha(0.85f).setDuration(1000).start()
         AppSettings.setPushEffect(binding.btnLoginAction)
 
-        // 🚀 2026 UX Standard: Push-down feedback layer mapped across brand secure methods card buttons
         AppSettings.setPushEffect(binding.btnMpinBoxTrigger)
         AppSettings.setPushEffect(binding.btnBiometricBoxTrigger)
     }
 
-    // 🚀 2026 Gold-Standard Deterministic Session Engine Split
     private fun checkAdaptiveSessionState() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 if (isAdaptiveUiOverridden) return@repeatOnLifecycle
-
-                // CRITICAL FIXED: Prevent sheets inflation stack blast if any sheet fragment is currently attached or open
                 if (isAnyBottomSheetVisible()) return@repeatOnLifecycle
 
                 val isMpinConfigured = dataStoreManager.isMpinSet.firstOrNull() ?: false
                 val cachedName = dataStoreManager.userName.firstOrNull() ?: "User"
 
                 if (isMpinConfigured) {
-                    // Switch interface configuration structure seamlessly
                     binding.layoutDefaultForm.visibility = View.GONE
                     binding.layoutAdaptiveMpinForm.visibility = View.VISIBLE
                     binding.tvWelcomeUser.text = getString(R.string.welcome_back, cachedName)
 
-                    // 🚀 FIXED: STOPPED AUTOMATIC POPUP ACCIDENTAL LOOPS.
-                    // Instead of force prompting raw system sheets, we cleanly set up the buttons UI visibility triggers,
-                    // allowing the user absolute freedom of option sequence selection as per 2026 UI standards.
                     val isBiometricActive = bioSettingsManager.isBiometricAuthActive() &&
                             biometricHelper.checkBiometricAvailability() == BiometricManager.BIOMETRIC_SUCCESS
 
-                    // Dynamically alter layout button properties based on biometric registration status mapping
                     binding.btnBiometricBoxTrigger.isVisible = isBiometricActive
 
-                    // Informative subtitle logic configuration binding
+                    // 🚀 FIXED: Safe ConstraintLayout handling preventing 'layoutSecureMethodsContainer' unresolved crash
+                    val constraintLayout = binding.btnMpinBoxTrigger.parent as? ConstraintLayout
+                    constraintLayout?.let { container ->
+                        val constraintSet = ConstraintSet()
+                        constraintSet.clone(container)
+
+                        if (isBiometricActive) {
+                            constraintSet.connect(
+                                R.id.btnMpinBoxTrigger,
+                                ConstraintSet.END,
+                                R.id.btnBiometricBoxTrigger,
+                                ConstraintSet.START
+                            )
+                        } else {
+                            constraintSet.connect(
+                                R.id.btnMpinBoxTrigger,
+                                ConstraintSet.END,
+                                ConstraintSet.PARENT_ID,
+                                ConstraintSet.END
+                            )
+                        }
+                        constraintSet.applyTo(container)
+                    }
+
                     binding.tvMpinSubtitlePrompt.text = if (isBiometricActive) {
                         getString(R.string.choose_your_secure_method_below_to_proceed)
                     } else {
@@ -160,7 +184,6 @@ class LoginFragment : Fragment() {
                     }
 
                 } else {
-                    // User has no custom keys configured - Fallback directly to email form layout structures
                     binding.layoutDefaultForm.visibility = View.VISIBLE
                     binding.layoutAdaptiveMpinForm.visibility = View.GONE
                 }
@@ -168,7 +191,6 @@ class LoginFragment : Fragment() {
         }
     }
 
-    // 🚀 FIXED: Global Fragment Stack Interceptor mapping to prevent background lifecycle duplicate sheets explosion
     private fun isAnyBottomSheetVisible(): Boolean {
         val forgotSheet = childFragmentManager.findFragmentByTag("ForgotPasswordSheet")
         val mpinSheet = childFragmentManager.findFragmentByTag("MpinSheet")
@@ -218,7 +240,6 @@ class LoginFragment : Fragment() {
             binding.tilEmail.isErrorEnabled = true
             binding.tilEmail.error = "Account locked! Try after $timeLeft"
 
-            // 🚀 FIXED: Cleaned and structured background security tracking to terminate loops gracefully on lifecycle exit vectors
             securityLockTickerJob?.cancel()
             securityLockTickerJob = viewLifecycleOwner.lifecycleScope.launch {
                 viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
@@ -247,7 +268,6 @@ class LoginFragment : Fragment() {
                     when (state) {
                         is LoginViewModel.LoginState.Idle, is LoginViewModel.LoginState.Loading -> {}
                         is LoginViewModel.LoginState.Success -> {
-                            // 🚀 FIXED: Enforced a strong condition barrier checking that inputs are populated before executing encryption keys payload serialization
                             val inputtedEmail = binding.etEmail.text.toString().trim()
                             val inputtedPassword = binding.etPassword.text.toString().trim()
 
@@ -335,14 +355,12 @@ class LoginFragment : Fragment() {
             val forgotMpinSheet = ForgotMpinBottomSheet(
                 runtimePasswordFallback = currentInputtedPass,
                 onResetVerified = {
-                    // Synchronous execution post handling
                     showLocalMpinSetupDialog()
                 }
             )
             forgotMpinSheet.show(childFragmentManager, "ForgotMpinBottomSheet")
         }
 
-        // 🚀 2026 INDUSTRY GOLD STANDARD: Modernized Symmetric Box Keypad Integration Channels
         binding.btnMpinBoxTrigger.setOnClickListener {
             AppSettings.triggerVibration(requireContext(), 25)
             showMpinBottomSheet()
@@ -355,20 +373,26 @@ class LoginFragment : Fragment() {
     }
 
     /**
-     * 🚀 2026 INDUSTRY GOLD STANDARD: Safe Lifecycle-Aware Infinite Ad Flip Loop Engine.
-     * Prevents context thread leak vectors and automatically switches with smooth hardware transitions.
+     * 🚀 2026 INDUSTRY GOLD STANDARD: Safe Lifecycle-Aware Coil Image Loading & Banner Rotation.
      */
     private fun startPromotionalAdsRotationEngine() {
-        // Configure standard Material slide enterprise animations programmatically
         binding.adViewFlipper.setInAnimation(requireContext(), android.R.anim.slide_in_left)
         binding.adViewFlipper.setOutAnimation(requireContext(), android.R.anim.slide_out_right)
 
-        // Set Click Redirect Interactions Channel Hooks for YouTube & WhatsApp Channel Handles
+        // Safe Direct Access via ViewBinding & Efficient Coil Image Loading
+        binding.imgYtBanner.load(R.drawable.yt_snap) {
+            crossfade(true)
+        }
+        binding.imgWaBanner.load(R.drawable.wa_snap) {
+            crossfade(true)
+        }
+
         binding.layoutYoutubeAdClick.setOnClickListener {
             AppSettings.triggerVibration(requireContext(), 20)
             val intent = Intent(
                 Intent.ACTION_VIEW,
-                getString(R.string.yt_channel_handle).toUri())
+                getString(R.string.yt_channel_handle).toUri()
+            )
             startActivity(intent)
         }
 
@@ -376,15 +400,15 @@ class LoginFragment : Fragment() {
             AppSettings.triggerVibration(requireContext(), 20)
             val intent = Intent(
                 Intent.ACTION_VIEW,
-                getString(R.string.wa_channel_handle).toUri())
+                getString(R.string.wa_channel_handle).toUri()
+            )
             startActivity(intent)
         }
 
-        // Asynchronous Loop Thread Runner bound to lifecycle state limits
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
                 while (true) {
-                    delay(3000.milliseconds) // Perfect 3-Seconds Auto-Transition interval
+                    delay(3000.milliseconds)
                     if (_binding != null) {
                         binding.adViewFlipper.showNext()
                     }
@@ -393,8 +417,27 @@ class LoginFragment : Fragment() {
         }
     }
 
+    /**
+     * 🚀 2026 GOLD STANDARD: Schedule WorkManager for background battery-efficient tasks.
+     */
+    private fun schedulePeriodicBackgroundSync() {
+        val constraints = Constraints.Builder()
+            .setRequiredNetworkType(NetworkType.CONNECTED)
+            .setRequiresBatteryNotLow(true)
+            .build()
+
+        val syncRequest = PeriodicWorkRequestBuilder<DataSyncWorker>(12, TimeUnit.HOURS)
+            .setConstraints(constraints)
+            .build()
+
+        WorkManager.getInstance(requireContext()).enqueueUniquePeriodicWork(
+            SYNC_WORK_NAME,
+            ExistingPeriodicWorkPolicy.KEEP,
+            syncRequest
+        )
+    }
+
     private fun showLocalMpinSetupDialog() {
-        // 🚀 2026 UI Architecture: Programmatically structured clean layout encapsulation frame using device density metrics
         val containerFrame = FrameLayout(requireContext()).apply {
             val paddingHorizontal = (24 * resources.displayMetrics.density).toInt()
             val paddingTop = (12 * resources.displayMetrics.density).toInt()
@@ -402,8 +445,6 @@ class LoginFragment : Fragment() {
             layoutParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
         }
 
-        // 🚀 FIXED: Routed ContextThemeWrapper straight into your Centralized Custom Global XML Style Profile
-        // This eliminates all manual cursor tint hacks, text colors, error boundaries, and selection pointer issues completely
         val styledContext = ContextThemeWrapper(
             requireContext(),
             R.style.Widget_Material3_TextInputLayout_OutlinedBox_CustomGlobal
@@ -418,7 +459,6 @@ class LoginFragment : Fragment() {
                 FrameLayout.LayoutParams.MATCH_PARENT,
                 FrameLayout.LayoutParams.WRAP_CONTENT
             )
-            // Enforce password visibility icons natively backed by your central system parameters
             endIconMode = TextInputLayout.END_ICON_PASSWORD_TOGGLE
         }
 
@@ -431,7 +471,6 @@ class LoginFragment : Fragment() {
             textAlignment = View.TEXT_ALIGNMENT_CENTER
         }
 
-        // 🚀 FIXED: Dynamic reactive observer clearing error frames smoothly the moment user clicks or updates data streams
         etMpin.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
@@ -444,7 +483,6 @@ class LoginFragment : Fragment() {
         textInputLayout.addView(etMpin)
         containerFrame.addView(textInputLayout)
 
-        // 🚀 2026 Human-Centric Master Alert Dialog Configuration System
         val dialog = MaterialAlertDialogBuilder(requireContext(), R.style.MaterialAlertDialog_Rounded)
             .setTitle(getString(R.string.reset_secure_mpin))
             .setMessage(getString(R.string.mpin_reset_dialog_msg))
@@ -456,21 +494,17 @@ class LoginFragment : Fragment() {
 
         dialog.show()
 
-        // 🚀 FIXED: Dynamic fluid boundaries scaling dialog component horizontally to exactly 92% layout metrics parameters
         val metricsWidth = (resources.displayMetrics.widthPixels * 0.92).toInt()
         dialog.window?.setLayout(metricsWidth, ViewGroup.LayoutParams.WRAP_CONTENT)
 
         dialog.getButton(DialogInterface.BUTTON_POSITIVE).setOnClickListener {
             val mpin = etMpin.text.toString().trim()
-
-            // 🚀 FIXED: Resolved references by binding accurately to your class initialized variable token layer 'bioSettingsManager'
             val previouslySavedMpin = bioSettingsManager.getMPIN()
 
             when {
                 mpin.length != 4 -> {
                     textInputLayout.isErrorEnabled = true
                     textInputLayout.error = getString(R.string.mpin_requires_exactly_4_digits)
-                    // Globally verified enterprise security feedback trigger
                     AppSettings.triggerErrorEffect(requireContext(), textInputLayout)
                 }
                 previouslySavedMpin != null && mpin == previouslySavedMpin -> {
@@ -511,7 +545,6 @@ class LoginFragment : Fragment() {
 
         clearAllErrors()
 
-        // 🚀 2026 Standard Form Sanitization: Clean separation of field emptiness vs format constraints
         when {
             email.isEmpty() -> {
                 binding.tilEmail.error = getString(R.string.error_email_empty)
@@ -524,7 +557,7 @@ class LoginFragment : Fragment() {
                 return
             }
         }
-        // 🚀 2026 Standard Password Validation: Granular evaluation separating empty states from depth limits
+
         when {
             pass.isEmpty() -> {
                 binding.tilPassword.error = getString(R.string.error_password_empty)
@@ -568,7 +601,6 @@ class LoginFragment : Fragment() {
         binding.tilPassword.isErrorEnabled = false
     }
 
-    // 🚀 FIXED: Restructured Sheet launchers bounded behind safe single-instance tag check validation bounds
     private fun showForgotPasswordSheet() {
         if (isAnyBottomSheetVisible()) return
         val bottomSheet = ForgotPasswordBottomSheet()
@@ -606,7 +638,6 @@ class LoginFragment : Fragment() {
                 }
             },
             onBiometricRequest = {
-                // Manual explicit user redirect interaction channel
                 showBiometricPrompt()
             },
             onForgotMpinRequested = {
@@ -631,7 +662,6 @@ class LoginFragment : Fragment() {
     }
 
     override fun onDestroyView() {
-        // 🚀 FIXED: Explicitly stop background security ticker coroutines to completely eradicate structural leaks
         securityLockTickerJob?.cancel()
         viewModel.resetState()
         _binding = null
